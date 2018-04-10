@@ -1,0 +1,4 @@
+2016.05
+------------------------------------------------------------------------------------------------------------------------------------
+CHANGED: MappedSQLWriter.xxx to SQLWriter.xxx
+CHANGED: class CMappedSQLWriter to class CSQLWriter and deleted all mapping functions and support.

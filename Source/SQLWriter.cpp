@@ -1,0 +1,1167 @@
+﻿//*********************************************************************************************************************************
+//
+// PROJECT:							General Class Library
+// FILE:								SQLWriter
+// SUBSYSTEM:						Database library
+// LANGUAGE:						C++
+// TARGET OS:						None - Standard C++
+// LIBRARY DEPENDANCE:	boost.
+// NAMESPACE:						GCL
+// AUTHOR:							Gavin Blakeman.
+// LICENSE:             GPLv2
+//
+//                      Copyright 2013-2018 Gavin Blakeman.
+//                      This file is part of the General Class Library (GCL)
+//
+//                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
+//                      Public License as published by the Free Software Foundation, either version 2 of the License, or
+//                      (at your option) any later version.
+//
+//                      GCL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+//                      implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+//                      for more details.
+//
+//                      You should have received a copy of the GNU General Public License along with GCL.  If not,
+//                      see <http://www.gnu.org/licenses/>.
+//
+// OVERVIEW:            The file provides a class for generating/composing/writing SQL queries using a simplified approach that
+//                      does not require knowledge of SQL.
+//                      The class does not communicate with the database server directly, but does provide functions to create the
+//                      SQL command strings to perform the database access.
+//                      Typical select query would be written as follows:
+//
+// CLASSES INCLUDED:    CSQLWriter
+//
+// HISTORY:             2015-09-22 GGB - AIRDAS 2015.09 release
+//                      2013-01-26 GGB - Development of class for application AIRDAS
+//
+//*********************************************************************************************************************************
+
+#include "../Include/SQLWriter.h"
+
+  // GCL Files
+
+#include "../Include/Error.h"
+
+  // Standard library files
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <typeinfo>
+#include <utility>
+
+  // Boost Library
+
+#include <boost/algorithm/string.hpp>
+
+namespace GCL
+{
+  namespace sqlwriter
+  {
+    std::string const TABLE("TABLE");
+    std::string const COLUMN("COLUMN");
+    std::string const END("END");
+
+    /// @brief Function to output the sort order as a string.
+    /// @param[in] outputStream - The stream to output the sort order to
+    /// @param[in] ob - The orderby value.
+    /// @returns Reference to the outputStream. Allows chaining.
+    /// @throws CError(GCL, 0x0006)
+    /// @version 2015-04-12/GGB - Function created.
+
+    std::ostream &operator<<(std::ostream &outputStream, CSQLWriter::EOrderBy ob)
+    {
+      if (ob == CSQLWriter::ASC)
+      {
+        outputStream << "ASC";
+      }
+      else if (ob == CSQLWriter::DESC)
+      {
+        outputStream << "DESC";
+      }
+      else
+      {
+        ERROR(GCL, 0x0006);
+      };
+
+      return outputStream;
+    }
+
+    //******************************************************************************************************************************
+    //
+    // CMappedSQLWriter
+    //
+    //******************************************************************************************************************************
+
+    /// @brief Function to capture the count expression
+    /// @param[in] countExpression - The count expression to capture.
+    /// @returns *this
+    /// @throws None
+    /// @version 2017-08-12/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::count(std::string const &countExpression)
+    {
+      countValue = countExpression;
+
+      return (*this);
+    }
+
+    /// @brief Creates the string for an insert query.
+    /// @returns The Insert Query as a string.
+    /// @throws None.
+    /// @version 2015-03-31/GGB - Function created.
+
+    std::string CSQLWriter::createInsertQuery() const
+    {
+      std::string returnValue = "INSERT INTO " + insertTable + "(";
+      bool firstRow = true;
+      bool firstValue = true;
+      std::ostringstream valueString;
+
+        // Output the column names.
+
+      for (auto &element : selectFields)
+      {
+        std::string columnName;
+
+        if (firstValue)
+        {
+          firstValue = false;
+        }
+        else
+        {
+          returnValue += ", ";
+        };
+        columnName = element;
+
+        returnValue += columnName;
+      };
+
+      returnValue += ") VALUES ";
+
+      firstValue = true;
+
+      for (auto &outerElement : valueFields)
+      {
+        if (firstRow)
+        {
+          firstRow = false;
+        }
+        else
+        {
+          returnValue += ", ";
+        }
+
+        firstValue = true;
+        returnValue += "(";
+
+        for (auto & innerElement : outerElement)
+        {
+          if (firstValue)
+          {
+            firstValue = false;
+          }
+          else
+          {
+            returnValue += ", ";
+          };
+
+          if (innerElement.type() == typeid(std::string))
+          {
+            returnValue += "'" + innerElement.stringOutput() + "'";
+          }
+          else if (innerElement.type() == typeid(bindValue))
+          {
+            std::string temp = innerElement.stringOutput();
+
+            if (temp.front() == ':')
+            {
+              returnValue += temp;
+            }
+            else if (temp.front() == '?')
+            {
+              returnValue += temp;
+            }
+            else
+            {
+              returnValue += ":" + temp;
+            }
+          }
+          else
+          {
+            returnValue += innerElement.stringOutput();
+          };
+        };
+
+        returnValue += ")";
+      };
+
+      return returnValue;
+    }
+
+    /// @brief Creates the set clause.
+    /// @throws GCL::CRuntimeError
+    /// @version 2017-08-21/GGB - Function created.
+
+    std::string CSQLWriter::createSetClause() const
+    {
+      RUNTIME_ASSERT(GCL, !setFields.empty(), "No Set fields defined for update query.");
+
+      std::string returnValue = "SET ";
+      bool firstValue = true;
+
+      for (auto element : setFields)
+      {
+        if (firstValue)
+        {
+          firstValue = false;
+        }
+        else
+        {
+          returnValue += ", ";
+        };
+        returnValue += element.first + " = ";
+
+        if (element.second.type() == typeid(std::string))
+        {
+          returnValue += "'" + element.second.stringOutput() + "'";
+        }
+        else if (element.second.type() == typeid(bindValue))
+        {
+          std::string temp = element.second.stringOutput();
+
+          if (temp.front() == ':')
+          {
+            returnValue += temp;
+          }
+          else if (temp.front() == '?')
+          {
+            returnValue += temp;
+          }
+          else
+          {
+            returnValue += ":" + temp;
+          }
+        }
+        else
+        {
+          returnValue += element.second.stringOutput();
+        };
+      };
+
+      return returnValue;
+
+    }
+
+    /// @brief Converts the query to a string. Specifically for an update query.
+    /// @throws
+    /// @version 2017-08-21/GGB - Function created.
+
+    std::string CSQLWriter::createUpdateQuery() const
+    {
+      std::string returnValue = "UPDATE " + updateTable + " ";
+
+      returnValue += createSetClause();
+
+      returnValue += createWhereClause();
+
+      return returnValue;
+    }
+
+    /// @brief Converts the where clause to a string for creating the SQL string.
+    /// @returns The where clause.
+    /// @version 2015-05-24/GGB - Function created.
+
+    std::string CSQLWriter::createWhereClause() const
+    {
+      std::string returnValue = " WHERE ";
+      bool first = true;
+      tripleStorage::const_iterator iterator;
+
+      for (iterator = whereFields.begin(); iterator != whereFields.end(); iterator++)
+      {
+        if (first)
+        {
+          first = false;
+        }
+        else
+        {
+          returnValue += " AND ";
+        };
+
+        returnValue += "(";
+        returnValue += getColumnMap(std::get<0>(*iterator));
+        returnValue += " ";
+        returnValue += std::get<1>(*iterator);
+
+        if (std::get<2>(*iterator).type() == typeid(std::string))
+        {
+          returnValue += " '";
+          returnValue += std::get<2>(*iterator).stringOutput();
+          returnValue += "')";
+        }
+        else
+        {
+          returnValue += " ";
+          returnValue += std::get<2>(*iterator).stringOutput();
+          returnValue += ")";
+        }
+      };
+
+      return returnValue;
+    }
+
+    /// @brief Adds the distinct keyword to a select query.
+    /// @returns (*this)
+    /// @throws None.
+    /// @version 2017-08-19/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::distinct()
+    {
+      distinct_ = true;
+      return (*this);
+    }
+
+    /// @brief Adds the table name to the from clause
+    /// @param[in] fromString - The table name to add to the from clause.
+    /// @returns (*this)
+    /// @throws None.
+    /// @version 2017-08-20/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::from(std::string const &fromString, std::string const &alias)
+    {
+      fromFields.emplace_back(fromString, alias);
+
+      return (*this);
+    }
+
+    /// @brief Searches the databaseMap and determines the mapped column names.
+    /// @param[in/out] columnName - The columnName to map.
+    /// @returns true - If the columnName was mapped succesfully.
+    /// @returns false - The columnName is not recognised in the databaseMap.
+    /// @throws None.
+    /// @version
+
+    std::string CSQLWriter::getColumnMap(std::string const &columnName) const
+    {
+      std::string returnValue = columnName;
+
+      return returnValue;
+    }
+
+    /// @brief Adds a max() function to the query.
+    /// @param[in] column - The name of the column to take the max of.
+    /// @param[in] as - The column name to assign to the max() function.
+    /// @returns (*this)
+    /// @throws None.
+    /// @version 2017-08-20/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::max(std::string const &column, std::string const &as)
+    {
+      maxFields.emplace_back(column, as);
+      return (*this);
+    }
+
+    /// @brief Adds a min() function to the query.
+    /// @param[in] column - The name of the column to take the max of.
+    /// @param[in] as - The column name to assign to the min() function.
+    /// @returns (*this)
+    /// @throws None.
+    /// @version 2017-08-20/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::min(std::string const &column, std::string const &as)
+    {
+      minFields.emplace_back(column, as);
+      return (*this);
+    }
+
+    /// @brief Function called to add columnData into a table.
+    /// @param[in] tableName - The table name to associate with the column.
+    /// @param[in] columnName - The column name to create.
+    /// @returns true - column added.
+    /// @returns false - column no added.
+    /// @throws None.
+    /// @version 2013-01-26/GGB - Function created.
+
+    bool CSQLWriter::createColumn(std::string const &tableName, std::string const &columnName)
+    {
+      TDatabaseMap::iterator iter;
+
+      if ( (iter = databaseMap.find(tableName)) == databaseMap.end() )
+      {
+        return false;
+      }
+      else if ( (*iter).second.columnData.find(columnName) != (*iter).second.columnData.end() )
+      {
+        return false;
+      }
+      else
+      {
+        SColumnData columnData;
+        columnData.columnName.first = columnName;
+
+        (*iter).second.columnData[columnName] = columnData;
+        return true;
+      };
+    }
+
+    /// @brief Function to add a table to the database map.
+    /// @param[in] tableName - The table name.
+    /// @returns true =
+    /// @note The table is not yet mapped at this point.
+    /// @version 2013-01-26/GGB - Function created.
+
+    bool CSQLWriter::createTable(std::string const &tableName)
+    {
+        // Check if the table already exists in the database.
+
+      if ( (databaseMap.find(tableName) != databaseMap.end()) )
+      {
+        return false;
+      }
+      else
+      {
+        STableData newTable;
+        newTable.tableName.first = tableName;
+
+        databaseMap[tableName] = newTable;
+        return true;
+      };
+    }
+
+    /// @brief Sets the Mapping of a specified column.
+    /// @param[in] tableName - The table name having the column.
+    /// @param[in] columnName - The column name to map.
+    /// @param[in] columnMap - The columnName to use when referring to the columnName.
+    /// @throws None.
+    /// @version 2013-01-26/GGB - Function created.
+
+    void CSQLWriter::setColumnMap(std::string const &tableName, std::string const &columnName, std::string const &columnMap)
+    {
+      if ( databaseMap.find(tableName) != databaseMap.end() )
+      {
+        if ( databaseMap[tableName].columnData.find(columnName) != databaseMap[tableName].columnData.end() )
+        {
+          databaseMap[tableName].columnData[columnName].columnName.first = columnName;
+          databaseMap[tableName].columnData[columnName].columnName.second = columnMap;
+        };
+      };
+    }
+
+    /// @brief Sets the Mapping of the table.
+    //
+    // 2013-01-26/GGB - Function created.
+
+    void CSQLWriter::setTableMap(std::string const &tableName, std::string const &tableMap)
+    {
+      if ( databaseMap.find(tableName) != databaseMap.end() )
+      {
+        databaseMap[tableName].tableName.first = tableName;
+        databaseMap[tableName].tableName.second = tableMap;
+      };
+    }
+
+    /// @brief Output the "FROM" clause as a string.
+    /// @returns A string representation of the "FROM" clause.
+    /// @version 2016-05-08/GGB - Added support for table alisases and table maps.
+    /// @version 2015-04-12/GGB - Function created.
+
+    std::string CSQLWriter::createFromClause() const
+    {
+      std::string returnValue = " FROM ";
+      std::string tableName;
+      std::string tableAlias;
+      bool first = true;
+      std::vector<std::string>::const_iterator iterator;
+
+      first = true;
+      for (auto element : fromFields)
+      {
+        if (first)
+        {
+          first = false;
+        }
+        else
+        {
+          returnValue += ", ";
+        };
+        tableName = element.first;
+
+        returnValue += tableName;
+
+        if (element.second.length() != 0)
+        {
+          returnValue += " AS " + tableAlias;
+        };
+      }
+
+      return returnValue;
+    }
+    
+    /// @brief Creates the "JOIN" clause 
+    /// @returns A string containing the join clause (begins with the JOIN keyword.
+    /// @version 2017-07-29/GGB - Function created.
+    
+    std::string CSQLWriter::createJoinClause() const
+    { 
+      std::string returnValue;
+
+      for (auto element : joinFields)
+      {
+        switch (std::get<2>(element))
+        {
+          case JOIN_LEFT:
+          {
+            returnValue += + " LEFT JOIN ";
+            break;
+          };
+          case JOIN_RIGHT:
+          {
+            returnValue += + " RIGHT JOIN ";
+            break;
+          };
+          case JOIN_INNER:
+          {
+            returnValue += " INNER JOIN ";
+            break;
+          }
+          case JOIN_FULL:
+          {
+            returnValue += "FULL JOIN ";
+            break;
+          }
+          default:
+          {
+            CODE_ERROR(AIRDAS);
+            break;
+          }
+
+        };
+        returnValue += std::get<3>(element) + " ON ";
+        returnValue += std::get<0>(element) + "." + std::get<1>(element) + "=" + std::get<3>(element) + "." + std::get<4>(element);
+      }
+      
+      return returnValue;
+    }
+
+    /// @brief Creates the "ORDER BY" clause.
+    /// @returns A string representation of the "Order By" clause.
+    /// @throws None.
+    /// @version 2015-04-12/GGB - Function created.
+
+    std::string CSQLWriter::createOrderByClause() const
+    {
+      pairStorage::const_iterator iterator;
+      bool first = true;
+
+      std::string returnValue = " ORDER BY ";
+
+      for (iterator = orderByFields.begin(); iterator != orderByFields.end(); iterator++)
+      {
+        if (first)
+        {
+          first = false;
+        }
+        else
+        {
+          returnValue += ", ";
+        }
+        returnValue += getColumnMap((*iterator).first);
+        returnValue += " ";
+
+        std::ostringstream directionString;
+        directionString << ((*iterator).second);
+        returnValue += directionString.str();
+      };
+
+      return returnValue;
+    }
+
+    /// @brief Function to create the select clause.
+    /// @returns A string representation of the select clause.
+    /// @note This function also performs the mapping to the correct table.columnNames. Additionally, if only the columnName is
+    ///       given the function will also search the correct tableName or tableAlias and add that to the term.
+    /// @version 2017-08-20/GGB - Added support for min() and max()
+    /// @version 2017-08-19/GGB - Added support for DISTINCT
+    /// @version 2017-08-12/GGB - Added code to support COUNT() clauses.
+    /// @version 2015-04-12/GGB - Function created.
+
+    std::string CSQLWriter::createSelectClause() const
+    {
+      std::string returnValue = "SELECT ";
+      bool first = true;
+      std::vector<std::string>::const_iterator iterator;
+      std::string columnName;
+
+      if ( (dialect == MICROSOFT) && (limitValue))
+      {
+        returnValue += "TOP " + std::to_string(*limitValue) + " ";
+      };
+
+      if (distinct_)
+      {
+        returnValue += "DISTINCT ";
+      };
+
+      for (iterator = selectFields.begin(); iterator != selectFields.end(); iterator++)
+      {
+        if (first)
+        {
+          first = false;
+        }
+        else
+        {
+          returnValue += ", ";
+        };
+        columnName = (*iterator);
+
+        returnValue += columnName;
+      };
+
+      if (countValue)
+      {
+        if (first)
+        {
+          first = false;
+        }
+        else
+        {
+          returnValue += ", ";
+        };
+
+        if (*countValue == "*")
+        {
+          returnValue += "COUNT(*) ";
+        }
+        else
+        {
+          returnValue += "COUNT(" + *countValue + ") ";
+        };
+      }
+
+      if (!maxFields.empty())
+      {
+        for (auto element : maxFields)
+        {
+          if (first)
+          {
+            first = false;
+          }
+          else
+          {
+            returnValue += ", ";
+          };
+
+          returnValue += "MAX(" + element.first + ")";
+          if (!element.second.empty())
+          {
+            returnValue += " AS " + element.second;
+          };
+        }
+      };
+
+      if (!minFields.empty())
+      {
+        for (auto element : minFields)
+        {
+          if (first)
+          {
+            first = false;
+          }
+          else
+          {
+            returnValue += ", ";
+          };
+
+          returnValue += "MIN(" + element.first + ")";
+          if (!element.second.empty())
+          {
+            returnValue += " AS " + element.second;
+          };
+        }
+      };
+
+      return returnValue;
+    }
+
+    /// @brief Produces the string for a SELECT query.
+    /// @returns A string containing the select clause.
+    /// @throws None.
+    /// @version 2017-08-12/GGB - Added check for countValue in selectClause if statement.
+    /// @version 2015-03-30/GGB - Function created.
+
+    std::string CSQLWriter::createSelectQuery() const
+    {
+      std::string returnValue;
+
+      if ( !selectFields.empty() || countValue ||
+           !maxFields.empty() || !minFields.empty() )
+      {
+        returnValue += createSelectClause();
+      }
+      else
+      {
+        ERROR(GCL, 0x0007);
+      };
+
+      if (!fromFields.empty())
+      {
+        returnValue += createFromClause();
+      }      
+      else
+      {
+        ERROR(GCL, 0x0008);
+      };
+
+      if (!joinFields.empty())
+      {
+        returnValue += createJoinClause();
+      }
+
+      if (!whereFields.empty())
+      {
+        returnValue += createWhereClause();
+      };
+
+      if (!orderByFields.empty())
+      {
+        returnValue += createOrderByClause();
+      };
+
+      if ( (dialect == MYSQL) && (limitValue))
+      {
+        returnValue += " LIMIT " + std::to_string(*limitValue);
+      };
+
+
+      return returnValue;
+    }
+
+    /// @brief Constructor for the from clause.
+    /// @param[in] fields - The fields to add to the from clause.
+    /// @throws None.
+    /// @version 2017-08-20/GGB - Added support for aliases.
+    /// @version 2015-03-30/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::from(std::initializer_list<std::string> fields)
+    {
+      for (auto elem : fields)
+      {
+        fromFields.emplace_back(elem, "");
+      }
+
+      return (*this);
+    }
+
+    /// @brief Set the query type to a 'DELETE' query.
+    //
+    // 2015-03-30/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::deleteQuery()
+    {
+      queryType = qt_insert;
+
+      return *this;
+    }
+
+    /// @brief Set the query type to a 'INSERT' query.
+    /// @param[in] tableName - The table name to insert into.
+    /// @returns *this
+    /// @version 2017097-26/GGB - Added support for fields.
+    /// @version 2015-03-30/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::insertInto(std::string tableName, std::initializer_list<std::string> fields)
+    {
+      queryType = qt_insert;
+
+      insertTable = tableName;
+
+      for (auto elem : fields)
+      {
+        selectFields.push_back(elem);
+      };
+
+      return *this;
+    }
+
+    /// @brief Adds join statements to the query.
+    /// @param[in] fields - The join statements to add.
+    /// @returns (*this)
+    /// @throws None.
+    /// @version 2016-05-08/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::join(std::initializer_list<parameterJoin> fields)
+    {
+      for (auto elem: fields)
+      {
+        joinFields.push_back(elem);
+      }
+
+      return *this;
+    }
+
+    /// Sets the limit value.
+    //
+    // 2015-04-12/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::limit(long limit)
+    {
+      limitValue = limit;
+      return (*this);
+    }
+
+    /// @brief Copy the orderBy pairs to the list.
+    /// @param[in] fields - The orderBy Pairs to copy
+    /// @returns *this
+    /// @throws None.
+    /// @version 2015-04-12/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::orderBy(std::initializer_list<parameterPair> fields)
+    {
+      for (auto elem : fields)
+      {
+        orderByFields.push_back(elem);
+      };
+
+      return *this;
+    }
+
+    /// @brief Function to load a map file and store all the aliases.
+    /// @param[in] ifn - The file to read the database mapping from.
+    /// @throws 0x0001 - MAPPED DATABASE: Invalid Map file name.
+    /// @throws 0x0002 - MAPPED DATABASE: Syntax Error
+    /// @throws 0x0004 - MAPPED DATABASE: Invalid Table Name
+    /// @throws 0x0005 - MAPPED DATABASE: Invalid Column Name
+    /// @version 2013-01-26/GGB - Function created.
+
+    void CSQLWriter::readMapFile(boost::filesystem::path const &ifn)
+    {
+      std::ifstream ifs;
+      std::string textLine;
+      std::string szCommand;
+      int lineNumber = 1;
+      std::string currentTable;
+      size_t spacePosn, token1S, token1E, token2S, token2E, equalPosn;
+      std::string szToken1, szToken2;
+
+      ifs.open(ifn.string());
+
+      if (!ifs)
+      {
+        std::clog << "Could not open SQL map file: " << ifn << "." << std::endl;
+        ERROR(GCL, 0x0001);    // MAPPEDDATABASE: Invalid Map file name.
+      }
+      else
+      {
+        while (ifs.good())
+        {
+          std::getline(ifs, textLine);
+          if ( (textLine.size() > 1) &&
+               (textLine[0] != ';') )
+          {
+
+            spacePosn = textLine.find_first_of(' ', 0);
+            szCommand = textLine.substr(0, spacePosn);
+            boost::trim(szCommand);
+            equalPosn = textLine.find_first_of('=', 0);
+            token1S = textLine.find_first_of('[', 0);
+            token1E = textLine.find_first_of(']', 0);
+            token2S = textLine.find_first_of('[', equalPosn);
+            token2E = textLine.find_first_of(']', equalPosn);
+
+            if (token1S < token1E)
+              szToken1 = textLine.substr(token1S + 1, token1E - token1S - 1);
+            else if (szCommand != END)
+            {
+              std::clog << "Error in SQL map file: " << ifn << std::endl;
+              std::clog << "Syntax command on line: " << lineNumber << " - Needs at least one token." << std::endl;
+              ERROR(GCL, 0x0002);  // MAPPED DATABASE: Syntax Error
+            };
+
+            if (token2S < token2E)
+              szToken2 = textLine.substr(token2S + 1, token2E - token2S - 1);
+            else
+              szToken2.clear();
+
+            if (szCommand == COLUMN)
+            {
+              if (currentTable.empty())
+              {
+                std::clog << "Error in SQL map file: " << ifn << std::endl;
+                std::clog << "Syntax command on line: " << lineNumber << " - COLUMN directive found, but no TABLE directive in force." << std::endl;
+                ERROR(GCL, 0x0002);  // MAPPED DATABASE: Syntax Error
+              }
+              else if (szToken1.empty())
+              {
+                std::clog << "Error in SQL map file: " << ifn << std::endl;
+                std::clog << "Syntax command on line: " << lineNumber << " - COLUMN directive found, column name." << std::endl;
+                ERROR(GCL, 0x0002);  // MAPPED DATABASE: Syntax Error
+              }
+              else if ( (*databaseMap.find(currentTable)).second.columnData.find(szToken1) == (*databaseMap.find(currentTable)).second.columnData.end())
+              {
+                std::clog << "Error in SQL map file: " << ifn << std::endl;
+                std::clog << "Syntax command on line: " << lineNumber << " - Invalid column name." << std::endl;
+                ERROR(GCL, 0x0005);  // MAPPED DATABASE: Invalid Column Name
+              }
+              else
+              {
+                if (!szToken2.empty())
+                  setColumnMap(currentTable, szToken1, szToken2);
+              };
+            }
+            else if (szCommand == TABLE)
+            {
+              if (!currentTable.empty())
+              {
+                std::clog << "Error in SQL map file: " << ifn << std::endl;
+                std::clog << "Syntax command on line: " << lineNumber << " - TABLE directive found, but a TABLE directive is already specified." << std::endl;
+                ERROR(GCL, 0x0002);  // MAPPED DATABASE: Syntax Error
+              }
+              else if (szToken1.empty() )
+              {
+                std::clog << "Error in SQL map file: " << ifn << std::endl;
+                std::clog << "Syntax command on line: " << lineNumber << " - TABLE directive found, but no table name." << std::endl;
+                ERROR(GCL, 0x0002);  // MAPPED DATABASE: Syntax Error
+              }
+              else if (databaseMap.find(szToken1) == databaseMap.end())
+              {
+                std::clog << "Error in SQL map file: " << ifn << std::endl;
+                std::clog << "Error on line: " << lineNumber << " - Invalid Table name." << std::endl;
+                ERROR(GCL, 0x0004);  // MAPPED DATABASE: Invalid Table Name
+              }
+              else
+              {
+               currentTable = szToken1;
+               if (!szToken2.empty())
+                 setTableMap(currentTable, szToken2);  // Add the alias into the record.
+              };
+            }
+            else if (szCommand == END)
+            {
+              if ( (token1S == textLine.npos) &&
+                   (token1E == textLine.npos) &&
+                   (token2S == textLine.npos) &&
+                   (token2E == textLine.npos) &&
+                   (equalPosn == textLine.npos) )
+                currentTable.clear();
+              else
+              {
+                std::clog << "Error in SQL map file: " << ifn << std::endl;
+                std::clog << "Syntax command on line: " << lineNumber << std::endl;
+                ERROR(GCL, 0x0002);  // MAPPED DATABASE: Syntax Error
+              };
+            }
+            else
+            {
+              std::clog << "Error in SQL map file: " << ifn << std::endl;
+              std::clog << "Invalid command on line: " << lineNumber << std::endl;
+              ERROR(GCL, 0x0003);  // MAPPED DATABASE: Syntax Error
+            };
+          };
+
+          lineNumber++;
+        };
+        ifs.close();
+      };
+    }
+
+    /// @brief Resets all the fields for the query.
+    /// @throws None.
+    /// @version 2017-08-19/GGB - Added support for distinct.
+    /// @version 2017-08-12/GGB - Added support for count expressions.
+    /// @version 2015-05-19/GGB - Function created.
+
+    void CSQLWriter::resetQuery()
+    {
+      selectFields.clear();
+      fromFields.clear();
+      whereFields.clear();
+      insertTable.clear();
+      valueFields.clear();
+      orderByFields.clear();
+      joinFields.clear();
+      limitValue.reset();
+      countValue.reset();
+      distinct_ = false;
+      maxFields.clear();
+      minFields.clear();
+      updateTable.clear();
+      setFields.clear();
+    }
+
+    /// @brief Resets the where clause of a query.
+    /// @throws None.
+    /// @version 2017-08-19/GGB - Function created.
+
+    void CSQLWriter::resetWhere()
+    {
+      whereFields.clear();
+    }
+
+    /// @brief Set the query type to a 'SELECT' query.
+    /// @returns A reference to (*this)
+    /// @version 2017-08-20/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::select()
+    {
+      queryType = qt_select;
+
+      return (*this);
+    }
+
+    /// @brief Set the query type to a 'SELECT' query.
+    /// @param[in] fields - The fields to add to the select clause.
+    /// @returns A reference to (*this)
+    /// @version 2014-12-19/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::select(std::initializer_list<std::string> fields)
+    {
+      queryType = qt_select;
+
+      for (auto elem : fields)
+      {
+        selectFields.push_back(elem);
+      };
+
+      return *this;
+    }
+
+    /// @brief Processes a single set clause.
+    /// @param[in] columnName - The columnName to set
+    /// @param[in] value - The value to set.
+    /// @returns (*this)
+    /// @throws None.
+    /// @version 2017-08-21/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::set(std::string const &columnName, SCL::CAny const &value)
+    {
+      setFields.emplace_back(columnName, value);
+
+      return (*this);
+    }
+
+    /// @brief Converts the query into an SQL query string.
+    /// @returns The SQL query as a string.
+    /// @throws None.
+    /// @version 2017-08-12/GGB - Function created.
+
+    std::string CSQLWriter::string() const
+    {
+      std::string returnValue;
+
+      switch (queryType)
+      {
+        case qt_select:
+          returnValue = createSelectQuery();
+          break;
+        case qt_insert:
+        {
+          returnValue = createInsertQuery();
+          break;
+        };
+        case qt_update:
+        {
+          returnValue = createUpdateQuery();
+          break;
+        }
+        default:
+        {
+          CODE_ERROR("GCL");
+          break;
+        };
+      }
+
+      return returnValue;
+    }
+
+    std::string CSQLWriter::getTableMap(std::string const &search) const
+    {
+      std::string returnValue = search;
+
+      return returnValue;
+    }
+
+    /// @brief Sets the table name for an update query.
+    /// @param[in] tableName - The tableName to update.
+    /// @returns (*this)
+    /// @throws None.
+    /// @version 2017-08-21/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::update(std::string const &tableName)
+    {
+
+      queryType = qt_update;
+
+      updateTable = tableName;
+
+      return (*this);
+    }
+
+    /// @brief Stores the value fields for the query.
+    /// @param[in] fields- The parameter values to include in the query.
+    /// @returns *this
+    /// @version 2017-07-26/GGB - Changed code to use parameter rather than parameter pair.
+    /// 2015-03-31/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::values(std::initializer_list<parameterStorage> fields)
+    { 
+      for (const auto &f : fields)
+      {
+        valueFields.emplace_back(f);
+      };
+
+      return *this;
+    }
+
+    /// @brief Verifies if a string constitutes a valid SQL operator.
+    /// @param[in] oper - The string to test.
+    /// @returns true - The string is a valid operator.
+    /// @returns false - The string is not a valid operator.
+    /// @note Valid operators are: "=", "<>", "!=", ">", "<", ">=", "<=", "BETWEEN", "LIKE", "IN"
+    /// @throws None.
+    /// @version
+
+    bool CSQLWriter::verifyOperator(std::string const &oper) const
+    {
+      bool returnValue = false;
+
+      returnValue = ( (oper == "=") || (oper == "<>") || (oper == "!=") || (oper == ">") || (oper == "<") ||
+                      (oper == ">=") || (oper == "<=") || (oper == "BETWEEN") || (oper == "LIKE") || (oper == "IN"));
+
+      return returnValue;
+    }
+
+    /// @brief Adds a single where clause to the where list.
+    /// @param[in] columnName - The columnName to add
+    /// @param[in] operatorString - The operatorString to add
+    /// @param[in] value - The value to add.
+    /// @returns (*this)
+    /// @throws None.
+    /// @version 2017-08-21/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::where(std::string const &columnName, std::string const &operatorString, SCL::CAny const &value)
+    {
+      whereFields.emplace_back(columnName, operatorString, std::move(value));
+
+      return (*this);
+    }
+
+    /// @brief Stores the where fields in the list.
+    /// @param[in] fields - The initialiser list of fields to store.
+    /// @returns (*this)
+    /// @throws None.
+    /// @version 2015-03-30/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::where(std::initializer_list<parameterTriple> fields)
+    {
+      for (auto elem : fields)
+      {
+        whereFields.push_back(elem);
+      };
+
+      return (*this);
+    }
+
+  } // namespace sqlwriter
+}  // namespace GCL

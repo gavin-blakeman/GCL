@@ -1,0 +1,58 @@
+﻿//*********************************************************************************************************************************
+//
+// PROJECT:							General Class Library (GCL)
+// FILE:                GCL Include File
+// SUBSYSTEM:						Include file for the entire library
+// LANGUAGE:						C++
+// TARGET OS:						All (Standard C++)
+// LIBRARY DEPENDANCE:	None.
+// NAMESPACE:						GCL
+// AUTHOR:							Gavin Blakeman.
+// LICENSE:             GPLv2
+//
+//                      Copyright 2013-2016 Gavin Blakeman.
+//                      This file is part of the General Class Library (GCL)
+//
+//                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
+//                      Public License as published by the Free Software Foundation, either version 2 of the License, or
+//                      (at your option) any later version.
+//
+//                      GCL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+//                      implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+//                      for more details.
+//
+//                      You should have received a copy of the GNU General Public License along with GCL.  If not,
+//                      see <http://www.gnu.org/licenses/>.
+//
+// OVERVIEW:            This is the include file that includes all the modules in the GCL library.
+//
+// CLASSES INCLUDED:    None
+//
+// HISTORY:             2015-09-22 GGB - AIRDAS 2015.09 release
+//                      2015-07-06 GGB - Updated Error files.
+//                      2013-01-26 GGB Development of classes for application AIRDAS.
+//
+//*********************************************************************************************************************************
+
+/// @section Compilation Control
+/// The following macros control how the code will be compiled for various applications.
+/// @li @b GCL_NOBOOST - Do not use the Boost C++ libraries. This should only be used on platforms where the Boost C++ libraries are not 
+///								      supported. By default the Boost C++ libraries are enabled.
+/// @li @b GCL_NOMT - Do not use multi-threading. This should only be used on platforms where multi-threading is not available. By 
+/// 									 default, multi-threading support is enabled.
+/// @li @b GCL_REALTIME - Compile in the realtime library support. By default this will not be compiled in.
+/// @li @b GCL_NOSTRINGS - Compile without using strings. This is intended to be used for embedded applications.
+/// @li @b EMBEDDED - Compile the library for embedded applications.
+/// @li @b GCL_CONTROL - Compile the library for control type applications.
+
+#include "Include/config.h"
+#include "Include/logger/LoggerCore.h"
+#include "Include/logger/FileSink.h"
+#include "Include/logger/StreamSink.h"
+
+#include "Include/common.h"
+#include "Include/dateTime.h"
+#include "Include/Error.h"
+#include "Include/Functions.h"
+#include "Include/SQLWriter.h"
+#include "Include/Resource.h"

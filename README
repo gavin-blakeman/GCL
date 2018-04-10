@@ -1,0 +1,21 @@
+General Class Library (GCL)
+===========================
+
+MappedSQLWriter
+---------------
+This selection of classes allows SQL queries to be easily assembled. The mapped part is user generated map files can be loaded 
+to map a programmed database application to the user generated (or pre-existing) tables.
+
+A typical code section would be
+CMappedSQLQuery sqlQuery = CMappedSQLQuery.select("employees.*").from(employees);
+std::string sqlString = sqlQuery.string();
+
+The value of sqlString is then
+SELECT employees.* FROM employees;
+
+
+std::string sqlString = QSQLQuery.select("employees.*").from("employees").toString();
+std::string sqlString (std::string) QSQLQuery.select("employees.*").from("employees");
+
+
+
