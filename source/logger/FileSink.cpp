@@ -56,14 +56,17 @@ namespace GCL
     //******************************************************************************************************************************
 
     /// @brief Constructor for the class.
+    /// @param[in] lfp: Log file path.
+    /// @param[in] lfn: Log file name.
+    /// @param[in] lfe: Log File Extension. The extension to use. <".log">
     /// @throws None.
+    /// @version 2018-08-18/GGB - Split log file name over three variables.
     /// @version 2017-01-26/GGB - Use a single variable for storing the path and name.
     /// @version 2014-07-22/GGB - Function created.
 
-    CFileSink::CFileSink(const boost::filesystem::path &logFilePath, boost::filesystem::path const &logFileName) : CLoggerSink(),
-      logFileExtension(".log"), logFileFullName(), logFile()
+    CFileSink::CFileSink(boost::filesystem::path const &lfp, boost::filesystem::path const &lfn, boost::filesystem::path const &lfe)
+      : CLoggerSink(), logFilePath(lfp), logFileName(lfn), logFileExt(lfe), logFile()
     {
-      logFileBaseName = logFilePath / logFileName;
     }
 
     /// @brief Destructor for the class. Only needs to close the file. The parent takes care of the closing of the thread.
@@ -85,7 +88,7 @@ namespace GCL
 
     void CFileSink::openLogFile()
     {
-      logFileFullName = logFileBaseName;
+      boost::filesystem::path logFileFullName = logFilePath / logFileName;
 
       switch (rotationMethod)
       {
@@ -109,17 +112,17 @@ namespace GCL
           };
 
           logFileFullName += std::string(szLocalTime);
-          logFileFullName += logFileExtension;
+          logFileFullName += logFileExt;
           break;
         };
         case size:
         {
-          logFileFullName += logFileExtension;
+          logFileFullName += logFileExt;
           break;
         }
         case use:
         {
-          logFileFullName += logFileExtension;
+          logFileFullName += logFileExt;
 
           if ( boost::filesystem::exists(logFileFullName) )
           {
@@ -144,7 +147,11 @@ namespace GCL
         std::cerr << boost::filesystem::current_path().string() << std::endl;
         std::cerr << "Unable to open log file. Exiting." << std::endl;
         ERROR(GCL, 0x1000);    // LOGGER: Unable to open log file.
-      };
+      }
+      else
+      {
+        openLogFileName = logFileFullName;
+      }
     }
 
     /// @brief Function to roll the files. IE move the files down the numbering order by 1.
@@ -153,6 +160,7 @@ namespace GCL
 
     void CFileSink::rollFiles(void)
     {
+      boost::filesystem::path logFileFullName = logFilePath / logFileName / logFileExt;
       if (maxCopies > 0)
       {
         std::uint16_t copyIndex = maxCopies;
@@ -164,7 +172,7 @@ namespace GCL
           // Delete the last file if necessary.
 
         number = boost::str( boost::format("%1$02d") % copyIndex);      /// @todo Limitation in boost::format cannot support variable lenght *
-        fnNew = logFileFullName;
+        fnNew = openLogFileName;
         fnNew += "." + number;
 
         if (boost::filesystem::exists(fnNew) )
@@ -199,7 +207,7 @@ namespace GCL
       }
       else
       {
-        if ( boost::filesystem::exists(logFileFullName) )
+        if ( boost::filesystem::exists(openLogFileName) )
         {
           boost::filesystem::remove(logFileFullName);
         };
@@ -254,8 +262,9 @@ namespace GCL
         logFile.close();
       };
 
-      logFileBaseName = static_cast<boost::filesystem::path>(filePath) / static_cast<boost::filesystem::path>(fileName);
-      logFileExtension = fileExt;
+      logFilePath = static_cast<boost::filesystem::path>(filePath);
+      logFileName = static_cast<boost::filesystem::path>(fileName);
+      logFileExt = fileExt;
 
         // Reopen the log file if required.
 
@@ -340,7 +349,7 @@ namespace GCL
 
       if (rotationMethod == size)
       {
-        std::uintmax_t fileSize = boost::filesystem::file_size(logFileBaseName);
+        std::uintmax_t fileSize = boost::filesystem::file_size(openLogFileName);
         if (fileSize >= rotationSize)
         {
           rotateLogFile();

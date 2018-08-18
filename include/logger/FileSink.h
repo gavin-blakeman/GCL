@@ -61,9 +61,10 @@ namespace GCL
       };
 
     private:
-      boost::filesystem::path logFileExtension;
-      boost::filesystem::path logFileBaseName;
-      boost::filesystem::path logFileFullName;
+      boost::filesystem::path logFilePath;
+      boost::filesystem::path logFileName;
+      boost::filesystem::path logFileExt;
+      boost::filesystem::path openLogFileName;
 
         // Daily based rotation variables
 
@@ -88,7 +89,7 @@ namespace GCL
       virtual void write(std::string const &);
 
     public:
-      CFileSink(boost::filesystem::path const &logpath, boost::filesystem::path const &logfilename);
+      CFileSink(boost::filesystem::path const &, boost::filesystem::path const &, boost::filesystem::path const & =".log");
       virtual ~CFileSink();
 
       void openLogFile();
