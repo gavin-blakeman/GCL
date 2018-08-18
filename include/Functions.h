@@ -1,4 +1,4 @@
-//*********************************************************************************************************************************
+﻿//*********************************************************************************************************************************
 //
 // PROJECT:							General Class Library (GCL)
 // FILE:								General functions.
@@ -63,7 +63,6 @@ namespace GCL
   int sprintfHMS(char *, FP_t, int=2);
   std::string sprintfHMS(std::uint32_t const &);
   std::string sprintfHMS(FP_t const &, int=2);
-
 
 }   // namespace
 

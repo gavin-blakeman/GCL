@@ -47,7 +47,7 @@
 
   // GCL Include files
 
-#include "../Include/logger/LoggerCore.h"
+#include "../include/logger/LoggerCore.h"
 
 #ifndef GCL_CONTROL
 
@@ -168,7 +168,7 @@ namespace GCL
 
 #define ERROR(LIBRARY, ERROR) (throw(GCL::CError(#LIBRARY, ERROR)))
 #define CODE_ERROR(LIBRARY) (throw(GCL::CCodeError( #LIBRARY,  __FILE__, __TIMESTAMP__, static_cast<size_t>(__LINE__)) ))
-#define RUNTIME_ASSERT(LIBRARY, EXPRESSION, MESSAGE) if (!(EXPRESSION)) { throw GCL::CRuntimeAssert(#LIBRARY, #EXPRESSION,  __FILE__, __TIMESTAMP__, (size_t) __LINE__, MESSAGE); }
+#define RUNTIME_ASSERT(LIBRARY, EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert(#LIBRARY, #EXPRESSION,  __FILE__, __TIMESTAMP__, (size_t) __LINE__, MESSAGE); }}
 
 }	// namespace GCL
 

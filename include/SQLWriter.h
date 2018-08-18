@@ -165,6 +165,7 @@ namespace GCL
       stringPairStorage maxFields;
       std::string updateTable;
       pairStorage setFields;
+      std::string deleteTable;
 
       EQueryType queryType;
       std::string currentTable;
@@ -181,6 +182,7 @@ namespace GCL
       std::string createSelectQuery() const;
       std::string createInsertQuery() const;
       std::string createUpdateQuery() const;
+      std::string createDeleteQuery() const;
 
       std::string createOrderByClause() const;
       std::string createSelectClause() const;
@@ -196,7 +198,7 @@ namespace GCL
       void resetWhere();
 
       CSQLWriter &count(std::string const &);
-      CSQLWriter &deleteQuery();
+      CSQLWriter &deleteFrom(std::string const &);
       CSQLWriter &distinct();
       CSQLWriter &from(std::string const &, std::string const & = "");
       CSQLWriter &from(std::initializer_list<std::string>);

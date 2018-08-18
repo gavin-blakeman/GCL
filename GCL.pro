@@ -4,11 +4,11 @@
 #
 #-------------------------------------------------
 
-QT -= core gui
-
 TARGET = GCL
 TEMPLATE = lib
 CONFIG += staticlib
+
+#QT -= core gui
 
 DEFINES += BOOST_CHRONO_DONT_PROVIDES_DEPRECATED_IO_SINCE_V2_0_0
 QMAKE_CXXFLAGS += -std=c++17
@@ -26,45 +26,53 @@ win32 {
 
 unix {
   CONFIG(release,debug|release) {
-    DESTDIR = "../Library/unix/release"
-    OBJECTS_DIR = "../Library/unix/release/object/GCL"
+  DESTDIR = ""
+  OBJECTS_DIR = "objects"
   }
   else {
-    DESTDIR = "../Library/unix/debug"
-    OBJECTS_DIR = "../Library/unix/debug/object/GCL"
+  DESTDIR = ""
+  OBJECTS_DIR = "objects"
   }
 }
 
 INCLUDEPATH += \
-  "../Boost/boost 1.62" \
   "../ACL" \
+  "../boost 1.62" \
   "../MCL" \
   "../SCL"
 
 SOURCES += \
-    Source/string.cpp \
-    Source/logger/LoggerCore.cpp \
-    Source/logger/FileSink.cpp \
-    Source/logger/StreamSink.cpp \
-    Source/Resource.cpp \
-    Source/Functions.cpp \
-    Source/common.cpp \
-    Source/Error.cpp \
-    Source/SQLWriter.cpp \
-    Source/dateTime.cpp
+    source/string.cpp \
+    source/logger/LoggerCore.cpp \
+    source/logger/FileSink.cpp \
+    source/logger/StreamSink.cpp \
+    source/Resource.cpp \
+    source/Functions.cpp \
+    source/common.cpp \
+    source/Error.cpp \
+    source/SQLWriter.cpp \
+    source/dateTime.cpp \
+    source/filesystem.cpp \
+    source/alarm/alarmCore.cpp \
+    source/alarm/alarmDaily.cpp \
+    source/alarm/alarmWeekly.cpp
 
 HEADERS += \
     GCL \
-    Include/logger/LoggerCore.h \
-    Include/logger/FileSink.h \
-    Include/logger/StreamSink.h \
-    Include/Resource.h \
-    Include/Functions.h \
-    Include/common.h \
-    Include/Error.h \
-    Include/SQLWriter.h \
-    Include/dateTime.h \
-    Include/config.h
+    include/logger/LoggerCore.h \
+    include/logger/FileSink.h \
+    include/logger/StreamSink.h \
+    include/Resource.h \
+    include/Functions.h \
+    include/common.h \
+    include/Error.h \
+    include/SQLWriter.h \
+    include/dateTime.h \
+    include/config.h \
+    include/filesystem.h \
+    include/alarm/alarmCore.h \
+    include/alarm/alarmDaily.h \
+    include/alarm/alarmWeekly.h
 
 OTHER_FILES += \
     changelog.txt

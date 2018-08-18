@@ -39,11 +39,7 @@
 //
 //*********************************************************************************************************************************
 
-#include "../Include/common.h"
-
-  // GCL Include files
-
-#include "../Include/Error.h"
+#include "../include/common.h"
 
   // Standard libraries
 
@@ -56,12 +52,16 @@
 
 #include <boost/algorithm/string.hpp>
 
+  // GCL Include files
+
+#include "../include/Error.h"
+
 namespace GCL
 {
 
-  unsigned int const GCL_MAJORVERSION = 2013;           ///< The Major version number (yyyy)
+  unsigned int const GCL_MAJORVERSION = 2018;           ///< The Major version number (yyyy)
   unsigned int const GCL_MINORVERSION = 9;              ///< The Minor version number (mm)
-  unsigned int const GCL_BUILDNUMBER  = 0x03a3;         ///< The build number - incremented on each build.
+  unsigned int const GCL_BUILDNUMBER  = 0x0059;         ///< The build number - incremented on each build.
 
   /// @brief Returns the library version and build number
   /// @returns A string with the application name, version, build.

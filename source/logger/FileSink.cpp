@@ -1,4 +1,4 @@
-//*********************************************************************************************************************************
+﻿//*********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
 // FILE:                FileSink
@@ -39,9 +39,9 @@
 //
 //*********************************************************************************************************************************
 
-#include "../../Include/logger/FileSink.h"
+#include "../../include/logger/FileSink.h"
 
-#include "../../Include/Error.h"
+#include "../../include/Error.h"
 
 #include "boost/format.hpp"
 
@@ -141,6 +141,8 @@ namespace GCL
 
       if (!logFile.good() || !logFile.is_open())
       {
+        std::cerr << boost::filesystem::current_path().string() << std::endl;
+        std::cerr << "Unable to open log file. Exiting." << std::endl;
         ERROR(GCL, 0x1000);    // LOGGER: Unable to open log file.
       };
     }

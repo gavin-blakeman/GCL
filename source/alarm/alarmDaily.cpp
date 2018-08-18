@@ -1,16 +1,16 @@
-//*********************************************************************************************************************************
+﻿//*********************************************************************************************************************************
 //
-// PROJECT:							General Class Library
-// FILE:								Config
-// SUBSYSTEM:						Configuration file
+// PROJECT:             General Class Library
+// FILE:                alarmDaily
+// SUBSYSTEM:           Alarm Module
 // LANGUAGE:						C++
-// TARGET OS:						None.
-// LIBRARY DEPENDANCE:	None.
-// NAMESPACE:						ACL
-// AUTHOR:							Gavin Blakeman (GGB)
+// TARGET OS:						WINDOWS/UNIX/LINUX/MAC
+// LIBRARY DEPENDANCE:
+// NAMESPACE:						GCL
+// AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2016-2017 Gavin Blakeman.
+//                      Copyright 2018 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -24,38 +24,33 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
+// OVERVIEW:
 //
-// OVERVIEW:						Configuration values and typedefs for the library.
+// CLASSES INCLUDED:
 //
-//
-// CLASSES INCLUDED:		None
-//
-// CLASS HIERARCHY:     None.
-//
-//
-// HISTORY:             2016-01-15 GGB - File created.
+// HISTORY:             2018-07-06 GGB - File created
 //
 //*********************************************************************************************************************************
 
-#ifndef GCL_CONFIG_H
-#define GCL_CONFIG_H
+#include "../../include/alarm/alarmDaily.h"
 
-#ifdef EMBEDDED
-  #ifdef __XC32
-    #define GCL_NOBOOST
-    #define GCL_NOMT
-    #define GCL_REALTIME
-    #define GCL_NOSTRINGS
-    #define GCL_CONTROL
-  #endif  // __XC32
-#else   // EMBEDDED
-  #undef GCL_NOBOOST
-  #undef GCL_NOMT
-  #undef GCL_REALTIME
-  #undef GCL_NOSTRINGS
-  #undef GCL_CONTROL
-#endif  // EMBEDDED
+namespace GCL
+{
+  namespace alarm
+  {
 
-typedef double FP_t;
+    CAlarmDaily::CAlarmDaily(callbackFunction_t callbackFunction, void *callbackData) :
+      CAlarmType(callbackFunction, callbackData)
+    {
 
-#endif // GCL_CONFIG_H
+    }
+
+    void CAlarmDaily::evaluateAlarm()
+    {
+
+    }
+
+  } // namespace alarm
+} // namespace GCL
+
+

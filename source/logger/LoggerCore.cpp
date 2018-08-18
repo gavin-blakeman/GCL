@@ -31,17 +31,26 @@
 //
 // CLASSES INCLUDED:    CLogger
 //
-// HISTORY:             2015-09-22 GGB - AIRDAS 2015.09 release
+// HISTORY:             2018-08-12 GGB - gnuCash-pud debugging and release.
+//                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2014-07-20 GGB - Development of class for "Observatory Weather System - Service"
 //
 //*********************************************************************************************************************************
 
-#include "../../Include/logger/LoggerCore.h"
-#include "../../Include/Error.h"
+#include "../../include/logger/LoggerCore.h"
+
+  // Standard C++ library headers
 
 #include <cstdio>
 
+  // Miscellaneous library headers
+
 #include <boost/chrono.hpp>
+
+  // GCL include headers
+
+#include "../../include/Error.h"
+#include "../../include/logger/StreamSink.h"
 
 namespace GCL
 {
@@ -65,7 +74,7 @@ namespace GCL
     //******************************************************************************************************************************
 
     /// @brief Check if the criticality is allowed
-    /// @param[in] s - The severity to check.
+    /// @param[in] s: The severity to check.
     /// @returns true if the severity is allowed
     /// @returns false otherwise
     /// @throws None.
@@ -116,9 +125,10 @@ namespace GCL
 
     /// @brief Default constructor
     /// @throws None.
+    /// @version 2018-08-14/GGB - Changed defaults on severity to not include trace and debug.
     /// @version 2014-12-25/GGB - Function created.
 
-    CLoggerSink::CLoggerSink() : timeStamp_(true), severityStamp_(true), logSeverity{true, true, true, true, true, true, true}
+    CLoggerSink::CLoggerSink() : timeStamp_(true), severityStamp_(true), logSeverity{true, true, true, true, true, false, false}
     {
     }
 
@@ -154,8 +164,8 @@ namespace GCL
     //******************************************************************************************************************************
 
     /// @brief Constructor for the class.
-    /// @param[in] s - The severity of the message.
-    /// @param[in] t - The message to be logged.
+    /// @param[in] s: The severity of the message.
+    /// @param[in] t: The message to be logged.
     /// @throws None.
     /// @version 2014-07-20/GGB - Function created.
 
@@ -165,8 +175,8 @@ namespace GCL
     }
 
     /// @brief Writes the logger message to the log file.
-    /// @param[in] ts - timestamp
-    /// @param[in] ss - message string.
+    /// @param[in] ts: timestamp
+    /// @param[in] ss: message string.
     /// @returns A std::string containing the combined timestamp and string.
     /// @throws None.
     /// @version 2014-07-21/GGB - Function created.
@@ -230,9 +240,12 @@ namespace GCL
     /// @brief Default constructor for the class.
     /// @throws GCL::CError(GCL, 0x1001) - LOGGER: Unable to start thread.
     /// @throws std::bad_alloc
+    /// @throws GCL::CError(GCL, 0x1001)
+    /// @version 2018-08-13/GGB - Bug #141 - Added auto-creation of std::cerr sink.
     /// @version 2014-12-24/GGB - Function created.
 
-    CLogger::CLogger() : terminateThread(false), logSeverity(warning), writerThread(nullptr)
+    CLogger::CLogger() : terminateThread(false), logSeverity(warning), writerThread(nullptr),
+      defaultStreamSink(std::make_shared<CStreamSink>(std::cerr))
     {
       writerThread = new boost::thread(&CLogger::writer, this);
 
@@ -240,6 +253,10 @@ namespace GCL
       {
         ERROR(GCL, 0x1001);  // LOGGER: Unable to start thread.
       };
+
+      defaultStreamSink->setLogLevel(GCL::logger::CSeverity{true, true, true, true, true, false, false});
+
+      addSink(defaultStreamSink);
     }
 
     /// @brief Destructor for the class.
@@ -281,6 +298,7 @@ namespace GCL
     }
 
     /// @brief Adds an output streamm into the container.
+    /// @param[in] ls: The logger sink to add to the logger.
     /// @throws None.
     /// @version 2015-09-19/GGB - Added locking to the sink container.
     /// @version 2014-12-24/GGB - Function created.
@@ -293,6 +311,8 @@ namespace GCL
     }
 
     /// @brief Creates a log message in place on the queue.
+    /// @param[in] s: The severity of the message.
+    /// @param[in] m: The text of the message.
     /// @throws std::bad_alloc
     /// @version 2014-12-25/GGB - Changed to create the logger record immediately on entry. The log record is also a smart pointer.
     /// @version 2014-07-20/GGB - Function created.
@@ -308,10 +328,20 @@ namespace GCL
       cvQueueData.notify_one();
     }
 
+    /// @brief Function to remove the default stream sink if it is not needed. The default stream sink is created in the
+    ///        constructor to ensure that the logger will always have an output.
+    /// @throws None.
+    /// @version 2018-08-13/GGB - Function created.
+
+    void CLogger::removeDefaultStreamSink()
+    {
+      removeSink(defaultStreamSink);
+    }
+
     /// @brief Removes a logger sink from the list of logger sinks.
-    /// @param[in] ls - The logger sink to remove.
-    /// @returns true - sink found and erased.
-    /// @returns false - sink not found.
+    /// @param[in] ls: The logger sink to remove.
+    /// @returns true sink found and erased.
+    /// @returns false sink not found.
     /// @throws None.
     /// @version 2015-09-19/GGB - Added locking to the sink container.
     /// @version 2014-12-25/GGB - Function created.
@@ -412,7 +442,7 @@ namespace GCL
 
           TSinkContainer::iterator sinkIterator;
 
-          /// @todo Rewrite using std::for_each() and lambdas
+          /// @todo Rewrite using std::for_each() and lambdas or range-based for loop.
 
           for (sinkIterator = sinkContainer.begin(); sinkIterator != sinkContainer.end(); sinkIterator++)
           {

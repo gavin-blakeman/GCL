@@ -1,16 +1,16 @@
-//*********************************************************************************************************************************
+﻿//*********************************************************************************************************************************
 //
 // PROJECT:							General Class Library
-// FILE:								dateTime
-// SUBSYSTEM:						Date & Time Functions
+// FILE:								filesystem
+// SUBSYSTEM:						std::filesystem or boost::filesystem extensions.
 // LANGUAGE:						C++
 // TARGET OS:						None.
-// LIBRARY DEPENDANCE:	boost.
-// NAMESPACE:						GCL
-// AUTHOR:							Gavin Blakeman.
+// LIBRARY DEPENDANCE:	boost::filesystem
+// NAMESPACE:						boost::filesystem
+// AUTHOR:							Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
-//                      Copyright 2017 Gavin Blakeman.
+//                      Copyright 2018 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -24,28 +24,35 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            This file provides functions for working with Date & Time values.
 //
-// CLASSES INCLUDED:
+// OVERVIEW:						Some extension functions to boost::filesystem. When std::filesystem is in common use, this will be changed
+//                      to support std::filesystem.
+//                      Note: The functions defined are set in the boost::filesystem namespace.
 //
-// HISTORY:             2017-08-12 GGB - File Created.
+// CLASSES INCLUDED:		None
+//
+// CLASS HIERARCHY:     None.
+//
+// HISTORY:             2018-05-20 GGB - File created.
 //
 //*********************************************************************************************************************************
 
-#ifndef DATETIME
-#define DATETIME
+#ifndef FILESYSTEM_H
+#define FILESYSTEM_H
 
-  // Standard C++ libraries
+#include <boost/filesystem.hpp>
 
-#include <ctime>
-#include <string>
-
-namespace GCL
+namespace boost
 {
-  std::string sprintDate(struct tm *);
-  std::string sprintDateTime(struct tm *);
-  std::string sprintTime(struct tm *);
-}
+  namespace filesystem
+  {
 
-#endif // DATETIME
+    bool file_readable(path const &);
+
+
+
+  } // namespace filesystem
+} // namespace boost
+
+#endif // FILESYSTEM_H
 

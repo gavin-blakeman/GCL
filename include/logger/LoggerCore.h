@@ -33,7 +33,8 @@
 //                      CLoggerRecord
 //                      CLoggerSink
 //
-// HISTORY:             2015-09-22 GGB - AIRDAS 2015.09 release
+// HISTORY:             2018-08-12 GGB - gnuCash-pud debugging and release.
+//                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2014-07-20 GGB - Development of class for "Observatory Weather System - Service"
 //
 //*********************************************************************************************************************************
@@ -139,7 +140,7 @@ namespace GCL
         typedef boost::upgrade_lock<mutex_type> UpgradeLock;
         typedef std::vector<PLoggerSink> TSinkContainer;
 
-        mutable mutex_type queueMutex;      
+        mutable mutex_type queueMutex;
         mutable mutex_type terminateMutex;
         bool terminateThread;
         mutable boost::condition_variable_any cvQueueData;
@@ -148,6 +149,7 @@ namespace GCL
         TSinkContainer sinkContainer;
 
         boost::thread *writerThread;
+        PLoggerSink defaultStreamSink;                        ///< Stream sink created in constructor to ensure logger always works.
 
         std::queue<PLoggerRecord> messageQueue;
 
@@ -162,6 +164,7 @@ namespace GCL
 
         virtual void addSink(PLoggerSink ls);
         virtual bool removeSink(PLoggerSink ls);
+        void removeDefaultStreamSink();
 
         virtual void logMessage(ESeverity, std::string const &);
 
@@ -173,7 +176,6 @@ namespace GCL
       private:
         bool timeStamp_     : 1;
         bool severityStamp_ : 1;
-
         CSeverity logSeverity;
 
       protected:
@@ -186,6 +188,12 @@ namespace GCL
         void timeStamp(bool nts) { timeStamp_ = nts;}
         void severityStamp(bool nss) { severityStamp_ = nss;}
 
+        void trace(bool f) { logSeverity.fTrace = f; }
+        void debug(bool f) { logSeverity.fDebug = f; }
+        void info(bool f) { logSeverity.fInfo = f; }
+        void notice(bool f) { logSeverity.fNotice = f; }
+        void warning(bool f) { logSeverity.fWarning = f; }
+
         virtual void writeRecord(PLoggerRecord &);
     };
 
@@ -197,6 +205,7 @@ namespace GCL
 #define CRITICALMESSAGE(message) GCL::logger::defaultLogger().logMessage(GCL::logger::critical, message)
 #define ERRORMESSAGE(message) GCL::logger::defaultLogger().logMessage(GCL::logger::error, message)
 #define WARNINGMESSAGE(message) GCL::logger::defaultLogger().logMessage(GCL::logger::warning, message)
+#define NOTICEMESSAGE(message) GCL::logger::defaultLogger().logMessage(GCL::logger::info, message)
 #define INFOMESSAGE(message) GCL::logger::defaultLogger().logMessage(GCL::logger::info, message)
 #define DEBUGMESSAGE(message) GCL::logger::defaultLogger().logMessage(GCL::logger::debug, message)
 #define TRACEMESSAGE(message) GCL::logger::defaultLogger().logMessage(GCL::logger::trace, message)
@@ -210,7 +219,7 @@ namespace GCL
 #define DEBUGMESSAGE(message)
 #define TRACEMESSAGE(message)
 #define TRACEENTER
-#define TRACEEXIT 
+#define TRACEEXIT
 #endif    // GCL_CONTROL
 
 

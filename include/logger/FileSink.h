@@ -1,4 +1,4 @@
-//*********************************************************************************************************************************
+﻿//*********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
 // FILE:                FileSink
@@ -69,7 +69,7 @@ namespace GCL
 
       int fileCreationDate;
 
-      ERotationMethod rotationMethod;
+      ERotationMethod rotationMethod = daily;
       std::uint16_t maxAge;
       std::uint16_t maxCopies;                        ///< Number of logfile copies to keep. +ve = number, 0 or -ve = none.
       std::uintmax_t rotationSize = 10 * 1024 * 1024; ///< Maximum allowable log file size

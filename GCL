@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2016 Gavin Blakeman.
+//                      Copyright 2013-2018 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -28,31 +28,35 @@
 //
 // CLASSES INCLUDED:    None
 //
-// HISTORY:             2015-09-22 GGB - AIRDAS 2015.09 release
+// HISTORY:             2018-07-06 GGB - Added alarm module.
+//                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2015-07-06 GGB - Updated Error files.
-//                      2013-01-26 GGB Development of classes for application AIRDAS.
+//                      2013-01-26 GGB - Development of classes for application AIRDAS.
 //
 //*********************************************************************************************************************************
 
 /// @section Compilation Control
 /// The following macros control how the code will be compiled for various applications.
-/// @li @b GCL_NOBOOST - Do not use the Boost C++ libraries. This should only be used on platforms where the Boost C++ libraries are not 
+/// @li @b GCL_NOBOOST - Do not use the Boost C++ libraries. This should only be used on platforms where the Boost C++ libraries are not
 ///								      supported. By default the Boost C++ libraries are enabled.
-/// @li @b GCL_NOMT - Do not use multi-threading. This should only be used on platforms where multi-threading is not available. By 
+/// @li @b GCL_NOMT - Do not use multi-threading. This should only be used on platforms where multi-threading is not available. By
 /// 									 default, multi-threading support is enabled.
 /// @li @b GCL_REALTIME - Compile in the realtime library support. By default this will not be compiled in.
 /// @li @b GCL_NOSTRINGS - Compile without using strings. This is intended to be used for embedded applications.
 /// @li @b EMBEDDED - Compile the library for embedded applications.
 /// @li @b GCL_CONTROL - Compile the library for control type applications.
 
-#include "Include/config.h"
-#include "Include/logger/LoggerCore.h"
-#include "Include/logger/FileSink.h"
-#include "Include/logger/StreamSink.h"
-
-#include "Include/common.h"
-#include "Include/dateTime.h"
-#include "Include/Error.h"
-#include "Include/Functions.h"
-#include "Include/SQLWriter.h"
-#include "Include/Resource.h"
+#include "include/config.h"
+#include "include/alarm/alarmCore.h"
+#include "include/alarm/alarmDaily.h"
+#include "include/alarm/alarmWeekly.h"
+#include "include/logger/LoggerCore.h"
+#include "include/logger/FileSink.h"
+#include "include/logger/StreamSink.h"
+#include "include/common.h"
+#include "include/dateTime.h"
+#include "include/Error.h"
+#include "include/filesystem.h"
+#include "include/Functions.h"
+#include "include/SQLWriter.h"
+#include "include/Resource.h"

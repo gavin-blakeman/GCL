@@ -1,4 +1,4 @@
-//*********************************************************************************************************************************
+﻿//*********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
 // FILE:                CStreamSink
@@ -13,7 +13,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2014-2016 Gavin Blakeman.
+//                      Copyright 2014-2018 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -40,23 +40,23 @@
 //
 //*********************************************************************************************************************************
 
-#include "../../Include/logger/StreamSink.h"
+#include "../../include/logger/StreamSink.h"
 
 namespace GCL
 {
   namespace logger
   {
-    /// Default class constructor.
-    //
-    // 2014-12-28/GGB - Function created.
+    /// @brief Default class constructor.
+    /// @param[in] os: The stream to associate with the sink.
+    /// @version 2014-12-28/GGB - Function created.
 
     CStreamSink::CStreamSink(std::ostream &os) : CLoggerSink(), outputStream(os)
     {
     }
 
-    /// This is the function to write the message to the logFile.
-    //
-    // 2014-12-28/GGB - Function created.
+    /// @brief This is the function to write the message to the stream.
+    /// @param[in] s: The string to write to the stream.
+    /// @version 2014-12-28/GGB - Function created.
 
     void CStreamSink::write(std::string const &s)
     {

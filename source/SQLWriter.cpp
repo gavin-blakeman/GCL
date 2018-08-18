@@ -37,11 +37,7 @@
 //
 //*********************************************************************************************************************************
 
-#include "../Include/SQLWriter.h"
-
-  // GCL Files
-
-#include "../Include/Error.h"
+#include "../include/SQLWriter.h"
 
   // Standard library files
 
@@ -54,6 +50,10 @@
   // Boost Library
 
 #include <boost/algorithm/string.hpp>
+
+  // GCL Files
+
+#include "../include/Error.h"
 
 namespace GCL
 {
@@ -107,6 +107,21 @@ namespace GCL
       return (*this);
     }
 
+    /// @brief Creates the test for the specified delete query.
+    /// @returns a string representation of the delete query.
+    /// @version 2018-05-12/GGB - Function created.
+
+    std::string CSQLWriter::createDeleteQuery() const
+    {
+      std::string returnValue = "DELETE FROM ";
+
+      returnValue += getColumnMap(deleteTable);
+
+      returnValue += createWhereClause();
+
+      return returnValue;
+    }
+
     /// @brief Creates the string for an insert query.
     /// @returns The Insert Query as a string.
     /// @throws None.
@@ -117,7 +132,6 @@ namespace GCL
       std::string returnValue = "INSERT INTO " + insertTable + "(";
       bool firstRow = true;
       bool firstValue = true;
-      std::ostringstream valueString;
 
         // Output the column names.
 
@@ -450,8 +464,9 @@ namespace GCL
     }
 
     /// @brief Sets the Mapping of the table.
-    //
-    // 2013-01-26/GGB - Function created.
+    /// @param[in] tableName - The name of the table.
+    /// @param[in] tableMap - The string to map to the tableName.
+    /// @version 2013-01-26/GGB - Function created.
 
     void CSQLWriter::setTableMap(std::string const &tableName, std::string const &tableMap)
     {
@@ -498,13 +513,13 @@ namespace GCL
 
       return returnValue;
     }
-    
-    /// @brief Creates the "JOIN" clause 
+
+    /// @brief Creates the "JOIN" clause
     /// @returns A string containing the join clause (begins with the JOIN keyword.
     /// @version 2017-07-29/GGB - Function created.
-    
+
     std::string CSQLWriter::createJoinClause() const
-    { 
+    {
       std::string returnValue;
 
       for (auto element : joinFields)
@@ -541,7 +556,7 @@ namespace GCL
         returnValue += std::get<3>(element) + " ON ";
         returnValue += std::get<0>(element) + "." + std::get<1>(element) + "=" + std::get<3>(element) + "." + std::get<4>(element);
       }
-      
+
       return returnValue;
     }
 
@@ -708,7 +723,7 @@ namespace GCL
       if (!fromFields.empty())
       {
         returnValue += createFromClause();
-      }      
+      }
       else
       {
         ERROR(GCL, 0x0008);
@@ -755,12 +770,16 @@ namespace GCL
     }
 
     /// @brief Set the query type to a 'DELETE' query.
-    //
-    // 2015-03-30/GGB - Function created.
+    /// @param[in] tableName - The name of the table to execute the delete query on.
+    /// @returns *this
+    /// @version 2018-05-12/GGB - Added parameter for the deletion table name.
+    /// @version 2015-03-30/GGB - Function created.
 
-    CSQLWriter &CSQLWriter::deleteQuery()
+    CSQLWriter &CSQLWriter::deleteFrom(std::string const &tableName)
     {
-      queryType = qt_insert;
+      queryType = qt_delete;
+
+      deleteTable = tableName;
 
       return *this;
     }
@@ -1065,6 +1084,11 @@ namespace GCL
           returnValue = createUpdateQuery();
           break;
         }
+        case qt_delete:
+        {
+          returnValue = createDeleteQuery();
+          break;
+        }
         default:
         {
           CODE_ERROR("GCL");
@@ -1105,7 +1129,7 @@ namespace GCL
     /// 2015-03-31/GGB - Function created.
 
     CSQLWriter &CSQLWriter::values(std::initializer_list<parameterStorage> fields)
-    { 
+    {
       for (const auto &f : fields)
       {
         valueFields.emplace_back(f);

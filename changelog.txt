@@ -1,4 +1,9 @@
+﻿2018.08
+------------------------------------------------------------------------------------------------------------------------------------
+BUG #144: CFileSink - Default rotation method to valid value
+BUG #142: CLogger - Create std::cerr logger sink in constructor.
+
 2016.05
 ------------------------------------------------------------------------------------------------------------------------------------
-CHANGED: MappedSQLWriter.xxx to SQLWriter.xxx
-CHANGED: class CMappedSQLWriter to class CSQLWriter and deleted all mapping functions and support.
+CHANGED:  MappedSQLWriter.xxx to SQLWriter.xxx
+CHANGED:  Class CMappedSQLWriter to class CSQLWriter and deleted all mapping functions and support.
