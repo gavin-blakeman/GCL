@@ -785,9 +785,24 @@ namespace GCL
     }
 
     /// @brief Set the query type to a 'INSERT' query.
-    /// @param[in] tableName - The table name to insert into.
+    /// @param[in] tableName: The table name to insert into.
     /// @returns *this
-    /// @version 2017097-26/GGB - Added support for fields.
+    /// @version 2018-08-19/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::insertInto(std::string tableName)
+    {
+      queryType = qt_insert;
+
+      insertTable = tableName;
+
+      return *this;
+    }
+
+    /// @brief Set the query type to a 'INSERT' query.
+    /// @param[in] tableName: The table name to insert into.
+    /// @param[in] fields: The fields and field values.
+    /// @returns *this
+    /// @version 2017-07-26/GGB - Added support for fields.
     /// @version 2015-03-30/GGB - Function created.
 
     CSQLWriter &CSQLWriter::insertInto(std::string tableName, std::initializer_list<std::string> fields)

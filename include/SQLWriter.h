@@ -203,6 +203,7 @@ namespace GCL
       CSQLWriter &from(std::string const &, std::string const & = "");
       CSQLWriter &from(std::initializer_list<std::string>);
       CSQLWriter &insertInto(std::string, std::initializer_list<std::string>);
+      CSQLWriter &insertInto(std::string);
       CSQLWriter &join(std::initializer_list<parameterJoin>);
       CSQLWriter &limit(long);
       CSQLWriter &max(std::string const &, std::string const & = "");
