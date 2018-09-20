@@ -41,20 +41,20 @@
 
 #include "../include/common.h"
 
-  // Standard libraries
+  // Standard C++ library header files.
 
 #include <iomanip>
 #include <sstream>
 #include <string>
 #include <utility>
 
-  // Boost Library
-
-#include <boost/algorithm/string.hpp>
-
   // GCL Include files
 
-#include "../include/Error.h"
+#include "../include/error.h"
+
+  // Miscellaneous library header files.
+
+#include <boost/algorithm/string.hpp>
 
 namespace GCL
 {
@@ -78,31 +78,5 @@ namespace GCL
     boost::algorithm::to_upper(returnValue);
 
     return returnValue;
-  }
-
-  /// @brief Loads the error code for the library into the error class.
-  /// @throws None.
-
-  void loadErrorMessages()
-  {
-    std::vector<std::pair<TErrorCode, std::string>> errors =
-    {
-      {0x0001, std::string("MAPPED SQL WRITER: Invalid Map file name.")},
-      {0x0002, std::string("MAPPED SQL WRITER: Syntax Error.")},
-      {0x0003, std::string("MAPPED SQL WRITER: Invalid Command.")},
-      {0x0004, std::string("MAPPED SQL WRITER: Invalid Table Name.")},
-      {0x0005, std::string("MAPPED SQL WRITER: Invalid Column Name.")},
-      {0x0006, std::string("MAPPED SQL WRITER: Invalid ORDER BY direction (ACS, DESC)")},
-      {0x0007, std::string("MAPPED SQL WRITER: No Select fields in select clause.")},
-      {0x0008, std::string("MAPPED SQL WRITER: No from fields in select clause.")},
-      {0x0009, "MAPPED SQL WRITER: No fields defined for set statement." },
-      {0x1000, std::string("LOGGER: Unable to open log file.")},
-      {0x1001, std::string("LOGGER: Unable to start thread.")},
-      {0x1002, std::string("LOGGER: Text Edit not assignd.")}
-    };
-
-    std::for_each(errors.begin(), errors.end(),
-                  [] (std::pair<TErrorCode, std::string> p) { CError::addErrorMessage("GCL", p.first, p.second); });
-
   }
 }

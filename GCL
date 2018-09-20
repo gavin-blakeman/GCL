@@ -35,6 +35,9 @@
 //
 //*********************************************************************************************************************************
 
+#ifndef GCL_H
+#define GCL_H
+
 /// @section Compilation Control
 /// The following macros control how the code will be compiled for various applications.
 /// @li @b GCL_NOBOOST - Do not use the Boost C++ libraries. This should only be used on platforms where the Boost C++ libraries are not
@@ -55,8 +58,10 @@
 #include "include/logger/StreamSink.h"
 #include "include/common.h"
 #include "include/dateTime.h"
-#include "include/Error.h"
+#include "include/error.h"
 #include "include/filesystem.h"
 #include "include/Functions.h"
 #include "include/SQLWriter.h"
 #include "include/Resource.h"
+
+#endif //GCL_H

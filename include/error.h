@@ -38,14 +38,14 @@
 #ifndef GCL_ERROR_H
 #define GCL_ERROR_H
 
-  // Standard include files
+  // Standard C++ library header files
 
 #include <cstdint>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
 
-  // GCL Include files
+  // GCL library header files
 
 #include "../include/logger/LoggerCore.h"
 
@@ -165,10 +165,9 @@ namespace GCL
     ~search_error() {}
   };
 
-
-#define ERROR(LIBRARY, ERROR) (throw(GCL::CError(#LIBRARY, ERROR)))
-#define CODE_ERROR(LIBRARY) (throw(GCL::CCodeError( #LIBRARY,  __FILE__, __TIMESTAMP__, static_cast<size_t>(__LINE__)) ))
-#define RUNTIME_ASSERT(LIBRARY, EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert(#LIBRARY, #EXPRESSION,  __FILE__, __TIMESTAMP__, (size_t) __LINE__, MESSAGE); }}
+#define ERROR(LIBRARY, ERROR) (throw(GCL::CError((#LIBRARY), (ERROR))))
+#define CODE_ERROR(LIBRARY) (throw(GCL::CCodeError((#LIBRARY),  __FILE__, __TIMESTAMP__, static_cast<size_t>(__LINE__)) ))
+#define RUNTIME_ASSERT(LIBRARY, EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert((#LIBRARY), (#EXPRESSION),  __FILE__, __TIMESTAMP__, (size_t) __LINE__, (MESSAGE)); }}
 
 }	// namespace GCL
 

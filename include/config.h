@@ -59,7 +59,6 @@
 #endif  // EMBEDDED
 
 typedef double FP_t;
-typedef int healpixID_t;
 typedef std::uint32_t indexID_t;
 
 #endif // GCL_CONFIG_H

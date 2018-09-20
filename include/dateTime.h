@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2017, 2018 Gavin Blakeman.
+//                      Copyright 2017-2018 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -32,10 +32,10 @@
 //
 //*********************************************************************************************************************************
 
-#ifndef DATETIME
-#define DATETIME
+#ifndef ACL_DATETIME
+#define ACL_DATETIME
 
-  // Standard C++ libraries
+  // Standard C++ library header files
 
 #include <ctime>
 #include <string>
@@ -47,5 +47,5 @@ namespace GCL
   std::string sprintTime(struct tm *);
 }
 
-#endif // DATETIME
+#endif // ACL_DATETIME
 

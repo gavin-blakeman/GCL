@@ -53,7 +53,7 @@
 
   // GCL Files
 
-#include "../include/Error.h"
+#include "../include/error.h"
 
 namespace GCL
 {

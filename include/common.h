@@ -48,8 +48,6 @@ namespace GCL
   std::string const GCL_LIBNAME       = "GCL";
 
   std::string getVersionString();
-
-  void loadErrorMessages();
 }
 
 #endif // GCL_COMMON_H

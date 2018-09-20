@@ -49,8 +49,6 @@ namespace boost
 
     bool file_readable(path const &);
 
-
-
   } // namespace filesystem
 } // namespace boost
 

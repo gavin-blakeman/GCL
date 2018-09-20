@@ -49,7 +49,7 @@
 
   // GCL include headers
 
-#include "../../include/Error.h"
+#include "../../include/error.h"
 #include "../../include/logger/StreamSink.h"
 
 namespace GCL

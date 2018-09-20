@@ -1,8 +1,8 @@
 ﻿//*********************************************************************************************************************************
 //
 // PROJECT:							General Class Library (GCL)
-// FILE:								CGCLError
-// SUBSYSTEM:						General Class Library Exception subsystem
+// FILE:								Error
+// SUBSYSTEM:						Exception/Error subsystem
 // LANGUAGE:						C++
 // TARGET OS:						All (Standard C++)
 // LIBRARY DEPENDANCE:	None.
@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2017 Gavin Blakeman.
+//                      Copyright 2013-2018 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -35,17 +35,36 @@
 //
 //*********************************************************************************************************************************
 
-#include "../include/Error.h"
+#include "../include/error.h"
+
+  // Standard C++ library header files.
 
 #include <cstdlib>
+
+  // Miscellaneous library header files.
 
 #include "boost/lexical_cast.hpp"
 
 namespace GCL
 {
+  class CLoader
+  {
+  private:
+    void loadErrorMessages();
+  public:
+    CLoader();
+  };
+
+  static CLoader executeLoader;
+
+  CLoader::CLoader()
+  {
+    loadErrorMessages();
+  }
+
   CError::TErrorStore CError::errorMessages;
 
-  /// @brief Fuction to add an error message to the error message list.
+  /// @brief Function to add an error message to the error message list.
   /// @throws None.
   /// @version 2015-07-28/GGB - Function created.
 
@@ -139,6 +158,39 @@ namespace GCL
     GCL::logger::defaultLogger().logMessage(GCL::logger::error,
                                             "A Code Error has occurred in the " + library_ + " library. In file: " + fileName +
                                          ". At line: " + boost::lexical_cast<std::string>(lineNo));
+  }
+
+  //********************************************************************************************************************************
+  //
+  // CLoader
+  //
+  //********************************************************************************************************************************
+
+  /// @brief Loads the error code for the library into the error class.
+  /// @throws None.
+  /// @version 2018-09-20/GGB - Function created.
+
+  void CLoader::loadErrorMessages()
+  {
+    std::vector<std::pair<TErrorCode, std::string>> errors =
+    {
+      {0x0001, std::string("MAPPED SQL WRITER: Invalid Map file name.")},
+      {0x0002, std::string("MAPPED SQL WRITER: Syntax Error.")},
+      {0x0003, std::string("MAPPED SQL WRITER: Invalid Command.")},
+      {0x0004, std::string("MAPPED SQL WRITER: Invalid Table Name.")},
+      {0x0005, std::string("MAPPED SQL WRITER: Invalid Column Name.")},
+      {0x0006, std::string("MAPPED SQL WRITER: Invalid ORDER BY direction (ACS, DESC)")},
+      {0x0007, std::string("MAPPED SQL WRITER: No Select fields in select clause.")},
+      {0x0008, std::string("MAPPED SQL WRITER: No from fields in select clause.")},
+      {0x0009, "MAPPED SQL WRITER: No fields defined for set statement." },
+      {0x1000, std::string("LOGGER: Unable to open log file.")},
+      {0x1001, std::string("LOGGER: Unable to start thread.")},
+      {0x1002, std::string("LOGGER: Text Edit not assignd.")}
+    };
+
+    std::for_each(errors.begin(), errors.end(),
+                  [] (std::pair<TErrorCode, std::string> p) { CError::addErrorMessage("GCL", p.first, p.second); });
+
   }
 
 }  // namespace GCL

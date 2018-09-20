@@ -52,5 +52,3 @@ namespace GCL
 
   } // namespace alarm
 } // namespace GCL
-
-

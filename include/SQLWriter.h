@@ -48,18 +48,17 @@
 #include <initializer_list>
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 #include <tuple>
 #include <utility>
 #include <vector>
 
-#include <../SCL/SCL>
-
-  // Boost Library
+  // Miscellaneous Library header files
 
 #include "boost/filesystem.hpp"
-#include "boost/optional.hpp"
+#include <SCL>
 
 /// @page page2 SQL Writer
 /// @tableofcontents

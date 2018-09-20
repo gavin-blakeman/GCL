@@ -7,7 +7,6 @@
 // TARGET OS:						WINDOWS/UNIX/LINUX/MAC
 // LIBRARY DEPENDANCE:	boost::chrono
 //                      boost::filesystem
-//                      boost::shared_ptr
 //                      boost::thread
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.

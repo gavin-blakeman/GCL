@@ -49,13 +49,13 @@ SOURCES += \
     source/Resource.cpp \
     source/Functions.cpp \
     source/common.cpp \
-    source/Error.cpp \
     source/SQLWriter.cpp \
     source/dateTime.cpp \
     source/filesystem.cpp \
     source/alarm/alarmCore.cpp \
     source/alarm/alarmDaily.cpp \
-    source/alarm/alarmWeekly.cpp
+    source/alarm/alarmWeekly.cpp \
+    source/error.cpp
 
 HEADERS += \
     GCL \
@@ -65,14 +65,14 @@ HEADERS += \
     include/Resource.h \
     include/Functions.h \
     include/common.h \
-    include/Error.h \
     include/SQLWriter.h \
     include/dateTime.h \
     include/config.h \
     include/filesystem.h \
     include/alarm/alarmCore.h \
     include/alarm/alarmDaily.h \
-    include/alarm/alarmWeekly.h
+    include/alarm/alarmWeekly.h \
+    include/error.h
 
 OTHER_FILES += \
     changelog.txt

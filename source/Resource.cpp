@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015 Gavin Blakeman.
+//                      Copyright 2015-2018 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -141,9 +141,9 @@ namespace GCL
 #endif
   }
 
-  /// Determine the memory usage.
-  //
-  // 2015-01-02/GGB - Function created.
+  /// @brief Determine the memory usage.
+  /// @throws None.
+  /// @version 2015-01-02/GGB - Function created.
 
   void CResourceUsage::determineMemory()
   {

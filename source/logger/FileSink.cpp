@@ -41,7 +41,7 @@
 
 #include "../../include/logger/FileSink.h"
 
-#include "../../include/Error.h"
+#include "../../include/error.h"
 
 #include "boost/format.hpp"
 
