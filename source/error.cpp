@@ -62,28 +62,28 @@ namespace GCL
     loadErrorMessages();
   }
 
-  CError::TErrorStore CError::errorMessages;
-
   /// @brief Function to add an error message to the error message list.
   /// @throws None.
+  /// @version 2018-09-21/GGB - Updated to use new errorMessages() function.
   /// @version 2015-07-28/GGB - Function created.
 
   bool CError::addErrorMessage(std::string library, TErrorCode code, std::string message)
   {
-    errorMessages.emplace(library + std::to_string(code), SErrorEntry(library, code, message));
+    errorMessages().emplace(library + std::to_string(code), SErrorEntry(library, code, message));
 
     return true;
   }
 
   /// @brief Returns the string of the error message.
   /// @returns The error message.
+  /// @version 2018-09-21/GGB - Updated to use new errorMessage() function.
   /// @version 2013-01-26/GGB - Function created.
 
   std::string CError::errorMessage() const
   {
     TErrorStore::const_iterator errorData;
 
-    if ((errorData = errorMessages.find(library_ + std::to_string(errorCode_))) == errorMessages.end() )
+    if ((errorData = errorMessages().find(library_ + std::to_string(errorCode_))) == errorMessages().end() )
     {
         // Error message not found - Error code has not been defined.
         // This is a non-recoverable error.
@@ -96,16 +96,30 @@ namespace GCL
     };
   }
 
+  /// @brief Construct and store the errorMessages map.
+  /// @returns Reference to the errorMessagesMap.
+  /// @note This uses the construct on first use idiom.
+  /// @throws None.
+  /// @version 2018-09-21/GGB - Function created.
+
+  CError::TErrorStore &CError::errorMessages()
+  {
+    static TErrorStore errorMessages_;
+
+    return errorMessages_;
+  }
+
   /// @brief Function to write the error message to a logFile.
   /// @details This is not automatically done in the library when an exception is thrown as the library may be able to recover from
-  /// the exception without having to terminate.
+  ///          the exception without having to terminate.
+  /// @version 2018-09-21/GGB - Updated to use new errorMessage() function.
   /// @version  2014-12-24/GGB - Function created.
 
   void CError::logErrorMessage() const
   {
     TErrorStore::const_iterator errorData;
 
-    if ((errorData = errorMessages.find(library_ + std::to_string(errorCode_))) == errorMessages.end() )
+    if ((errorData = errorMessages().find(library_ + std::to_string(errorCode_))) == errorMessages().end() )
     {
         // Error message not found - Error code has not been defined.
         // This is a non-recoverable error.

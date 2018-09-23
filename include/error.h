@@ -80,9 +80,10 @@ namespace GCL
     typedef std::unordered_map<std::string, SErrorEntry> TErrorStore;
 
   private:
-    static TErrorStore errorMessages;
     std::string library_;
     TErrorCode errorCode_;
+
+    static TErrorStore &errorMessages();
 
   public:
     inline explicit CError(std::string const & library, TErrorCode error) : std::runtime_error("Error"), library_(library),
