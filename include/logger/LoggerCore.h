@@ -56,11 +56,12 @@
 #include <queue>
 #include <vector>
 
-#ifndef GCL_NOBOOST
-  #include "boost/chrono/include.hpp"
-  #include "boost/filesystem.hpp"
-  #include "boost/thread.hpp"
-#endif  // GCL_NOBOOST
+  // Miscellaneous library header files.
+
+# include "boost/chrono/include.hpp"
+# include "boost/filesystem.hpp"
+# include "boost/format.hpp"
+# include "boost/thread.hpp"
 
 namespace GCL
 {
@@ -167,6 +168,7 @@ namespace GCL
         void removeDefaultStreamSink();
 
         virtual void logMessage(ESeverity, std::string const &);
+        virtual void logMessage(ESeverity s, boost::format const &m) { logMessage(s, boost::str(m)); }
 
         virtual void shutDown();
     };
