@@ -13,7 +13,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2014-2018 Gavin Blakeman.
+//                      Copyright 2014-2019 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -41,9 +41,17 @@
 
 #include "../../include/logger/FileSink.h"
 
-#include "../../include/error.h"
+  // Standard C++ library header files
+
+#include <iostream>
+
+  // Miscellaneous library header files
 
 #include "boost/format.hpp"
+
+  // GCL Library header files.
+
+#include "../../include/error.h"
 
 namespace GCL
 {
