@@ -36,8 +36,6 @@ unix {
 }
 
 INCLUDEPATH += \
-  "../ACL" \
-  "../boost 1.62" \
   "../MCL" \
   "../SCL"
 
