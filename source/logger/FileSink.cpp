@@ -8,7 +8,6 @@
 // LIBRARY DEPENDANCE:	boost::chrono
 //                      boost::filesystem
 //                      boost::format
-//                      boost::thread
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
@@ -44,10 +43,11 @@
   // Standard C++ library header files
 
 #include <iostream>
+#include <cmath>
 
   // Miscellaneous library header files
 
-#include "boost/format.hpp"
+#include <boost/format.hpp>
 
   // GCL Library header files.
 

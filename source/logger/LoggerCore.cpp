@@ -7,7 +7,6 @@
 // TARGET OS:						WINDOWS/UNIX/LINUX/MAC
 // LIBRARY DEPENDANCE:	boost::chrono
 //                      boost::filesystem
-//                      boost::thread
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
@@ -45,7 +44,7 @@
 
   // Miscellaneous library headers
 
-#include <boost/chrono.hpp>
+
 
   // GCL include headers
 
@@ -171,7 +170,7 @@ namespace GCL
 
     CLoggerRecord::CLoggerRecord(ESeverity s, std::string const &t) : severity(s), message(t)
     {
-      timeStamp = boost::chrono::system_clock::now();
+      timeStamp = std::chrono::system_clock::now();
     }
 
     /// @brief Writes the logger message to the log file.
@@ -185,7 +184,7 @@ namespace GCL
     {
       std::ostringstream os;
 
-      os << boost::chrono::time_fmt(boost::chrono::timezone::local);
+      os << std::chrono::time_fmt(std::chrono::timezone::local);
 
       SharedLock(recordMutex);
 
@@ -241,13 +240,15 @@ namespace GCL
     /// @throws GCL::CError(GCL, 0x1001) - LOGGER: Unable to start thread.
     /// @throws std::bad_alloc
     /// @throws GCL::CError(GCL, 0x1001)
+    /// @version 2019-10-22/GGB - 1. Changed writerThread to a std::unique_ptr
+    ///                           2. Changed writerThread from a boost::thread to a std::thread
     /// @version 2018-08-13/GGB - Bug #141 - Added auto-creation of std::cerr sink.
     /// @version 2014-12-24/GGB - Function created.
 
     CLogger::CLogger() : terminateThread(false), logSeverity(warning), writerThread(nullptr),
       defaultStreamSink(std::make_shared<CStreamSink>(std::cerr))
     {
-      writerThread = new boost::thread(&CLogger::writer, this);
+      writerThread = std::make_unique<std::thread>(&CLogger::writer, this);
 
       if (!writerThread)
       {
@@ -262,6 +263,8 @@ namespace GCL
     /// @brief Destructor for the class.
     /// @throws None.
     /// @details Needs too finish the thread and destroy the thread object.
+    /// @version 2019-10-22/GGB - 1. Changed writerThread to a std::unique_ptr
+    ///                           2. Changed writerThread from a boost::thread to a std::thread
     /// @version 2014-12-24/GGB - Function created.
 
     CLogger::~CLogger()
@@ -276,10 +279,11 @@ namespace GCL
         }
         cvQueueData.notify_one();
 
-        while (!writerThread->try_join_for(boost::chrono::milliseconds(1000)) )     // Wait for the writer thread to complete
-        {
-        }
-        writerThread = nullptr;
+        writerThread->join();
+        //while (!writerThread->try_join_for(boost::chrono::milliseconds(1000)) )     // Wait for the writer thread to complete
+        //{
+        //}
+        writerThread.reset(nullptr);
 
           // There should not be any messages, but empty the queue to be sure.
 
@@ -369,6 +373,8 @@ namespace GCL
 
     /// @brief Shuts down the writer thread.
     /// @throws None.
+    /// @version 2019-10-22/GGB - 1. Changed writerThread to a std::unique_ptr
+    ///                           2. Changed writerThread from a boost::thread to a std::thread
     /// @version 2015-09-19/GGB - Added locking to the sink container.
     /// @version 2015-06-01/GGB - Function created.
 
@@ -382,17 +388,18 @@ namespace GCL
       };  // Lock released at this point.
       cvQueueData.notify_one();   // Notify the queue to run.
 
-      while (!writerThread->try_join_for(boost::chrono::milliseconds(1000)) )     // Wait for the writer thread to complete
-      {
-        try
-        {
-          writerThread->interrupt();            // Force exit if thread does not join by itself.
-        }
-        catch(...)
-        {
-        }
-      };
-      writerThread = nullptr;
+      writerThread->join();
+//      while (!writerThread->try_join_for(boost::chrono::milliseconds(1000)) )     // Wait for the writer thread to complete
+//      {
+//        try
+//        {
+//          writerThread->interrupt();            // Force exit if thread does not join by itself.
+//        }
+//        catch(...)
+//        {
+//        }
+//      };
+      writerThread.reset(nullptr);
 
         // There should not be any messages, but empty the queue to be sure. In this case the queue does not need to be locked as
         // the thread has been terminated.

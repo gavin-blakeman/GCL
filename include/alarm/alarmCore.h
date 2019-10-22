@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2018 Gavin Blakeman.
+//                      Copyright 2018-2019 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -32,7 +32,6 @@
 //
 //*********************************************************************************************************************************
 
-
 #ifndef GCL_ALARMCORE
 #define GCL_ALARMCORE
 
@@ -50,6 +49,7 @@
 #include <unordered_set>
 
   // Miscellaneous library header files.
+
 
 namespace GCL
 {

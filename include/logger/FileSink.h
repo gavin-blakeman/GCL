@@ -8,7 +8,6 @@
 // LIBRARY DEPENDANCE:	boost::chrono
 //                      boost::filesystem
 //                      boost::format
-//                      boost::thread
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2

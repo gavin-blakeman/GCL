@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2018 Gavin Blakeman.
+//                      Copyright 2013-2019 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -40,8 +40,8 @@
 
 /// @section Compilation Control
 /// The following macros control how the code will be compiled for various applications.
-/// @li @b GCL_NOBOOST - Do not use the Boost C++ libraries. This should only be used on platforms where the Boost C++ libraries are not
-///								      supported. By default the Boost C++ libraries are enabled.
+/// @li @b GCL_NOBOOST - Do not use the Boost C++ libraries. This should only be used on platforms where the Boost C++ libraries
+///                      are not supported. By default the Boost C++ libraries are enabled.
 /// @li @b GCL_NOMT - Do not use multi-threading. This should only be used on platforms where multi-threading is not available. By
 /// 									 default, multi-threading support is enabled.
 /// @li @b GCL_REALTIME - Compile in the realtime library support. By default this will not be compiled in.

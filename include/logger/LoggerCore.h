@@ -33,7 +33,8 @@
 //                      CLoggerRecord
 //                      CLoggerSink
 //
-// HISTORY:             2018-08-12 GGB - gnuCash-pud debugging and release.
+// HISTORY:             2019-10-22 GGB - Changed Boost::thread to std::thread
+//                      2018-08-12 GGB - gnuCash-pud debugging and release.
 //                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2014-07-20 GGB - Development of class for "Observatory Weather System - Service"
 //
@@ -46,10 +47,13 @@
 
   // Standard C++ libraries
 
+#include <chrono>
+#include <condition_variable>
 #include <cstdint>
 #include <fstream>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -58,10 +62,8 @@
 
   // Miscellaneous library header files.
 
-# include "boost/chrono/include.hpp"
-# include "boost/filesystem.hpp"
-# include "boost/format.hpp"
-# include "boost/thread.hpp"
+#include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 
 namespace GCL
 {
@@ -114,15 +116,15 @@ namespace GCL
 
     class CLoggerRecord
     {
-      typedef boost::shared_mutex             mutex_type;
-      typedef boost::shared_lock<mutex_type>  SharedLock;
-      typedef boost::unique_lock<mutex_type>  ExclusiveLock;
+      typedef std::shared_mutex             mutex_type;
+      typedef std::shared_lock<mutex_type>  SharedLock;
+      typedef std::unique_lock<mutex_type>  ExclusiveLock;
 
     private:
       mutable mutex_type recordMutex;                                   ///< Mutex for access control to the record.
 
     public:
-      boost::chrono::system_clock::time_point timeStamp;
+      std::chrono::system_clock::time_point timeStamp;
       ESeverity severity;
       std::string message;
 
@@ -135,21 +137,21 @@ namespace GCL
     class CLogger
     {
       private:
-        typedef boost::upgrade_mutex            mutex_type;
-        typedef boost::unique_lock<mutex_type>  UniqueLock;
-        typedef boost::shared_lock<mutex_type>  SharedLock;
-        typedef boost::upgrade_lock<mutex_type> UpgradeLock;
+        typedef std::shared_mutex             mutex_type;
+        typedef std::unique_lock<mutex_type>  UniqueLock;
+        typedef std::shared_lock<mutex_type>  SharedLock;
+        //typedef std::shared_lock<mutex_type>  UpgradeLock;
         typedef std::vector<PLoggerSink> TSinkContainer;
 
         mutable mutex_type queueMutex;
         mutable mutex_type terminateMutex;
         bool terminateThread;
-        mutable boost::condition_variable_any cvQueueData;
+        mutable std::condition_variable_any cvQueueData;
 
         mutable mutex_type sinkMutex;
         TSinkContainer sinkContainer;
 
-        boost::thread *writerThread;
+        std::unique_ptr<std::thread> writerThread;
         PLoggerSink defaultStreamSink;                        ///< Stream sink created in constructor to ensure logger always works.
 
         std::queue<PLoggerRecord> messageQueue;
