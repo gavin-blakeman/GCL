@@ -40,6 +40,7 @@
 
   // Standard C++ library headers
 
+#include <iomanip>
 #include <iostream>
 
   // Miscellaneous library headers
@@ -178,19 +179,22 @@ namespace GCL
     /// @param[in] ss: message string.
     /// @returns A std::string containing the combined timestamp and string.
     /// @throws None.
+    /// @version 2019-10-23/GGB - Updated to use std::chrono. The timestamp output has not been tested and will likely
+    ///                           need to be fine tuned.
     /// @version 2014-07-21/GGB - Function created.
 
     std::string CLoggerRecord::writeRecord(bool ts, bool ss) const
     {
       std::ostringstream os;
 
-      os << std::chrono::time_fmt(std::chrono::timezone::local);
+      //os << boost::chrono::time_fmt(boost::chrono::timezone::local);
 
       SharedLock(recordMutex);
 
       if (ts)
       {
-        os << "[" << timeStamp << "] ";
+        std::time_t now_c = std::chrono::system_clock::to_time_t(timeStamp);
+        os << "[" << std::put_time(std::localtime(&now_c), "%F%T%") << "] ";
       };
 
       if (ss)
@@ -202,27 +206,39 @@ namespace GCL
             os << "[critical] ";
             break;
           }
-        case error:
-          os << "[error] ";
-          break;
-        case warning:
-          os << "[warning] ";
-          break;
-        case notice:
-          os << "[notice] ";
-          break;
-        case info:
-          os << "[information] ";
-          break;
-        case debug:
-          os << "[debug] ";
-          break;
-        case trace:
-          os << "[trace] ";
-          break;
-        default:
-          break;
-        }
+          case error:
+          {
+            os << "[error] ";
+            break;
+          };
+          case warning:
+          {
+            os << "[warning] ";
+            break;
+          };
+          case notice:
+          {
+            os << "[notice] ";
+            break;
+          };
+          case info:
+          {
+            os << "[information] ";
+            break;
+          };
+          case debug:
+          {
+            os << "[debug] ";
+            break;
+          };
+          case trace:
+          {
+            os << "[trace] ";
+            break;
+          };
+          default:
+            break;
+        };
       };
 
       os << message << std::flush;
@@ -242,11 +258,12 @@ namespace GCL
     /// @throws GCL::CError(GCL, 0x1001)
     /// @version 2019-10-22/GGB - 1. Changed writerThread to a std::unique_ptr
     ///                           2. Changed writerThread from a boost::thread to a std::thread
+    ///                           3. Changed to use std::chrono from boot::chrono.
     /// @version 2018-08-13/GGB - Bug #141 - Added auto-creation of std::cerr sink.
     /// @version 2014-12-24/GGB - Function created.
 
-    CLogger::CLogger() : terminateThread(false), logSeverity(warning), writerThread(nullptr),
-      defaultStreamSink(std::make_shared<CStreamSink>(std::cerr))
+    CLogger::CLogger() : terminateThread(false), writerThread(nullptr), defaultStreamSink(std::make_shared<CStreamSink>(std::cerr)),
+      logSeverity(warning)
     {
       writerThread = std::make_unique<std::thread>(&CLogger::writer, this);
 

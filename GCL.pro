@@ -65,7 +65,8 @@ unix {
 
 INCLUDEPATH += \
   "../MCL" \
-  "../SCL"
+  "../SCL" \
+  "/home/gavin/Documents/Projects/software/Library/Boost/boost_1_71_0"
 
 SOURCES += \
     source/string.cpp \
