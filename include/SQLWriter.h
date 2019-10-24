@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2018 Gavin Blakeman.
+//                      Copyright 2013-2019 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -77,6 +77,25 @@ namespace GCL
 {
   namespace sqlwriter
   {
+    enum EOrderBy
+    {
+      ASC,            ///< Ascending
+      DESC            ///< Descending
+    };
+    enum EDialect
+    {
+      MYSQL,          ///< MySQL Specific
+      ORACLE,         ///< Oracle Specific
+      MICROSOFT       ///< Microsoft specific
+    };
+    enum EJoin
+    {
+      JOIN_INNER,     ///< Inner Join
+      JOIN_RIGHT,     ///< Outer Right Join
+      JOIN_LEFT,      ///< Outer Left Join
+      JOIN_FULL       ///< Full outer join
+    };
+
     struct SColumnData
     {
       std::pair<std::string, std::string> columnName;           ///< TableName, ColumnName
@@ -95,11 +114,13 @@ namespace GCL
     typedef std::pair<std::string, parameter> parameterPair;
     typedef std::pair<std::string, std::string> stringPair;
     typedef std::tuple<std::string, std::string, parameter> parameterTriple;
+    typedef std::pair<std::string, EOrderBy> orderBy_t;
 
     typedef std::vector<parameter> parameterStorage;
     typedef std::vector<parameterPair> pairStorage;
     typedef std::vector<parameterTriple> tripleStorage;
     typedef std::vector<stringPair> stringPairStorage;
+    typedef std::vector<orderBy_t> orderByStorage_t;
 
     typedef std::vector<parameterStorage> valueStorage;
 
@@ -113,25 +134,6 @@ namespace GCL
     class CSQLWriter
     {
     public:
-      enum EOrderBy
-      {
-        ASC,            ///< Ascending
-        DESC            ///< Descending
-      };
-      enum EDialect
-      {
-        MYSQL,          ///< MySQL Specific
-        ORACLE,         ///< Oracle Specific
-        MICROSOFT       ///< Microsoft specific
-      };
-      enum EJoin
-      {
-        JOIN_INNER,     ///< Inner Join
-        JOIN_RIGHT,     ///< Outer Right Join
-        JOIN_LEFT,      ///< Outer Left Join
-        JOIN_FULL       ///< Full outer join
-      };
-
       typedef std::pair<std::string, std::string> stringPair;
       typedef std::tuple<std::string, std::string, EJoin, std::string, std::string> parameterJoin;
 
@@ -155,10 +157,10 @@ namespace GCL
       tripleStorage whereFields;
       std::string insertTable;
       valueStorage valueFields;
-      pairStorage orderByFields;
+      orderByStorage_t orderByFields;
       joinStorage joinFields;
-      boost::optional<std::uint64_t> limitValue;
-      boost::optional<std::string> countValue;
+      std::optional<std::uint64_t> limitValue;
+      std::optional<std::string> countValue;
       bool distinct_ = false;
       stringPairStorage minFields;
       stringPairStorage maxFields;
@@ -207,7 +209,7 @@ namespace GCL
       CSQLWriter &limit(long);
       CSQLWriter &max(std::string const &, std::string const & = "");
       CSQLWriter &min(std::string const &, std::string const & = "");
-      CSQLWriter &orderBy(std::initializer_list<parameterPair>);
+      CSQLWriter &orderBy(std::initializer_list<std::pair<std::string, EOrderBy>>);
       CSQLWriter &select();
       CSQLWriter &select(std::initializer_list<std::string>);
       CSQLWriter &set(std::string const &, SCL::CAny const &);
@@ -222,8 +224,6 @@ namespace GCL
 
       virtual bool createTable(std::string const &tableName);
       virtual bool createColumn(std::string const &tableName, std::string const &columnName);
-
-      friend std::ostream &operator<<(std::ostream &outputStream, CSQLWriter::EOrderBy);
     };
 
   } // namespace database

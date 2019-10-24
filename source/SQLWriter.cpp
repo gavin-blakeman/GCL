@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2018 Gavin Blakeman.
+//                      Copyright 2013-2019 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -63,31 +63,6 @@ namespace GCL
     std::string const COLUMN("COLUMN");
     std::string const END("END");
 
-    /// @brief Function to output the sort order as a string.
-    /// @param[in] outputStream - The stream to output the sort order to
-    /// @param[in] ob - The orderby value.
-    /// @returns Reference to the outputStream. Allows chaining.
-    /// @throws CError(GCL, 0x0006)
-    /// @version 2015-04-12/GGB - Function created.
-
-    std::ostream &operator<<(std::ostream &outputStream, CSQLWriter::EOrderBy ob)
-    {
-      if (ob == CSQLWriter::ASC)
-      {
-        outputStream << "ASC";
-      }
-      else if (ob == CSQLWriter::DESC)
-      {
-        outputStream << "DESC";
-      }
-      else
-      {
-        ERROR(GCL, 0x0006);
-      };
-
-      return outputStream;
-    }
-
     //******************************************************************************************************************************
     //
     // CMappedSQLWriter
@@ -95,7 +70,7 @@ namespace GCL
     //******************************************************************************************************************************
 
     /// @brief Function to capture the count expression
-    /// @param[in] countExpression - The count expression to capture.
+    /// @param[in] countExpression: The count expression to capture.
     /// @returns *this
     /// @throws None
     /// @version 2017-08-12/GGB - Function created.
@@ -338,7 +313,7 @@ namespace GCL
     }
 
     /// @brief Adds the table name to the from clause
-    /// @param[in] fromString - The table name to add to the from clause.
+    /// @param[in] fromString: The table name to add to the from clause.
     /// @returns (*this)
     /// @throws None.
     /// @version 2017-08-20/GGB - Function created.
@@ -351,7 +326,7 @@ namespace GCL
     }
 
     /// @brief Searches the databaseMap and determines the mapped column names.
-    /// @param[in/out] columnName - The columnName to map.
+    /// @param[in/out] columnName: The columnName to map.
     /// @returns true - If the columnName was mapped succesfully.
     /// @returns false - The columnName is not recognised in the databaseMap.
     /// @throws None.
@@ -365,8 +340,8 @@ namespace GCL
     }
 
     /// @brief Adds a max() function to the query.
-    /// @param[in] column - The name of the column to take the max of.
-    /// @param[in] as - The column name to assign to the max() function.
+    /// @param[in] column: The name of the column to take the max of.
+    /// @param[in] as: The column name to assign to the max() function.
     /// @returns (*this)
     /// @throws None.
     /// @version 2017-08-20/GGB - Function created.
@@ -391,8 +366,8 @@ namespace GCL
     }
 
     /// @brief Function called to add columnData into a table.
-    /// @param[in] tableName - The table name to associate with the column.
-    /// @param[in] columnName - The column name to create.
+    /// @param[in] tableName: The table name to associate with the column.
+    /// @param[in] columnName: The column name to create.
     /// @returns true - column added.
     /// @returns false - column no added.
     /// @throws None.
@@ -421,7 +396,7 @@ namespace GCL
     }
 
     /// @brief Function to add a table to the database map.
-    /// @param[in] tableName - The table name.
+    /// @param[in] tableName: The table name.
     /// @returns true =
     /// @note The table is not yet mapped at this point.
     /// @version 2013-01-26/GGB - Function created.
@@ -445,9 +420,9 @@ namespace GCL
     }
 
     /// @brief Sets the Mapping of a specified column.
-    /// @param[in] tableName - The table name having the column.
-    /// @param[in] columnName - The column name to map.
-    /// @param[in] columnMap - The columnName to use when referring to the columnName.
+    /// @param[in] tableName: The table name having the column.
+    /// @param[in] columnName: The column name to map.
+    /// @param[in] columnMap: The columnName to use when referring to the columnName.
     /// @throws None.
     /// @version 2013-01-26/GGB - Function created.
 
@@ -464,8 +439,8 @@ namespace GCL
     }
 
     /// @brief Sets the Mapping of the table.
-    /// @param[in] tableName - The name of the table.
-    /// @param[in] tableMap - The string to map to the tableName.
+    /// @param[in] tableName: The name of the table.
+    /// @param[in] tableMap: The string to map to the tableName.
     /// @version 2013-01-26/GGB - Function created.
 
     void CSQLWriter::setTableMap(std::string const &tableName, std::string const &tableMap)
@@ -479,8 +454,8 @@ namespace GCL
 
     /// @brief Output the "FROM" clause as a string.
     /// @returns A string representation of the "FROM" clause.
-    /// @version 2016-05-08/GGB - Added support for table alisases and table maps.
-    /// @version 2015-04-12/GGB - Function created.
+    /// @version 2016-05-08/GGB: Added support for table alisases and table maps.
+    /// @version 2015-04-12/GGB: Function created.
 
     std::string CSQLWriter::createFromClause() const
     {
@@ -567,7 +542,7 @@ namespace GCL
 
     std::string CSQLWriter::createOrderByClause() const
     {
-      pairStorage::const_iterator iterator;
+      orderByStorage_t::const_iterator iterator;
       bool first = true;
 
       std::string returnValue = " ORDER BY ";
@@ -581,13 +556,18 @@ namespace GCL
         else
         {
           returnValue += ", ";
-        }
+        };
         returnValue += getColumnMap((*iterator).first);
         returnValue += " ";
 
-        std::ostringstream directionString;
-        directionString << ((*iterator).second);
-        returnValue += directionString.str();
+        if ((*iterator).second == ASC)
+        {
+          returnValue += "ASC ";
+        }
+        else if ((*iterator).second == DESC)
+        {
+          returnValue += "DESC ";
+        };
       };
 
       return returnValue;
@@ -754,7 +734,7 @@ namespace GCL
     }
 
     /// @brief Constructor for the from clause.
-    /// @param[in] fields - The fields to add to the from clause.
+    /// @param[in] fields: The fields to add to the from clause.
     /// @throws None.
     /// @version 2017-08-20/GGB - Added support for aliases.
     /// @version 2015-03-30/GGB - Function created.
@@ -846,12 +826,13 @@ namespace GCL
     }
 
     /// @brief Copy the orderBy pairs to the list.
-    /// @param[in] fields - The orderBy Pairs to copy
+    /// @param[in] fields: The orderBy Pairs to copy
     /// @returns *this
     /// @throws None.
+    /// @version 2019-10-24/GGB - Changed the orderBy type and storage.
     /// @version 2015-04-12/GGB - Function created.
 
-    CSQLWriter &CSQLWriter::orderBy(std::initializer_list<parameterPair> fields)
+    CSQLWriter &CSQLWriter::orderBy(std::initializer_list<std::pair<std::string, EOrderBy>> fields)
     {
       for (auto elem : fields)
       {
