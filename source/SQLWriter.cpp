@@ -5,7 +5,8 @@
 // SUBSYSTEM:						Database library
 // LANGUAGE:						C++
 // TARGET OS:						None - Standard C++
-// LIBRARY DEPENDANCE:	boost.
+// LIBRARY DEPENDANCE:	boost::algorithm
+//                      boost::filesystem
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
@@ -32,7 +33,8 @@
 //
 // CLASSES INCLUDED:    CSQLWriter
 //
-// HISTORY:             2015-09-22 GGB - AIRDAS 2015.09 release
+// HISTORY:             2019-12-08 GGB - Added UPSERT functionality for MYSQL.
+//                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2013-01-26 GGB - Development of class for application AIRDAS
 //
 //*********************************************************************************************************************************
@@ -258,8 +260,126 @@ namespace GCL
       return returnValue;
     }
 
+    /// @brief Converts the upsert query to a string.
+    /// @throws
+    /// @version 2019-12-08/GGB - Function created.
+
+    std::string CSQLWriter::createUpsertQuery() const
+    {
+        // Notes:
+        //  1. The where() clauses should be populated. These need to be converted to insert clauses for the insert function.
+        //  2. The set clause needs to be included in the insert clauses.
+
+      RUNTIME_ASSERT(GCL, dialect == MYSQL, "Upsert only implemented for MYSQL.");
+
+      std::string returnValue;
+      std::string fieldNames;
+      std::string fieldValues;
+      bool firstValue = true;
+
+      switch(dialect)
+      {
+        case MYSQL:
+        {
+            // Create the field and value clauses for the insert into.
+
+          for (auto const &element : whereFields)
+          {
+            if (firstValue)
+            {
+              firstValue = false;
+            }
+            else
+            {
+              fieldNames += ", ";
+              fieldValues += ", ";
+            };
+
+            fieldNames += getColumnMap(std::get<0>(element));
+            if (std::get<2>(element).type() == typeid(std::string))
+            {
+              fieldValues += "'" + std::get<2>(element).stringOutput() + "'";
+            }
+            else
+            {
+              fieldValues += std::get<2>(element).stringOutput();
+            };
+          };
+
+            // Add the set clause.
+
+          for (auto const &element : setFields)
+          {
+            if (firstValue)
+            {
+              firstValue = false;
+            }
+            else
+            {
+              fieldNames += ", ";
+              fieldValues += ", ";
+            };
+
+            fieldNames += getColumnMap(element.first);
+            if (element.second.type() == typeid(std::string))
+            {
+              fieldValues += "'" + element.second.stringOutput() + "'";
+            }
+            else
+            {
+              fieldValues += element.second.stringOutput();
+            };
+          };
+
+            // Before we can create the insert query, we need to
+
+          returnValue = "INSERT INTO " + insertTable + "(";
+          returnValue += fieldNames + ") VALUES (";
+          returnValue += fieldValues + ") ";
+          returnValue += "ON DUPLICATE KEY UPDATE ";
+
+          firstValue = true;
+          fieldValues.clear();
+
+          for (auto const &element : setFields)
+          {
+            if (firstValue)
+            {
+              firstValue = false;
+            }
+            else
+            {
+              fieldValues += ", ";
+            };
+            fieldValues+= getColumnMap(element.first) + " = ";
+
+            if (element.second.type() == typeid(std::string))
+            {
+              fieldValues += "'" + element.second.stringOutput() + "'";
+            }
+            else
+            {
+              fieldValues += element.second.stringOutput();
+            };
+          };
+
+          returnValue += fieldValues;
+
+          break;
+        }
+        default:
+        {
+          throw std::runtime_error("UPSERT only implemented for MYSQL.");
+          break;
+        }
+      };
+
+      return returnValue;
+    }
+
     /// @brief Converts the where clause to a string for creating the SQL string.
     /// @returns The where clause.
+    /// @throws
     /// @version 2015-05-24/GGB - Function created.
 
     std::string CSQLWriter::createWhereClause() const
@@ -752,11 +872,17 @@ namespace GCL
     /// @brief Set the query type to a 'DELETE' query.
     /// @param[in] tableName - The name of the table to execute the delete query on.
     /// @returns *this
+    /// @version 2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
     /// @version 2018-05-12/GGB - Added parameter for the deletion table name.
     /// @version 2015-03-30/GGB - Function created.
 
     CSQLWriter &CSQLWriter::deleteFrom(std::string const &tableName)
     {
+      if (queryType != qt_none)
+      {
+        resetQuery();
+      };
+
       queryType = qt_delete;
 
       deleteTable = tableName;
@@ -767,10 +893,16 @@ namespace GCL
     /// @brief Set the query type to a 'INSERT' query.
     /// @param[in] tableName: The table name to insert into.
     /// @returns *this
+    /// @version 2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
     /// @version 2018-08-19/GGB - Function created.
 
     CSQLWriter &CSQLWriter::insertInto(std::string tableName)
     {
+      if (queryType != qt_none)
+      {
+        resetQuery();
+      };
+
       queryType = qt_insert;
 
       insertTable = tableName;
@@ -782,11 +914,17 @@ namespace GCL
     /// @param[in] tableName: The table name to insert into.
     /// @param[in] fields: The fields and field values.
     /// @returns *this
+    /// @version 2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
     /// @version 2017-07-26/GGB - Added support for fields.
     /// @version 2015-03-30/GGB - Function created.
 
     CSQLWriter &CSQLWriter::insertInto(std::string tableName, std::initializer_list<std::string> fields)
     {
+      if (queryType != qt_none)
+      {
+        resetQuery();
+      };
+
       queryType = qt_insert;
 
       insertTable = tableName;
@@ -983,6 +1121,7 @@ namespace GCL
 
     /// @brief Resets all the fields for the query.
     /// @throws None.
+    /// @version 2019-12-08/GGB - Update queryType = qt_none when the query is reset.
     /// @version 2017-08-19/GGB - Added support for distinct.
     /// @version 2017-08-12/GGB - Added support for count expressions.
     /// @version 2015-05-19/GGB - Function created.
@@ -1003,6 +1142,7 @@ namespace GCL
       minFields.clear();
       updateTable.clear();
       setFields.clear();
+      queryType = qt_none;
     }
 
     /// @brief Resets the where clause of a query.
@@ -1016,22 +1156,34 @@ namespace GCL
 
     /// @brief Set the query type to a 'SELECT' query.
     /// @returns A reference to (*this)
+    /// @version 2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
     /// @version 2017-08-20/GGB - Function created.
 
     CSQLWriter &CSQLWriter::select()
     {
+      if (queryType != qt_none)
+      {
+        resetQuery();
+      };
+
       queryType = qt_select;
 
       return (*this);
     }
 
     /// @brief Set the query type to a 'SELECT' query.
-    /// @param[in] fields - The fields to add to the select clause.
+    /// @param[in] fields: The fields to add to the select clause.
     /// @returns A reference to (*this)
+    /// @version 2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
     /// @version 2014-12-19/GGB - Function created.
 
     CSQLWriter &CSQLWriter::select(std::initializer_list<std::string> fields)
     {
+      if (queryType != qt_none)
+      {
+        resetQuery();
+      };
+
       queryType = qt_select;
 
       for (auto elem : fields)
@@ -1059,6 +1211,7 @@ namespace GCL
     /// @brief Converts the query into an SQL query string.
     /// @returns The SQL query as a string.
     /// @throws None.
+    /// @version 2019-12-08/GGB - Added UPSERT query.
     /// @version 2017-08-12/GGB - Function created.
 
     std::string CSQLWriter::string() const
@@ -1085,6 +1238,11 @@ namespace GCL
           returnValue = createDeleteQuery();
           break;
         }
+        case qt_upsert:
+        {
+          returnValue = createUpsertQuery();
+          break;
+        }
         default:
         {
           CODE_ERROR("GCL");
@@ -1103,13 +1261,18 @@ namespace GCL
     }
 
     /// @brief Sets the table name for an update query.
-    /// @param[in] tableName - The tableName to update.
+    /// @param[in] tableName: The tableName to update.
     /// @returns (*this)
     /// @throws None.
+    /// @version 2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
     /// @version 2017-08-21/GGB - Function created.
 
     CSQLWriter &CSQLWriter::update(std::string const &tableName)
     {
+      if (queryType != qt_none)
+      {
+        resetQuery();
+      };
 
       queryType = qt_update;
 
@@ -1118,8 +1281,32 @@ namespace GCL
       return (*this);
     }
 
+    /// @brief Sets the table name for an upsert query.
+    /// @param[in] tableName: The tableName to upsert.
+    /// @returns (*this)
+    /// @throws None.
+    /// @details @code upsert("tbl_scheduleModification").set("Value", true).where({"ModificationType", "=", 1} @endcode
+    ///          translates to
+    ///          @code INSERT INTO tbl_scheduleModification(ModificationType, Value) VALUES (1, true) ON DUPLICATE UPDATE
+    ///                Value = true @endcode
+    /// @version 2019-12-08/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::upsert(std::string const &tableName)
+    {
+      if (queryType != qt_none)
+      {
+        resetQuery();
+      };
+
+      queryType = qt_upsert;
+
+      insertTable = tableName;
+
+      return (*this);
+    }
+
     /// @brief Stores the value fields for the query.
-    /// @param[in] fields- The parameter values to include in the query.
+    /// @param[in] fields: The parameter values to include in the query.
     /// @returns *this
     /// @version 2017-07-26/GGB - Changed code to use parameter rather than parameter pair.
     /// 2015-03-31/GGB - Function created.
@@ -1153,9 +1340,9 @@ namespace GCL
     }
 
     /// @brief Adds a single where clause to the where list.
-    /// @param[in] columnName - The columnName to add
-    /// @param[in] operatorString - The operatorString to add
-    /// @param[in] value - The value to add.
+    /// @param[in] columnName: The columnName to add
+    /// @param[in] operatorString: The operatorString to add
+    /// @param[in] value: The value to add.
     /// @returns (*this)
     /// @throws None.
     /// @version 2017-08-21/GGB - Function created.
@@ -1168,7 +1355,7 @@ namespace GCL
     }
 
     /// @brief Stores the where fields in the list.
-    /// @param[in] fields - The initialiser list of fields to store.
+    /// @param[in] fields: The initialiser list of fields to store.
     /// @returns (*this)
     /// @throws None.
     /// @version 2015-03-30/GGB - Function created.

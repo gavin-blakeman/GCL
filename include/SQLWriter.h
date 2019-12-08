@@ -32,7 +32,8 @@
 //
 // CLASSES INCLUDED:    CSQLWriter
 //
-// HISTORY:             2015-09-22 GGB - AIRDAS 2015.09 release
+// HISTORY:             2019-12-08 GGB - Added UPSERT functionality for MYSQL.
+//                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2013-01-26 GGB - Development of class for application AIRDAS
 //
 //*********************************************************************************************************************************
@@ -86,7 +87,7 @@ namespace GCL
     {
       MYSQL,          ///< MySQL Specific
       ORACLE,         ///< Oracle Specific
-      MICROSOFT       ///< Microsoft specific
+      MICROSOFT,      ///< Microsoft specific
     };
     enum EJoin
     {
@@ -150,6 +151,7 @@ namespace GCL
         qt_insert,
         qt_delete,
         qt_update,
+        qt_upsert,
       };
 
       std::vector<std::string> selectFields;
@@ -184,6 +186,7 @@ namespace GCL
       std::string createInsertQuery() const;
       std::string createUpdateQuery() const;
       std::string createDeleteQuery() const;
+      std::string createUpsertQuery() const;
 
       std::string createOrderByClause() const;
       std::string createSelectClause() const;
@@ -214,6 +217,7 @@ namespace GCL
       CSQLWriter &select(std::initializer_list<std::string>);
       CSQLWriter &set(std::string const &, SCL::CAny const &);
       CSQLWriter &update(std::string const &);
+      CSQLWriter &upsert(std::string const &);
       CSQLWriter &where(std::string const &, std::string const &, SCL::CAny const &);
       CSQLWriter &where(std::initializer_list<parameterTriple>);
       CSQLWriter &values(std::initializer_list<parameterStorage>);
