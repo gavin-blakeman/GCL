@@ -5,8 +5,9 @@
 // SUBSYSTEM:						Database library
 // LANGUAGE:						C++
 // TARGET OS:						None - Standard C++
-// LIBRARY DEPENDANCE:	boost.
-// NAMESPACE:						GCL
+// LIBRARY DEPENDANCE:	boost::algorithm
+//                      boost::filesystem
+// NAMESPACE:						GCL::sqlWriter
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
@@ -209,7 +210,7 @@ namespace GCL
       CSQLWriter &insertInto(std::string, std::initializer_list<std::string>);
       CSQLWriter &insertInto(std::string);
       CSQLWriter &join(std::initializer_list<parameterJoin>);
-      CSQLWriter &limit(long);
+      CSQLWriter &limit(std::size_t);
       CSQLWriter &max(std::string const &, std::string const & = "");
       CSQLWriter &min(std::string const &, std::string const & = "");
       CSQLWriter &orderBy(std::initializer_list<std::pair<std::string, EOrderBy>>);

@@ -1,6 +1,7 @@
 ﻿2019-12
 -------
 ADD:      CSQLWriter - Added Upsert query and code for MySQL.
+CHANGED:  CSQLWriter - Parameter for limit() function changed to std::size_t from long.
 
 2019.10
 -------

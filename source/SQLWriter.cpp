@@ -7,7 +7,7 @@
 // TARGET OS:						None - Standard C++
 // LIBRARY DEPENDANCE:	boost::algorithm
 //                      boost::filesystem
-// NAMESPACE:						GCL
+// NAMESPACE:						GCL::sqlWriter
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
@@ -261,7 +261,7 @@ namespace GCL
     }
 
     /// @brief Converts the upsert query to a string.
-    /// @throws
+    /// @throws GCL::CRuntimeError
     /// @version 2019-12-08/GGB - Function created.
 
     std::string CSQLWriter::createUpsertQuery() const
@@ -451,6 +451,7 @@ namespace GCL
     /// @returns false - The columnName is not recognised in the databaseMap.
     /// @throws None.
     /// @version
+    /// @todo Implement this function. (Bug# 0000193)
 
     std::string CSQLWriter::getColumnMap(std::string const &columnName) const
     {
@@ -473,8 +474,8 @@ namespace GCL
     }
 
     /// @brief Adds a min() function to the query.
-    /// @param[in] column - The name of the column to take the max of.
-    /// @param[in] as - The column name to assign to the min() function.
+    /// @param[in] column: The name of the column to take the max of.
+    /// @param[in] as: The column name to assign to the min() function.
     /// @returns (*this)
     /// @throws None.
     /// @version 2017-08-20/GGB - Function created.
@@ -870,7 +871,7 @@ namespace GCL
     }
 
     /// @brief Set the query type to a 'DELETE' query.
-    /// @param[in] tableName - The name of the table to execute the delete query on.
+    /// @param[in] tableName: The name of the table to execute the delete query on.
     /// @returns *this
     /// @version 2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
     /// @version 2018-05-12/GGB - Added parameter for the deletion table name.
@@ -938,7 +939,7 @@ namespace GCL
     }
 
     /// @brief Adds join statements to the query.
-    /// @param[in] fields - The join statements to add.
+    /// @param[in] fields: The join statements to add.
     /// @returns (*this)
     /// @throws None.
     /// @version 2016-05-08/GGB - Function created.
@@ -953,11 +954,12 @@ namespace GCL
       return *this;
     }
 
-    /// Sets the limit value.
-    //
-    // 2015-04-12/GGB - Function created.
+    /// @brief  Sets the limit value. This will be interpreted based on the SQL dialect in use.
+    /// @param[in] limit: The maximum number of records to return.
+    /// @version 2019-12-14/GGB - Changed parameter from long to std::size_t
+    /// @version 2015-04-12/GGB - Function created.
 
-    CSQLWriter &CSQLWriter::limit(long limit)
+    CSQLWriter &CSQLWriter::limit(std::size_t limit)
     {
       limitValue = limit;
       return (*this);
@@ -981,7 +983,7 @@ namespace GCL
     }
 
     /// @brief Function to load a map file and store all the aliases.
-    /// @param[in] ifn - The file to read the database mapping from.
+    /// @param[in] ifn: The file to read the database mapping from.
     /// @throws 0x0001 - MAPPED DATABASE: Invalid Map file name.
     /// @throws 0x0002 - MAPPED DATABASE: Syntax Error
     /// @throws 0x0004 - MAPPED DATABASE: Invalid Table Name
@@ -1024,7 +1026,9 @@ namespace GCL
             token2E = textLine.find_first_of(']', equalPosn);
 
             if (token1S < token1E)
+            {
               szToken1 = textLine.substr(token1S + 1, token1E - token1S - 1);
+            }
             else if (szCommand != END)
             {
               std::clog << "Error in SQL map file: " << ifn << std::endl;
@@ -1033,9 +1037,13 @@ namespace GCL
             };
 
             if (token2S < token2E)
+            {
               szToken2 = textLine.substr(token2S + 1, token2E - token2S - 1);
+            }
             else
+            {
               szToken2.clear();
+            };
 
             if (szCommand == COLUMN)
             {
@@ -1060,7 +1068,9 @@ namespace GCL
               else
               {
                 if (!szToken2.empty())
+                {
                   setColumnMap(currentTable, szToken1, szToken2);
+                };
               };
             }
             else if (szCommand == TABLE)
@@ -1085,9 +1095,11 @@ namespace GCL
               }
               else
               {
-               currentTable = szToken1;
-               if (!szToken2.empty())
-                 setTableMap(currentTable, szToken2);  // Add the alias into the record.
+                currentTable = szToken1;
+                if (!szToken2.empty())
+                {
+                  setTableMap(currentTable, szToken2);  // Add the alias into the record.
+                };
               };
             }
             else if (szCommand == END)
@@ -1097,7 +1109,9 @@ namespace GCL
                    (token2S == textLine.npos) &&
                    (token2E == textLine.npos) &&
                    (equalPosn == textLine.npos) )
+              {
                 currentTable.clear();
+              }
               else
               {
                 std::clog << "Error in SQL map file: " << ifn << std::endl;
@@ -1195,8 +1209,8 @@ namespace GCL
     }
 
     /// @brief Processes a single set clause.
-    /// @param[in] columnName - The columnName to set
-    /// @param[in] value - The value to set.
+    /// @param[in] columnName: The columnName to set
+    /// @param[in] value: The value to set.
     /// @returns (*this)
     /// @throws None.
     /// @version 2017-08-21/GGB - Function created.
@@ -1221,8 +1235,10 @@ namespace GCL
       switch (queryType)
       {
         case qt_select:
+        {
           returnValue = createSelectQuery();
           break;
+        };
         case qt_insert:
         {
           returnValue = createInsertQuery();
@@ -1252,6 +1268,9 @@ namespace GCL
 
       return returnValue;
     }
+
+    /// @brief
+    /// @todo Implement the getTableMap function. (Bug# 0000194)
 
     std::string CSQLWriter::getTableMap(std::string const &search) const
     {
@@ -1322,7 +1341,7 @@ namespace GCL
     }
 
     /// @brief Verifies if a string constitutes a valid SQL operator.
-    /// @param[in] oper - The string to test.
+    /// @param[in] oper: The string to test.
     /// @returns true - The string is a valid operator.
     /// @returns false - The string is not a valid operator.
     /// @note Valid operators are: "=", "<>", "!=", ">", "<", ">=", "<=", "BETWEEN", "LIKE", "IN"
