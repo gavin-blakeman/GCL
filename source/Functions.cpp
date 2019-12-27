@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015, 2017-2018 Gavin Blakeman.
+//                      Copyright 2015, 2017-2019 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -119,7 +119,7 @@ namespace GCL
   }
 
   /// @brief Firmats a time value in (seconds past midnight) to a time.
-  /// @param[in] seconds - number of seconds past midnight.
+  /// @param[in] seconds: number of seconds past midnight.
   /// @returns The time as a string HH:mm:ss.ss
   /// @throws
   /// @version 2017-08-11/GGB - Function created.
@@ -172,24 +172,24 @@ namespace GCL
   }
 
   /// @brief Converts a hh.hhh value into a HH:mm:ss string.
-  /// @param[in] hours - The value to print in hours.
-  /// @param[in] decimals - The number of decimal places to display.
+  /// @param[in] hours: The value to print in hours.
+  /// @param[in] decimals: The number of decimal places to display.
   /// @returns A string representation of the value.
   /// @throws None.
   /// @version 2012-01-10/GGB - Function created.
 
-  std::string sprintfHMS(const FP_t &hours, int decimals)
-  {
-    char szNumber[30];
+//  std::string sprintfHMS(const FP_t &hours, int decimals)
+//  {
+//    char szNumber[30];
 
-    sprintfHMS(szNumber, hours, decimals);
+//    sprintfHMS(szNumber, hours, decimals);
 
-    return std::string(szNumber);
-  }
+//    return std::string(szNumber);
+//  }
 
   /// @brief Formats a double in DMS format with the required number of decimal places.
-  /// @param[out] szBuffer - The array to write to
-  /// @param[in] dNumber - The value to convert.
+  /// @param[out] szBuffer: The array to write to
+  /// @param[in] dNumber: The value to convert.
   ///
   /// converts the dNumber to a string representation of the degrees to nDecimal decimal places.
   /// sign == true forces the number to display as + or - while sign == false shows no + or -.
@@ -254,9 +254,9 @@ namespace GCL
   }
 
   /// @brief Converts a number in degrees to a std::string in dd°mm'ss".ss.
-  /// @param[in] degrees - The value in degrees
-  /// @param[in] sign - Determine if the sign must be displayed or if it is optional
-  /// @param[in] decimal - The number of decimal places to be displayed.
+  /// @param[in] degrees: The value in degrees
+  /// @param[in] sign: Determine if the sign must be displayed or if it is optional
+  /// @param[in] decimal: The number of decimal places to be displayed.
   /// @returns A string representation of the value.
   /// @throws None.
   /// @version 2012-01-10/GGB - Function created.
@@ -269,4 +269,4 @@ namespace GCL
     return std::string(szString);
   }
 
-} // namespace
+} // namespace GCL

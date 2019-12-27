@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015, 2017-2018 Gavin Blakeman.
+//                      Copyright 2015, 2017-2019 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -62,8 +62,8 @@ namespace GCL
   std::string sprintfDMS(double const &, bool = true, int = 0);
   int sprintfHMS(char *, FP_t, int=2);
   std::string sprintfHMS(std::uint32_t const &);
-  std::string sprintfHMS(FP_t const &, int=2);
+  //std::string sprintfHMS(FP_t const &, int=2);
 
-}   // namespace
+}   // namespace GCL
 
 #endif // FUNCTIONS_H
