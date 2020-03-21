@@ -5,14 +5,13 @@
 // SUBSYSTEM:           Logging Library
 // LANGUAGE:						C++
 // TARGET OS:						WINDOWS/UNIX/LINUX/MAC
-// LIBRARY DEPENDANCE:	boost::chrono
-//                      boost::filesystem
+// LIBRARY DEPENDANCE:	boost::filesystem
 //                      boost::format
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2014-2019 Gavin Blakeman.
+//                      Copyright 2014-2020 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -41,9 +40,13 @@
 
 #ifndef GCL_CONTROL
 
-#include "LoggerCore.h"
+  // Standard C++ library header files.
 
 #include <cstdint>
+
+  // GCL header files
+
+#include "LoggerCore.h"
 
 namespace GCL
 {
