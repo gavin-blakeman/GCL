@@ -11,7 +11,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2019 Gavin Blakeman.
+//                      Copyright 2013-2020 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -217,6 +217,7 @@ namespace GCL
       CSQLWriter &select();
       CSQLWriter &select(std::initializer_list<std::string>);
       CSQLWriter &set(std::string const &, SCL::CAny const &);
+      CSQLWriter &set(std::initializer_list<parameterPair>);
       CSQLWriter &update(std::string const &);
       CSQLWriter &upsert(std::string const &);
       CSQLWriter &where(std::string const &, std::string const &, SCL::CAny const &);

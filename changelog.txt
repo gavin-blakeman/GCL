@@ -1,4 +1,8 @@
-﻿2019-12
+﻿2020-03
+-------
+ADD:      CSQlWiter - Added a set(std::initializer_list...) function.
+
+2019-12
 -------
 ADD:      CSQLWriter - Added Upsert query and code for MySQL.
 CHANGED:  CSQLWriter - Parameter for limit() function changed to std::size_t from long.

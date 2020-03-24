@@ -106,3 +106,6 @@ HEADERS += \
 OTHER_FILES += \
     changelog.txt
 
+DISTFILES += \
+    changelog.txt
+

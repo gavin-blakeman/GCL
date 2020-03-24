@@ -1222,6 +1222,22 @@ namespace GCL
       return (*this);
     }
 
+    /// @brief Processes a list of set clauses
+    /// @param[in] fields: The initialiser list of set clauses.
+    /// @returns (*this)
+    /// @throws
+    /// @version 2020-03-24/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::set(std::initializer_list<parameterPair> fields)
+    {
+      for (auto elem : fields)
+      {
+        setFields.push_back(elem);
+      };
+
+      return *this;
+    }
+
     /// @brief Converts the query into an SQL query string.
     /// @returns The SQL query as a string.
     /// @throws None.
