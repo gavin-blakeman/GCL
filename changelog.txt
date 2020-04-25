@@ -1,4 +1,8 @@
-﻿2020-03
+﻿2020-04
+-------
+ADD:      CSQLWriter - Added MySQL support for OFFSET coupled with LIMIT.
+
+2020-03
 -------
 ADD:      CSQlWiter - Added a set(std::initializer_list...) function.
 

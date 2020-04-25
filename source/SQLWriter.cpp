@@ -11,7 +11,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2019 Gavin Blakeman.
+//                      Copyright 2013-2020 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -33,13 +33,14 @@
 //
 // CLASSES INCLUDED:    CSQLWriter
 //
-// HISTORY:             2019-12-08 GGB - Added UPSERT functionality for MYSQL.
+// HISTORY:             2020-04-25 GGB - Added offset functionality.
+//                      2019-12-08 GGB - Added UPSERT functionality for MYSQL.
 //                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2013-01-26 GGB - Development of class for application AIRDAS
 //
 //*********************************************************************************************************************************
 
-#include "../include/SQLWriter.h"
+#include "include/SQLWriter.h"
 
   // Standard library files
 
@@ -67,7 +68,7 @@ namespace GCL
 
     //******************************************************************************************************************************
     //
-    // CMappedSQLWriter
+    // CSQLWriter
     //
     //******************************************************************************************************************************
 
@@ -187,6 +188,48 @@ namespace GCL
 
         returnValue += ")";
       };
+
+      return returnValue;
+    }
+
+    /// @brief Creates the limit clause
+    /// @throws None.
+    /// @version 2020-04-25/GGB - Function created.
+
+    std::string CSQLWriter::createLimitClause() const
+    {
+      std::string returnValue;
+
+      switch (dialect)
+      {
+        case MYSQL:
+        {
+            // Offset does not have to be present. However if offset is present, then limit must also be present.
+
+          if (offsetValue)
+          {
+            returnValue = "LIMIT " + std::to_string(*offsetValue) + ", "
+                          + std::to_string(limitValue ? *limitValue : std::numeric_limits<std::uint64_t>::max()) + " ";
+          }
+          else
+          {
+            if (limitValue)
+            {
+              returnValue = "LIMIT " + std::to_string(*limitValue) + " ";
+            };
+          };
+          break;
+        };
+        case POSTGRE:
+        {
+          break;
+        }
+        default:
+        {
+          throw std::runtime_error("Unknown dialect");
+        }
+      }
+
 
       return returnValue;
     }
@@ -804,6 +847,7 @@ namespace GCL
     /// @brief Produces the string for a SELECT query.
     /// @returns A string containing the select clause.
     /// @throws None.
+    /// @version 2020-04-25/GGB - Added support for the LIMIT and OFFSET clauses.
     /// @version 2017-08-12/GGB - Added check for countValue in selectClause if statement.
     /// @version 2015-03-30/GGB - Function created.
 
@@ -845,11 +889,7 @@ namespace GCL
         returnValue += createOrderByClause();
       };
 
-      if ( (dialect == MYSQL) && (limitValue))
-      {
-        returnValue += " LIMIT " + std::to_string(*limitValue);
-      };
-
+      returnValue += createLimitClause();
 
       return returnValue;
     }
@@ -956,14 +996,26 @@ namespace GCL
 
     /// @brief  Sets the limit value. This will be interpreted based on the SQL dialect in use.
     /// @param[in] limit: The maximum number of records to return.
+    /// @version 2020-04-25/GGB - Changed parameter from std::size_t to std::uint64_t.
     /// @version 2019-12-14/GGB - Changed parameter from long to std::size_t
     /// @version 2015-04-12/GGB - Function created.
 
-    CSQLWriter &CSQLWriter::limit(std::size_t limit)
+    CSQLWriter &CSQLWriter::limit(std::uint64_t limit)
     {
       limitValue = limit;
       return (*this);
     }
+
+    /// @brief  Sets the offset value. This will be interpreted based on the SQL dialect in use.
+    /// @param[in] offset: The offset of the first record to return.
+    /// @version 2020-04-25/GGB - Function created.
+
+    CSQLWriter &CSQLWriter::offset(std::uint64_t offset)
+    {
+      offsetValue = offset;
+      return (*this);
+    }
+
 
     /// @brief Copy the orderBy pairs to the list.
     /// @param[in] fields: The orderBy Pairs to copy
@@ -1135,6 +1187,7 @@ namespace GCL
 
     /// @brief Resets all the fields for the query.
     /// @throws None.
+    /// @version 2020-04-25/GGB - Added offsetValue to support offsets.
     /// @version 2019-12-08/GGB - Update queryType = qt_none when the query is reset.
     /// @version 2017-08-19/GGB - Added support for distinct.
     /// @version 2017-08-12/GGB - Added support for count expressions.
@@ -1150,6 +1203,7 @@ namespace GCL
       orderByFields.clear();
       joinFields.clear();
       limitValue.reset();
+      offsetValue.reset();
       countValue.reset();
       distinct_ = false;
       maxFields.clear();

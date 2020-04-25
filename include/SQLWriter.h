@@ -33,7 +33,8 @@
 //
 // CLASSES INCLUDED:    CSQLWriter
 //
-// HISTORY:             2019-12-08 GGB - Added UPSERT functionality for MYSQL.
+// HISTORY:             2020-04-25 GGB - Added offset functionality.
+//                      2019-12-08 GGB - Added UPSERT functionality for MYSQL.
 //                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2013-01-26 GGB - Development of class for application AIRDAS
 //
@@ -89,6 +90,7 @@ namespace GCL
       MYSQL,          ///< MySQL Specific
       ORACLE,         ///< Oracle Specific
       MICROSOFT,      ///< Microsoft specific
+      POSTGRE,        ///< PostGre database
     };
     enum EJoin
     {
@@ -162,6 +164,7 @@ namespace GCL
       valueStorage valueFields;
       orderByStorage_t orderByFields;
       joinStorage joinFields;
+      std::optional<std::uint64_t> offsetValue;
       std::optional<std::uint64_t> limitValue;
       std::optional<std::string> countValue;
       bool distinct_ = false;
@@ -195,6 +198,7 @@ namespace GCL
       std::string createJoinClause() const;
       std::string createWhereClause() const;
       std::string createSetClause() const;
+      std::string createLimitClause() const;
 
     public:
       void setDialect(EDialect d) {dialect = d;}
@@ -210,9 +214,10 @@ namespace GCL
       CSQLWriter &insertInto(std::string, std::initializer_list<std::string>);
       CSQLWriter &insertInto(std::string);
       CSQLWriter &join(std::initializer_list<parameterJoin>);
-      CSQLWriter &limit(std::size_t);
+      CSQLWriter &limit(std::uint64_t);
       CSQLWriter &max(std::string const &, std::string const & = "");
       CSQLWriter &min(std::string const &, std::string const & = "");
+      CSQLWriter &offset(std::uint64_t);
       CSQLWriter &orderBy(std::initializer_list<std::pair<std::string, EOrderBy>>);
       CSQLWriter &select();
       CSQLWriter &select(std::initializer_list<std::string>);
