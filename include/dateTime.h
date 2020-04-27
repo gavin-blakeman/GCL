@@ -5,12 +5,11 @@
 // SUBSYSTEM:						Date & Time Functions
 // LANGUAGE:						C++
 // TARGET OS:						None.
-// LIBRARY DEPENDANCE:	boost.
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2017-2018 Gavin Blakeman.
+//                      Copyright 2017-2020 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -32,8 +31,8 @@
 //
 //*********************************************************************************************************************************
 
-#ifndef ACL_DATETIME
-#define ACL_DATETIME
+#ifndef GCL_DATETIME
+#define GCL_DATETIME
 
   // Standard C++ library header files
 
@@ -47,5 +46,5 @@ namespace GCL
   std::string sprintTime(struct tm *);
 }
 
-#endif // ACL_DATETIME
+#endif // GCL_DATETIME
 

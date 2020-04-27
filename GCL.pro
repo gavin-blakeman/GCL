@@ -72,9 +72,6 @@ INCLUDEPATH += \
 
 SOURCES += \
     source/string.cpp \
-    source/logger/LoggerCore.cpp \
-    source/logger/FileSink.cpp \
-    source/logger/StreamSink.cpp \
     source/Resource.cpp \
     source/Functions.cpp \
     source/common.cpp \
@@ -84,13 +81,13 @@ SOURCES += \
     source/alarm/alarmCore.cpp \
     source/alarm/alarmDaily.cpp \
     source/alarm/alarmWeekly.cpp \
-    source/error.cpp
+    source/error.cpp \
+    source/logger/loggerCore.cpp \
+    source/logger/fileSink.cpp \
+    source/logger/streamSink.cpp
 
 HEADERS += \
     GCL \
-    include/logger/LoggerCore.h \
-    include/logger/FileSink.h \
-    include/logger/StreamSink.h \
     include/Resource.h \
     include/Functions.h \
     include/common.h \
@@ -101,7 +98,11 @@ HEADERS += \
     include/alarm/alarmCore.h \
     include/alarm/alarmDaily.h \
     include/alarm/alarmWeekly.h \
-    include/error.h
+    include/error.h \
+    include/configurationReader/configurationReader.hpp \
+    include/logger/loggerCore.h \
+    include/logger/fileSink.h \
+    include/logger/streamSink.h
 
 OTHER_FILES += \
     changelog.txt

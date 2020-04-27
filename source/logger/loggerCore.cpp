@@ -1,11 +1,10 @@
 ﻿//*********************************************************************************************************************************
 //
 // PROJECT:							General Class Library
-// FILE:								CLogger
+// FILE:								loggerCore.cpp
 // SUBSYSTEM:						Logging Library
 // LANGUAGE:						C++
-// TARGET OS:						WINDOWS/UNIX/LINUX/MAC
-// LIBRARY DEPENDANCE:	boost::filesystem
+// TARGET OS:						None.
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
@@ -35,7 +34,7 @@
 //
 //*********************************************************************************************************************************
 
-#include "../../include/logger/LoggerCore.h"
+#include "include/logger/loggerCore.h"
 
   // Standard C++ library headers
 
@@ -45,11 +44,10 @@
   // Miscellaneous library headers
 
 
-
   // GCL include headers
 
-#include "../../include/error.h"
-#include "../../include/logger/StreamSink.h"
+#include "include/error.h"
+#include "include/logger/streamSink.h"
 
 namespace GCL
 {
@@ -178,22 +176,20 @@ namespace GCL
     /// @param[in] ss: message string.
     /// @returns A std::string containing the combined timestamp and string.
     /// @throws None.
-    /// @version 2019-10-23/GGB - Updated to use std::chrono. The timestamp output has not been tested and will likely
-    ///                           need to be fine tuned.
+    /// @version 2020-04-26/GGB - [Information] changed to [info]
+    /// @version 2019-10-23/GGB - Updated to use std::chrono.
     /// @version 2014-07-21/GGB - Function created.
 
     std::string CLoggerRecord::writeRecord(bool ts, bool ss) const
     {
       std::ostringstream os;
 
-      //os << boost::chrono::time_fmt(boost::chrono::timezone::local);
-
       SharedLock(recordMutex);
 
       if (ts)
       {
         std::time_t now_c = std::chrono::system_clock::to_time_t(timeStamp);
-        os << "[" << std::put_time(std::localtime(&now_c), "%F%T%") << "] ";
+        os << "[" << std::put_time(std::localtime(&now_c), "%F %T") << "] ";
       };
 
       if (ss)
@@ -222,7 +218,7 @@ namespace GCL
           };
           case info:
           {
-            os << "[information] ";
+            os << "[info] ";
             break;
           };
           case debug:

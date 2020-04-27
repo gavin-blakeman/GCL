@@ -5,8 +5,6 @@
 // SUBSYSTEM:						Database library
 // LANGUAGE:						C++
 // TARGET OS:						None - Standard C++
-// LIBRARY DEPENDANCE:	boost::algorithm
-//                      boost::filesystem
 // NAMESPACE:						GCL::sqlWriter
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2

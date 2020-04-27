@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
-//                      Copyright 2018 Gavin Blakeman.
+//                      Copyright 2018-2020 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -37,7 +37,7 @@
 //
 //*********************************************************************************************************************************
 
-#include "../include/filesystem.h"
+#include "include/filesystem.h"
 
 namespace boost
 {
@@ -45,7 +45,7 @@ namespace boost
   {
     /// @brief Checks if the specified filename is readable. If the file does not exist, or there is any other error, the function
     ///        returns false.
-    /// @param[in] p - The filename (or path) to check.
+    /// @param[in] p: The filename (or path) to check.
     /// @returns true - if the filename or path is readable.
     /// @returns false - if the filename or path is not readable, or does not exist.
     /// @throws None.

@@ -4,13 +4,12 @@
 // FILE:								Resource Utilisations (CPU and Memory)
 // SUBSYSTEM:						General Class Library Exception subsystem
 // LANGUAGE:						C++
-// TARGET OS:						All (Standard C++)
-// LIBRARY DEPENDANCE:	None.
+// TARGET OS:						All - Supported through compiler directives.
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015-2018 Gavin Blakeman.
+//                      Copyright 2015-2020 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General

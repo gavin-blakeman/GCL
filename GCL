@@ -5,12 +5,11 @@
 // SUBSYSTEM:						Include file for the entire library
 // LANGUAGE:						C++
 // TARGET OS:						All (Standard C++)
-// LIBRARY DEPENDANCE:	None.
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2019 Gavin Blakeman.
+//                      Copyright 2013-2020 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -24,7 +23,7 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            This is the include file that includes all the modules in the GCL library.
+// OVERVIEW:            Include file that includes all the modules in the GCL library.
 //
 // CLASSES INCLUDED:    None
 //
@@ -53,9 +52,10 @@
 #include "include/alarm/alarmCore.h"
 #include "include/alarm/alarmDaily.h"
 #include "include/alarm/alarmWeekly.h"
-#include "include/logger/LoggerCore.h"
-#include "include/logger/FileSink.h"
-#include "include/logger/StreamSink.h"
+#include "include/configurationReader/configurationReader.hpp"
+#include "include/logger/loggerCore.h"
+#include "include/logger/fileSink.h"
+#include "include/logger/streamSink.h"
 #include "include/common.h"
 #include "include/dateTime.h"
 #include "include/error.h"

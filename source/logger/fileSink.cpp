@@ -1,12 +1,10 @@
 ﻿//*********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// FILE:                FileSink
+// FILE:                fileSink.cpp
 // SUBSYSTEM:           Logging Library
 // LANGUAGE:						C++
-// TARGET OS:						WINDOWS/UNIX/LINUX/MAC
-// LIBRARY DEPENDANCE:	boost::filesystem
-//                      boost::format
+// TARGET OS:						None.
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
@@ -37,7 +35,7 @@
 //
 //*********************************************************************************************************************************
 
-#include "../../include/logger/FileSink.h"
+#include "include/logger/fileSink.h"
 
   // Standard C++ library header files
 
@@ -50,7 +48,7 @@
 
   // GCL Library header files.
 
-#include "../../include/error.h"
+#include "include/error.h"
 
 namespace GCL
 {

@@ -1,16 +1,15 @@
 ﻿//*********************************************************************************************************************************
 //
 // PROJECT:							General Class Library (GCL)
-// FILE:								Error
+// FILE:								error.h
 // SUBSYSTEM:						Exception/Error subsystem
 // LANGUAGE:						C++
-// TARGET OS:						All (Standard C++)
-// LIBRARY DEPENDANCE:	None.
+// TARGET OS:						None.
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2019 Gavin Blakeman.
+//                      Copyright 2013-2020 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -47,7 +46,7 @@
 
   // GCL library header files
 
-#include "../include/logger/LoggerCore.h"
+#include "include/logger/loggerCore.h"
 
 #ifndef GCL_CONTROL
 

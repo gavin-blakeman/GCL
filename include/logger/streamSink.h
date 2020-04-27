@@ -1,17 +1,15 @@
 ﻿//*********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// FILE:                CStreamSink
+// FILE:                streamSink.h
 // SUBSYSTEM:           Logging Library
 // LANGUAGE:						C++
-// TARGET OS:						WINDOWS/UNIX/LINUX/MAC
-// LIBRARY DEPENDANCE:	boost::chrono
-//                      boost::filesystem
+// TARGET OS:						None.
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2014-2018 Gavin Blakeman.
+//                      Copyright 2014-2020 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -38,28 +36,35 @@
 //
 //*********************************************************************************************************************************
 
-#include "../../include/logger/StreamSink.h"
+#ifndef GCL_STREAMSINK_H
+#define GCL_STREAMSINK_H
+
+#ifndef GCL_CONTROL
+
+#include "loggerCore.h"
+
+#include <ostream>
 
 namespace GCL
 {
   namespace logger
   {
-    /// @brief Default class constructor.
-    /// @param[in] os: The stream to associate with the sink.
-    /// @version 2014-12-28/GGB - Function created.
 
-    CStreamSink::CStreamSink(std::ostream &os) : CLoggerSink(), outputStream(os)
+    class CStreamSink: public CLoggerSink
     {
-    }
+      private:
+        std::ostream &outputStream;
 
-    /// @brief This is the function to write the message to the stream.
-    /// @param[in] s: The string to write to the stream.
-    /// @version 2014-12-28/GGB - Function created.
-
-    void CStreamSink::write(std::string const &s)
-    {
-      outputStream << s << std::endl;
-    }
+      protected:
+      public:
+        CStreamSink(std::ostream &);
+        virtual ~CStreamSink() {}
+        virtual void write(std::string const &);
+    };
 
   }   // namespace logger
 }   // namespace GCL
+
+#endif // GCL_CONTROL
+
+#endif // GCL_STREAMSINK_H

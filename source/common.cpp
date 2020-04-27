@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015, 2018 Gavin Blakeman.
+//                      Copyright 2015, 2018-2020 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -48,18 +48,18 @@
 #include <string>
 #include <utility>
 
-  // GCL Include files
-
-#include "../include/error.h"
-
   // Miscellaneous library header files.
 
 #include <boost/algorithm/string.hpp>
 
+  // GCL Include files
+
+#include "include/error.h"
+
 namespace GCL
 {
 
-  unsigned int const GCL_MAJORVERSION = 2018;           ///< The Major version number (yyyy)
+  unsigned int const GCL_MAJORVERSION = 2019;           ///< The Major version number (yyyy)
   unsigned int const GCL_MINORVERSION = 9;              ///< The Minor version number (mm)
   unsigned int const GCL_BUILDNUMBER  = 0x0083;         ///< The build number - incremented on each build.
 

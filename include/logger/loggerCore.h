@@ -1,11 +1,10 @@
 ﻿//*********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// FILE:                CLogger
+// FILE:                loggerCore.h
 // SUBSYSTEM:           Logging Library
 // LANGUAGE:						C++
-// TARGET OS:						WINDOWS/UNIX/LINUX/MAC
-// LIBRARY DEPENDANCE:	boost::filesystem
+// TARGET OS:						None.
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
