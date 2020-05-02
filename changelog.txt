@@ -1,7 +1,9 @@
 ﻿2020-04
 -------
 UPDATE:   Copyright notices to include 2020.
-ADD:      ConfigurationReader - Added the configuration reader base class.
+ADD:      CReaderSection - Added the configuration reader base class.
+ADD:      CReaderVanialla - Added the configuration reader base class.
+ADD:      CReaderCore - Added the configuration reader base class.
 CHANGE:   Logger - [information] changed to [info]
 ADD:      CSQLWriter - Added MySQL support for OFFSET coupled with LIMIT.
 

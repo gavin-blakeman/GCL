@@ -1,7 +1,7 @@
 ﻿//*********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// FILE:                configurationReader/configurationReader
+// FILE:                configurationReader/readerVanilla.hpp
 // SUBSYSTEM:           Configuratoin file reader
 // LANGUAGE:						C++
 // TARGET OS:						None.
@@ -31,8 +31,8 @@
 //
 //*********************************************************************************************************************************
 
-#ifndef GCL_CONFIGURATIONREADER_HPP
-#define GCL_CONFIGURATIONREADER_HPP
+#ifndef GCL_READERVANILLA_HPP
+#define GCL_READERVANILLA_HPP
 
   // Standard C++ library header files
 
@@ -47,14 +47,16 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/lexical_cast.hpp>
 
   // GCL library header files.
 
+#include "include/configurationReader/readerCore.hpp"
 #include "include/logger/loggerCore.h"
 
 namespace GCL
 {
-  /// @details  Implements standardised methods of reading configuration files. The CConfiguration reader is a standalone base class
+  /// @details  Implements standardised methods of reading configuration files. The CReaderVanilla reader is a standalone base class
   ///           that can be extended by descendents to implement further behavior.
   ///           The class implements a form of .conf file that uses a 'tag [seperator] value' approach. The seperators are defined
   ///           at runtime.
@@ -67,21 +69,18 @@ namespace GCL
   ///           Comments - Must always appear on line by themselves and the first non-white space character on the line must be
   ///                      the comment character.
 
-  class CConfigurationReader
+  class CReaderVanilla : CReaderCore
   {
-  private:
-    boost::filesystem::path filename_;        ///< Filename and path of the configuration file
-    std::string seperatorChar_;               ///< The seperator character to use between token and value.
-    std::string commentChar_;                 ///< Character(s) used to start comment lines.
-    std::unordered_map<std::string, std::string> configurationMap_;
-    std::size_t lastLine_ = 0;                ///< Last line read in the file.
-    std::size_t const readAhead_ = 10;        ///< Number of tags to read ahead.
-    bool readComplete_ = false;               ///< True if the entire file has been read.
+  protected:
+    using tagValueContainer_t = std::unordered_map<std::string, std::string>;
 
-    CConfigurationReader() = delete;
-    CConfigurationReader(CConfigurationReader const &) = delete;
-    CConfigurationReader(CConfigurationReader &&) = delete;
-    CConfigurationReader &operator =(CConfigurationReader const &) = delete;
+  private:
+    tagValueContainer_t tagValueMap;
+
+    CReaderVanilla() = delete;
+    CReaderVanilla(CReaderVanilla const &) = delete;
+    CReaderVanilla(CReaderVanilla &&) = delete;
+    CReaderVanilla &operator =(CReaderVanilla const &) = delete;
 
     /// @brief Reads the configuration file until the tag value is found.
     /// @param[in] tagName: The tag to find
@@ -89,7 +88,7 @@ namespace GCL
     /// @throws
     /// @version 2020-04-27/GGB - Function created.
 
-    std::optional<std::string> readTag(std::string tagName)
+    virtual std::optional<std::string> readTag(std::string tagName)
     {
       std::optional<std::string> returnValue;
       boost::filesystem::ifstream ifs;
@@ -100,8 +99,8 @@ namespace GCL
 
         // See if we already have the tag in memory.
 
-      auto iterator = configurationMap_.find(tagName);
-      if (iterator != configurationMap_.end())
+      auto iterator = tagValueMap.find(tagName);
+      if (iterator != tagValueMap.end())
       {
           // Have already got the value in memory.
 
@@ -159,7 +158,7 @@ namespace GCL
                   returnValue = value;
                 };
 
-                configurationMap_.emplace(std::move(tag), std::move(value));
+                tagValueMap.emplace(std::move(tag), std::move(value));
               };
             };
           };
@@ -177,6 +176,13 @@ namespace GCL
     }
 
   protected:
+    boost::filesystem::path filename_;        ///< Filename and path of the configuration file
+    std::string seperatorChar_;               ///< The seperator character to use between token and value.
+    std::string commentChar_;                 ///< Character(s) used to start comment lines.
+    std::size_t lastLine_ = 0;                ///< Last line read in the file.
+    std::size_t const readAhead_ = 10;        ///< Number of tags to read ahead.
+    bool readComplete_ = false;               ///< True if the entire file has been read.
+
   public:
 
     /// @brief Constructor for the class. A single constructor is provided and the default constructor is deleted.
@@ -186,100 +192,13 @@ namespace GCL
     /// @throws std::bad_alloc
     /// @version 2020-04-27/GGB - Function created.
 
-    CConfigurationReader(boost::filesystem::path const &filename, std::string seperatorChar = "=", std::string commentChar = "#")
-      : filename_(filename), seperatorChar_(seperatorChar), commentChar_(commentChar)
+    CReaderVanilla(boost::filesystem::path const &filename, std::string seperatorChar = "=", std::string commentChar = "#")
+      : CReaderCore(filename, seperatorChar, commentChar)
     {
     }
 
-    /// @brief Returns a tag value.
-    /// @param[in] tagName: The name of the tag to find.
-    /// @returns A std::optional containing the data (if found)
-    /// @throws
-    /// @version 2020-04-27/GGB - Function created.
+  }; // class
 
-
-    std::optional<std::string> tagValueString(std::string const &tagName)
-    {
-      return std::move(readTag(tagName));
-    }
-
-    /// @brief Returns a double tag value.
-    /// @param[in] tagName: The name of the tag to find.
-    /// @returns A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
-    /// @throws std::runtime_error - The value was not able to be converted.
-    /// @version 2020-04-27/GGB - Function created.
-
-    std::optional<double> tagValueDouble(std::string const &tagName)
-    {
-      std::optional<double> returnValue;
-
-      std::optional<std::string> value = readTag(tagName);
-
-      if (value)
-      {
-        try
-        {
-          returnValue = std::stod(*value);  // According to standard if the stod throws, then the optional should be false.
-        }
-        catch(std::invalid_argument const &e)
-        {
-            // Could not convert the value.
-
-          DEBUGMESSAGE(e.what());
-          throw std::runtime_error("Unable to convert tag value to double");
-        }
-        catch(std::out_of_range const &e)
-        {
-            // Unusual to get an double that is out of range.
-
-          DEBUGMESSAGE(e.what());
-          throw std::runtime_error("Unable to convert tag value to double");
-        };
-      };
-
-      return returnValue;
-    }
-
-    /// @brief Returns an int32 tag value.
-    /// @param[in] tagName: The name of the tag to find.
-    /// @returns A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
-    /// @throws std::runtime_error - The value was not able to be converted.
-    /// @throws std::out_of_range - The value was too large for the type.
-    /// @version 2020-04-27/GGB - Function created.
-
-    std::optional<std::int32_t> tagValueInt32(std::string const &tagName)
-    {
-      std::optional<std::int32_t> returnValue;
-
-      std::optional<std::string> value = readTag(tagName);
-
-      if (value)
-      {
-        try
-        {
-          returnValue = std::stol(*value, 0, 0);  // According to standard if the stod throws, then the optional should be false.
-        }
-        catch(std::invalid_argument const &e)
-        {
-            // Could not convert the value.
-
-          DEBUGMESSAGE(e.what());
-          throw std::runtime_error("Unable to convert tag value to double");
-        }
-        catch(std::out_of_range const &e)
-        {
-            // Unusual to get an double that is out of range.
-
-          DEBUGMESSAGE(e.what());
-          throw;    // Rethrow the out_of_range.
-        };
-      };
-
-      return returnValue;
-    }
-
-
-  };
 } // namespace GCL
 
-#endif // GCL_CONFIGURATIONREADER_HPP
+#endif // GCL_READERVANILLA_HPP

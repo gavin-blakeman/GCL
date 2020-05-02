@@ -99,10 +99,12 @@ HEADERS += \
     include/alarm/alarmDaily.h \
     include/alarm/alarmWeekly.h \
     include/error.h \
-    include/configurationReader/configurationReader.hpp \
     include/logger/loggerCore.h \
     include/logger/fileSink.h \
-    include/logger/streamSink.h
+    include/logger/streamSink.h \
+    include/configurationReader/readerSections.hpp \
+    include/configurationReader/readerVanilla.hpp \
+    include/configurationReader/readerCore.hpp
 
 OTHER_FILES += \
     changelog.txt
