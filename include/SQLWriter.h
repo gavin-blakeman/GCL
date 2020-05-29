@@ -43,7 +43,7 @@
 
 #ifndef GCL_CONTROL
 
-  // Standard Header Files
+// Standard Header Files
 
 #include <cstdint>
 #include <initializer_list>
@@ -56,7 +56,7 @@
 #include <utility>
 #include <vector>
 
-  // Miscellaneous Library header files
+// Miscellaneous Library header files
 
 #include "boost/filesystem.hpp"
 #include <SCL>
@@ -76,8 +76,24 @@
 
 namespace GCL
 {
-  namespace sqlwriter
+  class sqlWriter
   {
+  private:
+    struct SColumnData
+    {
+      std::pair<std::string, std::string> columnName;           ///< TableName, ColumnName
+      bool unique;
+    };
+    typedef std::map<std::string, SColumnData> TColumnMap;
+
+    struct STableData
+    {
+      std::pair<std::string, std::string> tableName;            ///<
+      TColumnMap columnData;
+    };
+    typedef std::map<std::string, STableData> TDatabaseMap;
+
+  public:
     enum EOrderBy
     {
       ASC,            ///< Ascending
@@ -98,21 +114,15 @@ namespace GCL
       JOIN_FULL       ///< Full outer join
     };
 
-    struct SColumnData
+    class bindValue : public std::string
     {
-      std::pair<std::string, std::string> columnName;           ///< TableName, ColumnName
-      bool unique;
+    private:
+      bindValue() = delete;
+    public:
+      bindValue(std::string const &st) : std::string(st) {}
     };
-    typedef std::map<std::string, SColumnData> TColumnMap;
 
-    struct STableData
-    {
-      std::pair<std::string, std::string> tableName;            ///<
-      TColumnMap columnData;
-    };
-    typedef std::map<std::string, STableData> TDatabaseMap;
-
-    typedef SCL::CAny parameter;
+    using parameter = SCL::any;
     typedef std::pair<std::string, parameter> parameterPair;
     typedef std::pair<std::string, std::string> stringPair;
     typedef std::tuple<std::string, std::string, parameter> parameterTriple;
@@ -125,117 +135,104 @@ namespace GCL
     typedef std::vector<orderBy_t> orderByStorage_t;
 
     typedef std::vector<parameterStorage> valueStorage;
+    typedef std::tuple<std::string, std::string, EJoin, std::string, std::string> parameterJoin;
 
-    class bindValue : public std::string
+    typedef std::vector<parameterJoin> joinStorage;
+
+  private:
+    EDialect dialect = MYSQL;
+
+    TDatabaseMap databaseMap;
+    enum EQueryType
     {
-    public:
-      bindValue(std::string const &st) : std::string(st) {}
-
+      qt_none,
+      qt_select,
+      qt_insert,
+      qt_delete,
+      qt_update,
+      qt_upsert,
     };
 
-    class CSQLWriter
-    {
-    public:
-      typedef std::pair<std::string, std::string> stringPair;
-      typedef std::tuple<std::string, std::string, EJoin, std::string, std::string> parameterJoin;
+    std::vector<std::string> selectFields;
+    stringPairStorage fromFields;
+    tripleStorage whereFields;
+    std::string insertTable;
+    valueStorage valueFields;
+    orderByStorage_t orderByFields;
+    joinStorage joinFields;
+    std::optional<std::uint64_t> offsetValue;
+    std::optional<std::uint64_t> limitValue;
+    std::optional<std::string> countValue;
+    bool distinct_ = false;
+    stringPairStorage minFields;
+    stringPairStorage maxFields;
+    std::string updateTable;
+    pairStorage setFields;
+    std::string deleteTable;
 
-      typedef std::vector<parameterJoin> joinStorage;
+    EQueryType queryType;
+    std::string currentTable;
 
-    private:
-      EDialect dialect = MYSQL;
+    bool verifyOperator(std::string const &) const;
 
-      TDatabaseMap databaseMap;
-      enum EQueryType
-      {
-        qt_none,
-        qt_select,
-        qt_insert,
-        qt_delete,
-        qt_update,
-        qt_upsert,
-      };
+  protected:
+    void setTableMap(std::string const &, std::string const &);
+    void setColumnMap(std::string const &, std::string const &, std::string const &);
 
-      std::vector<std::string> selectFields;
-      stringPairStorage fromFields;
-      tripleStorage whereFields;
-      std::string insertTable;
-      valueStorage valueFields;
-      orderByStorage_t orderByFields;
-      joinStorage joinFields;
-      std::optional<std::uint64_t> offsetValue;
-      std::optional<std::uint64_t> limitValue;
-      std::optional<std::string> countValue;
-      bool distinct_ = false;
-      stringPairStorage minFields;
-      stringPairStorage maxFields;
-      std::string updateTable;
-      pairStorage setFields;
-      std::string deleteTable;
+    std::string getColumnMap(std::string const &) const;
+    std::string getTableMap(std::string const &) const;
 
-      EQueryType queryType;
-      std::string currentTable;
+    std::string createSelectQuery() const;
+    std::string createInsertQuery() const;
+    std::string createUpdateQuery() const;
+    std::string createDeleteQuery() const;
+    std::string createUpsertQuery() const;
 
-      bool verifyOperator(std::string const &) const;
+    std::string createOrderByClause() const;
+    std::string createSelectClause() const;
+    std::string createFromClause() const;
+    std::string createJoinClause() const;
+    std::string createWhereClause() const;
+    std::string createSetClause() const;
+    std::string createLimitClause() const;
 
-    protected:
-      void setTableMap(std::string const &, std::string const &);
-      void setColumnMap(std::string const &, std::string const &, std::string const &);
+  public:
+    void setDialect(EDialect d) {dialect = d;}
 
-      std::string getColumnMap(std::string const &) const;
-      std::string getTableMap(std::string const &) const;
+    void resetQuery();
+    void resetWhere();
 
-      std::string createSelectQuery() const;
-      std::string createInsertQuery() const;
-      std::string createUpdateQuery() const;
-      std::string createDeleteQuery() const;
-      std::string createUpsertQuery() const;
+    sqlWriter &count(std::string const &);
+    sqlWriter &deleteFrom(std::string const &);
+    sqlWriter &distinct();
+    sqlWriter &from(std::string const &, std::string const & = "");
+    sqlWriter &from(std::initializer_list<std::string>);
+    sqlWriter &insertInto(std::string, std::initializer_list<std::string>);
+    sqlWriter &insertInto(std::string);
+    sqlWriter &join(std::initializer_list<parameterJoin>);
+    sqlWriter &limit(std::uint64_t);
+    sqlWriter &max(std::string const &, std::string const & = "");
+    sqlWriter &min(std::string const &, std::string const & = "");
+    sqlWriter &offset(std::uint64_t);
+    sqlWriter &orderBy(std::initializer_list<std::pair<std::string, EOrderBy>>);
+    sqlWriter &select();
+    sqlWriter &select(std::initializer_list<std::string>);
+    sqlWriter &set(std::string const &, SCL::any const &);
+    sqlWriter &set(std::initializer_list<parameterPair>);
+    sqlWriter &update(std::string const &);
+    sqlWriter &upsert(std::string const &);
+    sqlWriter &where(std::string const &, std::string const &, SCL::any const &);
+    sqlWriter &where(std::initializer_list<parameterTriple>);
+    sqlWriter &values(std::initializer_list<parameterStorage>);
 
-      std::string createOrderByClause() const;
-      std::string createSelectClause() const;
-      std::string createFromClause() const;
-      std::string createJoinClause() const;
-      std::string createWhereClause() const;
-      std::string createSetClause() const;
-      std::string createLimitClause() const;
+    std::string string() const;
 
-    public:
-      void setDialect(EDialect d) {dialect = d;}
+    virtual void readMapFile(boost::filesystem::path const &);
 
-      void resetQuery();
-      void resetWhere();
+    virtual bool createTable(std::string const &tableName);
+    virtual bool createColumn(std::string const &tableName, std::string const &columnName);
+  };
 
-      CSQLWriter &count(std::string const &);
-      CSQLWriter &deleteFrom(std::string const &);
-      CSQLWriter &distinct();
-      CSQLWriter &from(std::string const &, std::string const & = "");
-      CSQLWriter &from(std::initializer_list<std::string>);
-      CSQLWriter &insertInto(std::string, std::initializer_list<std::string>);
-      CSQLWriter &insertInto(std::string);
-      CSQLWriter &join(std::initializer_list<parameterJoin>);
-      CSQLWriter &limit(std::uint64_t);
-      CSQLWriter &max(std::string const &, std::string const & = "");
-      CSQLWriter &min(std::string const &, std::string const & = "");
-      CSQLWriter &offset(std::uint64_t);
-      CSQLWriter &orderBy(std::initializer_list<std::pair<std::string, EOrderBy>>);
-      CSQLWriter &select();
-      CSQLWriter &select(std::initializer_list<std::string>);
-      CSQLWriter &set(std::string const &, SCL::CAny const &);
-      CSQLWriter &set(std::initializer_list<parameterPair>);
-      CSQLWriter &update(std::string const &);
-      CSQLWriter &upsert(std::string const &);
-      CSQLWriter &where(std::string const &, std::string const &, SCL::CAny const &);
-      CSQLWriter &where(std::initializer_list<parameterTriple>);
-      CSQLWriter &values(std::initializer_list<parameterStorage>);
-
-      std::string string() const;
-
-      virtual void readMapFile(boost::filesystem::path const &);
-
-      virtual bool createTable(std::string const &tableName);
-      virtual bool createColumn(std::string const &tableName, std::string const &columnName);
-    };
-
-  } // namespace database
 }  // namespace GCL
 
 #endif // GCL_CONTROL

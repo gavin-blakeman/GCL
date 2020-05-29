@@ -41,6 +41,8 @@
   // Standard libraries
 
 #include <cstdint>
+#include <ctime>
+#include <iostream>
 #include <tuple>
 #include <string>
 
@@ -64,5 +66,7 @@ namespace GCL
   //std::string sprintfHMS(FP_t const &, int=2);
 
 }   // namespace GCL
+
+  std::ostream &operator<<(std::ostream &, std::tm const &);
 
 #endif // FUNCTIONS_H

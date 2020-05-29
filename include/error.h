@@ -122,7 +122,7 @@ namespace GCL
 
   /// @brief The CRuntimeAssert class throws exceptions to indicate assertion failures within a library.
   /// @details Assertion exceptions are used when parameters to functions, or calculated values within functions are checked for
-  /// correctness. Exceptions are thrown if the assertion fails.
+  ///          correctness. Exceptions are thrown if the assertion fails.
   /// @note The CodeError class should be used for unreachable code errors.
 
   class CRuntimeAssert: public std::runtime_error

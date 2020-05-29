@@ -52,11 +52,10 @@ namespace GCL
 {
   /// @Pretty print a 2^ value. (IE bytes.)
   /// @details Convert a value in bytes into a string including the size. (KB, MB etc)
-  /// @param[in] bytes - The number of bytes to print.
+  /// @param[in] bytes: The number of bytes to print.
   /// @returns The string indicating the bytes in a relevant human readable format.
   /// @throws None.
-  //
-  // 2015-01-02/GGB - Function created.
+  /// @version 2015-01-02/GGB - Function created.
 
   std::string prettyPrintBytes(size_t bytes)
   {
@@ -82,11 +81,10 @@ namespace GCL
   }
 
   /// @brief Converts an IPv4 address to a string
-  /// @param[in] ip - The IPv4 address to convert to a string.
+  /// @param[in] ip: The IPv4 address to convert to a string.
   /// @returns The ipV4 address as a string.
   /// @throws None.
-  //
-  // 2015-06-14/GGB - Function created.
+  /// @version 2015-06-14/GGB - Function created.
 
   std::string IPtoString(const TIPV4 &ip)
   {
@@ -100,11 +98,10 @@ namespace GCL
   }
 
   /// @brief Converts a string to an IP address.
-  /// @param[in] ip - The string to search for the IP address.
+  /// @param[in] ip: The string to search for the IP address.
   /// @returns The IPV4 address.
   /// @throws None.
-  //
-  // 2015-06-13/GGB - Function created.
+  /// @version 2015-06-13/GGB - Function created.
 
   TIPV4 stringToIP(std::string const &ip)
   {
@@ -117,7 +114,7 @@ namespace GCL
     return std::make_tuple(bytes[0], bytes[1], bytes[2], bytes[3]);
   }
 
-  /// @brief Firmats a time value in (seconds past midnight) to a time.
+  /// @brief Formats a time value in (seconds past midnight) to a time.
   /// @param[in] seconds: number of seconds past midnight.
   /// @returns The time as a string HH:mm:ss.ss
   /// @throws
@@ -135,9 +132,9 @@ namespace GCL
   }
 
   /// @brief Formats a double in HMS format with the required number of decimal places.
-  /// @param[in] dNumber - number to format in hh.hhhhhh format.
-  /// @param[in] dDecimal - Number of digits after the decimal place
-  /// @param[out] szBuffer = "23h59'59.99s
+  /// @param[in] dNumber: number to format in hh.hhhhhh format.
+  /// @param[in] dDecimal: Number of digits after the decimal place
+  /// @param[out] szBuffer: "23h59'59.99s
   /// @throws None.
   /// @details Uses the secure form of sprintf.
   /// @version 2009-09-06/GGB - Function created.
@@ -269,3 +266,17 @@ namespace GCL
   }
 
 } // namespace GCL
+
+/// @brief Stream output operator for std::tm
+/// @param[in] os: The output stream.
+/// @param[in] dateValue: The date value to output.
+/// @returns A reference to os.
+/// @throws
+/// @version 2020-05-25/GGB - Function created.
+
+std::ostream &operator<<(std::ostream &os, std::tm const &dateValue)
+{
+  os << dateValue.tm_year << "-" << dateValue.tm_mon << "-" << dateValue.tm_mday;
+
+  return os;
+}
