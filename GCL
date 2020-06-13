@@ -65,4 +65,14 @@
 #include "include/SQLWriter.h"
 #include "include/Resource.h"
 
+  // Inject the logger functions into the global namespace.
+
+using GCL::logger::CRITICALMESSAGE;
+using GCL::logger::ERRORMESSAGE;
+using GCL::logger::WARNINGMESSAGE;
+using GCL::logger::NOTICEMESSAGE;
+using GCL::logger::INFOMESSAGE;
+using GCL::logger::DEBUGMESSAGE;
+using GCL::logger::TRACEMESSAGE;
+
 #endif //GCL_H

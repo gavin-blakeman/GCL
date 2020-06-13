@@ -72,7 +72,7 @@
 /// with exceptions to indicate issues.
 /// @section sec2 class CSQLWriter
 /// There is a single class that implements the SQL Writer.
-/// This is placed in the GCL::sqlwriter namespace.
+/// This is placed in the GCL::sqlWriter namespace.
 
 namespace GCL
 {

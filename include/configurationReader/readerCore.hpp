@@ -55,6 +55,8 @@
 
 namespace GCL
 {
+  using GCL::logger::DEBUGMESSAGE;
+
   class CReaderCore
   {
   private:

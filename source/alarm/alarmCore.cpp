@@ -42,6 +42,8 @@ namespace GCL
   namespace alarm
   {
 
+    using GCL::logger::CRITICALMESSAGE;
+
     /// @brief Constructor for the CAlarmType class.
     /// @param[in] callbackFunction: The callback function for the alarm.
     /// @param[in] callbackData: The callback data to use with the callback function.

@@ -200,25 +200,110 @@ namespace GCL
 
     CLogger &defaultLogger();
 
-      // Some macros to simplify life
+      // Some inline functions to simplify life
 
-#define LOGMESSAGE(severity, message) GCL::logger::defaultLogger().logMessage(GCL::logger::severity, message)
-#define CRITICALMESSAGE(message) GCL::logger::defaultLogger().logMessage(GCL::logger::critical, message)
-#define ERRORMESSAGE(message) GCL::logger::defaultLogger().logMessage(GCL::logger::error, message)
-#define WARNINGMESSAGE(message) GCL::logger::defaultLogger().logMessage(GCL::logger::warning, message)
-#define NOTICEMESSAGE(message) GCL::logger::defaultLogger().logMessage(GCL::logger::info, message)
-#define INFOMESSAGE(message) GCL::logger::defaultLogger().logMessage(GCL::logger::info, message)
-#define DEBUGMESSAGE(message) GCL::logger::defaultLogger().logMessage(GCL::logger::debug, message)
-#define TRACEMESSAGE(message) GCL::logger::defaultLogger().logMessage(GCL::logger::trace, message)
+    /// @brief Function to log a message.
+    /// @param[in] severity: The severity of the message.
+    /// @param[in] message: The message to log.
+    /// @throws
+    /// @version 2020-06-13/GGB - Converted from macro to function.
+
+    inline void LOGMESSAGE(ESeverity severity, std::string const &message)
+    {
+      defaultLogger().logMessage(severity, message);
+    }
+
+    /// @brief Function to log a critical message.
+    /// @param[in] message: The message to log.
+    /// @throws
+    /// @version 2020-06-13/GGB - Converted from macro to function.
+
+    inline void CRITICALMESSAGE(std::string const &message)
+    {
+      defaultLogger().logMessage(critical, message);
+    }
+
+    /// @brief Function to log a critical message.
+    /// @param[in] logger: The logger to use for logging.
+    /// @param[in] message: The message to log.
+    /// @throws
+    /// @version 2020-06-13/GGB - Converted from macro to function.
+
+    inline void CRITICALMESSAGE(CLogger &logger, std::string const &message)
+    {
+      logger.logMessage(critical, message);
+    }
+
+    /// @brief Function to log an error message.
+    /// @param[in] message: The message to log.
+    /// @throws
+    /// @version 2020-06-13/GGB - Converted from macro to function.
+
+    inline void ERRORMESSAGE(std::string const &message)
+    {
+      defaultLogger().logMessage(error, message);
+    }
+
+    /// @brief Function to log an warning message.
+    /// @param[in] message: The message to log.
+    /// @throws
+    /// @version 2020-06-13/GGB - Converted from macro to function.
+
+    inline void WARNINGMESSAGE(std::string const &message)
+    {
+      defaultLogger().logMessage(warning, message);
+    }
+
+    /// @brief Function to log an notice message.
+    /// @param[in] message: The message to log.
+    /// @throws
+    /// @version 2020-06-13/GGB - Converted from macro to function.
+
+    inline void NOTICEMESSAGE(std::string const &message)
+    {
+      defaultLogger().logMessage(notice, message);
+    }
+
+    /// @brief Function to log an notice message.
+    /// @param[in] message: The message to log.
+    /// @throws
+    /// @version 2020-06-13/GGB - Converted from macro to function.
+
+    inline void INFOMESSAGE(std::string const &message)
+    {
+      defaultLogger().logMessage(info, message);
+    }
+
+    /// @brief Function to log an debug message.
+    /// @param[in] message: The message to log.
+    /// @throws
+    /// @version 2020-06-13/GGB - Converted from macro to function.
+
+    inline void DEBUGMESSAGE(std::string const &message)
+    {
+      defaultLogger().logMessage(debug, message);
+    }
+
+    /// @brief Function to log a trace function entry point.
+    /// @param[in] message: The message to log.
+    /// @throws
+    /// @version 2020-06-13/GGB - Converted from macro to function.
+
+    inline void TRACEMESSAGE(std::string const &message)
+    {
+      defaultLogger().logMessage(trace, message);
+    }
+
+    /* Note the following two macros cannot be changed as they pick up the name of the function on entry and exit. This can
+     * AFAIK only be done with the macro compiler and not the standard compiler. */
+
 #define TRACEENTER GCL::logger::defaultLogger().logMessage(GCL::logger::trace, "Entering Function: " + std::string(__PRETTY_FUNCTION__) + ". File: " + std::string(__FILE__) + ". Line: " + std::to_string(__LINE__))
 #define TRACEEXIT GCL::logger::defaultLogger().logMessage(GCL::logger::trace, "Exiting Function: " + std::string(__PRETTY_FUNCTION__) + ". File: " + std::string(__FILE__) + ". Line: " + std::to_string(__LINE__))
-      } // namespace logger
+
+  } // namespace logger
 } // namespace GCL
 
 #else // GCL_CONTROL
-#define LOGMESSAGE(severity, message)
-#define DEBUGMESSAGE(message)
-#define TRACEMESSAGE(message)
 #define TRACEENTER
 #define TRACEEXIT
 #endif    // GCL_CONTROL
