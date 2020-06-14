@@ -52,6 +52,7 @@
 
 namespace GCL
 {
+  using GCL::logger::LOGEXCEPTION;
 
   typedef std::uint16_t TErrorCode;
 
@@ -59,7 +60,7 @@ namespace GCL
   /// @details Errors can be of any type. The exception allows a library and error number within a library to be specified.
   /// Each error has a library name, an error number and an error description. These can be loaded at runtime.
 
-  class CError : public std::runtime_error
+  class [[deprecated]] CError : public std::runtime_error
   {
   private:
     struct SErrorEntry
@@ -99,8 +100,8 @@ namespace GCL
 
   /// @brief The CCodeError class is used to throw exceptions to indicate code errors within a library.
   /// @details Code exceptions are thrown when the running code reaches places that are theoretically impossible to reach.
-  /// The exceptions includes data about the file name and line number where the exception occurred in order to allow easy
-  /// tracking of where the exception was thrown.
+  ///          The exceptions includes data about the file name and line number where the exception occurred in order to allow easy
+  ///          tracking of where the exception was thrown.
 
   class CCodeError : public std::runtime_error
   {
@@ -110,14 +111,12 @@ namespace GCL
     std::string fileName;
     std::string timeStamp;
 
-  public:
-    inline explicit CCodeError(std::string library, std::string file, std::string time, size_t newLine)
-      : std::runtime_error("Unreachable Code Error"), library_(library), lineNo(newLine), fileName(file), timeStamp(time)
-    { logErrorMessage(); }
+    std::string errorMessage(std::string const &, std::string const &, std::string const &, std::size_t) const;
 
-    virtual std::string errorMessage() const;
-    std::string library() const { return library_; }
-    void logErrorMessage() const;
+  public:
+    inline explicit CCodeError(std::string library, std::string fileName, std::string timeStamp, size_t lineNumber)
+      : std::runtime_error(errorMessage(library, fileName, timeStamp, lineNumber))
+    { LOGEXCEPTION(what()); }
   };
 
   /// @brief The CRuntimeAssert class throws exceptions to indicate assertion failures within a library.
@@ -128,34 +127,15 @@ namespace GCL
   class CRuntimeAssert: public std::runtime_error
   {
   private:
-    std::string library_;
-    size_t lineNo;
-    std::string fileName;
-    std::string timeStamp;
-    std::string expression;
-    std::string message;
+    std::string errorMessage(std::string const &, std::string const &, std::string const &, std::string const &, std::size_t, std::string const &) const;
 
   public:
-    explicit CRuntimeAssert(std::string library, std::string ne, std::string newFile, std::string newTime, size_t newLine,
-                            std::string nm)
-      : std::runtime_error("Runtime Assertion"), library_(library), lineNo(newLine), fileName(newFile), timeStamp(newTime),
-        expression(ne), message(nm)
+    explicit CRuntimeAssert(std::string const &library, std::string const &expression, std::string const &fileName,
+                            std::string const &timeStamp, size_t lineNumber, std::string const &message)
+      : std::runtime_error(errorMessage(library, expression, fileName, timeStamp, lineNumber, message))
     {
-      std::string messageString;
-
-      messageString = "Assertion '" + expression + "' failed in library " + library_ + " file '";
-
-      messageString += fileName + "' at line '" + std::to_string(lineNo) + "'.";
-
-      if (!message.empty())
-      {
-        messageString += " " + message;
-      }
-
-      logger::defaultLogger().logMessage(logger::error, messageString);
+      LOGEXCEPTION(what());
     }
-
-    std::string library() const { return library_; }
   };
 
   class search_error : public std::runtime_error

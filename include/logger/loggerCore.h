@@ -86,6 +86,7 @@ namespace GCL
     enum ESeverity
     {
       trace,      ///< Lowest level log severity. Used for tracing program execution through function entry/exit.
+      exception,  ///< Used to capture exceptions. These do not need to be actioned as the code may manage them.
       debug,      ///< Used to display debugging messages.
       info,       ///< Information messages.
       notice,     ///< Legal notices etc.
@@ -103,6 +104,7 @@ namespace GCL
         bool fNotice;
         bool fInfo;
         bool fDebug;
+        bool fException;
         bool fTrace;
 
         bool allow(ESeverity);
@@ -294,11 +296,23 @@ namespace GCL
       defaultLogger().logMessage(trace, message);
     }
 
+    /// @brief Function to log an exception.
+    /// @param[in] message: The message to log.
+    /// @throws
+    /// @version 2020-06-14/GGB - Converted from macro to function.
+
+    inline void LOGEXCEPTION(std::string const &message)
+    {
+      defaultLogger().logMessage(exception, message);
+    }
+
     /* Note the following two macros cannot be changed as they pick up the name of the function on entry and exit. This can
      * AFAIK only be done with the macro compiler and not the standard compiler. */
 
 #define TRACEENTER GCL::logger::defaultLogger().logMessage(GCL::logger::trace, "Entering Function: " + std::string(__PRETTY_FUNCTION__) + ". File: " + std::string(__FILE__) + ". Line: " + std::to_string(__LINE__))
 #define TRACEEXIT GCL::logger::defaultLogger().logMessage(GCL::logger::trace, "Exiting Function: " + std::string(__PRETTY_FUNCTION__) + ". File: " + std::string(__FILE__) + ". Line: " + std::to_string(__LINE__))
+
+
 
   } // namespace logger
 } // namespace GCL

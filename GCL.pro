@@ -3,7 +3,7 @@
 # PROJECT:            General Class Library (GCL)
 # FILE:               GCL Project File
 # SUBSYSTEM:					Project File
-# LANGUAGE:						C++
+# LANGUAGE:						C++17
 # TARGET OS:					All (Standard C++)
 # LIBRARY DEPENDANCE:	None.
 # NAMESPACE:					GCL

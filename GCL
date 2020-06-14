@@ -73,6 +73,7 @@ using GCL::logger::WARNINGMESSAGE;
 using GCL::logger::NOTICEMESSAGE;
 using GCL::logger::INFOMESSAGE;
 using GCL::logger::DEBUGMESSAGE;
+using GCL::logger::LOGEXCEPTION;
 using GCL::logger::TRACEMESSAGE;
 
 #endif //GCL_H

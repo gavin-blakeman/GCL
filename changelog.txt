@@ -1,35 +1,43 @@
-﻿2020-04
+﻿2020-06
 -------
-UPDATE:   Copyright notices to include 2020.
-ADD:      CReaderSection - Added the configuration reader base class.
-ADD:      CReaderVanialla - Added the configuration reader base class.
-ADD:      CReaderCore - Added the configuration reader base class.
-CHANGE:   Logger - [information] changed to [info]
-ADD:      CSQLWriter - Added MySQL support for OFFSET coupled with LIMIT.
+CHANGE:     Logger - Logging macros changed to inline functions
+ADD:        Logging functions added to <GCL> to pull functions into global scope.
+DEPRECATE:  CError. Will need to be replaced with an extension to std::runtime_error that includes logging.
+REFACTOR:   CCodeError::errorMessage to CCodeError::what()
+ADD:        CLogger - Added exception log level and code. (potentially breaking)
+
+2020-04
+-------
+UPDATE:     Copyright notices to include 2020.
+ADD:        CReaderSection - Added the configuration reader base class.
+ADD:        CReaderVanialla - Added the configuration reader base class.
+ADD:        CReaderCore - Added the configuration reader base class.
+CHANGE:     Logger - [information] changed to [info]
+ADD:        CSQLWriter - Added MySQL support for OFFSET coupled with LIMIT.
 
 2020-03
 -------
-ADD:      CSQlWiter - Added a set(std::initializer_list...) function.
+ADD:        CSQlWiter - Added a set(std::initializer_list...) function.
 
 2019-12
 -------
-ADD:      CSQLWriter - Added Upsert query and code for MySQL.
-CHANGED:  CSQLWriter - Parameter for limit() function changed to std::size_t from long.
+ADD:        CSQLWriter - Added Upsert query and code for MySQL.
+CHANGED:    CSQLWriter - Parameter for limit() function changed to std::size_t from long.
 
 2019.10
 -------
-CHANGED:  CLogger - thread from boost::thread to std::thread.
-CHANGED:  CLogger - from boost::chrono to std::chrono
-CHANGED:  CSQLWriter - Storage type of the orderBy types.
-CHANGED:  CSQLWriter - Moved enumerations out of the class (breaking)
-CHANGED:  CSQLWriter - boost::optional to std::optional
+CHANGED:    CLogger - thread from boost::thread to std::thread.
+CHANGED:    CLogger - from boost::chrono to std::chrono
+CHANGED:    CSQLWriter - Storage type of the orderBy types.
+CHANGED:    CSQLWriter - Moved enumerations out of the class (breaking)
+CHANGED:    CSQLWriter - boost::optional to std::optional
 
 2018.08
 -------
-BUG #144: CFileSink - Default rotation method to valid value
-BUG #142: CLogger - Create std::cerr logger sink in constructor.
+BUG #144:   CFileSink - Default rotation method to valid value
+BUG #142:   CLogger - Create std::cerr logger sink in constructor.
 
 2016.05
 -------
-CHANGED:  MappedSQLWriter.xxx to SQLWriter.xxx
-CHANGED:  Class CMappedSQLWriter to class CSQLWriter and deleted all mapping functions and support.
+CHANGED:    MappedSQLWriter.xxx to SQLWriter.xxx
+CHANGED:    Class CMappedSQLWriter to class CSQLWriter and deleted all mapping functions and support.

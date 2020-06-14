@@ -75,6 +75,7 @@ namespace GCL
     /// @returns true if the severity is allowed
     /// @returns false otherwise
     /// @throws None.
+    /// @version 2020-06-14/GGB - Added exception support.
     /// @version 2016-05-06/GGB - Updated to allow critical errors.
 
     bool CSeverity::allow(ESeverity s)
@@ -83,12 +84,17 @@ namespace GCL
 
       switch (s)
       {
-      case trace:
-        returnValue = fTrace;
-        break;
-      case debug:
-        returnValue = fDebug;
-        break;
+        case trace:
+          returnValue = fTrace;
+          break;
+        case exception:
+        {
+          returnValue = fException;
+          break;
+        };
+        case debug:
+          returnValue = fDebug;
+          break;
       case info:
         returnValue = fInfo;
         break;
@@ -125,7 +131,7 @@ namespace GCL
     /// @version 2018-08-14/GGB - Changed defaults on severity to not include trace and debug.
     /// @version 2014-12-25/GGB - Function created.
 
-    CLoggerSink::CLoggerSink() : timeStamp_(true), severityStamp_(true), logSeverity{true, true, true, true, true, false, false}
+    CLoggerSink::CLoggerSink() : timeStamp_(true), severityStamp_(true), logSeverity{true, true, true, true, true, false, true, false}
     {
     }
 
@@ -176,6 +182,7 @@ namespace GCL
     /// @param[in] ss: message string.
     /// @returns A std::string containing the combined timestamp and string.
     /// @throws None.
+    /// @version 2020-06-14/GGB - Added [exception] for exception.
     /// @version 2020-04-26/GGB - [Information] changed to [info]
     /// @version 2019-10-23/GGB - Updated to use std::chrono.
     /// @version 2014-07-21/GGB - Function created.
@@ -226,6 +233,10 @@ namespace GCL
             os << "[debug] ";
             break;
           };
+          case exception:
+          {
+            os << "[exception] ";
+          }
           case trace:
           {
             os << "[trace] ";
@@ -257,8 +268,9 @@ namespace GCL
     /// @version 2018-08-13/GGB - Bug #141 - Added auto-creation of std::cerr sink.
     /// @version 2014-12-24/GGB - Function created.
 
-    CLogger::CLogger() : terminateThread(false), writerThread(nullptr), defaultStreamSink(std::make_shared<CStreamSink>(std::cerr)),
-      logSeverity(warning)
+    CLogger::CLogger()
+      : terminateThread(false), writerThread(nullptr), defaultStreamSink(std::make_shared<CStreamSink>(std::cerr)),
+        logSeverity(warning)
     {
       writerThread = std::make_unique<std::thread>(&CLogger::writer, this);
 

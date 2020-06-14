@@ -144,33 +144,66 @@ namespace GCL
   //********************************************************************************************************************************
 
   /// @brief Converts the error message to a string.
+  /// @param[in] library: The name of the library. (May be an empty string)
+  /// @param[in] fileName: The name of the source file having the error.
+  /// @param[in] timeStamp: The build timestamp of the source file.
+  /// @param[in] lineNo: The line number that raises the error.
   /// @returns String containing the error message details.
   /// @throws None.
+  /// @version 2020-06-14/GGB - Error text updated.
   /// @version 2015-07-28/GGB - Updated message to reflect library.
   /// @version 2014-12-25/GGB - Updated to working code.
   /// @version 2013-01-26/GGB - Function created
 
-  std::string CCodeError::errorMessage() const
+  std::string CCodeError::errorMessage(std::string const &library, std::string const &fileName,
+                                       std::string const &timeStamp, std::size_t lineNo) const
   {
     std::ostringstream o;
 
-    o << "A code error has occurred in the " << library_ << " Library." << std::endl;
-    o << "In file: " << fileName << " dated: " << timeStamp << " at line: " << lineNo << std::endl;
+    o << "Code Error. (Generally unreachable code)" << std::endl;
+    if (!library.empty())
+    {
+      o << "Library: " << library << " ";
+    };
+    o << "File: " << fileName << " dated: " << timeStamp << " at line: " << lineNo << std::endl;
 
     return o.str();
   }
 
-  /// @brief Function to write the error message to a logFile.
-  /// @details This is not automatically done in the library when an exception is thrown as the library may be able to recover from
-  /// the exception without having to terminate.
-  /// @throws None.
-  /// @version 2014-12-24/GGB - Function created.
+  /// @brief Creates the message string for the runtime assertion.
+  /// @param[in] library: The name of the library. (May be an empty string)
+  /// @param[in] expression: The expression that failed.
+  /// @param[in] fileName: The name of the source file that generated the error.
+  /// @param[in] timeStamp: The build timestamp.
+  /// @param[in] lineNumber: The line number that created the exception.
+  /// @param[in] message: The message to associate with the exception.
+  /// @returns A string to use for creating a standardised description for the exception.
+  /// @throws std::bad_alloc
+  /// @version 2020-04-14/GGB - Function created.
 
-  void CCodeError::logErrorMessage() const
+  std::string CRuntimeAssert::errorMessage(std::string const &library, std::string const &expression,
+                                           std::string const &fileName, std::string const &timeStamp,
+                                           std::size_t lineNumber, std::string const &message) const
   {
-    GCL::logger::defaultLogger().logMessage(GCL::logger::error,
-                                            "A Code Error has occurred in the " + library_ + " library. In file: " + fileName +
-                                         ". At line: " + boost::lexical_cast<std::string>(lineNo));
+    std::string messageString;
+
+    messageString = "Failed Assertion: '" + expression + "'  failed in ";
+
+    if (!library.empty())
+    {
+      messageString += " library " + library + ", ";
+    };
+
+    messageString += " file '";
+
+    messageString += fileName + "' at line '" + std::to_string(lineNumber) + "'.";
+
+    if (!message.empty())
+    {
+      messageString += " " + message;
+    }
+
+    return messageString;
   }
 
   //********************************************************************************************************************************
