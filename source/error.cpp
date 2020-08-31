@@ -46,7 +46,7 @@
 
 namespace GCL
 {
-  class CLoader
+  class [[deprecated]] CLoader
   {
   private:
     void loadErrorMessages();

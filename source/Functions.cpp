@@ -174,14 +174,14 @@ namespace GCL
   /// @throws None.
   /// @version 2012-01-10/GGB - Function created.
 
-//  std::string sprintfHMS(const FP_t &hours, int decimals)
-//  {
-//    char szNumber[30];
+  std::string sprintfHMS(const FP_t &hours, int decimals)
+  {
+    char szNumber[30];
 
-//    sprintfHMS(szNumber, hours, decimals);
+    sprintfHMS(szNumber, hours, decimals);
 
-//    return std::string(szNumber);
-//  }
+    return std::string(szNumber);
+  }
 
   /// @brief Formats a double in DMS format with the required number of decimal places.
   /// @param[out] szBuffer: The array to write to

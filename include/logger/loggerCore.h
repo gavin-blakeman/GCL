@@ -246,6 +246,16 @@ namespace GCL
       defaultLogger().logMessage(error, message);
     }
 
+    /// @brief Function to log an error message.
+    /// @param[in] message: The message to log.
+    /// @throws
+    /// @version 2020-08-31/GGB - Converted from macro to function.
+
+    inline void ERRORMESSAGE(boost::format const &message)
+    {
+      ERRORMESSAGE(boost::str(message));
+    }
+
     /// @brief Function to log an warning message.
     /// @param[in] message: The message to log.
     /// @throws

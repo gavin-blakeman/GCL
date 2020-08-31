@@ -63,7 +63,7 @@ namespace GCL
   std::string sprintfDMS(double const &, bool = true, int = 0);
   int sprintfHMS(char *, FP_t, int=2);
   std::string sprintfHMS(std::uint32_t const &);
-  //std::string sprintfHMS(FP_t const &, int=2);
+  std::string sprintfHMS(FP_t const &, int=2);
 
 }   // namespace GCL
 
