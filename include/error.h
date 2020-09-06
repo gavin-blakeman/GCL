@@ -98,24 +98,23 @@ namespace GCL
     static bool addErrorMessage(std::string, TErrorCode, std::string);
   };
 
-  /// @brief The CCodeError class is used to throw exceptions to indicate code errors within a library.
-  /// @details Code exceptions are thrown when the running code reaches places that are theoretically impossible to reach.
-  ///          The exceptions includes data about the file name and line number where the exception occurred in order to allow easy
-  ///          tracking of where the exception was thrown.
+  /// @brief        The CCodeError class is used to throw exceptions to indicate code errors within a library.
+  /// @details      Code exceptions are thrown when the running code reaches places that are theoretically impossible to reach.
+  ///               The exceptions includes data about the file name and line number where the exception occurred in order to allow
+  ///               easy tracking of where the exception was thrown.
 
   class CCodeError : public std::runtime_error
   {
   private:
-    std::string library_;
     size_t lineNo;
     std::string fileName;
     std::string timeStamp;
 
-    std::string errorMessage(std::string const &, std::string const &, std::string const &, std::size_t) const;
+    std::string errorMessage(std::string const &, std::string const &, std::size_t) const;
 
   public:
-    inline explicit CCodeError(std::string library, std::string fileName, std::string timeStamp, size_t lineNumber)
-      : std::runtime_error(errorMessage(library, fileName, timeStamp, lineNumber))
+    inline explicit CCodeError(std::string fileName, std::string timeStamp, size_t lineNumber)
+      : std::runtime_error(errorMessage(fileName, timeStamp, lineNumber))
     { LOGEXCEPTION(what()); }
   };
 
@@ -127,12 +126,12 @@ namespace GCL
   class CRuntimeAssert: public std::runtime_error
   {
   private:
-    std::string errorMessage(std::string const &, std::string const &, std::string const &, std::string const &, std::size_t, std::string const &) const;
+    std::string errorMessage(std::string const &, std::string const &, std::string const &, std::size_t, std::string const &) const;
 
   public:
-    explicit CRuntimeAssert(std::string const &library, std::string const &expression, std::string const &fileName,
+    explicit CRuntimeAssert(std::string const &expression, std::string const &fileName,
                             std::string const &timeStamp, size_t lineNumber, std::string const &message)
-      : std::runtime_error(errorMessage(library, expression, fileName, timeStamp, lineNumber, message))
+      : std::runtime_error(errorMessage(expression, fileName, timeStamp, lineNumber, message))
     {
       LOGEXCEPTION(what());
     }
@@ -146,16 +145,16 @@ namespace GCL
   };
 
 #define ERROR(LIBRARY, ERROR) (throw(GCL::CError((#LIBRARY), (ERROR))))
-#define CODE_ERROR(LIBRARY) (throw(GCL::CCodeError((#LIBRARY),  __FILE__, __TIMESTAMP__, static_cast<size_t>(__LINE__)) ))
-#define RUNTIME_ASSERT(LIBRARY, EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert((#LIBRARY), (#EXPRESSION),  __FILE__, __TIMESTAMP__, (size_t) __LINE__, (MESSAGE)); }}
+#define CODE_ERROR (throw(GCL::CCodeError( __FILE__, __TIMESTAMP__, static_cast<size_t>(__LINE__)) ))
+#define RUNTIME_ASSERT(EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert((#EXPRESSION),  __FILE__, __TIMESTAMP__, (size_t) __LINE__, (MESSAGE)); }}
 
 }	// namespace GCL
 
 #else // GCL_CONTROL
 
 #define ERROR(LIBRARY, ERROR)
-#define CODE_ERROR(LIBRARY)
-#define RUNTIME_ASSERT(LIBRARY, EXPRESSION, MESSAGE)
+#define CODE_ERROR
+#define RUNTIME_ASSERT(EXPRESSION, MESSAGE)
 
 #endif // GCL_CONTROL
 

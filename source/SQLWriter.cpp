@@ -237,7 +237,7 @@ namespace GCL
 
   std::string sqlWriter::createSetClause() const
   {
-    RUNTIME_ASSERT(GCL, !setFields.empty(), "No Set fields defined for update query.");
+    RUNTIME_ASSERT(!setFields.empty(), "No Set fields defined for update query.");
 
     std::string returnValue = "SET ";
     bool firstValue = true;
@@ -310,7 +310,7 @@ namespace GCL
     //  1. The where() clauses should be populated. These need to be converted to insert clauses for the insert function.
     //  2. The set clause needs to be included in the insert clauses.
 
-    RUNTIME_ASSERT(GCL, dialect == MYSQL, "Upsert only implemented for MYSQL.");
+    RUNTIME_ASSERT(dialect == MYSQL, "Upsert only implemented for MYSQL.");
 
     std::string returnValue;
     std::string fieldNames;
@@ -684,7 +684,7 @@ namespace GCL
         }
         default:
         {
-          CODE_ERROR(AIRDAS);
+          CODE_ERROR;
           break;
         }
 
@@ -1328,7 +1328,7 @@ namespace GCL
       }
       default:
       {
-        CODE_ERROR("GCL");
+        CODE_ERROR;
         break;
       };
     }

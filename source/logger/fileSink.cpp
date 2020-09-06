@@ -113,7 +113,7 @@ namespace GCL
           {
               // The string length should not exceed 80 characters. If it does, this is bad and just exit with an error.
 
-            CODE_ERROR(GCL);
+            CODE_ERROR;
           };
 
           logFileFullName += std::string(szLocalTime);
@@ -140,7 +140,7 @@ namespace GCL
         };
         default:
         {
-          CODE_ERROR(GCL);
+          CODE_ERROR;
           break;
         }
       };

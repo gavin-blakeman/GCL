@@ -1,4 +1,9 @@
-﻿2020-06
+﻿2020-09
+-------
+CHANGE:     CRuntimeAssert - Removed parameter library from macro and class. (Breaking)
+CHANGE:     CCodeError - Removed parameter library from macro and class. (Breaking)
+
+2020-06
 -------
 CHANGE:     Logger - Logging macros changed to inline functions
 ADD:        Logging functions added to <GCL> to pull functions into global scope.
