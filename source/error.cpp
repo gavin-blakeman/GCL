@@ -137,11 +137,24 @@ namespace GCL
     };
   }
 
-  //********************************************************************************************************************************
-  //
-  // CCodeError
-  //
-  //********************************************************************************************************************************
+  /// @brief        Converts the error message to a string.
+  /// @param[in]    fileName: The name of the source file having the error.
+  /// @param[in]    timeStamp: The build timestamp of the source file.
+  /// @param[in]    lineNo: The line number that raises the error.
+  /// @returns      String containing the error message details.
+  /// @throws       std::bad_alloc
+  /// @version      2020-09-08/GGB - Function created
+
+  std::string CRuntimeError::errorMessage(std::string const &errorMessage, std::string const &fileName,
+                                          std::string const &timeStamp, std::size_t lineNo) const
+  {
+    std::ostringstream o;
+
+    o << "Runtime Error - " << errorMessage << std::endl;
+    o << "File: " << fileName << " dated: " << timeStamp << " at line: " << lineNo << std::endl;
+
+    return o.str();
+  }
 
   /// @brief        Converts the error message to a string.
   /// @param[in]    fileName: The name of the source file having the error.

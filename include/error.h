@@ -98,6 +98,22 @@ namespace GCL
     static bool addErrorMessage(std::string, TErrorCode, std::string);
   };
 
+  class CRuntimeError : public std::runtime_error
+  {
+  private:
+    CRuntimeError() = delete;
+    CRuntimeError(CRuntimeError const &) = delete;
+
+    std::string errorMessage(std::string const &, std::string const &, std::string const &, std::size_t) const;
+
+  public:
+    CRuntimeError(std::string const &errorString, std::string const &filename, std::string const &timeStamp, size_t lineNumber) :
+      std::runtime_error(errorString)
+    {
+      LOGEXCEPTION(errorMessage(errorString, filename, timeStamp, lineNumber));
+    }
+  };
+
   /// @brief        The CCodeError class is used to throw exceptions to indicate code errors within a library.
   /// @details      Code exceptions are thrown when the running code reaches places that are theoretically impossible to reach.
   ///               The exceptions includes data about the file name and line number where the exception occurred in order to allow
@@ -114,8 +130,10 @@ namespace GCL
 
   public:
     inline explicit CCodeError(std::string fileName, std::string timeStamp, size_t lineNumber)
-      : std::runtime_error(errorMessage(fileName, timeStamp, lineNumber))
-    { LOGEXCEPTION(what()); }
+      : std::runtime_error("Code Error.")
+    {
+      LOGEXCEPTION(errorMessage(fileName, timeStamp, lineNumber));
+    }
   };
 
   /// @brief The CRuntimeAssert class throws exceptions to indicate assertion failures within a library.
@@ -131,9 +149,9 @@ namespace GCL
   public:
     explicit CRuntimeAssert(std::string const &expression, std::string const &fileName,
                             std::string const &timeStamp, size_t lineNumber, std::string const &message)
-      : std::runtime_error(errorMessage(expression, fileName, timeStamp, lineNumber, message))
+      : std::runtime_error("Runtime Assert")
     {
-      LOGEXCEPTION(what());
+      LOGEXCEPTION(errorMessage(expression, fileName, timeStamp, lineNumber, message));
     }
   };
 
@@ -144,6 +162,7 @@ namespace GCL
     ~search_error() {}
   };
 
+#define RUNTIME_ERROR(MESSAGE) (throw GCL::CRuntimeError((MESSAGE),  __FILE__, __TIMESTAMP__, (size_t) __LINE__) )
 #define ERROR(LIBRARY, ERROR) (throw(GCL::CError((#LIBRARY), (ERROR))))
 #define CODE_ERROR (throw(GCL::CCodeError( __FILE__, __TIMESTAMP__, static_cast<size_t>(__LINE__)) ))
 #define RUNTIME_ASSERT(EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert((#EXPRESSION),  __FILE__, __TIMESTAMP__, (size_t) __LINE__, (MESSAGE)); }}

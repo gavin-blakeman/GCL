@@ -236,30 +236,30 @@ namespace GCL
       logger.logMessage(critical, message);
     }
 
-    /// @brief Function to log an error message.
-    /// @param[in] message: The message to log.
+    /// @brief      Function to log an error message.
+    /// @param[in]  message: The message to log.
     /// @throws
-    /// @version 2020-06-13/GGB - Converted from macro to function.
+    /// @version    2020-06-13/GGB - Converted from macro to function.
 
     inline void ERRORMESSAGE(std::string const &message)
     {
       defaultLogger().logMessage(error, message);
     }
 
-    /// @brief Function to log an error message.
-    /// @param[in] message: The message to log.
+    /// @brief      Function to log an error message.
+    /// @param[in]  message: The message to log.
     /// @throws
-    /// @version 2020-08-31/GGB - Converted from macro to function.
+    /// @version    2020-08-31/GGB - Converted from macro to function.
 
     inline void ERRORMESSAGE(boost::format const &message)
     {
       ERRORMESSAGE(boost::str(message));
     }
 
-    /// @brief Function to log an warning message.
-    /// @param[in] message: The message to log.
+    /// @brief      Function to log an warning message.
+    /// @param[in]  message: The message to log.
     /// @throws
-    /// @version 2020-06-13/GGB - Converted from macro to function.
+    /// @version    2020-06-13/GGB - Converted from macro to function.
 
     inline void WARNINGMESSAGE(std::string const &message)
     {
@@ -294,6 +294,16 @@ namespace GCL
     inline void DEBUGMESSAGE(std::string const &message)
     {
       defaultLogger().logMessage(debug, message);
+    }
+
+    /// @brief      Function to log an debug message.
+    /// @param[in]  message: The message to log.
+    /// @throws
+    /// @version    2020-09-08/GGB - Function created.
+
+    inline void DEBUGMESSAGE(boost::format const &message)
+    {
+      DEBUGMESSAGE(boost::str(message));
     }
 
     /// @brief Function to log a trace function entry point.
