@@ -46,21 +46,6 @@
 
 namespace GCL
 {
-  class [[deprecated]] CLoader
-  {
-  private:
-    void loadErrorMessages();
-  public:
-    CLoader();
-  };
-
-  static CLoader executeLoader;
-
-  CLoader::CLoader()
-  {
-    loadErrorMessages();
-  }
-
   /// @brief Function to add an error message to the error message list.
   /// @throws None.
   /// @version 2018-09-21/GGB - Updated to use new errorMessages() function.
@@ -145,13 +130,18 @@ namespace GCL
   /// @throws       std::bad_alloc
   /// @version      2020-09-08/GGB - Function created
 
-  std::string CRuntimeError::errorMessage(std::string const &errorMessage, std::string const &fileName,
-                                          std::string const &timeStamp, std::size_t lineNo) const
+  std::string CRuntimeError::errorMessage() const
   {
     std::ostringstream o;
 
-    o << "Runtime Error - " << errorMessage << std::endl;
-    o << "File: " << fileName << " dated: " << timeStamp << " at line: " << lineNo << std::endl;
+    o << "Runtime Error - " << what() << " Error Code: " << errorCode_;
+
+    if (!library_.empty())
+    {
+      o << " Library: " << library_;
+    };
+
+    o << std::endl;
 
     return o.str();
   }
@@ -205,39 +195,6 @@ namespace GCL
     }
 
     return messageString;
-  }
-
-  //********************************************************************************************************************************
-  //
-  // CLoader
-  //
-  //********************************************************************************************************************************
-
-  /// @brief Loads the error code for the library into the error class.
-  /// @throws None.
-  /// @version 2018-09-20/GGB - Function created.
-
-  void CLoader::loadErrorMessages()
-  {
-    std::vector<std::pair<TErrorCode, std::string>> errors =
-    {
-      {0x0001, std::string("MAPPED SQL WRITER: Invalid Map file name.")},
-      {0x0002, std::string("MAPPED SQL WRITER: Syntax Error.")},
-      {0x0003, std::string("MAPPED SQL WRITER: Invalid Command.")},
-      {0x0004, std::string("MAPPED SQL WRITER: Invalid Table Name.")},
-      {0x0005, std::string("MAPPED SQL WRITER: Invalid Column Name.")},
-      {0x0006, std::string("MAPPED SQL WRITER: Invalid ORDER BY direction (ACS, DESC)")},
-      {0x0007, std::string("MAPPED SQL WRITER: No Select fields in select clause.")},
-      {0x0008, std::string("MAPPED SQL WRITER: No from fields in select clause.")},
-      {0x0009, "MAPPED SQL WRITER: No fields defined for set statement." },
-      {0x1000, std::string("LOGGER: Unable to open log file.")},
-      {0x1001, std::string("LOGGER: Unable to start thread.")},
-      {0x1002, std::string("LOGGER: Text Edit not assignd.")}
-    };
-
-    std::for_each(errors.begin(), errors.end(),
-                  [] (std::pair<TErrorCode, std::string> p) { CError::addErrorMessage("GCL", p.first, p.second); });
-
   }
 
 }  // namespace GCL

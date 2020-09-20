@@ -40,7 +40,7 @@
 
 #include "include/SQLWriter.h"
 
-  // Standard library files
+  // Standard C++ library files
 
 #include <iostream>
 #include <fstream>
@@ -48,13 +48,17 @@
 #include <typeinfo>
 #include <utility>
 
-  // Boost Library
+  // Miscellaneous library header files
 
-#include <boost/algorithm/string.hpp>
+#include "boost/algorithm/string.hpp"
+#include "boost/format.hpp"
+#include "boost/locale.hpp"
 
-  // GCL Files
+  // GCL library header Files
 
+#include "include/common.h"
 #include "include/error.h"
+#include "include/GCLError.h"
 
 namespace GCL
 {
@@ -69,11 +73,11 @@ namespace GCL
   //
   //******************************************************************************************************************************
 
-  /// @brief Function to capture the count expression
-  /// @param[in] countExpression: The count expression to capture.
-  /// @returns *this
-  /// @throws None
-  /// @version 2017-08-12/GGB - Function created.
+  /// @brief      Function to capture the count expression
+  /// @param[in]  countExpression: The count expression to capture.
+  /// @returns    (*this)
+  /// @throws     None
+  /// @version    2017-08-12/GGB - Function created.
 
   sqlWriter &sqlWriter::count(std::string const &countExpression)
   {
@@ -82,9 +86,9 @@ namespace GCL
     return (*this);
   }
 
-  /// @brief Creates the test for the specified delete query.
-  /// @returns a string representation of the delete query.
-  /// @version 2018-05-12/GGB - Function created.
+  /// @brief      Creates the test for the specified delete query.
+  /// @returns    a string representation of the delete query.
+  /// @version    2018-05-12/GGB - Function created.
 
   std::string sqlWriter::createDeleteQuery() const
   {
@@ -158,11 +162,11 @@ namespace GCL
 
         if (innerElement.type() == typeid(std::string))
         {
-          returnValue += "'" + innerElement.stringOutput() + "'";
+          returnValue += "'" + innerElement.to_string() + "'";
         }
         else if (innerElement.type() == typeid(bindValue))
         {
-          std::string temp = innerElement.stringOutput();
+          std::string temp = innerElement.to_string();
 
           if (temp.front() == ':')
           {
@@ -179,7 +183,7 @@ namespace GCL
         }
         else
         {
-          returnValue += innerElement.stringOutput();
+          returnValue += innerElement.to_string();
         };
       };
 
@@ -223,21 +227,20 @@ namespace GCL
       }
       default:
       {
-        throw std::runtime_error("Unknown dialect");
+        RUNTIME_ERROR(boost::locale::translate("Unknown dialect"), E_SQLWRITER_UNKNOWNDIALECT, LIBRARYNAME);
       }
     }
-
 
     return returnValue;
   }
 
-  /// @brief Creates the set clause.
-  /// @throws GCL::CRuntimeError
-  /// @version 2017-08-21/GGB - Function created.
+  /// @brief      Creates the set clause.
+  /// @throws     GCL::CRuntimeAssert
+  /// @version    2017-08-21/GGB - Function created.
 
   std::string sqlWriter::createSetClause() const
   {
-    RUNTIME_ASSERT(!setFields.empty(), "No Set fields defined for update query.");
+    RUNTIME_ASSERT(!setFields.empty(), boost::locale::translate("No Set fields defined for update query."));
 
     std::string returnValue = "SET ";
     bool firstValue = true;
@@ -256,11 +259,11 @@ namespace GCL
 
       if (element.second.type() == typeid(std::string))
       {
-        returnValue += "'" + element.second.stringOutput() + "'";
+        returnValue += "'" + element.second.to_string() + "'";
       }
       else if (element.second.type() == typeid(bindValue))
       {
-        std::string temp = element.second.stringOutput();
+        std::string temp = element.second.to_string();
 
         if (temp.front() == ':')
         {
@@ -277,7 +280,7 @@ namespace GCL
       }
       else
       {
-        returnValue += element.second.stringOutput();
+        returnValue += element.second.to_string();
       };
     };
 
@@ -310,7 +313,7 @@ namespace GCL
     //  1. The where() clauses should be populated. These need to be converted to insert clauses for the insert function.
     //  2. The set clause needs to be included in the insert clauses.
 
-    RUNTIME_ASSERT(dialect == MYSQL, "Upsert only implemented for MYSQL.");
+    RUNTIME_ASSERT(dialect == MYSQL, boost::locale::translate("Upsert only implemented for MYSQL."));
 
     std::string returnValue;
     std::string fieldNames;
@@ -338,11 +341,11 @@ namespace GCL
           fieldNames += getColumnMap(std::get<0>(element));
           if (std::get<2>(element).type() == typeid(std::string))
           {
-            fieldValues += "'" + std::get<2>(element).stringOutput() + "'";
+            fieldValues += "'" + std::get<2>(element).to_string() + "'";
           }
           else
           {
-            fieldValues += std::get<2>(element).stringOutput();
+            fieldValues += std::get<2>(element).to_string();
           };
         };
 
@@ -363,11 +366,11 @@ namespace GCL
           fieldNames += getColumnMap(element.first);
           if (element.second.type() == typeid(std::string))
           {
-            fieldValues += "'" + element.second.stringOutput() + "'";
+            fieldValues += "'" + element.second.to_string() + "'";
           }
           else
           {
-            fieldValues += element.second.stringOutput();
+            fieldValues += element.second.to_string();
           };
         };
 
@@ -395,11 +398,11 @@ namespace GCL
 
           if (element.second.type() == typeid(std::string))
           {
-            fieldValues += "'" + element.second.stringOutput() + "'";
+            fieldValues += "'" + element.second.to_string() + "'";
           }
           else
           {
-            fieldValues += element.second.stringOutput();
+            fieldValues += element.second.to_string();
           };
         };
 
@@ -409,18 +412,17 @@ namespace GCL
       }
       default:
       {
-        throw std::runtime_error("UPSERT only implemented for MYSQL.");
-        break;
+        CODE_ERROR;
       }
     };
 
     return returnValue;
   }
 
-  /// @brief Converts the where clause to a string for creating the SQL string.
-  /// @returns The where clause.
+  /// @brief      Converts the where clause to a string for creating the SQL string.
+  /// @returns    The where clause.
   /// @throws
-  /// @version 2015-05-24/GGB - Function created.
+  /// @version    2015-05-24/GGB - Function created.
 
   std::string sqlWriter::createWhereClause() const
   {
@@ -447,13 +449,13 @@ namespace GCL
       if (std::get<2>(*iterator).type() == typeid(std::string))
       {
         returnValue += " '";
-        returnValue += std::get<2>(*iterator).stringOutput();
+        returnValue += std::get<2>(*iterator).to_string();
         returnValue += "')";
       }
       else
       {
         returnValue += " ";
-        returnValue += std::get<2>(*iterator).stringOutput();
+        returnValue += std::get<2>(*iterator).to_string();
         returnValue += ")";
       }
     };
@@ -841,12 +843,12 @@ namespace GCL
     return returnValue;
   }
 
-  /// @brief Produces the string for a SELECT query.
-  /// @returns A string containing the select clause.
-  /// @throws None.
-  /// @version 2020-04-25/GGB - Added support for the LIMIT and OFFSET clauses.
-  /// @version 2017-08-12/GGB - Added check for countValue in selectClause if statement.
-  /// @version 2015-03-30/GGB - Function created.
+  /// @brief      Produces the string for a SELECT query.
+  /// @returns    A string containing the select clause.
+  /// @throws     None.
+  /// @version    2020-04-25/GGB - Added support for the LIMIT and OFFSET clauses.
+  /// @version    2017-08-12/GGB - Added check for countValue in selectClause if statement.
+  /// @version    2015-03-30/GGB - Function created.
 
   std::string sqlWriter::createSelectQuery() const
   {
@@ -859,7 +861,8 @@ namespace GCL
     }
     else
     {
-      ERROR(GCL, 0x0007);
+      RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: No Select fields in select clause."), E_SQLWRITER_NOSELECTFIELDS,
+                    LIBRARYNAME);
     };
 
     if (!fromFields.empty())
@@ -868,7 +871,8 @@ namespace GCL
     }
     else
     {
-      ERROR(GCL, 0x0008);
+      RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: No from fields in select clause."), E_SQLWRITER_NOFROMFIELD,
+                    LIBRARYNAME);
     };
 
     if (!joinFields.empty())
@@ -1031,13 +1035,10 @@ namespace GCL
     return *this;
   }
 
-  /// @brief Function to load a map file and store all the aliases.
-  /// @param[in] ifn: The file to read the database mapping from.
-  /// @throws 0x0001 - MAPPED DATABASE: Invalid Map file name.
-  /// @throws 0x0002 - MAPPED DATABASE: Syntax Error
-  /// @throws 0x0004 - MAPPED DATABASE: Invalid Table Name
-  /// @throws 0x0005 - MAPPED DATABASE: Invalid Column Name
-  /// @version 2013-01-26/GGB - Function created.
+  /// @brief      Function to load a map file and store all the aliases.
+  /// @param[in]  ifn: The file to read the database mapping from.
+  /// @throws     GCL::CRuntimeError
+  /// @version    2013-01-26/GGB - Function created.
 
   void sqlWriter::readMapFile(boost::filesystem::path const &ifn)
   {
@@ -1053,18 +1054,15 @@ namespace GCL
 
     if (!ifs)
     {
-      std::clog << "Could not open SQL map file: " << ifn << "." << std::endl;
-      ERROR(GCL, 0x0001);    // MAPPEDDATABASE: Invalid Map file name.
+      RUNTIME_ERROR("Could not open SQL map file:" + ifn.native());
     }
     else
     {
       while (ifs.good())
       {
         std::getline(ifs, textLine);
-        if ( (textLine.size() > 1) &&
-             (textLine[0] != ';') )
+        if ( (textLine.size() > 1) && (textLine[0] != ';') )
         {
-
           spacePosn = textLine.find_first_of(' ', 0);
           szCommand = textLine.substr(0, spacePosn);
           boost::trim(szCommand);
@@ -1080,9 +1078,8 @@ namespace GCL
           }
           else if (szCommand != END)
           {
-            std::clog << "Error in SQL map file: " << ifn << std::endl;
-            std::clog << "Syntax command on line: " << lineNumber << " - Needs at least one token." << std::endl;
-            ERROR(GCL, 0x0002);  // MAPPED DATABASE: Syntax Error
+            RUNTIME_ERROR("Error in SQL map file:" + ifn.native() + "Syntax error on line: " +
+                          std::to_string(lineNumber) + " - Needs at least one token.");
           };
 
           if (token2S < token2E)
@@ -1100,19 +1097,19 @@ namespace GCL
             {
               std::clog << "Error in SQL map file: " << ifn << std::endl;
               std::clog << "Syntax command on line: " << lineNumber << " - COLUMN directive found, but no TABLE directive in force." << std::endl;
-              ERROR(GCL, 0x0002);  // MAPPED DATABASE: Syntax Error
+              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
             }
             else if (szToken1.empty())
             {
               std::clog << "Error in SQL map file: " << ifn << std::endl;
               std::clog << "Syntax command on line: " << lineNumber << " - COLUMN directive found, column name." << std::endl;
-              ERROR(GCL, 0x0002);  // MAPPED DATABASE: Syntax Error
+              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
             }
-            else if ( (*databaseMap.find(currentTable)).second.columnData.find(szToken1) == (*databaseMap.find(currentTable)).second.columnData.end())
+            else if ( (*databaseMap.find(currentTable)).second.columnData.find(szToken1) ==
+                      (*databaseMap.find(currentTable)).second.columnData.end())
             {
-              std::clog << "Error in SQL map file: " << ifn << std::endl;
-              std::clog << "Syntax command on line: " << lineNumber << " - Invalid column name." << std::endl;
-              ERROR(GCL, 0x0005);  // MAPPED DATABASE: Invalid Column Name
+              RUNTIME_ERROR("Error in SQL map file: " + ifn.native() +
+                            "Syntax command on line: " + std::to_string(lineNumber) + " - Invalid column name.");
             }
             else
             {
@@ -1128,19 +1125,20 @@ namespace GCL
             {
               std::clog << "Error in SQL map file: " << ifn << std::endl;
               std::clog << "Syntax command on line: " << lineNumber << " - TABLE directive found, but a TABLE directive is already specified." << std::endl;
-              ERROR(GCL, 0x0002);  // MAPPED DATABASE: Syntax Error
+              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
             }
             else if (szToken1.empty() )
             {
               std::clog << "Error in SQL map file: " << ifn << std::endl;
               std::clog << "Syntax command on line: " << lineNumber << " - TABLE directive found, but no table name." << std::endl;
-              ERROR(GCL, 0x0002);  // MAPPED DATABASE: Syntax Error
+              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
             }
             else if (databaseMap.find(szToken1) == databaseMap.end())
             {
               std::clog << "Error in SQL map file: " << ifn << std::endl;
               std::clog << "Error on line: " << lineNumber << " - Invalid Table name." << std::endl;
-              ERROR(GCL, 0x0004);  // MAPPED DATABASE: Invalid Table Name
+              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Invalid Table Name."), E_SQLWRITER_INVALIDTABLENAME,
+                            LIBRARYNAME);
             }
             else
             {
@@ -1165,14 +1163,14 @@ namespace GCL
             {
               std::clog << "Error in SQL map file: " << ifn << std::endl;
               std::clog << "Syntax command on line: " << lineNumber << std::endl;
-              ERROR(GCL, 0x0002);  // MAPPED DATABASE: Syntax Error
+              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
             };
           }
           else
           {
             std::clog << "Error in SQL map file: " << ifn << std::endl;
             std::clog << "Invalid command on line: " << lineNumber << std::endl;
-            ERROR(GCL, 0x0003);  // MAPPED DATABASE: Syntax Error
+            RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Invalid Command."), E_SQLWRITER_INVALIDCOMMAND, LIBRARYNAME);
           };
         };
 
@@ -1425,26 +1423,11 @@ namespace GCL
     return returnValue;
   }
 
-  /// @brief Adds a single where clause to the where list.
-  /// @param[in] columnName: The columnName to add
-  /// @param[in] operatorString: The operatorString to add
-  /// @param[in] value: The value to add.
-  /// @returns (*this)
-  /// @throws None.
-  /// @version 2017-08-21/GGB - Function created.
-
-  sqlWriter &sqlWriter::where(std::string const &columnName, std::string const &operatorString, SCL::any const &value)
-  {
-    whereFields.emplace_back(columnName, operatorString, std::move(value));
-
-    return (*this);
-  }
-
-  /// @brief Stores the where fields in the list.
-  /// @param[in] fields: The initialiser list of fields to store.
-  /// @returns (*this)
-  /// @throws None.
-  /// @version 2015-03-30/GGB - Function created.
+  /// @brief        Stores the where fields in the list.
+  /// @param[in]    fields: The initialiser list of fields to store.
+  /// @returns      (*this)
+  /// @throws       None.
+  /// @version      2015-03-30/GGB - Function created.
 
   sqlWriter &sqlWriter::where(std::initializer_list<parameterTriple> fields)
   {

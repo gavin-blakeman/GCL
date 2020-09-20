@@ -43,10 +43,13 @@
 
   // Miscellaneous library headers
 
+#include "boost/locale.hpp"
 
   // GCL include headers
 
+#include "include/common.h"
 #include "include/error.h"
+#include "include/GCLError.h"
 #include "include/logger/streamSink.h"
 
 namespace GCL
@@ -276,7 +279,7 @@ namespace GCL
 
       if (!writerThread)
       {
-        ERROR(GCL, 0x1001);  // LOGGER: Unable to start thread.
+        RUNTIME_ERROR(boost::locale::translate("LOGGER: Unable to start thread."), E_LOGGER_UNABLETOSTARTTHREAD, LIBRARYNAME);
       };
 
       defaultStreamSink->setLogLevel(GCL::logger::CSeverity{true, true, true, true, true, false, false});

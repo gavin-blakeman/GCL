@@ -98,20 +98,28 @@ namespace GCL
     static bool addErrorMessage(std::string, TErrorCode, std::string);
   };
 
+  /// @brief        The CRuntimeError class is used for reporting exceptions and errors. It is integrated with the logger and allows
+  ///               exceptions to be thrown and errors reported.
+  ///               Exceptions raised by CRuntimeError are not intended to be fatal and allow error management of calling functions.
+
   class CRuntimeError : public std::runtime_error
   {
   private:
+    TErrorCode errorCode_;
+    std::string library_;
+
     CRuntimeError() = delete;
     CRuntimeError(CRuntimeError const &) = delete;
 
-    std::string errorMessage(std::string const &, std::string const &, std::string const &, std::size_t) const;
+    std::string errorMessage() const;
 
   public:
-    CRuntimeError(std::string const &errorString, std::string const &filename, std::string const &timeStamp, size_t lineNumber) :
-      std::runtime_error(errorString)
+    CRuntimeError(std::string const &errorString, TErrorCode errorCode = 0, std::string const &library = "") :
+      std::runtime_error(errorString), errorCode_(errorCode), library_(library)
     {
-      LOGEXCEPTION(errorMessage(errorString, filename, timeStamp, lineNumber));
+      LOGEXCEPTION(errorMessage());
     }
+
   };
 
   /// @brief        The CCodeError class is used to throw exceptions to indicate code errors within a library.
@@ -136,10 +144,10 @@ namespace GCL
     }
   };
 
-  /// @brief The CRuntimeAssert class throws exceptions to indicate assertion failures within a library.
-  /// @details Assertion exceptions are used when parameters to functions, or calculated values within functions are checked for
-  ///          correctness. Exceptions are thrown if the assertion fails.
-  /// @note The CodeError class should be used for unreachable code errors.
+  /// @brief    The CRuntimeAssert class throws exceptions to indicate assertion failures within a library.
+  /// @details  Assertion exceptions are used when parameters to functions, or calculated values within functions are checked for
+  ///           correctness. Exceptions are thrown if the assertion fails.
+  /// @note     The CodeError class should be used for unreachable code errors.
 
   class CRuntimeAssert: public std::runtime_error
   {
@@ -162,7 +170,7 @@ namespace GCL
     ~search_error() {}
   };
 
-#define RUNTIME_ERROR(MESSAGE) (throw GCL::CRuntimeError((MESSAGE),  __FILE__, __TIMESTAMP__, (size_t) __LINE__) )
+#define RUNTIME_ERROR(...) (throw GCL::CRuntimeError(__VA_ARGS__))
 #define ERROR(LIBRARY, ERROR) (throw(GCL::CError((#LIBRARY), (ERROR))))
 #define CODE_ERROR (throw(GCL::CCodeError( __FILE__, __TIMESTAMP__, static_cast<size_t>(__LINE__)) ))
 #define RUNTIME_ASSERT(EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert((#EXPRESSION),  __FILE__, __TIMESTAMP__, (size_t) __LINE__, (MESSAGE)); }}

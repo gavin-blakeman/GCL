@@ -44,11 +44,14 @@
 
   // Miscellaneous library header files
 
-#include <boost/format.hpp>
+#include "boost/format.hpp"
+#include "boost/locale.hpp"
 
   // GCL Library header files.
 
+#include "include/common.h"
 #include "include/error.h"
+#include "include/GCLError.h"
 
 namespace GCL
 {
@@ -151,7 +154,7 @@ namespace GCL
       {
         std::cerr << boost::filesystem::current_path().string() << std::endl;
         std::cerr << "Unable to open log file. Exiting." << std::endl;
-        ERROR(GCL, 0x1000);    // LOGGER: Unable to open log file.
+        RUNTIME_ERROR(boost::locale::translate("LOGGER: Unable to open log file."), E_LOGGER_UNABLETOOPENFILE, LIBRARYNAME);
       }
       else
       {

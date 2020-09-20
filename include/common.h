@@ -44,7 +44,7 @@
 
 namespace GCL
 {
-  std::string const GCL_LIBNAME       = "GCL";
+  std::string const LIBRARYNAME       = "GCL";
 
   std::string getVersionString();
 }

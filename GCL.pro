@@ -104,7 +104,8 @@ HEADERS += \
     include/logger/streamSink.h \
     include/configurationReader/readerSections.hpp \
     include/configurationReader/readerVanilla.hpp \
-    include/configurationReader/readerCore.hpp
+    include/configurationReader/readerCore.hpp \
+    include/GCLError.h
 
 OTHER_FILES += \
     changelog.txt
