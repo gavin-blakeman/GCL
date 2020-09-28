@@ -43,7 +43,7 @@
 
 #ifndef GCL_CONTROL
 
-// Standard Header Files
+  // Standard Header Files
 
 #include <cstdint>
 #include <initializer_list>
@@ -56,7 +56,7 @@
 #include <utility>
 #include <vector>
 
-// Miscellaneous Library header files
+  // Miscellaneous Library header files
 
 #include "boost/filesystem.hpp"
 #include <SCL>
@@ -114,15 +114,19 @@ namespace GCL
       JOIN_FULL       ///< Full outer join
     };
 
-    class bindValue : public std::string
+    class bindValue
     {
     private:
+      std::string value;
+
       bindValue() = delete;
     public:
-      bindValue(std::string const &st) : std::string(st) {}
+      bindValue(std::string const &st) : value(st) {}
+
+      std::string to_string() const { return value; }
     };
 
-    using parameter = SCL::any;
+    using parameter = SCL::variant_t;
     typedef std::pair<std::string, parameter> parameterPair;
     typedef std::pair<std::string, std::string> stringPair;
     typedef std::tuple<std::string, std::string, parameter> parameterTriple;
@@ -134,7 +138,7 @@ namespace GCL
     typedef std::vector<stringPair> stringPairStorage;
     typedef std::vector<orderBy_t> orderByStorage_t;
 
-    typedef std::vector<parameterStorage> valueStorage;
+    typedef std::vector<parameterStorage> valueStorage;     // This is to allow multiple insertions in one statement.
     typedef std::tuple<std::string, std::string, EJoin, std::string, std::string> parameterJoin;
 
     typedef std::vector<parameterJoin> joinStorage;
@@ -217,7 +221,7 @@ namespace GCL
     sqlWriter &orderBy(std::initializer_list<std::pair<std::string, EOrderBy>>);
     sqlWriter &select();
     sqlWriter &select(std::initializer_list<std::string>);
-    sqlWriter &set(std::string const &, SCL::any const &);
+    sqlWriter &set(std::string const &, parameter const &);
     sqlWriter &set(std::initializer_list<parameterPair>);
     sqlWriter &update(std::string const &);
     sqlWriter &upsert(std::string const &);
@@ -250,7 +254,20 @@ namespace GCL
     virtual bool createColumn(std::string const &tableName, std::string const &columnName);
   };
 
+  std::string to_string(GCL::sqlWriter::bindValue const &);
+
 }  // namespace GCL
+
+namespace SCL
+{
+  template<>
+  inline std::string variant_t::Manager_external<GCL::sqlWriter::bindValue>::S_toString(variant_t const *anyp)
+  {
+    auto ptr = static_cast<GCL::sqlWriter::bindValue const *>(anyp->dataStorage.heapPointer);
+    return GCL::to_string(*ptr);
+  }
+}
+
 
 #endif // GCL_CONTROL
 

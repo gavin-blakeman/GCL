@@ -53,6 +53,7 @@
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
 #include "boost/locale.hpp"
+#include <SCL>
 
   // GCL library header Files
 
@@ -1264,7 +1265,7 @@ namespace GCL
   /// @throws None.
   /// @version 2017-08-21/GGB - Function created.
 
-  sqlWriter &sqlWriter::set(std::string const &columnName, SCL::any const &value)
+  sqlWriter &sqlWriter::set(std::string const &columnName, parameter const &value)
   {
     setFields.emplace_back(columnName, value);
 
@@ -1389,11 +1390,11 @@ namespace GCL
     return (*this);
   }
 
-  /// @brief Stores the value fields for the query.
-  /// @param[in] fields: The parameter values to include in the query.
-  /// @returns *this
-  /// @version 2017-07-26/GGB - Changed code to use parameter rather than parameter pair.
-  /// 2015-03-31/GGB - Function created.
+  /// @brief        Stores the value fields for the query.
+  /// @param[in]    fields: The parameter values to include in the query.
+  /// @returns      (*this)
+  /// @version      2017-07-26/GGB - Changed code to use parameter rather than parameter pair.
+  /// @version      2015-03-31/GGB - Function created.
 
   sqlWriter &sqlWriter::values(std::initializer_list<parameterStorage> fields)
   {
@@ -1439,4 +1440,14 @@ namespace GCL
     return (*this);
   }
 
+  /// @brief      to_string function for a bind value.
+  /// @param[in]  bv: The value to convert to a std::string.
+  /// @version    2020-09-24/GGB - Function created.
+
+  std::string to_string(GCL::sqlWriter::bindValue const &bv)
+  {
+    return bv.to_string();
+  }
+
 }  // namespace GCL
+
