@@ -276,14 +276,24 @@ namespace GCL
       defaultLogger().logMessage(notice, message);
     }
 
-    /// @brief Function to log an notice message.
-    /// @param[in] message: The message to log.
+    /// @brief      Function to log an information message.
+    /// @param[in]  message: The message to log.
     /// @throws
-    /// @version 2020-06-13/GGB - Converted from macro to function.
+    /// @version    2020-06-13/GGB - Converted from macro to function.
 
     inline void INFOMESSAGE(std::string const &message)
     {
       defaultLogger().logMessage(info, message);
+    }
+
+    /// @brief      Function to log an information message.
+    /// @param[in]  message: The message to log.
+    /// @throws
+    /// @version    2020-10-03/GGB - Converted from macro to function.
+
+    inline void INFOMESSAGE(boost::format const &message)
+    {
+      INFOMESSAGE(boost::str(message));
     }
 
     /// @brief Function to log an debug message.

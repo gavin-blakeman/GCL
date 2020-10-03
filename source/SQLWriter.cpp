@@ -475,11 +475,12 @@ namespace GCL
     return (*this);
   }
 
-  /// @brief Adds the table name to the from clause
-  /// @param[in] fromString: The table name to add to the from clause.
-  /// @returns (*this)
-  /// @throws None.
-  /// @version 2017-08-20/GGB - Function created.
+  /// @brief      Adds the table name to the from clause. @c from("tbl_name", "n")
+  /// @param[in]  fromString: The table name to add to the from clause.
+  /// @param[in]  alias: The alias to use for the table name.
+  /// @returns    (*this)
+  /// @throws     None.
+  /// @version    2017-08-20/GGB - Function created.
 
   sqlWriter &sqlWriter::from(std::string const &fromString, std::string const &alias)
   {
@@ -488,13 +489,13 @@ namespace GCL
     return (*this);
   }
 
-  /// @brief Searches the databaseMap and determines the mapped column names.
+  /// @brief        Searches the databaseMap and determines the mapped column names.
   /// @param[in/out] columnName: The columnName to map.
-  /// @returns true - If the columnName was mapped succesfully.
-  /// @returns false - The columnName is not recognised in the databaseMap.
-  /// @throws None.
+  /// @returns      true - If the columnName was mapped succesfully.
+  /// @returns      false - The columnName is not recognised in the databaseMap.
+  /// @throws       None.
   /// @version
-  /// @todo Implement this function. (Bug# 0000193)
+  /// @todo         Implement this function. (Bug# 0000193)
 
   std::string sqlWriter::getColumnMap(std::string const &columnName) const
   {
@@ -503,12 +504,12 @@ namespace GCL
     return returnValue;
   }
 
-  /// @brief Adds a max() function to the query.
-  /// @param[in] column: The name of the column to take the max of.
-  /// @param[in] as: The column name to assign to the max() function.
-  /// @returns (*this)
-  /// @throws None.
-  /// @version 2017-08-20/GGB - Function created.
+  /// @brief      Adds a max() function to the query.
+  /// @param[in]  column: The name of the column to take the max of.
+  /// @param[in]  as: The column name to assign to the max() function.
+  /// @returns    (*this)
+  /// @throws     None.
+  /// @version    2017-08-20/GGB - Function created.
 
   sqlWriter &sqlWriter::max(std::string const &column, std::string const &as)
   {
@@ -516,12 +517,12 @@ namespace GCL
     return (*this);
   }
 
-  /// @brief Adds a min() function to the query.
-  /// @param[in] column: The name of the column to take the max of.
-  /// @param[in] as: The column name to assign to the min() function.
-  /// @returns (*this)
-  /// @throws None.
-  /// @version 2017-08-20/GGB - Function created.
+  /// @brief      Adds a min() function to the query.
+  /// @param[in]  column: The name of the column to take the max of.
+  /// @param[in]  as: The column name to assign to the min() function.
+  /// @returns    (*this)
+  /// @throws     None.
+  /// @version    2017-08-20/GGB - Function created.
 
   sqlWriter &sqlWriter::min(std::string const &column, std::string const &as)
   {
@@ -529,13 +530,13 @@ namespace GCL
     return (*this);
   }
 
-  /// @brief Function called to add columnData into a table.
-  /// @param[in] tableName: The table name to associate with the column.
-  /// @param[in] columnName: The column name to create.
-  /// @returns true - column added.
-  /// @returns false - column no added.
-  /// @throws None.
-  /// @version 2013-01-26/GGB - Function created.
+  /// @brief      Function called to add columnData into a table.
+  /// @param[in]  tableName: The table name to associate with the column.
+  /// @param[in]  columnName: The column name to create.
+  /// @returns    true - column added.
+  /// @returns    false - column no added.
+  /// @throws     None.
+  /// @version    2013-01-26/GGB - Function created.
 
   bool sqlWriter::createColumn(std::string const &tableName, std::string const &columnName)
   {
@@ -980,11 +981,11 @@ namespace GCL
     return *this;
   }
 
-  /// @brief Adds join statements to the query.
-  /// @param[in] fields: The join statements to add.
-  /// @returns (*this)
-  /// @throws None.
-  /// @version 2016-05-08/GGB - Function created.
+  /// @brief      Adds join statements to the query.
+  /// @param[in]  fields: The join statements to add.
+  /// @returns    (*this)
+  /// @throws     None.
+  /// @version    2016-05-08/GGB - Function created.
 
   sqlWriter &sqlWriter::join(std::initializer_list<parameterJoin> fields)
   {
@@ -1218,10 +1219,10 @@ namespace GCL
     whereFields.clear();
   }
 
-  /// @brief Set the query type to a 'SELECT' query.
-  /// @returns A reference to (*this)
-  /// @version 2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
-  /// @version 2017-08-20/GGB - Function created.
+  /// @brief      Set the query type to a 'SELECT' query.
+  /// @returns    A reference to (*this)
+  /// @version    2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
+  /// @version    2017-08-20/GGB - Function created.
 
   sqlWriter &sqlWriter::select()
   {
@@ -1235,24 +1236,39 @@ namespace GCL
     return (*this);
   }
 
-  /// @brief Set the query type to a 'SELECT' query.
-  /// @param[in] fields: The fields to add to the select clause.
-  /// @returns A reference to (*this)
-  /// @version 2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
-  /// @version 2014-12-19/GGB - Function created.
+  /// @brief      Specify the selection fields for the select query.
+  /// @param[in]  fields: The fields to add to the select clause.
+  /// @returns    A reference to (*this)
+  /// @version    2020-10-02/GGB - Call to select() to reset the query and set the query type.
+  /// @version    2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
+  /// @version    2014-12-19/GGB - Function created.
 
   sqlWriter &sqlWriter::select(std::initializer_list<std::string> fields)
   {
-    if (queryType != qt_none)
-    {
-      resetQuery();
-    };
-
-    queryType = qt_select;
+    select();
 
     for (auto elem : fields)
     {
       selectFields.push_back(elem);
+    };
+
+    return *this;
+  }
+
+  /// @brief      Specify table name and fields for the select query.
+  /// @param[in]  tableName: The name of the table to append to each of the field names.
+  /// @param[in]  fields: The list of field names.
+  /// @returns    A reference to (*this)
+  /// @note       This can be called recursivly with different table and field specifiers.
+  /// @version    2020-10-02/GGB - Function created.
+
+  sqlWriter &sqlWriter::select(std::string const &tableName, std::initializer_list<std::string> fields)
+  {
+    select();
+
+    for (auto elem : fields)
+    {
+      selectFields.push_back(tableName + "." + elem);
     };
 
     return *this;

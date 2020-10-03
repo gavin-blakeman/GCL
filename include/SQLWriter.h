@@ -221,6 +221,7 @@ namespace GCL
     sqlWriter &orderBy(std::initializer_list<std::pair<std::string, EOrderBy>>);
     sqlWriter &select();
     sqlWriter &select(std::initializer_list<std::string>);
+    sqlWriter &select(std::string const &, std::initializer_list<std::string>);
     sqlWriter &set(std::string const &, parameter const &);
     sqlWriter &set(std::initializer_list<parameterPair>);
     sqlWriter &update(std::string const &);
