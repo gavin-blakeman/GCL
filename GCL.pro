@@ -71,6 +71,7 @@ INCLUDEPATH += \
 
 SOURCES += \
     source/dataParser/dataDelimited.cpp \
+    source/julianDay.cpp \
     source/string.cpp \
     source/Resource.cpp \
     source/Functions.cpp \
@@ -101,6 +102,7 @@ HEADERS += \
     include/alarm/alarmDaily.h \
     include/alarm/alarmWeekly.h \
     include/error.h \
+    include/julianDay.h \
     include/logger/loggerCore.h \
     include/logger/fileSink.h \
     include/logger/streamSink.h \

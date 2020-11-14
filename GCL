@@ -56,6 +56,7 @@
 #include "include/configurationReader/readerVanilla.hpp"
 #include "include/error.h"
 #include "include/GCLError.h"
+#include "include/julianDay.h"
 #include "include/logger/loggerCore.h"
 #include "include/logger/fileSink.h"
 #include "include/logger/streamSink.h"
