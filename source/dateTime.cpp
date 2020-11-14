@@ -32,41 +32,43 @@
 //
 //*********************************************************************************************************************************
 
-#include "../include/dateTime.h"
+#include "include/dateTime.h"
+
+  // Miscellaneous library header files
 
 #include "boost/format.hpp"
 
 namespace GCL
 {
-  /// @brief Outputs the passed date as a string value.
-  /// @param[in] dateTime - Structure with the date value.
-  /// @returns A string containing the date/time (YYYY-MM-DD)
-  /// @throws None.
-  /// @version 2017-08-12/GGB - Function created.
+  /// @brief      Outputs the passed date as a string value.
+  /// @param[in]  dateTime: Structure with the date value.
+  /// @returns    A string containing the date/time (YYYY-MM-DD)
+  /// @throws     None.
+  /// @version    2017-08-12/GGB - Function created.
 
-  std::string sprintDate(struct tm *dateTime)
+  std::string sprintDate(std::tm *dateTime)
   {
     return boost::str(boost::format("%1$04d-%2$02d-%3$02d") % (dateTime->tm_year + 1900) %
                       (dateTime->tm_mon + 1) % dateTime->tm_mday);
   }
 
-  /// @brief Outputs the passed date time as a string value.
-  /// @param[in] dateTime - Structure with the date and time values.
-  /// @returns A string containing the date/time (YYYY-MM-DD HH:mm:ss)
-  /// @throws None.
-  /// @version 2017-08-12/GGB - Function created.
+  /// @brief      Outputs the passed date time as a string value.
+  /// @param[in]  dateTime: Structure with the date and time values.
+  /// @returns    A string containing the date/time (YYYY-MM-DD HH:mm:ss)
+  /// @throws     None.
+  /// @version    2017-08-12/GGB - Function created.
 
-  std::string sprintDateTime(struct tm *dateTime)
+  std::string sprintDateTime(std::tm *dateTime)
   {
     return boost::str(boost::format("%1$04d-%2$02d-%3$02d %4$02d:%5$02d:%6$02d") % (dateTime->tm_year + 1900) %
                       (dateTime->tm_mon +1) % dateTime->tm_mday % dateTime->tm_hour % dateTime->tm_min % dateTime->tm_sec);
   }
 
-  /// @brief Outputs the passed time as a string value.
-  /// @param[in] dateTime - Structure with the time value.
-  /// @returns A string containing the date/time (HH:mm:ss)
-  /// @throws None.
-  /// @version 2017-08-12/GGB - Function created.
+  /// @brief      Outputs the passed time as a string value.
+  /// @param[in]  dateTime: Structure with the time value.
+  /// @returns    A string containing the date/time (HH:mm:ss)
+  /// @throws     None.
+  /// @version    2017-08-12/GGB - Function created.
 
   std::string sprintTime(struct tm *dateTime)
   {

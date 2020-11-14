@@ -61,7 +61,7 @@ namespace GCL
 
   unsigned int const GCL_MAJORVERSION = 2019;           ///< The Major version number (yyyy)
   unsigned int const GCL_MINORVERSION = 9;              ///< The Minor version number (mm)
-  unsigned int const GCL_BUILDNUMBER  = 0x019A;         ///< The build number - incremented on each build.
+  unsigned int const GCL_BUILDNUMBER  = 0x01AF;         ///< The build number - incremented on each build.
 
   /// @brief Returns the library version and build number
   /// @returns A string with the application name, version, build.

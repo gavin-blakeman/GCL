@@ -1,15 +1,15 @@
-﻿//*********************************************************************************************************************************
+﻿//**********************************************************************************************************************************
 //
-// PROJECT:							General Class Library
-// FILE:								dateTime
-// SUBSYSTEM:						Date & Time Functions
+// PROJECT:             General Class Library
+// FILE:                dataParser/dataParserCore.h
+// SUBSYSTEM:           Data File Parser
 // LANGUAGE:						C++
 // TARGET OS:						None.
 // NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2017-2020 Gavin Blakeman.
+//                      Copyright 2020 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -23,29 +23,43 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            This file provides functions for working with Date & Time values.
+// OVERVIEW:            Implementation of a configuration file reader.
 //
 // CLASSES INCLUDED:
 //
-// HISTORY:             2017-08-12 GGB - File Created.
+// HISTORY:             2020-10-13 GGB - File Created
 //
-//*********************************************************************************************************************************
+//**********************************************************************************************************************************
 
-#ifndef GCL_DATETIME
-#define GCL_DATETIME
+#ifndef DATAPARSERCORE_H
+#define DATAPARSERCORE_H
 
   // Standard C++ library header files
 
-#include <ctime>
+#include <any>
+#include <cstdint>
+#include <map>
 #include <string>
+#include <vector>
 
 namespace GCL
 {
-  std::string sprintDate(std::tm *);
-  std::string sprintDateTime(std::tm *);
-  std::string sprintTime(std::tm *);
+  class CDataParser
+  {
+  public:
+    using headerData_t = std::map<std::string, std::uint16_t>;
+    using data_t = std::any;
+    using dataLine_t = std::vector<std::any>;
+    using dataFile_t = std::vector<dataLine_t>;
 
-}
+  private:
+  protected:
+    headerData_t headerData;
+    dataFile_t dataFile;
 
-#endif // GCL_DATETIME
+  public:
+  };
 
+} // namespace GCL
+
+#endif // DATAPARSERCORE_H

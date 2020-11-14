@@ -2,7 +2,7 @@
 //
 // PROJECT:             General Class Library
 // FILE:                configurationReader/readerVanilla.hpp
-// SUBSYSTEM:           Configuratoin file reader
+// SUBSYSTEM:           Configuration file reader
 // LANGUAGE:						C++
 // TARGET OS:						None.
 // NAMESPACE:						GCL

@@ -126,7 +126,7 @@ namespace GCL
       std::string to_string() const { return value; }
     };
 
-    using parameter = SCL::variant_t;
+    using parameter = SCL::any;
     typedef std::pair<std::string, parameter> parameterPair;
     typedef std::pair<std::string, std::string> stringPair;
     typedef std::tuple<std::string, std::string, parameter> parameterTriple;
@@ -262,7 +262,7 @@ namespace GCL
 namespace SCL
 {
   template<>
-  inline std::string variant_t::Manager_external<GCL::sqlWriter::bindValue>::S_toString(variant_t const *anyp)
+  inline std::string any::Manager_external<GCL::sqlWriter::bindValue>::S_toString(any const *anyp)
   {
     auto ptr = static_cast<GCL::sqlWriter::bindValue const *>(anyp->dataStorage.heapPointer);
     return GCL::to_string(*ptr);

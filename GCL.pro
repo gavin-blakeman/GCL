@@ -68,9 +68,9 @@ unix {
 INCLUDEPATH += \
   "../MCL" \
   "../SCL" \
-  "/home/gavin/Documents/Projects/software/Library/Boost/boost_1_71_0"
 
 SOURCES += \
+    source/dataParser/dataDelimited.cpp \
     source/string.cpp \
     source/Resource.cpp \
     source/Functions.cpp \
@@ -92,6 +92,8 @@ HEADERS += \
     include/Functions.h \
     include/common.h \
     include/SQLWriter.h \
+    include/dataParser/dataDelimited.h \
+    include/dataParser/dataParserCore.h \
     include/dateTime.h \
     include/config.h \
     include/filesystem.h \
