@@ -272,7 +272,7 @@ namespace GCL
     /// @version 2014-12-24/GGB - Function created.
 
     CLogger::CLogger()
-      : terminateThread(false), writerThread(nullptr), defaultStreamSink(std::make_shared<CStreamSink>(std::cerr)),
+      : terminateThread(false), writerThread(nullptr), defaultStreamSink_(std::make_shared<CStreamSink>(std::cerr)),
         logSeverity(warning)
     {
       writerThread = std::make_unique<std::thread>(&CLogger::writer, this);
@@ -282,9 +282,9 @@ namespace GCL
         RUNTIME_ERROR(boost::locale::translate("LOGGER: Unable to start thread."), E_LOGGER_UNABLETOSTARTTHREAD, LIBRARYNAME);
       };
 
-      defaultStreamSink->setLogLevel(GCL::logger::CSeverity{true, true, true, true, true, false, false});
+      defaultStreamSink_->setLogLevel(GCL::logger::CSeverity{true, true, true, true, true, false, false});
 
-      addSink(defaultStreamSink);
+      addSink(defaultStreamSink_);
     }
 
     /// @brief Destructor for the class.
@@ -366,7 +366,7 @@ namespace GCL
 
     void CLogger::removeDefaultStreamSink()
     {
-      removeSink(defaultStreamSink);
+      removeSink(defaultStreamSink_);
     }
 
     /// @brief Removes a logger sink from the list of logger sinks.

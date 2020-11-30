@@ -77,4 +77,8 @@ using GCL::logger::DEBUGMESSAGE;
 using GCL::logger::LOGEXCEPTION;
 using GCL::logger::TRACEMESSAGE;
 
+  // Inject the error functions into the global namespace.
+
+using GCL::RUNTIME_ERROR;
+
 #endif //GCL_H

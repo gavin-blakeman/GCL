@@ -130,7 +130,7 @@ namespace GCL
   /// @throws       std::bad_alloc
   /// @version      2020-09-08/GGB - Function created
 
-  std::string CRuntimeError::errorMessage() const
+  std::string runtime_error::errorMessage() const
   {
     std::ostringstream o;
 

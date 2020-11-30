@@ -1,9 +1,9 @@
-General Class Library (GCL)
+﻿General Class Library (GCL)
 ===========================
 
 MappedSQLWriter
 ---------------
-This selection of classes allows SQL queries to be easily assembled. The mapped part is user generated map files can be loaded 
+This selection of classes allows SQL queries to be easily assembled. The mapped part is user generated map files can be loaded
 to map a programmed database application to the user generated (or pre-existing) tables.
 
 A typical code section would be
@@ -14,8 +14,15 @@ The value of sqlString is then
 SELECT employees.* FROM employees;
 
 
-std::string sqlString = QSQLQuery.select("employees.*").from("employees").toString();
-std::string sqlString (std::string) QSQLQuery.select("employees.*").from("employees");
+PluginManager
+-------------
+Only one instance of the plugin manager class should be used in an application. This class contains data that should be shared over
+the entire application. 
+
+The class is multi-thread safe.
 
 
 
+
+
+------

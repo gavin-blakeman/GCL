@@ -102,19 +102,21 @@ namespace GCL
   ///               exceptions to be thrown and errors reported.
   ///               Exceptions raised by CRuntimeError are not intended to be fatal and allow error management of calling functions.
 
-  class CRuntimeError : public std::runtime_error
+  class runtime_error : public std::runtime_error
   {
   private:
     TErrorCode errorCode_;
     std::string library_;
 
-    CRuntimeError() = delete;
-    CRuntimeError(CRuntimeError const &) = delete;
+    runtime_error() = delete;
+    runtime_error(runtime_error const &) = delete;
+    runtime_error(runtime_error &&) = delete;
+    runtime_error operator =(runtime_error const &) = delete;
 
     std::string errorMessage() const;
 
   public:
-    CRuntimeError(std::string const &errorString, TErrorCode errorCode = 0, std::string const &library = "") :
+    runtime_error(std::string const &errorString, TErrorCode errorCode = 0, std::string const &library = "") :
       std::runtime_error(errorString), errorCode_(errorCode), library_(library)
     {
       LOGEXCEPTION(errorMessage());
@@ -170,7 +172,13 @@ namespace GCL
     ~search_error() {}
   };
 
-#define RUNTIME_ERROR(...) (throw GCL::CRuntimeError(__VA_ARGS__))
+  /// @brief Function to throw a runtime error.
+
+  inline void RUNTIME_ERROR(std::string const &errorString, TErrorCode errorCode = 0, std::string const &library = "")
+  {
+    throw GCL::runtime_error(errorString, errorCode, library);
+  }
+
 #define ERROR(LIBRARY, ERROR) (throw(GCL::CError((#LIBRARY), (ERROR))))
 #define CODE_ERROR (throw(GCL::CCodeError( __FILE__, __TIMESTAMP__, static_cast<size_t>(__LINE__)) ))
 #define RUNTIME_ASSERT(EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert((#EXPRESSION),  __FILE__, __TIMESTAMP__, (size_t) __LINE__, (MESSAGE)); }}

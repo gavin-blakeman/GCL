@@ -38,6 +38,7 @@
 
 #include <cstdint>
 #include <exception>
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -45,12 +46,12 @@
   // Miscellaneous library header files
 
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/locale.hpp>
 
   // GCL library header files.
 
+#include "include/error.h"
 #include "include/configurationReader/readerCore.hpp"
 #include "include/logger/loggerCore.h"
 
@@ -93,12 +94,12 @@ namespace GCL
     /// @param[in] sectionTagName: The section and tag seperated by a namespace seperator.
     /// @returns Standard optional with the value if found. If the tag is not found then the optional has no value.
     /// @throws
+    /// @version 2020-11-30/GGB - Debugging function.
     /// @version 2020-04-27/GGB - Function created.
 
     virtual std::optional<std::string> readTag(std::string const &sectionTagName)
     {
       std::optional<std::string> returnValue;
-      boost::filesystem::ifstream ifs;
       std::size_t lineNumber = 0;
       std::size_t linesRead = 0;  // Used for readahead.
       std::string szLine, szSection;
@@ -114,6 +115,8 @@ namespace GCL
 
       boost::trim(section);
       boost::trim(tagName);
+
+      logger::TRACEMESSAGE("READERSECTIONS: Searching for section: " + section + " tag: " + tagName);
 
         // Has the section been loaded?
 
@@ -132,9 +135,15 @@ namespace GCL
       }
       else
       {
+
           // Section::Tag pair not found yet, read from the file.
 
-        ifs.open(filename_);
+        std::ifstream ifs(filename_);
+
+        if (!ifs.is_open())
+        {
+          RUNTIME_ERROR(boost::locale::translate("Unable to open configuration file."));
+        };
 
           // Read through the already read lines quickly without any translation.
 
@@ -159,7 +168,16 @@ namespace GCL
           {
             std::size_t indexStart, indexEnd;
 
-              // Check if a section, comment or tag line
+              // Check if a comment, section or tag line
+
+            if ((indexStart = szLine.find(commentChar_)) != std::string::npos)
+            {
+                // Comment in line, discard everything after the comment.
+
+              szLine = szLine.substr(0, indexStart);
+
+              logger::TRACEMESSAGE("Line after removing comments: " + szLine);
+            };
 
             if ((indexStart = szLine.find(sectionOpenChar_)) != std::string::npos)
             {
@@ -173,7 +191,10 @@ namespace GCL
               {
                 indexEnd = szLine.find(sectionCloseChar_);
 
-                szSection = szLine.substr(indexStart + sectionOpenChar_.size(), indexEnd - sectionOpenChar_.size());
+                szSection = szLine.substr(indexStart + sectionOpenChar_.size(), indexEnd -
+                                          (indexStart + sectionOpenChar_.size()));
+
+                logger::TRACEMESSAGE("Section Found: " + szSection);
 
                 sectionIterator = std::get<0>(sectionContainer.emplace(szSection, tagValueContainer_t()));
 
@@ -187,8 +208,10 @@ namespace GCL
                 }
               };
             }
-            else if (szLine.substr(0, commentChar_.size()) != commentChar_)
+            else
             {
+                // tag line
+
               std::size_t tokenEnd;
               std::string tag, value;
 
@@ -201,6 +224,8 @@ namespace GCL
                 value = szLine.substr(tokenEnd + seperatorChar_.size(), std::string::npos);
                 boost::trim(value);
 
+                logger::TRACEMESSAGE("Tag identified: " + tag  + " value: " + value);
+
                 if (sectionFound)
                 {
                   if (tagFound)
@@ -212,6 +237,8 @@ namespace GCL
                   }
                   else if (tag == tagName)
                   {
+                    logger::TRACEMESSAGE("Tag Found");
+
                     tagFound = true;
                     returnValue = value;
                   };
@@ -240,14 +267,15 @@ namespace GCL
     using CReaderCore::tagValueString;
     using CReaderCore::tagValueUInt16;
 
-    /// @brief Constructor for the class. A single constructor is provided and the default constructor is deleted.
-    /// @param[in] filename: The filename and path of the configuration file.
-    /// @param[in] seperatorChar: The character(s) used for seperating statements.
-    /// @param[in] commentChar: The character(s) used for indicating comments.
-    /// @throws std::bad_alloc
-    /// @version 2020-04-27/GGB - Function created.
+    /// @brief      Constructor for the class. A single constructor is provided and the default constructor is deleted.
+    /// @param[in]  filename: The filename and path of the configuration file.
+    /// @param[in]  seperatorChar: The character(s) used for seperating statements.
+    /// @param[in]  commentChar: The character(s) used for indicating comments.
+    /// @throws     std::bad_alloc
+    /// @version    2020-11-30/GGB - Changed to suse std::filesystem.
+    /// @version    2020-04-27/GGB - Function created.
 
-    CReaderSections(boost::filesystem::path const &filename, std::string seperatorChar = "=", std::string commentChar = "#")
+    CReaderSections(std::filesystem::path const &filename, std::string seperatorChar = "=", std::string commentChar = "#")
       :  CReaderCore(filename, seperatorChar, commentChar), sectionOpenChar_("["), sectionCloseChar_("]"), namespaceChar_("/")
     {
     }

@@ -151,7 +151,7 @@ namespace GCL
         TSinkContainer sinkContainer;
 
         std::unique_ptr<std::thread> writerThread;
-        PLoggerSink defaultStreamSink;                        ///< Stream sink created in constructor to ensure logger always works.
+        PLoggerSink defaultStreamSink_;                        ///< Stream sink created in constructor to ensure logger always works.
 
         std::queue<PLoggerRecord> messageQueue;
 
@@ -166,6 +166,8 @@ namespace GCL
 
         virtual void addSink(PLoggerSink ls);
         virtual bool removeSink(PLoggerSink ls);
+
+        CLoggerSink *defaultStreamSink() { return defaultStreamSink_.get(); }
         void removeDefaultStreamSink();
 
         virtual void logMessage(ESeverity, std::string const &);

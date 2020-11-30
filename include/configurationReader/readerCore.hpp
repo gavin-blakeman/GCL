@@ -38,6 +38,7 @@
 
 #include <cstdint>
 #include <exception>
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -45,8 +46,6 @@
   // Miscellaneous library header files
 
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/lexical_cast.hpp>
 
   // GCL library header files.
@@ -66,7 +65,7 @@ namespace GCL
     CReaderCore &operator =(CReaderCore const &) = delete;
 
   protected:
-    boost::filesystem::path filename_;        ///< Filename and path of the configuration file
+    std::filesystem::path filename_;          ///< Filename and path of the configuration file
     std::string seperatorChar_;               ///< The seperator character to use between token and value.
     std::string commentChar_;                 ///< Character(s) used to start comment lines.
     std::size_t lastLine_ = 0;                ///< Last line read in the file.
@@ -172,9 +171,10 @@ namespace GCL
     /// @param[in] seperatorChar: The character(s) used for seperating statements.
     /// @param[in] commentChar: The character(s) used for indicating comments.
     /// @throws std::bad_alloc
+    /// @version    2020-11-30/GGB - Changed to use std::filesystem
     /// @version 2020-04-27/GGB - Function created.
 
-    CReaderCore(boost::filesystem::path const &filename, std::string seperatorChar = "=", std::string commentChar = "#")
+    CReaderCore(std::filesystem::path const &filename, std::string seperatorChar = "=", std::string commentChar = "#")
       : filename_(filename), seperatorChar_(seperatorChar), commentChar_(commentChar)
     {
     }

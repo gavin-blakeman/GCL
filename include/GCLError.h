@@ -47,6 +47,10 @@ namespace GCL
   TErrorCode const E_SQLWRITER_INVALIDTABLENAME   = 0x1003;
   TErrorCode const E_SQLWRITER_NOSELECTFIELDS     = 0x1004;
   TErrorCode const E_SQLWRITER_NOFROMFIELD        = 0x1005;
+
+  TErrorCode const E_PLUGINMANAGER_NODIRECTORY    = 0x1100;
+  TErrorCode const E_PLUGINMANAGER_UNABLETOLOAD   = 0x1101;
+  TErrorCode const E_PLUGINMANAGER_UNABLETOMAP    = 0x1102;
 }
 
 #endif // GCLERROR_H

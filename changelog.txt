@@ -1,3 +1,11 @@
+﻿2020-11
+-------
+CHANGE:     CReaderSection - to use std::filesystem::path instead of boost::filesystem::path
+ADD:        Additional constructor deletions to GCL::runtime_error
+CHANGE:     name of CRuntimeError to runtime_error.
+CHANGE:     RUNTIME_ERROR [error.h] from macro to inline function. Also inject into global namespace.
+ADD:        CPluginManager - Manage plugins.
+
 ﻿2020-09
 -------
 CHANGE:     CRuntimeAssert - Removed parameter library from macro and class. (Breaking)
