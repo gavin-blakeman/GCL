@@ -38,8 +38,8 @@ namespace GCL
   namespace alarm
   {
 
-    CAlarmDaily::CAlarmDaily(callbackFunction_t callbackFunction, void *callbackData) :
-      CAlarmType(callbackFunction, callbackData)
+    CAlarmDaily::CAlarmDaily(timezone_t tz, std::uint32_t, callbackFunction_t callbackFunction, void *callbackData) :
+      CAlarmType(tz, callbackFunction, callbackData)
     {
 
     }

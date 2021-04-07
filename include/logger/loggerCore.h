@@ -344,8 +344,6 @@ namespace GCL
 #define TRACEENTER GCL::logger::defaultLogger().logMessage(GCL::logger::trace, "Entering Function: " + std::string(__PRETTY_FUNCTION__) + ". File: " + std::string(__FILE__) + ". Line: " + std::to_string(__LINE__))
 #define TRACEEXIT GCL::logger::defaultLogger().logMessage(GCL::logger::trace, "Exiting Function: " + std::string(__PRETTY_FUNCTION__) + ". File: " + std::string(__FILE__) + ". Line: " + std::to_string(__LINE__))
 
-
-
   } // namespace logger
 } // namespace GCL
 

@@ -91,7 +91,7 @@ HEADERS += \
     include/configurationReader/readerVanilla.hpp \
     include/configurationReader/readerCore.hpp \
     include/GCLError.h \
-    include/pluginManager/pluginManager.h
+    include/pluginManager/pluginManager.h \
 
 OTHER_FILES += \
     changelog.txt

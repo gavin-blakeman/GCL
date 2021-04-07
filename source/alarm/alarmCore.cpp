@@ -45,13 +45,14 @@ namespace GCL
     using GCL::logger::CRITICALMESSAGE;
 
     /// @brief Constructor for the CAlarmType class.
+    /// @param[in[ tz: The time zone to use for the alarm. (+- hours)
     /// @param[in] callbackFunction: The callback function for the alarm.
     /// @param[in] callbackData: The callback data to use with the callback function.
     /// @throws None.
     /// @version 2018-08-11/GGB - Function created.
 
-    CAlarmType::CAlarmType(callbackFunction_t callbackFunction, void *callbackData) :
-      alarmHandle_(0), callbackFunction_(callbackFunction), callbackData_(callbackData)
+    CAlarmType::CAlarmType(timezone_t tz, callbackFunction_t callbackFunction, void *callbackData) :
+      alarmHandle_(0), callbackFunction_(callbackFunction), callbackData_(callbackData), timeZone_(tz)
     {
 
     }
@@ -96,13 +97,13 @@ namespace GCL
     /// @throws None.
     /// @version 2018-07-06/GGB - Function created.
 
-    alarmHandle_t CAlarmCore::addAlarm(PAlarmType &newAlarm)
+    std::pair<alarmHandle_t, CAlarmType *>  CAlarmCore::addAlarm(std::unique_ptr<CAlarmType> newAlarm)
     {
       alarmContainer_.emplace_back(std::move(newAlarm));
       alarmContainer_.back()->alarmHandle(++lastAlarmHandle);
       alarmContainer_.back()->alarmCore(this);
 
-      return lastAlarmHandle;
+      //return lastAlarmHandle;
     }
 
     /// @brief The loop function to evaluate whether alarms are required. This is the thread function.
@@ -131,7 +132,7 @@ namespace GCL
 
           // Run over each of the alarms and call callback functions as required.
 
-        for (auto alarm: alarmContainer_)
+        for (auto &alarm: alarmContainer_)
         {
           alarm->evaluateAlarm(currentTime);
         };

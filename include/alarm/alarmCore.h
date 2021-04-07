@@ -46,6 +46,7 @@
 #include <string>
 #include <thread>
 #include <unordered_set>
+#include <utility>
 
   // Miscellaneous library header files.
 
@@ -54,8 +55,10 @@ namespace GCL
 {
   namespace alarm
   {
-    typedef std::uint64_t alarmHandle_t;
-    typedef std::function<void(std::uint64_t, void *)> callbackFunction_t;      // first parameter is the alarmHandle. The second is user defined data.
+    typedef std::uint32_t alarmHandle_t;
+    typedef std::function<void(alarmHandle_t, void *)> callbackFunction_t;      // first parameter is the alarmHandle.
+                                                                                // The second is user defined data.
+    using timezone_t = std::int8_t;
 
     class CAlarmCore;
 
@@ -67,17 +70,20 @@ namespace GCL
       callbackFunction_t callbackFunction_;
       void *callbackData_;
       bool publicHolidayDisable_ = true;
+      timezone_t timeZone_;
 
-        // Remove the illegal constructors.
+        // Remove the undesirable constructors.
 
       CAlarmType() = delete;
       CAlarmType(CAlarmType const &) = delete;
+      CAlarmType(CAlarmType &&) = delete;
+      CAlarmType &operator =(CAlarmType const &) = delete;
 
     protected:
       virtual void executeCallback() const { callbackFunction_(alarmHandle_, callbackData_); }
 
     public:
-      CAlarmType(callbackFunction_t callbackFunction, void *callbackData);
+      CAlarmType(timezone_t, callbackFunction_t callbackFunction, void *callbackData);
       virtual ~CAlarmType() {}
 
       void alarmStart() {}
@@ -92,12 +98,12 @@ namespace GCL
       void publicHolidayDisable(bool phd) { publicHolidayDisable_ = phd; }
       bool publicHolidayDisable() const noexcept { return publicHolidayDisable_; }
 
+      void timeZone(std::int8_t tz) { timeZone_ = tz; }
+      std::int8_t timeZone() { return timeZone_; }
+
       virtual void evaluateAlarm(std::tm const &) = 0;
 
     };
-
-    typedef std::shared_ptr<CAlarmType> PAlarmType;
-
 
     class CAlarmCore
     {
@@ -107,13 +113,13 @@ namespace GCL
       typedef std::unique_lock<mutex_type>  UniqueLock;
       typedef std::shared_lock<mutex_type>  SharedLock;
 
-      typedef std::list<PAlarmType> TAlarmContainer;
+      typedef std::list<std::unique_ptr<CAlarmType>> TAlarmContainer;
 
       alarmHandle_t lastAlarmHandle = 0;                  ///< The last alarm handle used.
       mutable mutex_type terminateMutex;
       bool terminateThread_ = false;
       TAlarmContainer alarmContainer_;
-      std::thread * alarmThread_;
+      std::thread *alarmThread_;
       bool alarmLoopRunning = false;
       bool localTime_ = true;
       std::unordered_set<dateHash_t> publicHolidays_;
@@ -128,7 +134,7 @@ namespace GCL
       CAlarmCore();
       ~CAlarmCore();
 
-       alarmHandle_t addAlarm(PAlarmType &);
+       std::pair<alarmHandle_t, CAlarmType *> addAlarm(std::unique_ptr<CAlarmType>);
        bool removeAlarm(alarmHandle_t);
 
        void stopAlarmCore();

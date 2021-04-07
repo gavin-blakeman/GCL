@@ -89,10 +89,10 @@ namespace GCL
       };
     }
 
-    /// @brief Creates and opens the log file.
-    /// @throws 0x1000 - LOGGER: Unable to open log file.
-    /// @version 2018-01-18/GGB - Added class member logFileSize.
-    /// @version 2014-07-22/GGB - Function created.
+    /// @brief    Creates and opens the log file.
+    /// @throws   0x1000 - LOGGER: Unable to open log file.
+    /// @version  2018-01-18/GGB - Added class member logFileSize.
+    /// @version  2014-07-22/GGB - Function created.
 
     void CFileSink::openLogFile()
     {
@@ -159,7 +159,7 @@ namespace GCL
       else
       {
         openLogFileName = logFileFullName;
-      }
+      };
     }
 
     /// @brief Function to roll the files. IE move the files down the numbering order by 1.
@@ -308,12 +308,12 @@ namespace GCL
       maxCopies = copies;
     }
 
-    /// @brief Sets the rotation policy to a maximum number of days.'
-    /// @param[in] copies - The number of copies of the log file to keep.
-    /// @param[in] maxDays - The number of days before rotation.
-    /// @throws None.
-    /// @version 2018-01-26/GGB - Removed all compression support
-    /// @version 2018-01-19/GGB - Function created.
+    /// @brief      Sets the rotation policy to a maximum number of days.'
+    /// @param[in]  copies: The number of copies of the log file to keep.
+    /// @param[in]  maxDays: The number of days before rotation.
+    /// @throws     None.
+    /// @version    2018-01-26/GGB - Removed all compression support
+    /// @version    2018-01-19/GGB - Function created.
 
     void CFileSink::setRotationPolicyDays(std::uint16_t copies, std::uint16_t maxDays)
     {
@@ -322,11 +322,11 @@ namespace GCL
       rotationDays = maxDays;
     }
 
-    /// @brief Sets the rotation policy to a new one every startup (use) of the application.
-    /// @param[in] copies - The number of copies of the log file to keep.
-    /// @throws None.
-    /// @version 2018-01-26/GGB - Removed all compression support
-    /// @version 2018-01-19/GGB - Function created.
+    /// @brief      Sets the rotation policy to a new one every startup (use) of the application.
+    /// @param[in]  copies: The number of copies of the log file to keep.
+    /// @throws     None.
+    /// @version    2018-01-26/GGB - Removed all compression support
+    /// @version    2018-01-19/GGB - Function created.
 
     void CFileSink::setRotationPolicyUse(std::uint16_t copies)
     {
@@ -334,11 +334,11 @@ namespace GCL
       maxCopies = copies;
     }
 
-    /// @brief Function to write the message to the logFile.
-    /// @param[in] s - String to write to the logFile.
-    /// @throws None.
-    /// @version 2015-06-01/GGB - Added functionality to rotate based on date.
-    /// @version 2014-12-24/GGB - Function created.
+    /// @brief      Function to write the message to the logFile.
+    /// @param[in]  s: String to write to the logFile.
+    /// @throws     None.
+    /// @version    2015-06-01/GGB - Added functionality to rotate based on date.
+    /// @version    2014-12-24/GGB - Function created.
 
     void CFileSink::write(std::string const &s)
     {
@@ -366,7 +366,7 @@ namespace GCL
       else if (rotationMethod == days)
       {
 
-      }
+      };
     }
 
   } // namespace logger

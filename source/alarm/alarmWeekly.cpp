@@ -45,7 +45,8 @@ namespace GCL
     /// @throws None.
     /// @version 2018-08-11/GGB - Function created.
 
-    CAlarmWeekly::CAlarmWeekly(callbackFunction_t callbackFunction, void *callbackData) : CAlarmType(callbackFunction, callbackData)
+    CAlarmWeekly::CAlarmWeekly(timezone_t tz, callbackFunction_t callbackFunction, void *callbackData)
+      : CAlarmType(tz, callbackFunction, callbackData)
     {
     }
 
@@ -58,9 +59,9 @@ namespace GCL
     /// @note 1: Only the hours, minutes and seconds fields of the std::tm are used.
     /// @version 2018-07-07/GGB - Function created.
 
-    CAlarmWeekly::CAlarmWeekly(callbackFunction_t callbackFunction, void *callbackData,
+    CAlarmWeekly::CAlarmWeekly(timezone_t tz, callbackFunction_t callbackFunction, void *callbackData,
                                std::vector<bool> const &weekDays, std::tm const &alarmTime) :
-      CAlarmType(callbackFunction, callbackData), weekDays_(std::move(weekDays)), alarmTime_(std::move(alarmTime))
+      CAlarmType(tz, callbackFunction, callbackData), weekDays_(std::move(weekDays)), alarmTime_(std::move(alarmTime))
     {
 
     }

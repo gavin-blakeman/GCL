@@ -56,13 +56,14 @@ namespace GCL
     {
     private:
       CAlarmWeekly() = delete;
+
       std::vector<bool> weekDays_;                ///< Array of days that the alarm applies to. 0-Sunday; 6-Saturday.
       std::tm alarmTime_;
 
     protected:
     public:
-      CAlarmWeekly(callbackFunction_t, void *);
-      CAlarmWeekly(callbackFunction_t, void *, std::vector<bool> const &, std::tm const &);
+      CAlarmWeekly(timezone_t, callbackFunction_t, void *);
+      CAlarmWeekly(timezone_t, callbackFunction_t, void *, std::vector<bool> const &, std::tm const &);
       explicit CAlarmWeekly(CAlarmWeekly const &);
 
       virtual void evaluateAlarm(std::tm const &);

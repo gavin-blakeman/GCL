@@ -43,12 +43,17 @@ namespace GCL
     class CAlarmDaily : public CAlarmType
     {
     private:
+
+
+
       CAlarmDaily() = delete;
+      CAlarmDaily(CAlarmDaily const &) = delete;
+      CAlarmDaily(CAlarmDaily &&) = delete;
+      CAlarmDaily &operator =(CAlarmDaily const &) = delete;
 
     protected:
     public:
-      CAlarmDaily(callbackFunction_t, void *callbackData);
-      explicit CAlarmDaily(CAlarmDaily const &);
+      CAlarmDaily(timezone_t, std::uint32_t, callbackFunction_t, void *callbackData);
 
       virtual void evaluateAlarm();
 
