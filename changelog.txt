@@ -1,4 +1,8 @@
-﻿2020-11
+﻿2021-04
+-------
+CHANGE:     sqlWriter - Add call functionality.
+
+2020-11
 -------
 CHANGE:     CReaderSection - to use std::filesystem::path instead of boost::filesystem::path
 ADD:        Additional constructor deletions to GCL::runtime_error

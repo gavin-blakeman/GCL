@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2020 Gavin Blakeman.
+//                      Copyright 2013-2021 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -74,6 +74,28 @@ namespace GCL
   //
   //******************************************************************************************************************************
 
+  /// @brief      Function to create a call procedure.
+  /// @param[in]  procedureName: The name of the procedure to call.
+  /// @param[in]  parameters: The parameters for the procedure call.
+  /// @returns    (*this)
+  /// @throws     None
+  /// @version    2021-04-13/GGB - Function created.
+
+  sqlWriter &sqlWriter::call(std::string const &procedureName, std::initializer_list<parameter> parameters)
+  {
+    resetQuery();
+    queryType = qt_call;
+
+    procedureName_ = procedureName;
+
+    for (auto param : parameters)
+    {
+      procedureParameters_.push_back(param);
+    };
+
+    return (*this);
+  }
+
   /// @brief      Function to capture the count expression
   /// @param[in]  countExpression: The count expression to capture.
   /// @returns    (*this)
@@ -85,6 +107,35 @@ namespace GCL
     countValue = countExpression;
 
     return (*this);
+  }
+
+  /// @brief      Creates the string for the call including parameters.
+  /// @returns    a string representation of stored procedure call.
+  /// @version    2021-04-13/GGB - Function created.
+
+  std::string sqlWriter::createCall() const
+  {
+    bool commaRequired = false;
+    std::string returnValue = "CALL ";
+
+    returnValue += procedureName_ + "(";
+
+    for (auto param: procedureParameters_)
+    {
+      if (commaRequired)
+      {
+        returnValue += ", ";
+      }
+      else
+      {
+        commaRequired = true;
+      };
+      returnValue += "'" + param.to_string() + "'";
+    }
+
+    returnValue += ")";
+
+    return returnValue;
   }
 
   /// @brief      Creates the test for the specified delete query.
@@ -848,6 +899,7 @@ namespace GCL
   /// @brief      Produces the string for a SELECT query.
   /// @returns    A string containing the select clause.
   /// @throws     None.
+  /// @version    2021-04-11/GGB - Added support for "FOR SHARE" and "FOR UPDATE"
   /// @version    2020-04-25/GGB - Added support for the LIMIT and OFFSET clauses.
   /// @version    2017-08-12/GGB - Added check for countValue in selectClause if statement.
   /// @version    2015-03-30/GGB - Function created.
@@ -893,6 +945,15 @@ namespace GCL
     };
 
     returnValue += createLimitClause();
+
+    if (forShare_)
+    {
+      returnValue += " FOR SHARE";
+    }
+    else if (forUpdate_)
+    {
+      returnValue += " FOR UPDATE";
+    };
 
     return returnValue;
   }
@@ -1184,6 +1245,8 @@ namespace GCL
 
   /// @brief Resets all the fields for the query.
   /// @throws None.
+  /// @version 2021-04-13/GGB - Added procedure call support.
+  /// @version 2021-04-11/GGB - Added "FOR SHARE" and "FOR UPDATE" functionality.
   /// @version 2020-04-25/GGB - Added offsetValue to support offsets.
   /// @version 2019-12-08/GGB - Update queryType = qt_none when the query is reset.
   /// @version 2017-08-19/GGB - Added support for distinct.
@@ -1208,6 +1271,9 @@ namespace GCL
     updateTable.clear();
     setFields.clear();
     queryType = qt_none;
+    forShare_ = false;
+    forUpdate_ = false;
+    procedureName_.clear();
   }
 
   /// @brief Resets the where clause of a query.
@@ -1266,6 +1332,8 @@ namespace GCL
   {
     select();
 
+    fromFields.emplace_back(tableName, "");
+
     for (auto elem : fields)
     {
       selectFields.push_back(tableName + "." + elem);
@@ -1307,6 +1375,7 @@ namespace GCL
   /// @brief Converts the query into an SQL query string.
   /// @returns The SQL query as a string.
   /// @throws None.
+  /// @version 2021-04-13/GGB - Added stored procedure calls.
   /// @version 2019-12-08/GGB - Added UPSERT query.
   /// @version 2017-08-12/GGB - Function created.
 
@@ -1339,6 +1408,11 @@ namespace GCL
       case qt_upsert:
       {
         returnValue = createUpsertQuery();
+        break;
+      }
+      case qt_call:
+      {
+        returnValue = createCall();
         break;
       }
       default:

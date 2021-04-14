@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015, 2017-2020 Gavin Blakeman.
+//                      Copyright 2015, 2017-2021 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -114,11 +114,11 @@ namespace GCL
     return std::make_tuple(bytes[0], bytes[1], bytes[2], bytes[3]);
   }
 
-  /// @brief Formats a time value in (seconds past midnight) to a time.
-  /// @param[in] seconds: number of seconds past midnight.
-  /// @returns The time as a string HH:mm:ss.ss
+  /// @brief      Formats a time value in (seconds past midnight) to a time.
+  /// @param[in]  seconds: number of seconds past midnight.
+  /// @returns    The time as a string HH:mm:ss.ss
   /// @throws
-  /// @version 2017-08-11/GGB - Function created.
+  /// @version    2017-08-11/GGB - Function created.
 
   std::string sprintfHMS(std::uint32_t const &seconds)
   {
@@ -126,9 +126,7 @@ namespace GCL
     std::uint16_t min = std::floor((seconds % 3600) / 60);
     std::uint16_t sec = seconds % 60;
 
-    std::string test = boost::str(boost::format("%|02d|:%|02d|:%|02d|") % hrs % min % sec);
-
-    return test;
+    return boost::str(boost::format("%|02d|:%|02d|:%|02d|") % hrs % min % sec);
   }
 
   /// @brief Formats a double in HMS format with the required number of decimal places.

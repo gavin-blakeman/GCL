@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2020 Gavin Blakeman.
+//                      Copyright 2013-2021 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -31,7 +31,8 @@
 //
 // CLASSES INCLUDED:    CSQLWriter
 //
-// HISTORY:             2020-04-25 GGB - Added offset functionality.
+// HISTORY:             2021-04-13 GGB - Added call functionality.
+//                      2020-04-25 GGB - Added offset functionality.
 //                      2019-12-08 GGB - Added UPSERT functionality for MYSQL.
 //                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2013-01-26 GGB - Development of class for application AIRDAS
@@ -155,6 +156,7 @@ namespace GCL
       qt_delete,
       qt_update,
       qt_upsert,
+      qt_call,
     };
 
     std::vector<std::string> selectFields;
@@ -173,9 +175,14 @@ namespace GCL
     std::string updateTable;
     pairStorage setFields;
     std::string deleteTable;
+    std::string procedureName_;
+    parameterStorage procedureParameters_;
 
     EQueryType queryType;
     std::string currentTable;
+
+    bool forUpdate_ = false;
+    bool forShare_ = false;
 
     bool verifyOperator(std::string const &) const;
 
@@ -191,6 +198,7 @@ namespace GCL
     std::string createUpdateQuery() const;
     std::string createDeleteQuery() const;
     std::string createUpsertQuery() const;
+    std::string createCall() const;
 
     std::string createOrderByClause() const;
     std::string createSelectClause() const;
@@ -206,6 +214,7 @@ namespace GCL
     void resetQuery();
     void resetWhere();
 
+    sqlWriter &call(std::string const &, std::initializer_list<parameter>);
     sqlWriter &count(std::string const &);
     sqlWriter &deleteFrom(std::string const &);
     sqlWriter &distinct();
@@ -226,6 +235,8 @@ namespace GCL
     sqlWriter &set(std::initializer_list<parameterPair>);
     sqlWriter &update(std::string const &);
     sqlWriter &upsert(std::string const &);
+    sqlWriter &forShare() { forShare_ = true; }
+    sqlWriter &forUpdate() {forUpdate_ = true; }
 
     /// @brief Adds a single where clause to the where list.
     /// @param[in] columnName: The columnName to add
