@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2021 Gavin Blakeman.
+//                      Copyright 2013-2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -31,7 +31,8 @@
 //
 // CLASSES INCLUDED:    CSQLWriter
 //
-// HISTORY:             2021-04-13 GGB - Added call functionality.
+// HISTORY:             2022-04-11 GGB - Converted to std::filesystem
+//                      2021-04-13 GGB - Added call functionality.
 //                      2020-04-25 GGB - Added offset functionality.
 //                      2019-12-08 GGB - Added UPSERT functionality for MYSQL.
 //                      2015-09-22 GGB - AIRDAS 2015.09 release
@@ -48,6 +49,7 @@
 
 #include <cstdint>
 #include <initializer_list>
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <optional>
@@ -55,11 +57,11 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <variant>
 #include <vector>
 
   // Miscellaneous Library header files
 
-#include "boost/filesystem.hpp"
 #include <SCL>
 
 /// @page page2 SQL Writer
@@ -95,6 +97,7 @@ namespace GCL
     typedef std::map<std::string, STableData> TDatabaseMap;
 
   public:
+    using columnNumber_t = std::uint32_t;
     enum EOrderBy
     {
       ASC,            ///< Ascending
@@ -114,6 +117,21 @@ namespace GCL
       JOIN_LEFT,      ///< Outer Left Join
       JOIN_FULL       ///< Full outer join
     };
+    enum logicalOperator_e
+    {
+      AND,
+      OR,
+    };
+    enum operator_e
+    {
+      eq,             ///< equals
+      gt,             ///< greater than
+      lt,             ///< less than
+      gte,            ///< greater than equal to
+      lte,            ///< less than equal to
+      ob,             ///< open bracket
+      cb,             ///< close bracket
+    };
 
     class bindValue
     {
@@ -128,14 +146,16 @@ namespace GCL
     };
 
     using parameter = SCL::any;
+
+    using groupByStorage = std::vector<parameter>;
     typedef std::pair<std::string, parameter> parameterPair;
     typedef std::pair<std::string, std::string> stringPair;
-    typedef std::tuple<std::string, std::string, parameter> parameterTriple;
+    using parameterTriple = std::tuple<std::string, std::string, parameter>;
     typedef std::pair<std::string, EOrderBy> orderBy_t;
 
     typedef std::vector<parameter> parameterStorage;
     typedef std::vector<parameterPair> pairStorage;
-    typedef std::vector<parameterTriple> tripleStorage;
+    using tripleStorage = std::vector<parameterTriple>;
     typedef std::vector<stringPair> stringPairStorage;
     typedef std::vector<orderBy_t> orderByStorage_t;
 
@@ -143,6 +163,18 @@ namespace GCL
     typedef std::tuple<std::string, std::string, EJoin, std::string, std::string> parameterJoin;
 
     typedef std::vector<parameterJoin> joinStorage;
+
+    using whereTriple = std::tuple<std::string, operator_e, parameter>;
+    class whereValue;
+    class whereValue : public std::variant<parameterTriple, whereTriple, logicalOperator_e, std::vector<whereValue>>
+    {
+    public:
+        using base = std::variant<parameterTriple, whereTriple, logicalOperator_e, std::vector<whereValue>>;
+        using base::base;
+        using base::operator=;
+    };
+
+    using whereStorage = std::vector<whereValue>;
 
   private:
     EDialect dialect = MYSQL;
@@ -161,14 +193,15 @@ namespace GCL
 
     std::vector<std::string> selectFields;
     stringPairStorage fromFields;
-    tripleStorage whereFields;
+    whereStorage whereFields;
     std::string insertTable;
     valueStorage valueFields;
+    groupByStorage groupByFields_;
     orderByStorage_t orderByFields;
     joinStorage joinFields;
     std::optional<std::uint64_t> offsetValue;
     std::optional<std::uint64_t> limitValue;
-    std::optional<std::string> countValue;
+    std::optional<std::pair<std::string, std::string>> countValue;
     bool distinct_ = false;
     stringPairStorage minFields;
     stringPairStorage maxFields;
@@ -190,9 +223,6 @@ namespace GCL
     void setTableMap(std::string const &, std::string const &);
     void setColumnMap(std::string const &, std::string const &, std::string const &);
 
-    std::string getColumnMap(std::string const &) const;
-    std::string getTableMap(std::string const &) const;
-
     std::string createSelectQuery() const;
     std::string createInsertQuery() const;
     std::string createUpdateQuery() const;
@@ -200,6 +230,7 @@ namespace GCL
     std::string createUpsertQuery() const;
     std::string createCall() const;
 
+    std::string createGroupByClause() const;
     std::string createOrderByClause() const;
     std::string createSelectClause() const;
     std::string createFromClause() const;
@@ -209,17 +240,23 @@ namespace GCL
     std::string createLimitClause() const;
 
   public:
+    operator std::string() const { return string(); }
+
     void setDialect(EDialect d) {dialect = d;}
 
     void resetQuery();
     void resetWhere();
 
     sqlWriter &call(std::string const &, std::initializer_list<parameter>);
-    sqlWriter &count(std::string const &);
+    sqlWriter &count(std::string const &, std::string const & = "");
     sqlWriter &deleteFrom(std::string const &);
     sqlWriter &distinct();
     sqlWriter &from(std::string const &, std::string const & = "");
     sqlWriter &from(std::initializer_list<std::string>);
+    sqlWriter &groupBy(std::string const &);
+    sqlWriter &groupBy(columnNumber_t);
+    sqlWriter &groupBy(std::initializer_list<std::string>);
+    sqlWriter &groupBy(std::initializer_list<columnNumber_t>);
     sqlWriter &insertInto(std::string, std::initializer_list<std::string>);
     sqlWriter &insertInto(std::string);
     sqlWriter &join(std::initializer_list<parameterJoin>);
@@ -231,12 +268,14 @@ namespace GCL
     sqlWriter &select();
     sqlWriter &select(std::initializer_list<std::string>);
     sqlWriter &select(std::string const &, std::initializer_list<std::string>);
+    sqlWriter &selectDistinct(std::initializer_list<std::string>);
+    sqlWriter &selectDistinct(std::string const &, std::initializer_list<std::string>);
     sqlWriter &set(std::string const &, parameter const &);
     sqlWriter &set(std::initializer_list<parameterPair>);
     sqlWriter &update(std::string const &);
     sqlWriter &upsert(std::string const &);
-    sqlWriter &forShare() { forShare_ = true; }
-    sqlWriter &forUpdate() {forUpdate_ = true; }
+    sqlWriter &forShare() { forShare_ = true; return *this; }
+    sqlWriter &forUpdate() {forUpdate_ = true; return *this; }
 
     /// @brief Adds a single where clause to the where list.
     /// @param[in] columnName: The columnName to add
@@ -250,20 +289,41 @@ namespace GCL
     template<typename T>
     sqlWriter &where(std::string const &columnName, std::string const &operatorString, T &&value)
     {
-      whereFields.emplace_back(columnName, operatorString, std::forward<T>(value));
+      whereFields.emplace_back(parameterTriple(columnName, operatorString, std::forward<T>(value)));
 
       return (*this);
     }
 
+    /// @brief Adds a single where clause to the where list.
+    /// @param[in] columnName: The columnName to add
+    /// @param[in] oper: The operator to add
+    /// @param[in] value: The value to add.
+    /// @returns (*this)
+    /// @throws None.
+    /// @version 2020-09-09/GGB - Changed to a templated forwarding reference.
+    /// @version 2017-08-21/GGB - Function created.
+
+    template<typename T>
+    sqlWriter &where(std::string const &columnName, operator_e oper, T &&value)
+    {
+      whereFields.emplace_back(whereTriple(columnName, oper, std::forward<T>(value)));
+
+      return (*this);
+    }
+
+    sqlWriter &where(logicalOperator_e);
     sqlWriter &where(std::initializer_list<parameterTriple>);
     sqlWriter &values(std::initializer_list<parameterStorage>);
 
     std::string string() const;
 
-    virtual void readMapFile(boost::filesystem::path const &);
+    virtual void readMapFile(std::filesystem::path const &);
 
     virtual bool createTable(std::string const &tableName);
     virtual bool createColumn(std::string const &tableName, std::string const &columnName);
+
+    std::string getColumnMappedName(std::string const &) const;
+    std::string getTableMappedName(std::string const &) const;
   };
 
   std::string to_string(GCL::sqlWriter::bindValue const &);

@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2021 Gavin Blakeman.
+//                      Copyright 2013-2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -31,7 +31,9 @@
 //
 // CLASSES INCLUDED:    CSQLWriter
 //
-// HISTORY:             2020-04-25 GGB - Added offset functionality.
+// HISTORY:             2022-04-11 GGB - Converted to std::filesystem
+//                      2021-04-13 GGB - Added call functionality.
+//                      2020-04-25 GGB - Added offset functionality.
 //                      2019-12-08 GGB - Added UPSERT functionality for MYSQL.
 //                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2013-01-26 GGB - Development of class for application AIRDAS
@@ -98,13 +100,15 @@ namespace GCL
 
   /// @brief      Function to capture the count expression
   /// @param[in]  countExpression: The count expression to capture.
+  /// @param[in]  countAs: The name for the count expression.
   /// @returns    (*this)
   /// @throws     None
+  /// @version    2022-04-06/GGB - Added second parameter to allow for specifying count AS ...
   /// @version    2017-08-12/GGB - Function created.
 
-  sqlWriter &sqlWriter::count(std::string const &countExpression)
+  sqlWriter &sqlWriter::count(std::string const &countExpression, std::string const &countAs)
   {
-    countValue = countExpression;
+    countValue = std::make_pair(countExpression, countAs);
 
     return (*this);
   }
@@ -146,7 +150,7 @@ namespace GCL
   {
     std::string returnValue = "DELETE FROM ";
 
-    returnValue += getColumnMap(deleteTable);
+    returnValue += getColumnMappedName(deleteTable);
 
     returnValue += createWhereClause();
 
@@ -355,9 +359,10 @@ namespace GCL
     return returnValue;
   }
 
-  /// @brief Converts the upsert query to a string.
-  /// @throws GCL::CRuntimeError
-  /// @version 2019-12-08/GGB - Function created.
+  /// @brief    Converts the upsert query to a string.
+  /// @throws   GCL::CRuntimeError
+  /// @version  2021-11-18/GGB - Updated to use std::variant with the where fields.
+  /// @version  2019-12-08/GGB - Function created.
 
   std::string sqlWriter::createUpsertQuery() const
   {
@@ -390,15 +395,22 @@ namespace GCL
             fieldValues += ", ";
           };
 
-          fieldNames += getColumnMap(std::get<0>(element));
-          if (std::get<2>(element).type() == typeid(std::string))
+          if (std::holds_alternative<parameterTriple>(element))
           {
-            fieldValues += "'" + std::get<2>(element).to_string() + "'";
+            fieldNames += getColumnMappedName(std::get<0>(std::get<parameterTriple>(element)));
+            if (std::get<2>(std::get<parameterTriple>(element)).type() == typeid(std::string))
+            {
+              fieldValues += "'" + std::get<2>(std::get<parameterTriple>(element)).to_string() + "'";
+            }
+            else
+            {
+              fieldValues += std::get<2>(std::get<parameterTriple>(element)).to_string();
+            };
           }
           else
           {
-            fieldValues += std::get<2>(element).to_string();
-          };
+            RUNTIME_ERROR(boost::locale::translate("Incorrect Parameter type"), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
+          }
         };
 
         // Add the set clause.
@@ -415,7 +427,7 @@ namespace GCL
             fieldValues += ", ";
           };
 
-          fieldNames += getColumnMap(element.first);
+          fieldNames += getColumnMappedName(element.first);
           if (element.second.type() == typeid(std::string))
           {
             fieldValues += "'" + element.second.to_string() + "'";
@@ -446,7 +458,7 @@ namespace GCL
           {
             fieldValues += ", ";
           };
-          fieldValues+= getColumnMap(element.first) + " = ";
+          fieldValues+= getColumnMappedName(element.first) + " = ";
 
           if (element.second.type() == typeid(std::string))
           {
@@ -474,42 +486,48 @@ namespace GCL
   /// @brief      Converts the where clause to a string for creating the SQL string.
   /// @returns    The where clause.
   /// @throws
+  /// @version    2021-11-18/GGB - Updated to use std::variant with the where fields.
   /// @version    2015-05-24/GGB - Function created.
 
   std::string sqlWriter::createWhereClause() const
   {
     std::string returnValue = " WHERE ";
     bool first = true;
-    tripleStorage::const_iterator iterator;
 
-    for (iterator = whereFields.begin(); iterator != whereFields.end(); iterator++)
+    for (auto const &element : whereFields)
     {
-      if (first)
+      if (std::holds_alternative<parameterTriple>(element))
       {
-        first = false;
-      }
-      else
-      {
-        returnValue += " AND ";
-      };
-
-      returnValue += "(";
-      returnValue += getColumnMap(std::get<0>(*iterator));
-      returnValue += " ";
-      returnValue += std::get<1>(*iterator);
-
-      if (std::get<2>(*iterator).type() == typeid(std::string))
-      {
-        returnValue += " '";
-        returnValue += std::get<2>(*iterator).to_string();
-        returnValue += "')";
-      }
-      else
-      {
+        returnValue += "(";
+        returnValue += getColumnMappedName(std::get<0>(std::get<parameterTriple>(element)));
         returnValue += " ";
-        returnValue += std::get<2>(*iterator).to_string();
-        returnValue += ")";
+        returnValue += std::get<1>(std::get<parameterTriple>(element));
+
+        if (std::get<2>(std::get<parameterTriple>(element)).type() == typeid(std::string))
+        {
+          returnValue += " '";
+          returnValue += std::get<2>(std::get<parameterTriple>(element)).to_string();
+          returnValue += "')";
+        }
+        else
+        {
+          returnValue += " ";
+          returnValue += std::get<2>(std::get<parameterTriple>(element)).to_string();
+          returnValue += ")";
+        }
       }
+      else if (std::holds_alternative<logicalOperator_e>(element))
+      {
+
+      }
+      else if (std::holds_alternative<std::vector<whereValue>>(element))
+      {
+
+      }
+      else
+      {
+        RUNTIME_ERROR(boost::locale::translate("Incorrect Parameter type"), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
+      };
     };
 
     return returnValue;
@@ -541,14 +559,13 @@ namespace GCL
   }
 
   /// @brief        Searches the databaseMap and determines the mapped column names.
-  /// @param[in/out] columnName: The columnName to map.
-  /// @returns      true - If the columnName was mapped succesfully.
-  /// @returns      false - The columnName is not recognised in the databaseMap.
+  /// @param[in]    columnName: The columnName to map.
+  /// @returns      The mapped column name,
   /// @throws       None.
   /// @version
   /// @todo         Implement this function. (Bug# 0000193)
 
-  std::string sqlWriter::getColumnMap(std::string const &columnName) const
+  std::string sqlWriter::getColumnMappedName(std::string const &columnName) const
   {
     std::string returnValue = columnName;
 
@@ -705,6 +722,31 @@ namespace GCL
     return returnValue;
   }
 
+  /// @brief Creates the 'GROUP BY' clause if required.
+  /// @returns A string containing the 'GROUP BY' clause.
+  /// @version 2022-04-07/GGB - Function created.
+
+  std::string sqlWriter::createGroupByClause() const
+  {
+    std::string returnValue = " GROUP BY ";
+    bool first = true;
+
+    for (auto column : groupByFields_)
+    {
+      if (first)
+      {
+        first = false;
+      }
+      else
+      {
+        returnValue += ", ";
+      }
+      returnValue += column.to_string();
+    }
+
+    return returnValue;
+  }
+
   /// @brief Creates the "JOIN" clause
   /// @returns A string containing the join clause (begins with the JOIN keyword.
   /// @version 2017-07-29/GGB - Function created.
@@ -773,7 +815,7 @@ namespace GCL
       {
         returnValue += ", ";
       };
-      returnValue += getColumnMap((*iterator).first);
+      returnValue += getColumnMappedName((*iterator).first);
       returnValue += " ";
 
       if ((*iterator).second == ASC)
@@ -793,6 +835,7 @@ namespace GCL
   /// @returns A string representation of the select clause.
   /// @note This function also performs the mapping to the correct table.columnNames. Additionally, if only the columnName is
   ///       given the function will also search the correct tableName or tableAlias and add that to the term.
+  /// @version 2022-04-06/GGB - Added support for 'COUNT() AS '
   /// @version 2017-08-20/GGB - Added support for min() and max()
   /// @version 2017-08-19/GGB - Added support for DISTINCT
   /// @version 2017-08-12/GGB - Added code to support COUNT() clauses.
@@ -841,13 +884,18 @@ namespace GCL
         returnValue += ", ";
       };
 
-      if (*countValue == "*")
+      if ((*countValue).first == "*")
       {
         returnValue += "COUNT(*) ";
       }
       else
       {
-        returnValue += "COUNT(" + *countValue + ") ";
+        returnValue += "COUNT(" + (*countValue).first + ") ";
+      };
+
+      if ((*countValue).second.size() != 0)
+      {
+        returnValue += " AS " + (*countValue).second;
       };
     }
 
@@ -939,6 +987,11 @@ namespace GCL
       returnValue += createWhereClause();
     };
 
+    if (!groupByFields_.empty())
+    {
+      returnValue += createGroupByClause();
+    };
+
     if (!orderByFields.empty())
     {
       returnValue += createOrderByClause();
@@ -991,6 +1044,60 @@ namespace GCL
     queryType = qt_delete;
 
     deleteTable = tableName;
+
+    return *this;
+  }
+
+  /// @brief  Add a single group by column by name.
+  /// @param[in] column: The column name.
+  /// @returns *this;
+  /// @version 2022-04-07/GGB - Function created.
+
+  sqlWriter &sqlWriter::groupBy(std::string const &column)
+  {
+    groupByFields_.push_back(column);
+
+    return *this;
+  }
+
+  /// @brief  Add a single group by column by number.
+  /// @param[in] column: The column name.
+  /// @returns *this;
+  /// @version 2022-04-07/GGB - Function created.
+
+  sqlWriter &sqlWriter::groupBy(columnNumber_t column)
+  {
+    groupByFields_.push_back(column);
+
+    return *this;
+  }
+
+  /// @brief  Add a group of group by columns.
+  /// @param[in] column: The column name.
+  /// @returns *this;
+  /// @version 2022-04-07/GGB - Function created.
+
+  sqlWriter &sqlWriter::groupBy(std::initializer_list<std::string> columns)
+  {
+    for (auto column: columns)
+    {
+      groupByFields_.push_back(column);
+    }
+
+    return *this;
+  }
+
+  /// @brief  Add a group of group by columns.
+  /// @param[in] column: The column name.
+  /// @returns *this;
+  /// @version 2022-04-07/GGB - Function created.
+
+  sqlWriter &sqlWriter::groupBy(std::initializer_list<columnNumber_t> columns)
+  {
+    for (auto column: columns)
+    {
+      groupByFields_.push_back(column);
+    }
 
     return *this;
   }
@@ -1101,9 +1208,10 @@ namespace GCL
   /// @brief      Function to load a map file and store all the aliases.
   /// @param[in]  ifn: The file to read the database mapping from.
   /// @throws     GCL::CRuntimeError
+  /// @version    2022-04-11/GGB - Converted to std::filesystem.
   /// @version    2013-01-26/GGB - Function created.
 
-  void sqlWriter::readMapFile(boost::filesystem::path const &ifn)
+  void sqlWriter::readMapFile(std::filesystem::path const &ifn)
   {
     std::ifstream ifs;
     std::string textLine;
@@ -1113,7 +1221,7 @@ namespace GCL
     size_t spacePosn, token1S, token1E, token2S, token2E, equalPosn;
     std::string szToken1, szToken2;
 
-    ifs.open(ifn.string());
+    ifs.open(ifn);
 
     if (!ifs)
     {
@@ -1274,6 +1382,7 @@ namespace GCL
     forShare_ = false;
     forUpdate_ = false;
     procedureName_.clear();
+    groupByFields_.clear();
   }
 
   /// @brief Resets the where clause of a query.
@@ -1341,6 +1450,36 @@ namespace GCL
 
     return *this;
   }
+
+  /// @brief      Specify the selection fields for the selectDistinct query.
+  /// @param[in]  fields: The fields to add to the select clause.
+  /// @returns    A reference to (*this)
+  /// @version    2022-04-08/GGB - Call to select() to reset the query and set the query type.
+
+  sqlWriter &sqlWriter::selectDistinct(std::initializer_list<std::string> columns)
+  {
+    select(columns);
+    distinct_ = true;
+
+    return *this;
+  }
+
+  /// @brief      Specify table name and fields for the SELECT DISTINCT query.
+  /// @param[in]  tableName: The name of the table to append to each of the field names.
+  /// @param[in]  columns: The list of field names.
+  /// @returns    A reference to (*this)
+  /// @note       This can be called recursivly with different table and field specifiers.
+  /// @version    2022-04-06/GGB - Function created.
+
+  sqlWriter &sqlWriter::selectDistinct(std::string const &tableName, std::initializer_list<std::string> columns)
+  {
+    select(tableName, columns);
+    distinct_ = true;
+
+    return *this;
+  }
+
+
 
   /// @brief Processes a single set clause.
   /// @param[in] columnName: The columnName to set
@@ -1425,10 +1564,10 @@ namespace GCL
     return returnValue;
   }
 
-  /// @brief
+  /// @brief  Return the mapped table name.
   /// @todo Implement the getTableMap function. (Bug# 0000194)
 
-  std::string sqlWriter::getTableMap(std::string const &search) const
+  std::string sqlWriter::getTableMappedName(std::string const &search) const
   {
     std::string returnValue = search;
 
@@ -1528,6 +1667,17 @@ namespace GCL
     };
 
     return (*this);
+  }
+
+  /// @brief        Stores the where fields in the list.
+  /// @param[in]    le: Logical operator
+  /// @returns      (*this)
+  /// @throws       None.
+  /// @version      2021-11-19/GGB - Function created.
+
+  sqlWriter &sqlWriter::where(logicalOperator_e le)
+  {
+    whereFields.emplace_back(le);
   }
 
   /// @brief      to_string function for a bind value.
