@@ -31,7 +31,8 @@
 //
 // CLASSES INCLUDED:    CSQLWriter
 //
-// HISTORY:             2022-04-11 GGB - Converted to std::filesystem
+// HISTORY:             2022-05-01 GGB - Added support for "Returning"
+//                      2022-04-11 GGB - Converted to std::filesystem
 //                      2021-04-13 GGB - Added call functionality.
 //                      2020-04-25 GGB - Added offset functionality.
 //                      2019-12-08 GGB - Added UPSERT functionality for MYSQL.
@@ -44,6 +45,7 @@
 
   // Standard C++ library files
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -157,14 +159,15 @@ namespace GCL
     return returnValue;
   }
 
-  /// @brief Creates the string for an insert query.
-  /// @returns The Insert Query as a string.
-  /// @throws None.
-  /// @version 2015-03-31/GGB - Function created.
+  /// @brief      Creates the string for an insert query.
+  /// @returns    The Insert Query as a string.
+  /// @throws     None.
+  /// @version    2022-05-01/GGB - Added support for the 'RETURNING' function.
+  /// @version    2015-03-31/GGB - Function created.
 
   std::string sqlWriter::createInsertQuery() const
   {
-    std::string returnValue = "INSERT INTO " + insertTable + "(";
+    std::string returnValue = "INSERT INTO " + insertTable + " (";
     bool firstRow = true;
     bool firstValue = true;
 
@@ -246,12 +249,31 @@ namespace GCL
       returnValue += ")";
     };
 
+    if (!returningFields_.empty())
+    {
+      returnValue += " RETURNING ";
+      firstValue = true;
+
+      for (std::string const &v : returningFields_)
+      {
+        if (firstValue)
+        {
+          firstValue = false;
+        }
+        else
+        {
+          returnValue += ", ";
+        }
+        returnValue += v;
+      };
+    }
+
     return returnValue;
   }
 
-  /// @brief Creates the limit clause
-  /// @throws None.
-  /// @version 2020-04-25/GGB - Function created.
+  /// @brief    Creates the limit clause
+  /// @throws   None.
+  /// @version  2020-04-25/GGB - Function created.
 
   std::string sqlWriter::createLimitClause() const
   {
@@ -1102,11 +1124,11 @@ namespace GCL
     return *this;
   }
 
-  /// @brief Set the query type to a 'INSERT' query.
-  /// @param[in] tableName: The table name to insert into.
-  /// @returns *this
-  /// @version 2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
-  /// @version 2018-08-19/GGB - Function created.
+  /// @brief      Set the query type to a 'INSERT' query.
+  /// @param[in]  tableName: The table name to insert into.
+  /// @returns    *this
+  /// @version    2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
+  /// @version    2018-08-19/GGB - Function created.
 
   sqlWriter &sqlWriter::insertInto(std::string tableName)
   {
@@ -1122,13 +1144,13 @@ namespace GCL
     return *this;
   }
 
-  /// @brief Set the query type to a 'INSERT' query.
-  /// @param[in] tableName: The table name to insert into.
-  /// @param[in] fields: The fields and field values.
-  /// @returns *this
-  /// @version 2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
-  /// @version 2017-07-26/GGB - Added support for fields.
-  /// @version 2015-03-30/GGB - Function created.
+  /// @brief      Set the query type to a 'INSERT' query.
+  /// @param[in]  tableName: The table name to insert into.
+  /// @param[in]  fields: The fields and field values.
+  /// @returns    *this
+  /// @version    2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
+  /// @version    2017-07-26/GGB - Added support for fields.
+  /// @version    2015-03-30/GGB - Function created.
 
   sqlWriter &sqlWriter::insertInto(std::string tableName, std::initializer_list<std::string> fields)
   {
@@ -1353,6 +1375,7 @@ namespace GCL
 
   /// @brief Resets all the fields for the query.
   /// @throws None.
+  /// @version 2022-05-01/GGB - Added support for 'RETURNING'
   /// @version 2021-04-13/GGB - Added procedure call support.
   /// @version 2021-04-11/GGB - Added "FOR SHARE" and "FOR UPDATE" functionality.
   /// @version 2020-04-25/GGB - Added offsetValue to support offsets.
@@ -1383,6 +1406,7 @@ namespace GCL
     forUpdate_ = false;
     procedureName_.clear();
     groupByFields_.clear();
+    returningFields_.clear();
   }
 
   /// @brief Resets the where clause of a query.
@@ -1392,6 +1416,29 @@ namespace GCL
   void sqlWriter::resetWhere()
   {
     whereFields.clear();
+  }
+
+  /// @brief      Saves the returning fields.
+  /// @returns    A reference to (*this)
+  /// @version    2022-05-01/GGB - Function created.
+
+  sqlWriter &sqlWriter::returning(std::string const &field)
+  {
+    returningFields_.emplace_back(field);
+  }
+
+  /// @brief      Saves the returning fields.
+  /// @returns    A reference to (*this)
+  /// @version    2022-05-01/GGB - Function created.
+
+  sqlWriter &sqlWriter::returning(std::initializer_list<std::string> fields)
+  {
+    for (auto elem : fields)
+    {
+      returningFields_.push_back(elem);
+    };
+
+    return *this;
   }
 
   /// @brief      Set the query type to a 'SELECT' query.
@@ -1478,8 +1525,6 @@ namespace GCL
 
     return *this;
   }
-
-
 
   /// @brief Processes a single set clause.
   /// @param[in] columnName: The columnName to set
@@ -1635,12 +1680,26 @@ namespace GCL
     return *this;
   }
 
-  /// @brief Verifies if a string constitutes a valid SQL operator.
-  /// @param[in] oper: The string to test.
-  /// @returns true - The string is a valid operator.
-  /// @returns false - The string is not a valid operator.
-  /// @note Valid operators are: "=", "<>", "!=", ">", "<", ">=", "<=", "BETWEEN", "LIKE", "IN"
-  /// @throws None.
+  /// @brief        Stores values passed in a standard vector.
+  /// @param[in]    insertRows: The rows of values to insert.
+  /// @returns      (*this)
+  /// @version      2022-04-29/GGB - Function created.
+
+  sqlWriter &sqlWriter::values(valueStorage &&insertRows)
+  {
+    valueFields.clear();
+
+    valueFields = std::move(insertRows);
+
+    return *this;
+  }
+
+  /// @brief      Verifies if a string constitutes a valid SQL operator.
+  /// @param[in]  oper: The string to test.
+  /// @returns    true - The string is a valid operator.
+  /// @returns    false - The string is not a valid operator.
+  /// @note       Valid operators are: "=", "<>", "!=", ">", "<", ">=", "<=", "BETWEEN", "LIKE", "IN"
+  /// @throws     None.
   /// @version
 
   bool sqlWriter::verifyOperator(std::string const &oper) const

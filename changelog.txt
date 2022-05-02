@@ -1,4 +1,12 @@
-﻿2021-04
+﻿2022-05
+-------
+ADD:        sqlWriter - Support for 'RETURNING' clause in insert query.
+
+2022-04
+------
+ADD:        sqlWriter - function to pass vectors to value() for insert queries.
+
+2021-04
 -------
 CHANGE:     sqlWriter - Add call functionality.
 

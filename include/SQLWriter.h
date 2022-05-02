@@ -31,7 +31,8 @@
 //
 // CLASSES INCLUDED:    CSQLWriter
 //
-// HISTORY:             2022-04-11 GGB - Converted to std::filesystem
+// HISTORY:             2022-05-01 GGB - Added support for "Returning"
+//                      2022-04-11 GGB - Converted to std::filesystem
 //                      2021-04-13 GGB - Added call functionality.
 //                      2020-04-25 GGB - Added offset functionality.
 //                      2019-12-08 GGB - Added UPSERT functionality for MYSQL.
@@ -153,13 +154,13 @@ namespace GCL
     using parameterTriple = std::tuple<std::string, std::string, parameter>;
     typedef std::pair<std::string, EOrderBy> orderBy_t;
 
-    typedef std::vector<parameter> parameterStorage;
+    using parameterStorage = std::vector<parameter>;
     typedef std::vector<parameterPair> pairStorage;
     using tripleStorage = std::vector<parameterTriple>;
     typedef std::vector<stringPair> stringPairStorage;
     typedef std::vector<orderBy_t> orderByStorage_t;
 
-    typedef std::vector<parameterStorage> valueStorage;     // This is to allow multiple insertions in one statement.
+    using valueStorage = std::vector<parameterStorage>;     // This is to allow multiple insertions in one statement.
     typedef std::tuple<std::string, std::string, EJoin, std::string, std::string> parameterJoin;
 
     typedef std::vector<parameterJoin> joinStorage;
@@ -192,6 +193,7 @@ namespace GCL
     };
 
     std::vector<std::string> selectFields;
+    std::vector<std::string> returningFields_;
     stringPairStorage fromFields;
     whereStorage whereFields;
     std::string insertTable;
@@ -265,6 +267,8 @@ namespace GCL
     sqlWriter &min(std::string const &, std::string const & = "");
     sqlWriter &offset(std::uint64_t);
     sqlWriter &orderBy(std::initializer_list<std::pair<std::string, EOrderBy>>);
+    sqlWriter &returning(std::string const &);
+    sqlWriter &returning(std::initializer_list<std::string>);
     sqlWriter &select();
     sqlWriter &select(std::initializer_list<std::string>);
     sqlWriter &select(std::string const &, std::initializer_list<std::string>);
@@ -294,14 +298,14 @@ namespace GCL
       return (*this);
     }
 
-    /// @brief Adds a single where clause to the where list.
-    /// @param[in] columnName: The columnName to add
-    /// @param[in] oper: The operator to add
-    /// @param[in] value: The value to add.
-    /// @returns (*this)
-    /// @throws None.
-    /// @version 2020-09-09/GGB - Changed to a templated forwarding reference.
-    /// @version 2017-08-21/GGB - Function created.
+    /// @brief      Adds a single where clause to the where list.
+    /// @param[in]  columnName: The columnName to add
+    /// @param[in]  oper: The operator to add
+    /// @param[in]  value: The value to add.
+    /// @returns    (*this)
+    /// @throws     None.
+    /// @version    2020-09-09/GGB - Changed to a templated forwarding reference.
+    /// @version    2017-08-21/GGB - Function created.
 
     template<typename T>
     sqlWriter &where(std::string const &columnName, operator_e oper, T &&value)
@@ -314,6 +318,7 @@ namespace GCL
     sqlWriter &where(logicalOperator_e);
     sqlWriter &where(std::initializer_list<parameterTriple>);
     sqlWriter &values(std::initializer_list<parameterStorage>);
+    sqlWriter &values(valueStorage &&);
 
     std::string string() const;
 
