@@ -540,7 +540,20 @@ namespace GCL
       }
       else if (std::holds_alternative<logicalOperator_e>(element))
       {
+        logicalOperator_e le = std::get<logicalOperator_e>(element);
 
+        if (le == AND)
+        {
+          returnValue += " AND ";
+        }
+        else if (le == OR)
+        {
+          returnValue += " OR ";
+        }
+        else
+        {
+          RUNTIME_ERROR(boost::locale::translate("Incorrect Parameter type"), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
+        }
       }
       else if (std::holds_alternative<std::vector<whereValue>>(element))
       {
@@ -1737,6 +1750,8 @@ namespace GCL
   sqlWriter &sqlWriter::where(logicalOperator_e le)
   {
     whereFields.emplace_back(le);
+
+    return (*this);
   }
 
   /// @brief      to_string function for a bind value.

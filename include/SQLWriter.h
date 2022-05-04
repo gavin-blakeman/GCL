@@ -281,14 +281,14 @@ namespace GCL
     sqlWriter &forShare() { forShare_ = true; return *this; }
     sqlWriter &forUpdate() {forUpdate_ = true; return *this; }
 
-    /// @brief Adds a single where clause to the where list.
-    /// @param[in] columnName: The columnName to add
-    /// @param[in] operatorString: The operatorString to add
-    /// @param[in] value: The value to add.
-    /// @returns (*this)
-    /// @throws None.
-    /// @version 2020-09-09/GGB - Changed to a templated forwarding reference.
-    /// @version 2017-08-21/GGB - Function created.
+    /// @brief      Adds a single where clause to the where list.
+    /// @param[in]  columnName: The columnName to add
+    /// @param[in]  operatorString: The operatorString to add
+    /// @param[in]  value: The value to add.
+    /// @returns    (*this)
+    /// @throws     None.
+    /// @version    2020-09-09/GGB - Changed to a templated forwarding reference.
+    /// @version    2017-08-21/GGB - Function created.
 
     template<typename T>
     sqlWriter &where(std::string const &columnName, std::string const &operatorString, T &&value)
