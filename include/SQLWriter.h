@@ -109,14 +109,15 @@ namespace GCL
       MYSQL,          ///< MySQL Specific
       ORACLE,         ///< Oracle Specific
       MICROSOFT,      ///< Microsoft specific
-      POSTGRE,        ///< PostGre database
+      POSTGRE,        ///< Postgre database
     };
     enum EJoin
     {
       JOIN_INNER,     ///< Inner Join
       JOIN_RIGHT,     ///< Outer Right Join
       JOIN_LEFT,      ///< Outer Left Join
-      JOIN_FULL       ///< Full outer join
+      JOIN_FULL,      ///< Full outer join
+      JOIN_SELF,      ///< Self Join - This should not be passes to a function, but rather use the self-join function.
     };
     enum logicalOperator_e
     {
@@ -248,6 +249,7 @@ namespace GCL
 
     void resetQuery();
     void resetWhere();
+    void resetValues();
 
     sqlWriter &call(std::string const &, std::initializer_list<parameter>);
     sqlWriter &count(std::string const &, std::string const & = "");
@@ -274,6 +276,7 @@ namespace GCL
     sqlWriter &select(std::string const &, std::initializer_list<std::string>);
     sqlWriter &selectDistinct(std::initializer_list<std::string>);
     sqlWriter &selectDistinct(std::string const &, std::initializer_list<std::string>);
+    sqlWriter &selfJoin(std::string const &, std::string const &);
     sqlWriter &set(std::string const &, parameter const &);
     sqlWriter &set(std::initializer_list<parameterPair>);
     sqlWriter &update(std::string const &);

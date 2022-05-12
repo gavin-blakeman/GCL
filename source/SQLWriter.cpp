@@ -273,6 +273,7 @@ namespace GCL
 
   /// @brief    Creates the limit clause
   /// @throws   None.
+  /// @version  2022-05-10/GGB - Bug Fix (#226)
   /// @version  2020-04-25/GGB - Function created.
 
   std::string sqlWriter::createLimitClause() const
@@ -287,14 +288,14 @@ namespace GCL
 
         if (offsetValue)
         {
-          returnValue = "LIMIT " + std::to_string(*offsetValue) + ", "
+          returnValue = " LIMIT " + std::to_string(*offsetValue) + ", "
                         + std::to_string(limitValue ? *limitValue : std::numeric_limits<std::uint64_t>::max()) + " ";
         }
         else
         {
           if (limitValue)
           {
-            returnValue = "LIMIT " + std::to_string(*limitValue) + " ";
+            returnValue = " LIMIT " + std::to_string(*limitValue) + " ";
           };
         };
         break;
@@ -1422,6 +1423,15 @@ namespace GCL
     returningFields_.clear();
   }
 
+  /// @brief    Resets the value clause of a query.
+  /// @throws   None.
+  /// @version  2022-05-12/GGB - Function created.
+
+  void sqlWriter::resetValues()
+  {
+    valueFields.clear();
+  }
+
   /// @brief Resets the where clause of a query.
   /// @throws None.
   /// @version 2017-08-19/GGB - Function created.
@@ -1630,6 +1640,12 @@ namespace GCL
     std::string returnValue = search;
 
     return returnValue;
+  }
+
+  sqlWriter &sqlWriter::selfJoin(std::string const &, std::string const &)
+  {
+
+    return *this;
   }
 
   /// @brief Sets the table name for an update query.
