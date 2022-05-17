@@ -110,6 +110,7 @@ namespace GCL
 
   sqlWriter &sqlWriter::count(std::string const &countExpression, std::string const &countAs)
   {
+    queryType = qt_select;
     countValue = std::make_pair(countExpression, countAs);
 
     return (*this);
