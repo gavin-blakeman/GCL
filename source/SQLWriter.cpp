@@ -72,11 +72,265 @@ namespace GCL
   std::string const COLUMN("COLUMN");
   std::string const END("END");
 
+
+  /* Where clauses
+   * =============
+   *
+   * Where clauses can be complicated beasts:
+   *  > There is the simple,      'WHERE ID = 3';
+   *  > The more complicated      'WHERE (ID = 3) AND (Type = 4)
+   *  > The IN style              'WHERE ID IN (2, 3)
+   *  > The subquery style        'WHERE ID IN (subQuery)
+   *  > BETWEEN                   'WHERE ID BETWEEN 2 AND 3
+   *  > NOT BETWEEN
+   *  > NOT IN
+   *  and combinations of the above.
+   *  The challenge is then to create a robust way of creating any version of the where clause.
+   *
+   *  Consider each of the following as a test
+   *  > ID = 3                  string, operator, value
+   *  > ID IN (2,3)             string, operator, value, valueSet
+   *  > ID IN (subQuery)        string, operator, pointer
+   *  > ID BETWEEN 2 AND 3      string, operator, valueSet
+   *  > NOT IN (2, 3)           string, operator, value, valueSet
+   *
+   *  > Consider a singular WHERE clause => string, operator, (value, valueSet, pointer)
+   *    This can be done with a single call to the where function that takes the necessary value. The following signatures
+   *    will do.
+   *      > where(std::string, operator_t, parameter)
+   *      > where(std::string, operator_t, pointer)
+   *      > where(std::string, operator_t, vector)
+   *  > A chained WHERE clause => WHERE (test) AND (test) AND (test) AND ...
+   *    This can be done with multiple calls to the where function, with the caveat that each call creates a new test
+   *    in the list of tests. The 'AND' is then implied.
+   *  > A complex WHERE clause (WHERE (test AND test) or (TEST IN (x,y)) ...
+   *    This is best done by having a test clause builder. IE a function that returns a where clause.
+   *
+   *
+   *  For the complex cases, (and the simple) cases, the challenge is to build a structure that can be read out in a way that
+   *  creates the total test clause by a once-through operation.
+   *  Consider a tree type object as follows:
+   *
+   *  variant-logical  = test_t, logicalOperator_t, test_t => (test AND test)
+   *  variant-test     = std::string, operator_t, valueSet => (ID = 1)
+   *
+   *  For a complex, the tree then looks like a queue or vector, and is read from the front
+   *
+   *      0)  ("ID", eq, 1))
+   *      1)  AND
+   *      2)  ("Type", eq, 2)
+   *
+   *
+   *
+   *  Define the following:
+   *  operator_t        eq(=), gt(>), lt(<), lte(<=), gte(>=), ne(!=), nse(<=>), in(IN), between(BETWEEN)
+   *  logicalOperator_t AND, OR, NOT, XOR
+   *  parameter         SCL::any
+   *  parameterVector_t std::vector<parameter>
+   *  pointer_t         std::unique_ptr<sqlQuery>
+   *  parameterVariant  std::variant<parameter, parameterList, pointer>()
+   *
+   *  whereTest_t       std::tuple<std::string, operator_t, parameterVariant
+   *  whereLogical_t    std::tuple<whereVariant_t, logicalOperator_t, whereVariant_t>
+   *  whereVariant_t    std::variant<whereLogical_t, whereTest_t>
+   *
+   *  Main storage is sqlWriter is then the whereVariant.
+   *
+   *  Some helper functions are then needed.
+   *  friend whereVariant_t &where_v(std::string, operator_t, parameter);
+   *  friend whereVariant_t &where_v(std::string, operator_t, parameterVector_t);
+   *  friend whereVariant_t &where_v(std::string, operator_t, pointer_t);
+   *  friend whereVariant_t &where_v(whereVariant_t, logicalOperator_t, whereVariant_t);
+   *
+   *  sqlWriter &where(std::string, operator_t, parameter);
+   *  sqlWriter &where(std::string, operator_t, sqlWriter &&);
+   *  sqlWriter &where(std::string, operator_t, vector);
+   *
+   *
+   *  Sample Code: 'WHERE (ID = 1 AND Type = 2) or (ID IN (3, 4))'
+   *
+   *  sqlWriter sqlQuery;
+   *  whereVariant_t whereClause;
+   *
+   *  whereClause.
+   *  sqlQuery.where( where_v(
+   *                    where_v(
+   *                      where_v("ID", eq, 1),
+   *                      AND,
+   *                      where_v("Type", eq, 2)),
+   *                    OR,
+   *                    where("ID", IN, {3, 4})));
+   *
+   *  Read out is done, (i think) by a std::visit of the variant.
+   *  Now lets code this.
+   *
+   */
+
+
+  // helper type for the visitor
+  template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+  // explicit deduction guide (not needed as of C++20)
+  template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
+  std::string sqlWriter::to_string(parameter const &p) const
+  {
+    return p.to_string();
+  }
+
+
+  /// @brief      Converts a whereTest_t to a string.
+  /// @param[in]  w: The whereTest_t to convert.
+  /// @throws
+  /// @version    2022-06-07/GGB - Function created.
+
+  std::string sqlWriter::to_string(whereTest_t const &w) const
+  {
+
+    std::string returnValue = "(";
+
+    returnValue += std::get<0>(w) + " ";
+    returnValue += operatorMap[std::get<1>(w)] + " ";
+
+    switch(std::get<1>(w))
+    {
+      case eq:
+      case gt:
+      case lt:
+      case gte:
+      case lte:
+      case neq:
+      case nse:
+      {
+        if (std::holds_alternative<parameter>(std::get<2>(w)))
+        {
+          returnValue += to_string(std::get<parameter>(std::get<2>(w)));
+        }
+        else
+        {
+          RUNTIME_ERROR("Only a single parameter is allowed for " + sqlWriter::operatorMap[std::get<1>(w)] + ".");
+        }
+        break;
+      }
+      case in:
+      case nin:
+      {
+        returnValue += "(";
+        std::visit(overloaded
+                   {
+                     [&](parameter const &p) { returnValue += to_string(p) + ")"; },
+                     [&](parameterVector_t const &pv)
+                     {
+                       bool first = true;
+
+                       for (auto const &p : pv)
+                       {
+                         if (first)
+                         {
+                           first = false;
+                         }
+                         else
+                         {
+                           returnValue += ", ";
+                         }
+                         returnValue += to_string(p);
+                       }
+                       returnValue += ")";
+                     },
+                     [&](pointer_t const &pt)
+                     {
+                       returnValue += static_cast<std::string>(*pt) + ")";
+                     },
+                   }, std::get<2>(w));
+        break;
+      };
+      case between:
+      {
+        if (std::holds_alternative<parameterVector_t>(std::get<2>(w)))
+        {
+          if (std::get<parameterVector_t>(std::get<2>(w)).size() != 2)
+          {
+            RUNTIME_ERROR("Two parameters are required for 'BETWEEN'.");
+          }
+          else
+          {
+            returnValue += to_string(std::get<parameterVector_t>(std::get<2>(w))[0]);
+            returnValue += " AND ";
+            returnValue += to_string(std::get<parameterVector_t>(std::get<2>(w))[1]);
+          }
+        }
+        break;
+      }
+      default:
+      {
+        CODE_ERROR;
+        break;
+      }
+    }
+    returnValue += ")";
+    return returnValue;
+  }
+
+  /// @brief      Converts a whereTest_t to a string.
+  /// @param[in]  w: The whereTest_t to convert.
+  /// @throws
+  /// @version    2022-06-07/GGB - Function created.
+
+  std::string sqlWriter::to_string(whereLogical_t const &wl) const
+  {
+    std::string returnValue = " (";
+
+    returnValue += to_string(*std::get<0>(wl));
+    returnValue += " " + logicalOperatorMap[std::get<1>(wl)] + " ";
+    returnValue += to_string(*std::get<2>(wl)) + ")";
+
+    return returnValue;
+  }
+
+  //  class whereVariant_t : public std::variant<whereTest_t, whereLogical_t, nullptr_t>
+  std::string sqlWriter::to_string(whereVariant_t const &wv) const
+  {
+    std::string returnValue;
+
+    std::visit(overloaded
+               {
+                 [&](std::monostate const &) { CODE_ERROR; },
+                 [&](whereTest_t const &wt) { returnValue = to_string(wt); },
+                 [&](whereLogical_t const &wl) { returnValue = to_string(wl); },
+               }, wv.base);
+
+    return returnValue;
+  }
+
+
   //******************************************************************************************************************************
   //
   // CSQLWriter
   //
   //******************************************************************************************************************************
+
+  sqlWriter::operatorMap_t sqlWriter::operatorMap =
+  {
+    {eq, "="},
+    {gt, ">"},
+    {lt, "<"},
+    {gte, ">="},
+    {lte, "<="},
+    {neq, "!="},
+    {nse, "<=>"},
+    {in, "IN"},
+    {between, "BETWEEN"},
+    {nin, "NOT IN"},
+  };
+
+  sqlWriter::logicalOperatorMap_t sqlWriter::logicalOperatorMap =
+  {
+    {AND, "AND"},
+    {OR, "OR"},
+    {XOR, "XOR"},
+    {NOT, "NOT"}
+  };
+
+
 
   /// @brief      Function to create a call procedure.
   /// @param[in]  procedureName: The name of the procedure to call.
@@ -407,35 +661,35 @@ namespace GCL
       {
         // Create the field and value clauses for the insert into.
 
-        for (auto const &element : whereFields)
-        {
-          if (firstValue)
-          {
-            firstValue = false;
-          }
-          else
-          {
-            fieldNames += ", ";
-            fieldValues += ", ";
-          };
+//        for (auto const &element : whereFields)
+//        {
+//          if (firstValue)
+//          {
+//            firstValue = false;
+//          }
+//          else
+//          {
+//            fieldNames += ", ";
+//            fieldValues += ", ";
+//          };
 
-          if (std::holds_alternative<parameterTriple>(element))
-          {
-            fieldNames += getColumnMappedName(std::get<0>(std::get<parameterTriple>(element)));
-            if (std::get<2>(std::get<parameterTriple>(element)).type() == typeid(std::string))
-            {
-              fieldValues += "'" + std::get<2>(std::get<parameterTriple>(element)).to_string() + "'";
-            }
-            else
-            {
-              fieldValues += std::get<2>(std::get<parameterTriple>(element)).to_string();
-            };
-          }
-          else
-          {
-            RUNTIME_ERROR(boost::locale::translate("Incorrect Parameter type"), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
-          }
-        };
+//          if (std::holds_alternative<parameterTriple>(element))
+//          {
+//            fieldNames += getColumnMappedName(std::get<0>(std::get<parameterTriple>(element)));
+//            if (std::get<2>(std::get<parameterTriple>(element)).type() == typeid(std::string))
+//            {
+//              fieldValues += "'" + std::get<2>(std::get<parameterTriple>(element)).to_string() + "'";
+//            }
+//            else
+//            {
+//              fieldValues += std::get<2>(std::get<parameterTriple>(element)).to_string();
+//            };
+//          }
+//          else
+//          {
+//            RUNTIME_ERROR(boost::locale::translate("Incorrect Parameter type"), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
+//          }
+//        };
 
         // Add the set clause.
 
@@ -510,63 +764,21 @@ namespace GCL
   /// @brief      Converts the where clause to a string for creating the SQL string.
   /// @returns    The where clause.
   /// @throws
+  /// @version    2022-06-02/GGB - Added support for 'IN'
   /// @version    2021-11-18/GGB - Updated to use std::variant with the where fields.
   /// @version    2015-05-24/GGB - Function created.
 
   std::string sqlWriter::createWhereClause() const
   {
-    std::string returnValue = " WHERE ";
-    bool first = true;
+    TRACEENTER;
+    std::string returnValue = "";
 
-    for (auto const &element : whereFields)
+    if (!std::holds_alternative<std::monostate>(whereClause_.base))
     {
-      if (std::holds_alternative<parameterTriple>(element))
-      {
-        returnValue += "(";
-        returnValue += getColumnMappedName(std::get<0>(std::get<parameterTriple>(element)));
-        returnValue += " ";
-        returnValue += std::get<1>(std::get<parameterTriple>(element));
+      returnValue += " WHERE " + to_string(whereClause_);
+    }
 
-        if (std::get<2>(std::get<parameterTriple>(element)).type() == typeid(std::string))
-        {
-          returnValue += " '";
-          returnValue += std::get<2>(std::get<parameterTriple>(element)).to_string();
-          returnValue += "')";
-        }
-        else
-        {
-          returnValue += " ";
-          returnValue += std::get<2>(std::get<parameterTriple>(element)).to_string();
-          returnValue += ")";
-        }
-      }
-      else if (std::holds_alternative<logicalOperator_e>(element))
-      {
-        logicalOperator_e le = std::get<logicalOperator_e>(element);
-
-        if (le == AND)
-        {
-          returnValue += " AND ";
-        }
-        else if (le == OR)
-        {
-          returnValue += " OR ";
-        }
-        else
-        {
-          RUNTIME_ERROR(boost::locale::translate("Incorrect Parameter type"), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
-        }
-      }
-      else if (std::holds_alternative<std::vector<whereValue>>(element))
-      {
-
-      }
-      else
-      {
-        RUNTIME_ERROR(boost::locale::translate("Incorrect Parameter type"), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
-      };
-    };
-
+    TRACEEXIT;
     return returnValue;
   }
 
@@ -1019,10 +1231,7 @@ namespace GCL
       returnValue += createJoinClause();
     }
 
-    if (!whereFields.empty())
-    {
-      returnValue += createWhereClause();
-    };
+    returnValue += createWhereClause();
 
     if (!groupByFields_.empty())
     {
@@ -1224,6 +1433,20 @@ namespace GCL
     return (*this);
   }
 
+  /// @brief      Add a single orderBy pair to the list.
+  /// @param[in]  field: the field to order on.
+  /// @param[in]  order: The sort order
+  /// @returns    *this
+  /// @throws     None.
+  /// @version    202-05-25/GGB - Function created.
+
+  sqlWriter &sqlWriter::orderBy(std::string field, EOrderBy order)
+  {
+    orderByFields.emplace_back(field, order);
+
+    return *this;
+  }
+
 
   /// @brief Copy the orderBy pairs to the list.
   /// @param[in] fields: The orderBy Pairs to copy
@@ -1390,6 +1613,7 @@ namespace GCL
 
   /// @brief Resets all the fields for the query.
   /// @throws None.
+  /// @version 2022-06-02/GGB - Added support for 'IN'
   /// @version 2022-05-01/GGB - Added support for 'RETURNING'
   /// @version 2021-04-13/GGB - Added procedure call support.
   /// @version 2021-04-11/GGB - Added "FOR SHARE" and "FOR UPDATE" functionality.
@@ -1403,9 +1627,7 @@ namespace GCL
   {
     selectFields.clear();
     fromFields.clear();
-    whereFields.clear();
     insertTable.clear();
-    valueFields.clear();
     orderByFields.clear();
     joinFields.clear();
     limitValue.reset();
@@ -1422,6 +1644,9 @@ namespace GCL
     procedureName_.clear();
     groupByFields_.clear();
     returningFields_.clear();
+
+    resetValues();
+    resetWhere();
   }
 
   /// @brief    Resets the value clause of a query.
@@ -1439,7 +1664,7 @@ namespace GCL
 
   void sqlWriter::resetWhere()
   {
-    whereFields.clear();
+    whereClause_ = whereVariant_t{};
   }
 
   /// @brief      Saves the returning fields.
@@ -1550,12 +1775,12 @@ namespace GCL
     return *this;
   }
 
-  /// @brief Processes a single set clause.
-  /// @param[in] columnName: The columnName to set
-  /// @param[in] value: The value to set.
-  /// @returns (*this)
-  /// @throws None.
-  /// @version 2017-08-21/GGB - Function created.
+  /// @brief      Processes a single set clause.
+  /// @param[in]  columnName: The columnName to set
+  /// @param[in]  value: The value to set.
+  /// @returns    (*this)
+  /// @throws     None.
+  /// @version  2017-08-21/GGB - Function created.
 
   sqlWriter &sqlWriter::set(std::string const &columnName, parameter const &value)
   {
@@ -1564,11 +1789,11 @@ namespace GCL
     return (*this);
   }
 
-  /// @brief Processes a list of set clauses
-  /// @param[in] fields: The initialiser list of set clauses.
-  /// @returns (*this)
+  /// @brief      Processes a list of set clauses
+  /// @param[in]  fields: The initialiser list of set clauses.
+  /// @returns    (*this)
   /// @throws
-  /// @version 2020-03-24/GGB - Function created.
+  /// @version    2020-03-24/GGB - Function created.
 
   sqlWriter &sqlWriter::set(std::initializer_list<parameterPair> fields)
   {
@@ -1643,6 +1868,11 @@ namespace GCL
     return returnValue;
   }
 
+  std::string sqlWriter::sum(std::string const &col)
+  {
+    return "SUM(" + col + ")";
+  }
+
   sqlWriter &sqlWriter::selfJoin(std::string const &, std::string const &)
   {
 
@@ -1670,9 +1900,9 @@ namespace GCL
     return (*this);
   }
 
-  /// @brief Sets the table name for an upsert query.
-  /// @param[in] tableName: The tableName to upsert.
-  /// @returns (*this)
+  /// @brief      Sets the table name for an upsert query.
+  /// @param[in]  tableName: The tableName to upsert.
+  /// @returns  (*this)
   /// @throws None.
   /// @details @code upsert("tbl_scheduleModification").set("Value", true).where({"ModificationType", "=", 1} @endcode
   ///          translates to
@@ -1742,33 +1972,16 @@ namespace GCL
     return returnValue;
   }
 
-  /// @brief        Stores the where fields in the list.
-  /// @param[in]    fields: The initialiser list of fields to store.
-  /// @returns      (*this)
-  /// @throws       None.
-  /// @version      2015-03-30/GGB - Function created.
+  /// @brief Assigns a whereVaraint to the where clause.
+  /// @param[in] w: whereVariant.
+  /// @returns *this
+  /// @version  2022-06-09/GGB - Function created
 
-  sqlWriter &sqlWriter::where(std::initializer_list<parameterTriple> fields)
+  sqlWriter &sqlWriter::where(whereVariant_t &&w)
   {
-    for (auto elem : fields)
-    {
-      whereFields.push_back(elem);
-    };
+    whereClause_ = std::move(w);
 
-    return (*this);
-  }
-
-  /// @brief        Stores the where fields in the list.
-  /// @param[in]    le: Logical operator
-  /// @returns      (*this)
-  /// @throws       None.
-  /// @version      2021-11-19/GGB - Function created.
-
-  sqlWriter &sqlWriter::where(logicalOperator_e le)
-  {
-    whereFields.emplace_back(le);
-
-    return (*this);
+    return *this;
   }
 
   /// @brief      to_string function for a bind value.
@@ -1778,6 +1991,41 @@ namespace GCL
   std::string to_string(GCL::sqlWriter::bindValue const &bv)
   {
     return bv.to_string();
+  }
+
+    /*
+     * Friend functions.
+     */
+
+
+  sqlWriter::whereVariant_t where_v(std::string col, operator_t op, sqlWriter::parameter param)
+  {
+    return {std::make_tuple(col, op, param)};
+  }
+
+  sqlWriter::whereVariant_t where_v(std::string col, operator_t op, sqlWriter::parameterVector_t param)
+  {
+    return {std::make_tuple(col, op, param)};
+  }
+
+  sqlWriter::whereVariant_t where_v(std::string col, operator_t op, sqlWriter::pointer_t param)
+  {
+    return {std::make_tuple(col, op, std::move(param))};
+  }
+
+  sqlWriter::whereVariant_t where_v(sqlWriter::whereVariant_t lhs, logicalOperator_t op, sqlWriter::whereVariant_t rhs)
+  {
+    sqlWriter::whereLogical_t wl = std::make_tuple(std::make_unique<sqlWriter::whereVariant_t>(std::move(lhs)),
+                                                   op,
+                                                   std::make_unique<sqlWriter::whereVariant_t>(std::move(rhs)));
+
+
+    return {std::move(wl)};
+  }
+
+  sqlWriter::whereVariant_t where_v(std::string col, operator_t op, sqlWriter &&rhs)
+  {
+    return {std::make_tuple(col, op, std::make_unique<sqlWriter>(std::move(rhs)))};
   }
 
 }  // namespace GCL

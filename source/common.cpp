@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015, 2018-2020 Gavin Blakeman.
+//                      Copyright 2015, 2018-2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -59,9 +59,9 @@
 namespace GCL
 {
 
-  unsigned int const GCL_MAJORVERSION = 2019;           ///< The Major version number (yyyy)
-  unsigned int const GCL_MINORVERSION = 9;              ///< The Minor version number (mm)
-  unsigned int const GCL_BUILDNUMBER  = 0x01B0;         ///< The build number - incremented on each build.
+  unsigned int const GCL_MAJORVERSION = 2022;           ///< The Major version number (yyyy)
+  unsigned int const GCL_MINORVERSION = 6;              ///< The Minor version number (mm)
+  unsigned int const GCL_BUILDNUMBER  = 0x0000;         ///< The build number - incremented on each build.
 
   /// @brief Returns the library version and build number
   /// @returns A string with the application name, version, build.

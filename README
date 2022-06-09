@@ -1,14 +1,16 @@
 ﻿General Class Library (GCL)
 ===========================
 
-MappedSQLWriter
+sqlWriter
 ---------------
 This selection of classes allows SQL queries to be easily assembled. The mapped part is user generated map files can be loaded
 to map a programmed database application to the user generated (or pre-existing) tables.
 
 A typical code section would be
-CMappedSQLQuery sqlQuery = CMappedSQLQuery.select("employees.*").from(employees);
+SQLWriter sqlQuery.select("employees.*").from(employees);
 std::string sqlString = sqlQuery.string();
+or
+std::stirng sqlString = static_cast<std::string>(sqlQuery);
 
 The value of sqlString is then
 SELECT employees.* FROM employees;
@@ -17,7 +19,7 @@ SELECT employees.* FROM employees;
 PluginManager
 -------------
 Only one instance of the plugin manager class should be used in an application. This class contains data that should be shared over
-the entire application. 
+the entire application.
 
 The class is multi-thread safe.
 

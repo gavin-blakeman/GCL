@@ -49,8 +49,9 @@
   // Standard Header Files
 
 #include <cstdint>
-#include <initializer_list>
 #include <filesystem>
+#include <initializer_list>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <optional>
@@ -63,7 +64,7 @@
 
   // Miscellaneous Library header files
 
-#include <SCL>
+#include "include/any.hpp"
 
 /// @page page2 SQL Writer
 /// @tableofcontents
@@ -80,6 +81,28 @@
 
 namespace GCL
 {
+  enum operator_t
+  {
+    eq,             ///< equals
+    gt,             ///< greater than
+    lt,             ///< less than
+    gte,            ///< greater than equal to
+    lte,            ///< less than equal to
+    neq,
+    nse,
+    in,
+    between,
+    nin
+  };
+
+  enum logicalOperator_t
+  {
+    AND,
+    OR,
+    XOR,
+    NOT
+  };
+
   class sqlWriter
   {
   private:
@@ -119,21 +142,6 @@ namespace GCL
       JOIN_FULL,      ///< Full outer join
       JOIN_SELF,      ///< Self Join - This should not be passes to a function, but rather use the self-join function.
     };
-    enum logicalOperator_e
-    {
-      AND,
-      OR,
-    };
-    enum operator_e
-    {
-      eq,             ///< equals
-      gt,             ///< greater than
-      lt,             ///< less than
-      gte,            ///< greater than equal to
-      lte,            ///< less than equal to
-      ob,             ///< open bracket
-      cb,             ///< close bracket
-    };
 
     class bindValue
     {
@@ -147,79 +155,10 @@ namespace GCL
       std::string to_string() const { return value; }
     };
 
-    using parameter = SCL::any;
-
-    using groupByStorage = std::vector<parameter>;
-    typedef std::pair<std::string, parameter> parameterPair;
-    typedef std::pair<std::string, std::string> stringPair;
-    using parameterTriple = std::tuple<std::string, std::string, parameter>;
-    typedef std::pair<std::string, EOrderBy> orderBy_t;
-
-    using parameterStorage = std::vector<parameter>;
-    typedef std::vector<parameterPair> pairStorage;
-    using tripleStorage = std::vector<parameterTriple>;
-    typedef std::vector<stringPair> stringPairStorage;
-    typedef std::vector<orderBy_t> orderByStorage_t;
-
-    using valueStorage = std::vector<parameterStorage>;     // This is to allow multiple insertions in one statement.
-    typedef std::tuple<std::string, std::string, EJoin, std::string, std::string> parameterJoin;
-
-    typedef std::vector<parameterJoin> joinStorage;
-
-    using whereTriple = std::tuple<std::string, operator_e, parameter>;
-    class whereValue;
-    class whereValue : public std::variant<parameterTriple, whereTriple, logicalOperator_e, std::vector<whereValue>>
-    {
-    public:
-        using base = std::variant<parameterTriple, whereTriple, logicalOperator_e, std::vector<whereValue>>;
-        using base::base;
-        using base::operator=;
-    };
-
-    using whereStorage = std::vector<whereValue>;
+#include "sqlWriter_typedef.inc"
+#include "sqlWriter_variables.inc"
 
   private:
-    EDialect dialect = MYSQL;
-
-    TDatabaseMap databaseMap;
-    enum EQueryType
-    {
-      qt_none,
-      qt_select,
-      qt_insert,
-      qt_delete,
-      qt_update,
-      qt_upsert,
-      qt_call,
-    };
-
-    std::vector<std::string> selectFields;
-    std::vector<std::string> returningFields_;
-    stringPairStorage fromFields;
-    whereStorage whereFields;
-    std::string insertTable;
-    valueStorage valueFields;
-    groupByStorage groupByFields_;
-    orderByStorage_t orderByFields;
-    joinStorage joinFields;
-    std::optional<std::uint64_t> offsetValue;
-    std::optional<std::uint64_t> limitValue;
-    std::optional<std::pair<std::string, std::string>> countValue;
-    bool distinct_ = false;
-    stringPairStorage minFields;
-    stringPairStorage maxFields;
-    std::string updateTable;
-    pairStorage setFields;
-    std::string deleteTable;
-    std::string procedureName_;
-    parameterStorage procedureParameters_;
-
-    EQueryType queryType;
-    std::string currentTable;
-
-    bool forUpdate_ = false;
-    bool forShare_ = false;
-
     bool verifyOperator(std::string const &) const;
 
   protected:
@@ -241,6 +180,11 @@ namespace GCL
     std::string createWhereClause() const;
     std::string createSetClause() const;
     std::string createLimitClause() const;
+
+    std::string to_string(whereTest_t const &) const;
+    std::string to_string(whereLogical_t const &) const;
+    std::string to_string(whereVariant_t const &) const;
+    std::string to_string(parameter const &) const;
 
   public:
     operator std::string() const { return string(); }
@@ -268,6 +212,7 @@ namespace GCL
     sqlWriter &max(std::string const &, std::string const & = "");
     sqlWriter &min(std::string const &, std::string const & = "");
     sqlWriter &offset(std::uint64_t);
+    sqlWriter &orderBy(std::string, EOrderBy);
     sqlWriter &orderBy(std::initializer_list<std::pair<std::string, EOrderBy>>);
     sqlWriter &returning(std::string const &);
     sqlWriter &returning(std::initializer_list<std::string>);
@@ -286,23 +231,6 @@ namespace GCL
 
     /// @brief      Adds a single where clause to the where list.
     /// @param[in]  columnName: The columnName to add
-    /// @param[in]  operatorString: The operatorString to add
-    /// @param[in]  value: The value to add.
-    /// @returns    (*this)
-    /// @throws     None.
-    /// @version    2020-09-09/GGB - Changed to a templated forwarding reference.
-    /// @version    2017-08-21/GGB - Function created.
-
-    template<typename T>
-    sqlWriter &where(std::string const &columnName, std::string const &operatorString, T &&value)
-    {
-      whereFields.emplace_back(parameterTriple(columnName, operatorString, std::forward<T>(value)));
-
-      return (*this);
-    }
-
-    /// @brief      Adds a single where clause to the where list.
-    /// @param[in]  columnName: The columnName to add
     /// @param[in]  oper: The operator to add
     /// @param[in]  value: The value to add.
     /// @returns    (*this)
@@ -311,15 +239,15 @@ namespace GCL
     /// @version    2017-08-21/GGB - Function created.
 
     template<typename T>
-    sqlWriter &where(std::string const &columnName, operator_e oper, T &&value)
+    sqlWriter &where(std::string const &columnName, operator_t oper, T &&value)
     {
-      whereFields.emplace_back(whereTriple(columnName, oper, std::forward<T>(value)));
+      whereClause_ = where_v(columnName, oper, value);
 
       return (*this);
     }
 
-    sqlWriter &where(logicalOperator_e);
-    sqlWriter &where(std::initializer_list<parameterTriple>);
+    sqlWriter &where(whereVariant_t &&w);
+
     sqlWriter &values(std::initializer_list<parameterStorage>);
     sqlWriter &values(valueStorage &&);
 
@@ -332,21 +260,32 @@ namespace GCL
 
     std::string getColumnMappedName(std::string const &) const;
     std::string getTableMappedName(std::string const &) const;
-  };
 
-  std::string to_string(GCL::sqlWriter::bindValue const &);
+    static std::string sum(std::string const &);
 
-}  // namespace GCL
 
-namespace SCL
-{
+
+  }; // class sqlWriter
+
+  std::string to_string(sqlWriter::bindValue const &);
+  sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter::parameterVector_t);
+  sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter::parameter);
+  sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter::pointer_t);
+  sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter &&);
+  sqlWriter::whereVariant_t where_v(sqlWriter::whereVariant_t, logicalOperator_t, sqlWriter::whereVariant_t);
+
+
   template<>
   inline std::string any::Manager_external<GCL::sqlWriter::bindValue>::S_toString(any const *anyp)
   {
     auto ptr = static_cast<GCL::sqlWriter::bindValue const *>(anyp->dataStorage.heapPointer);
     return GCL::to_string(*ptr);
   }
-}
+
+}  // namespace GCL
+
+
+
 
 
 #endif // GCL_CONTROL

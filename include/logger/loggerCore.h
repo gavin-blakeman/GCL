@@ -268,7 +268,7 @@ namespace GCL
       defaultLogger().logMessage(warning, message);
     }
 
-    /// @brief Function to log an notice message.
+    /// @brief Function to log a notice message.
     /// @param[in] message: The message to log.
     /// @throws
     /// @version 2020-06-13/GGB - Converted from macro to function.
@@ -313,6 +313,7 @@ namespace GCL
     /// @throws
     /// @version    2020-09-08/GGB - Function created.
 
+    [[deprecated]]
     inline void DEBUGMESSAGE(boost::format const &message)
     {
       DEBUGMESSAGE(boost::str(message));

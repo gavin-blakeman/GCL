@@ -102,5 +102,7 @@ namespace GCL
 
     startIndex = currentPosn;
 
+    return false;
+
   }
 }

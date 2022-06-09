@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015-2020 Gavin Blakeman.
+//                      Copyright 2015-2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -71,17 +71,17 @@ namespace GCL
 
       size_t totalRAM() { return totalRAM_; }
       size_t usedRAM() {return usedRAM_; }
-      size_t processRAM() {}
+      size_t processRAM() { return 0;}
 
       size_t totalVirtMemory() { return (totalRAM_  + totalSwap_); }
       size_t usedVirtMemory() { return (usedRAM_ + usedSwap_); }
-      size_t processVirtMemory() {}
+      size_t processVirtMemory() {return 0;}
 
       size_t totalSwapMemory() { return totalSwap_; }
       size_t usedSwapMemory() { return usedSwap_; }
 
       double usageCPU() { return percentCPU_; }
-      double processCPU() {}
+      double processCPU() { return 0; }
   };
 }
 

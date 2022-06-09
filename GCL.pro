@@ -41,7 +41,7 @@ QT -= core gui
 DEFINES += BOOST_CHRONO_DONT_PROVIDES_DEPRECATED_IO_SINCE_V2_0_0
 DEFINES += BOOST_THREAD_USE_LIB
 
-QMAKE_CXXFLAGS += -std=c++17
+QMAKE_CXXFLAGS += -std=c++20
 
 DESTDIR = ""
 OBJECTS_DIR = "objects"
@@ -73,6 +73,7 @@ HEADERS += \
     GCL \
     include/Resource.h \
     include/Functions.h \
+    include/any.hpp \
     include/common.h \
     include/SQLWriter.h \
     include/dataParser/dataDelimited.h \
@@ -92,11 +93,14 @@ HEADERS += \
     include/configurationReader/readerCore.hpp \
     include/GCLError.h \
     include/pluginManager/pluginManager.h \
+    include/traits.h
 
 OTHER_FILES += \
     changelog.txt
 
 DISTFILES += \
     README \
-    changelog.txt
+    changelog.txt \
+    include/sqlWriter_typedef.inc \
+    include/sqlWriter_variables.inc
 
