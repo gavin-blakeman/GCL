@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2014-2020 Gavin Blakeman.
+//                      Copyright 2014-2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -194,7 +194,7 @@ namespace GCL
     {
       std::ostringstream os;
 
-      SharedLock(recordMutex);
+      SharedLock recordMutex;
 
       if (ts)
       {
@@ -239,6 +239,7 @@ namespace GCL
           case exception:
           {
             os << "[exception] ";
+            break;
           }
           case trace:
           {
@@ -282,7 +283,7 @@ namespace GCL
         RUNTIME_ERROR(boost::locale::translate("LOGGER: Unable to start thread."), E_LOGGER_UNABLETOSTARTTHREAD, LIBRARYNAME);
       };
 
-      defaultStreamSink_->setLogLevel(GCL::logger::CSeverity{true, true, true, true, true, false, false});
+      defaultStreamSink_->setLogLevel(GCL::logger::CSeverity{true, true, true, true, true, false, false, false});
 
       addSink(defaultStreamSink_);
     }
@@ -336,7 +337,7 @@ namespace GCL
 
     void CLogger::addSink(PLoggerSink ls)
     {
-      UniqueLock(sinkMutex);
+      UniqueLock sinkMutex;
 
       sinkContainer.push_back(ls);
     }
@@ -352,7 +353,7 @@ namespace GCL
     {
       PLoggerRecord newRecord(new CLoggerRecord(s, m));
       {
-        UniqueLock(queueMutex);
+        UniqueLock queueMutex;
 
         messageQueue.push(newRecord);
       };
@@ -379,7 +380,7 @@ namespace GCL
 
     bool CLogger::removeSink(PLoggerSink ls)
     {
-      UniqueLock(sinkMutex);
+      UniqueLock sinkMutex;
 
       TSinkContainer::iterator iter = sinkContainer.begin();
       bool returnValue = false;
@@ -433,7 +434,7 @@ namespace GCL
 
       while (!messageQueue.empty())
       {
-        UniqueLock(sinkMutex);
+        UniqueLock sinkMutex;
 
         TSinkContainer::iterator sinkIterator;
 
@@ -472,7 +473,7 @@ namespace GCL
 
         while (!messageQueue.empty())
         {
-          SharedLock(sinkMutex);              // Lock the sinks while writing.
+          SharedLock sinkMutex;              // Lock the sinks while writing.
 
           TSinkContainer::iterator sinkIterator;
 

@@ -30,7 +30,8 @@
 //                      CLoggerRecord
 //                      CLoggerSink
 //
-// HISTORY:             2019-10-22 GGB - Changed Boost::thread to std::thread
+// HISTORY:             2022-06-09 GGB - Replace macros TRACENETER and TRACEEXIT with functions.
+//                      2019-10-22 GGB - Changed Boost::thread to std::thread
 //                      2018-08-12 GGB - gnuCash-pud debugging and release.
 //                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2014-07-20 GGB - Development of class for "Observatory Weather System - Service"
@@ -50,11 +51,12 @@
 #include <fstream>
 #include <memory>
 #include <mutex>
+#include <queue>
 #include <shared_mutex>
+#include <source_location>
 #include <sstream>
 #include <string>
 #include <thread>
-#include <queue>
 #include <vector>
 
   // Miscellaneous library header files.
@@ -339,18 +341,25 @@ namespace GCL
       defaultLogger().logMessage(exception, message);
     }
 
-    /* Note the following two macros cannot be changed as they pick up the name of the function on entry and exit. This can
-     * AFAIK only be done with the macro compiler and not the standard compiler. */
+    inline void TRACEENTER(std::source_location const location = std::source_location::current())
+    {
+      defaultLogger().logMessage(GCL::logger::trace,
+                                 "Entering Function: " + std::string(location.function_name()) +
+                                 ". File: " + std::string(location.file_name()) +
+                                 ". Line: " + std::to_string(location.line()));
+    }
 
-#define TRACEENTER GCL::logger::defaultLogger().logMessage(GCL::logger::trace, "Entering Function: " + std::string(__PRETTY_FUNCTION__) + ". File: " + std::string(__FILE__) + ". Line: " + std::to_string(__LINE__))
-#define TRACEEXIT GCL::logger::defaultLogger().logMessage(GCL::logger::trace, "Exiting Function: " + std::string(__PRETTY_FUNCTION__) + ". File: " + std::string(__FILE__) + ". Line: " + std::to_string(__LINE__))
+    inline void TRACEEXIT(std::source_location const location = std::source_location::current())
+    {
+      defaultLogger().logMessage(GCL::logger::trace,
+                                 "Exiting Function: " + std::string(location.function_name()) +
+                                 ". File: " + std::string(location.file_name()) +
+                                 ". Line: " + std::to_string(location.line()));
+    }
 
   } // namespace logger
 } // namespace GCL
 
-#else // GCL_CONTROL
-#define TRACEENTER
-#define TRACEEXIT
 #endif    // GCL_CONTROL
 
 

@@ -174,7 +174,25 @@ namespace GCL
 
   std::string sqlWriter::to_string(parameter const &p) const
   {
-    return p.to_string();
+    std::string returnValue;
+
+    if (p.type() == typeid(std::string))
+    {
+      try
+      {
+        returnValue = "'" + p.to_string() + "'";
+      }
+      catch(std::bad_any_cast)
+      {
+        CODE_ERROR;
+      }
+
+    }
+    else
+    {
+      returnValue = p.to_string();
+    };
+    return returnValue;
   }
 
 

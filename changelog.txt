@@ -1,5 +1,6 @@
 ﻿2022-06
 -------
+UPDATE:     TRACEENTER and TRACEEXIT to inline functions (where macros) usng C++20 std::source_location.
 UPDATE:     GCL Version to 2022.06.0000
 BREAKING:   Updated the where clause generation in sqlWriter. This involved moving the enums into GCL scope and adding the ability
             to create hierarchical where clauses, including additional functions in the where clauses.

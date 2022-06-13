@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2018-2020 Gavin Blakeman.
+//                      Copyright 2018-2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -106,9 +106,9 @@ namespace GCL
       //return lastAlarmHandle;
     }
 
-    /// @brief The loop function to evaluate whether alarms are required. This is the thread function.
-    /// @throws None.
-    /// @version 2018-07-07/GGB - Function created.
+    /// @brief    The loop function to evaluate whether alarms are required. This is the thread function.
+    /// @throws   None.
+    /// @version  2018-07-07/GGB - Function created.
 
     void CAlarmCore::alarmLoop()
     {
@@ -149,7 +149,7 @@ namespace GCL
     /// @param[in] date: The date to hash.
     /// @throws None.
     /// @note 1: Not all hashes are valid dates, but all valid dates have a unique hash.
-    /// @note 2: The hash can be reveresed.
+    /// @note 2: The hash can be reversed.
     /// @version 2018-07-07/GGB - Function created.
 
     CAlarmCore::dateHash_t CAlarmCore::dateHash(std::tm const &date) const noexcept

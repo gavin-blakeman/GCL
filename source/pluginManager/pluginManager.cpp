@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
-//                      Copyright 2020 Gavin Blakeman.
+//                      Copyright 2020-2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -116,7 +116,7 @@ namespace GCL::plugin
   /// @brief      Loads the specified plugin. First checks if it is already loaded and if so returns the existing handle. If not
   ///             loaded, loads the plugin and returns the handle.
   /// @param[in]  pluginName: The name of the plugin to load.
-  /// @note       1. The plugin name can include a full path, however this can create errors. Rather set the search paths to for the
+  /// @note       1. The plugin name can include a full path, however this can create errors. Rather set the search paths for the
   ///               path and just pass the plugin name.
   /// @note       2. Unix and Linux will search /lib and /usr/lib. This appears to be unavoidable. Refer: dlopen(3)
   /// @note       3. Unix and Linux will load any libraries referenced by the plugin automatically. Refer: dlopen(3)
