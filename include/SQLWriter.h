@@ -246,7 +246,7 @@ namespace GCL
       return (*this);
     }
 
-    sqlWriter &where(whereVariant_t &&w);
+    sqlWriter &where(whereVariant_t &&);
 
     sqlWriter &values(std::initializer_list<parameterStorage>);
     sqlWriter &values(valueStorage &&);

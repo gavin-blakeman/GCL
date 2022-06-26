@@ -182,7 +182,7 @@ namespace GCL
       {
         returnValue = "'" + p.to_string() + "'";
       }
-      catch(std::bad_any_cast)
+      catch(std::bad_any_cast &)
       {
         CODE_ERROR;
       }
@@ -788,7 +788,7 @@ namespace GCL
 
   std::string sqlWriter::createWhereClause() const
   {
-    TRACEENTER;
+    TRACEENTER();
     std::string returnValue = "";
 
     if (!std::holds_alternative<std::monostate>(whereClause_.base))
@@ -796,7 +796,7 @@ namespace GCL
       returnValue += " WHERE " + to_string(whereClause_);
     }
 
-    TRACEEXIT;
+    TRACEEXIT();
     return returnValue;
   }
 
