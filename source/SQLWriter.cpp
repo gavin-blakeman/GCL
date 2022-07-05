@@ -57,7 +57,7 @@
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
 #include "boost/locale.hpp"
-#include <SCL>
+//#include <SCL>
 
   // GCL library header Files
 
@@ -788,7 +788,7 @@ namespace GCL
 
   std::string sqlWriter::createWhereClause() const
   {
-    TRACEENTER();
+    logger::TRACEENTER();
     std::string returnValue = "";
 
     if (!std::holds_alternative<std::monostate>(whereClause_.base))
@@ -796,7 +796,7 @@ namespace GCL
       returnValue += " WHERE " + to_string(whereClause_);
     }
 
-    TRACEEXIT();
+    logger::TRACEEXIT();
     return returnValue;
   }
 
@@ -1692,6 +1692,8 @@ namespace GCL
   sqlWriter &sqlWriter::returning(std::string const &field)
   {
     returningFields_.emplace_back(field);
+
+    return *this;
   }
 
   /// @brief      Saves the returning fields.

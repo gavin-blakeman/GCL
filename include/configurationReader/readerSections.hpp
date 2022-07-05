@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2020 Gavin Blakeman.
+//                      Copyright 2020-2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -51,12 +51,13 @@
 
   // GCL library header files.
 
-#include "include/error.h"
 #include "include/configurationReader/readerCore.hpp"
-#include "include/logger/loggerCore.h"
+#include "include/error.h"
 
 namespace GCL
 {
+  using GCL::RUNTIME_ERROR;
+
   /// @details  Implements standardised methods of reading configuration files. The CReaderSections reader is a derived from the
   ///           CVanillaReader class with additional behavior to manage sections.
   ///           Sections are tags that appear on a line with a tag opening and closing character. (Typically '[]').

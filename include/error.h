@@ -179,7 +179,6 @@ namespace GCL
     throw GCL::runtime_error(errorString, errorCode, library);
   }
 
-#define ERROR(LIBRARY, ERROR) (throw(GCL::CError((#LIBRARY), (ERROR))))
 #define CODE_ERROR (throw(GCL::CCodeError( __FILE__, __TIMESTAMP__, static_cast<size_t>(__LINE__)) ))
 #define RUNTIME_ASSERT(EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert((#EXPRESSION),  __FILE__, __TIMESTAMP__, (size_t) __LINE__, (MESSAGE)); }}
 
