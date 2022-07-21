@@ -68,11 +68,12 @@ namespace GCL
     /// @param[in] lfn: Log file name.
     /// @param[in] lfe: Log File Extension. The extension to use. <".log">
     /// @throws None.
+    /// @version 2022-07-10/GGB - Changed boost::filesystem to std::filesystem
     /// @version 2018-08-18/GGB - Split log file name over three variables.
     /// @version 2017-01-26/GGB - Use a single variable for storing the path and name.
     /// @version 2014-07-22/GGB - Function created.
 
-    CFileSink::CFileSink(boost::filesystem::path const &lfp, boost::filesystem::path const &lfn, boost::filesystem::path const &lfe)
+    CFileSink::CFileSink(std::filesystem::path const &lfp, std::filesystem::path const &lfn, std::filesystem::path const &lfe)
       : CLoggerSink(), logFilePath(lfp), logFileName(lfn), logFileExt(lfe), logFile()
     {
     }
@@ -96,7 +97,7 @@ namespace GCL
 
     void CFileSink::openLogFile()
     {
-      boost::filesystem::path logFileFullName = logFilePath / logFileName;
+      std::filesystem::path logFileFullName = logFilePath / logFileName;
 
       switch (rotationMethod)
       {
@@ -132,7 +133,7 @@ namespace GCL
         {
           logFileFullName += logFileExt;
 
-          if ( boost::filesystem::exists(logFileFullName) )
+          if ( std::filesystem::exists(logFileFullName) )
           {
               // Need to roll files.
 
@@ -152,7 +153,7 @@ namespace GCL
 
       if (!logFile.good() || !logFile.is_open())
       {
-        std::cerr << boost::filesystem::current_path().string() << std::endl;
+        std::cerr << std::filesystem::current_path().string() << std::endl;
         std::cerr << "Unable to open log file. Exiting." << std::endl;
         RUNTIME_ERROR(boost::locale::translate("LOGGER: Unable to open log file."), E_LOGGER_UNABLETOOPENFILE, LIBRARYNAME);
       }
@@ -168,14 +169,14 @@ namespace GCL
 
     void CFileSink::rollFiles(void)
     {
-      boost::filesystem::path logFileFullName = logFilePath / logFileName / logFileExt;
+      std::filesystem::path logFileFullName = logFilePath / logFileName / logFileExt;
       if (maxCopies > 0)
       {
         std::uint16_t copyIndex = maxCopies;
         std::uint8_t digits = static_cast<std::uint8_t>(std::log10(maxCopies) + 1);     // Number of digits in copy number.
         std::string number;
-        boost::filesystem::path fnOld;
-        boost::filesystem::path fnNew;
+        std::filesystem::path fnOld;
+        std::filesystem::path fnNew;
 
           // Delete the last file if necessary.
 
@@ -183,9 +184,9 @@ namespace GCL
         fnNew = openLogFileName;
         fnNew += "." + number;
 
-        if (boost::filesystem::exists(fnNew) )
+        if (std::filesystem::exists(fnNew) )
         {
-          boost::filesystem::remove(fnNew);
+          std::filesystem::remove(fnNew);
         };
 
         copyIndex--;
@@ -198,9 +199,9 @@ namespace GCL
           fnOld = logFileFullName;
           fnOld += "." + number;
 
-          if (boost::filesystem::exists(fnOld) )
+          if (std::filesystem::exists(fnOld) )
           {
-            boost::filesystem::rename(fnOld, fnNew);
+            std::filesystem::rename(fnOld, fnNew);
           };
 
           fnNew = fnOld;
@@ -208,16 +209,16 @@ namespace GCL
 
           // Now rename the base file to fnNew
 
-        if (boost::filesystem::exists(logFileFullName))
+        if (std::filesystem::exists(logFileFullName))
         {
-          boost::filesystem::rename(logFileFullName, fnNew);
+          std::filesystem::rename(logFileFullName, fnNew);
         };
       }
       else
       {
-        if ( boost::filesystem::exists(openLogFileName) )
+        if ( std::filesystem::exists(openLogFileName) )
         {
-          boost::filesystem::remove(logFileFullName);
+          std::filesystem::remove(logFileFullName);
         };
       }
     }
@@ -270,8 +271,8 @@ namespace GCL
         logFile.close();
       };
 
-      logFilePath = static_cast<boost::filesystem::path>(filePath);
-      logFileName = static_cast<boost::filesystem::path>(fileName);
+      logFilePath = static_cast<std::filesystem::path>(filePath);
+      logFileName = static_cast<std::filesystem::path>(fileName);
       logFileExt = fileExt;
 
         // Reopen the log file if required.
@@ -357,7 +358,7 @@ namespace GCL
 
       if (rotationMethod == size)
       {
-        std::uintmax_t fileSize = boost::filesystem::file_size(openLogFileName);
+        std::uintmax_t fileSize = std::filesystem::file_size(openLogFileName);
         if (fileSize >= rotationSize)
         {
           rotateLogFile();

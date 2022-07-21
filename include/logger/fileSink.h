@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2014-2020 Gavin Blakeman.
+//                      Copyright 2014-2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -61,10 +61,10 @@ namespace GCL
       };
 
     private:
-      boost::filesystem::path logFilePath;
-      boost::filesystem::path logFileName;
-      boost::filesystem::path logFileExt;
-      boost::filesystem::path openLogFileName;
+      std::filesystem::path logFilePath;
+      std::filesystem::path logFileName;
+      std::filesystem::path logFileExt;
+      std::filesystem::path openLogFileName;
 
         // Daily based rotation variables
 
@@ -89,7 +89,7 @@ namespace GCL
       virtual void write(std::string const &);
 
     public:
-      CFileSink(boost::filesystem::path const &, boost::filesystem::path const &, boost::filesystem::path const & =".log");
+      CFileSink(std::filesystem::path const &, std::filesystem::path const &, std::filesystem::path const & =".log");
       virtual ~CFileSink();
 
       void openLogFile();

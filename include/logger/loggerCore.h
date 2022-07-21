@@ -48,6 +48,7 @@
 #include <chrono>
 #include <condition_variable>
 #include <cstdint>
+#include <filesystem>
 #include <fstream>
 #include <memory>
 #include <mutex>
@@ -61,7 +62,6 @@
 
   // Miscellaneous library header files.
 
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 namespace GCL
@@ -141,7 +141,6 @@ namespace GCL
         typedef std::shared_mutex             mutex_type;
         typedef std::unique_lock<mutex_type>  UniqueLock;
         typedef std::shared_lock<mutex_type>  SharedLock;
-        //typedef std::shared_lock<mutex_type>  UpgradeLock;
         typedef std::vector<PLoggerSink> TSinkContainer;
 
         mutable mutex_type queueMutex;
