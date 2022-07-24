@@ -68,6 +68,8 @@
 #include <string>
 #include <typeinfo>
 #include <type_traits>
+#include <utility>
+
 
   // Miscellaneous library header files
 
@@ -80,6 +82,26 @@
 
 namespace GCL
 {
+  template<typename _Tp>
+  inline constexpr std::in_place_type_t<_Tp> in_place_type{};
+
+  template<size_t _Idx> struct in_place_index_t
+  {
+    explicit in_place_index_t() = default;
+  };
+
+  template<size_t _Idx>
+  inline constexpr in_place_index_t<_Idx> in_place_index{};
+
+  template<typename>
+  inline constexpr bool __is_in_place_type_v = false;
+
+  template<typename _Tp>
+  inline constexpr bool __is_in_place_type_v<std::in_place_type_t<_Tp>> = true;
+
+  template<typename _Tp>
+  using __is_in_place_type = std::bool_constant<__is_in_place_type_v<_Tp>>;
+
 
   /// @brief    The GCL::any class allows any type of data to be stored.
   /// @details  The class implement small buffer optimisation. Any type of data can be stored. If stringification of the stored
@@ -104,6 +126,7 @@ namespace GCL
       std::aligned_storage<sizeof(heapPointer), alignof(void*)>::type memoryBuffer;
     };
 
+
     template<typename T, typename _Safe = std::is_nothrow_move_constructible<T>, bool _Fits = (sizeof(T) <= sizeof(objectStorage))
                                                                                            && (alignof(T) <= alignof(objectStorage))>
     using Internal = std::integral_constant<bool, _Safe::value && _Fits>;
@@ -119,8 +142,15 @@ namespace GCL
                                         Manager_internal<T>,
                                         Manager_external<T>>;
 
-    template<typename T, typename Decayed = std::decay_t<T>>
-    using Decay = std::enable_if_t<!std::is_same<Decayed, any>::value, Decayed>;
+    template<typename _Tp, typename _VTp = std::decay_t<_Tp>>
+    using _Decay_if_not_any = std::enable_if_t<!std::is_same_v<_VTp, any>, _VTp>;
+
+    template <typename _Res, typename _Tp, typename... _Args>
+    using __any_constructible = std::enable_if<std::__and_<std::is_copy_constructible<_Tp>,
+                                                           std::is_constructible<_Tp, _Args...>>::value, _Res>;
+
+    template <typename _Tp, typename... _Args>
+    using __any_constructible_t = typename __any_constructible<bool, _Tp, _Args...>::type;
 
   public:
     /// @brief      Default constructor, creates an empty object.
@@ -167,32 +197,43 @@ namespace GCL
       };
     }
 
-    /// @brief      Construct with a copy of @p value as the contained object.
+    /// @brief      Construct with a copy of @p __value as the contained object.
     /// @param[in]  value: The value to intialise with.
     /// @version    2020-09-21/GGB - Added the M_toString() member.
 
-    template <typename ValueType, typename T = Decay<ValueType>,
-              typename Mgr = Manager<T>,
-              typename std::enable_if<std::is_constructible<T, ValueType&&>::value
-                                  && !is_container<ValueType>::value, bool>::type = true>
-    any(ValueType&& value) : M_manager(&Mgr::S_manage), M_toString(&Mgr::S_toString)
+    template <typename _Tp, typename _VTp = _Decay_if_not_any<_Tp>, typename _Mgr = Manager<_VTp>,
+            std::enable_if_t<std::is_copy_constructible_v<_VTp>
+            && !__is_in_place_type_v<_VTp>, bool> = true>
+    any(_Tp&& value) : M_manager(&_Mgr::S_manage), M_toString(&_Mgr::S_toString)
     {
-      Mgr::S_create(dataStorage, std::forward<ValueType>(value));
-      static_assert(std::is_copy_constructible<T>::value, "The contained object must be CopyConstructible");
+      _Mgr::S_create(dataStorage, std::forward<_Tp>(value));
     }
 
-    /// @brief      Construct with a copy of @p value as the contained object.
+    /// @brief      Construct with an object created from @p __args as the contained object.
     /// @param[in]  value: The value to intialise with.
     /// @version    2020-09-21/GGB - Added the M_toString() member.
 
-    template <typename ValueType, typename T = Decay<ValueType>,
-              typename _Mgr = Manager<T>,
-              typename std::enable_if<!std::is_constructible<T, ValueType&&>::value, bool>::type = false>
-    any(ValueType&& value) : M_manager(&_Mgr::S_manage), M_toString(&_Mgr::S_toString)
+    template <typename _Tp, typename... _Args, typename _VTp = std::decay_t<_Tp>,
+              typename _Mgr = Manager<_VTp>,
+              __any_constructible_t<_VTp, _Args&&...> = false>
+    any(std::in_place_type_t<_Tp>, _Args&&... __args) : M_manager(&_Mgr::S_manage), M_toString(&_Mgr::S_toString)
     {
-      _Mgr::_S_create(dataStorage, value);
-      static_assert(std::is_copy_constructible<T>::value, "The contained object must be CopyConstructible");
+      _Mgr::_S_create(dataStorage, std::forward<_Args>(__args)...);
     }
+
+    /// @brief Construct with an object created from @p __il and @p __args as the contained object.
+
+    template <typename _Tp, typename _Up, typename... _Args, typename _VTp = std::decay_t<_Tp>,
+              typename _Mgr = Manager<_VTp>, __any_constructible_t<_VTp, std::initializer_list<_Up>&,
+                _Args&&...> = false>
+    explicit
+    any(std::in_place_type_t<_Tp>, std::initializer_list<_Up> __il, _Args&&... __args)
+      : M_manager(&_Mgr::_S_manage), M_toString(&_Mgr::S_toString)
+    {
+      _Mgr::_S_create(dataStorage, __il, std::forward<_Args>(__args)...);
+    }
+
+
 
     /// @brief      Destructor, calls @c clear()
     ///

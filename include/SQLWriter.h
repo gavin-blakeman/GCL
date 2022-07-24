@@ -186,6 +186,9 @@ namespace GCL
     std::string to_string(whereVariant_t const &) const;
     std::string to_string(parameter const &) const;
 
+    std::string to_string(valueType_t const &) const;
+    std::string to_string(valueStorage const &) const;
+
   public:
     operator std::string() const { return string(); }
 
@@ -216,11 +219,7 @@ namespace GCL
     sqlWriter &orderBy(std::initializer_list<std::pair<std::string, EOrderBy>>);
     sqlWriter &returning(std::string const &);
     sqlWriter &returning(std::initializer_list<std::string>);
-    sqlWriter &select();
-    sqlWriter &select(std::initializer_list<std::string>);
-    sqlWriter &select(std::string const &, std::initializer_list<std::string>);
-    sqlWriter &selectDistinct(std::initializer_list<std::string>);
-    sqlWriter &selectDistinct(std::string const &, std::initializer_list<std::string>);
+    sqlWriter &select(std::initializer_list<parameter>);
     sqlWriter &selfJoin(std::string const &, std::string const &);
     sqlWriter &set(std::string const &, parameter const &);
     sqlWriter &set(std::initializer_list<parameterPair>);
@@ -250,6 +249,7 @@ namespace GCL
 
     sqlWriter &values(std::initializer_list<parameterStorage>);
     sqlWriter &values(valueStorage &&);
+    sqlWriter &values(pointer_t);
 
     std::string string() const;
 

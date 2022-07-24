@@ -73,6 +73,32 @@ namespace GCL
   std::string const END("END");
 
 
+  /* INSERT INTO SELECT
+   * ==================
+   *
+   * Used to insert the values from one query into another query.
+   *
+   * The values for insertion are stored in
+   *    valueStorage valueFields;
+   *      of type
+   *    using valueStorage = std::vector<parameterVector_t>;     // This is to allow multiple insertions in one statement.
+   *    using parameterVector_t = std::vector<parameter>;
+   *    using parameter = GCL::any;
+   *
+   * IE, a vector of vectors containing parameters.
+   *
+   * An INSERT INTO SELECT can only have one value, the subquery.
+   *
+   * Change the valueStorage type as follows
+   *  using pointer_t = std::unique_ptr<sqlWriter>; -> Already existing
+   *
+   * using valueType_t = std::variant<std::monotype, valueStorage, pointer_t>;
+   *  This changes valueType_t to either a null, a vector of vectors or a pointer to a subQuery.
+   *
+   * Then use std::visit to generate the strings.
+   */
+
+
   /* Where clauses
    * =============
    *
@@ -319,6 +345,93 @@ namespace GCL
     return returnValue;
   }
 
+  /// @brief      Creates the string for the values for an INSERT query.
+  /// @param[in]  values: The values to convert to a string.
+  /// @version    2022-07-23/GGB - Function created.
+
+  std::string sqlWriter::to_string(valueType_t const &values) const
+  {
+    std::string returnValue;
+
+    std::visit(overloaded
+               {
+                 [&](std::monostate const &) { CODE_ERROR; },
+                 [&](valueStorage const &vs) { returnValue = to_string(vs); },
+                 [&](pointer_t const &pt) { returnValue = "( " + static_cast<std::string>(*pt) + ") "; },
+               }, values);
+
+    return returnValue;
+  }
+
+  /// @brief      Creates the string for the values for an INSERT query.
+  /// @param[in]  values: The values to convert to a string.
+  /// @version    2022-07-23/GGB - Function created.
+
+  std::string sqlWriter::to_string(valueStorage const &valueFields) const
+  {
+    bool firstValue = true;
+    bool firstRow = true;
+
+    std::string returnValue = "VALUES ";
+
+    for (auto &outerElement : valueFields)
+    {
+      if (firstRow)
+      {
+        firstRow = false;
+      }
+      else
+      {
+        returnValue += ", ";
+      }
+
+      firstValue = true;
+      returnValue += "(";
+
+      for (auto & innerElement : outerElement)
+      {
+        if (firstValue)
+        {
+          firstValue = false;
+        }
+        else
+        {
+          returnValue += ", ";
+        };
+
+        if (innerElement.type() == typeid(std::string))
+        {
+          returnValue += "'" + innerElement.to_string() + "'";
+        }
+        else if (innerElement.type() == typeid(bindValue))
+        {
+          std::string temp = innerElement.to_string();
+
+          if (temp.front() == ':')
+          {
+            returnValue += temp;
+          }
+          else if (temp.front() == '?')
+          {
+            returnValue += temp;
+          }
+          else
+          {
+            returnValue += ":" + temp;
+          }
+        }
+        else
+        {
+          returnValue += innerElement.to_string();
+        };
+      };
+
+      returnValue += ")";
+    };
+
+    return returnValue;
+  }
+
 
   //******************************************************************************************************************************
   //
@@ -435,16 +548,16 @@ namespace GCL
   /// @brief      Creates the string for an insert query.
   /// @returns    The Insert Query as a string.
   /// @throws     None.
+  /// @version    2022-07-23/GGB - Changed the value storage to valueType_t and useing std::variant
   /// @version    2022-05-01/GGB - Added support for the 'RETURNING' function.
   /// @version    2015-03-31/GGB - Function created.
 
   std::string sqlWriter::createInsertQuery() const
   {
     std::string returnValue = "INSERT INTO " + insertTable + " (";
-    bool firstRow = true;
     bool firstValue = true;
 
-    // Output the column names.
+      // Output the column names.
 
     for (auto &element : selectFields)
     {
@@ -458,69 +571,14 @@ namespace GCL
       {
         returnValue += ", ";
       };
-      columnName = element;
+      columnName = element.to_string();
 
       returnValue += columnName;
     };
 
-    returnValue += ") VALUES ";
+    returnValue += ") ";
 
-    firstValue = true;
-
-    for (auto &outerElement : valueFields)
-    {
-      if (firstRow)
-      {
-        firstRow = false;
-      }
-      else
-      {
-        returnValue += ", ";
-      }
-
-      firstValue = true;
-      returnValue += "(";
-
-      for (auto & innerElement : outerElement)
-      {
-        if (firstValue)
-        {
-          firstValue = false;
-        }
-        else
-        {
-          returnValue += ", ";
-        };
-
-        if (innerElement.type() == typeid(std::string))
-        {
-          returnValue += "'" + innerElement.to_string() + "'";
-        }
-        else if (innerElement.type() == typeid(bindValue))
-        {
-          std::string temp = innerElement.to_string();
-
-          if (temp.front() == ':')
-          {
-            returnValue += temp;
-          }
-          else if (temp.front() == '?')
-          {
-            returnValue += temp;
-          }
-          else
-          {
-            returnValue += ":" + temp;
-          }
-        }
-        else
-        {
-          returnValue += innerElement.to_string();
-        };
-      };
-
-      returnValue += ")";
-    };
+    returnValue += to_string(insertValue);
 
     if (!returningFields_.empty())
     {
@@ -1098,15 +1156,16 @@ namespace GCL
     return returnValue;
   }
 
-  /// @brief Function to create the select clause.
-  /// @returns A string representation of the select clause.
-  /// @note This function also performs the mapping to the correct table.columnNames. Additionally, if only the columnName is
-  ///       given the function will also search the correct tableName or tableAlias and add that to the term.
-  /// @version 2022-04-06/GGB - Added support for 'COUNT() AS '
-  /// @version 2017-08-20/GGB - Added support for min() and max()
-  /// @version 2017-08-19/GGB - Added support for DISTINCT
-  /// @version 2017-08-12/GGB - Added code to support COUNT() clauses.
-  /// @version 2015-04-12/GGB - Function created.
+  /// @brief    Function to create the select clause.
+  /// @returns  A string representation of the select clause.
+  /// @note     This function also performs the mapping to the correct table.columnNames. Additionally, if only the columnName is
+  ///           given the function will also search the correct tableName or tableAlias and add that to the term.
+  /// @version  2022-07-23/GGB - Added support for constants as select cases.
+  /// @version  2022-04-06/GGB - Added support for 'COUNT() AS '
+  /// @version  2017-08-20/GGB - Added support for min() and max()
+  /// @version  2017-08-19/GGB - Added support for DISTINCT
+  /// @version  2017-08-12/GGB - Added code to support COUNT() clauses.
+  /// @version  2015-04-12/GGB - Function created.
 
   std::string sqlWriter::createSelectClause() const
   {
@@ -1125,7 +1184,7 @@ namespace GCL
       returnValue += "DISTINCT ";
     };
 
-    for (iterator = selectFields.begin(); iterator != selectFields.end(); iterator++)
+    for (auto const &field: selectFields)
     {
       if (first)
       {
@@ -1135,7 +1194,7 @@ namespace GCL
       {
         returnValue += ", ";
       };
-      columnName = (*iterator);
+      columnName = field.to_string();
 
       returnValue += columnName;
     };
@@ -1312,10 +1371,10 @@ namespace GCL
     return *this;
   }
 
-  /// @brief  Add a single group by column by name.
-  /// @param[in] column: The column name.
-  /// @returns *this;
-  /// @version 2022-04-07/GGB - Function created.
+  /// @brief      Add a single group by column by name.
+  /// @param[in]  column: The column name.
+  /// @returns    *this;
+  /// @version    2022-04-07/GGB - Function created.
 
   sqlWriter &sqlWriter::groupBy(std::string const &column)
   {
@@ -1669,11 +1728,12 @@ namespace GCL
 
   /// @brief    Resets the value clause of a query.
   /// @throws   None.
+  /// @version  2022-07-23/GGB - Changed to use std::variant to store data.
   /// @version  2022-05-12/GGB - Function created.
 
   void sqlWriter::resetValues()
   {
-    valueFields.clear();
+    insertValue = valueType_t{};
   }
 
   /// @brief Resets the where clause of a query.
@@ -1710,12 +1770,14 @@ namespace GCL
     return *this;
   }
 
-  /// @brief      Set the query type to a 'SELECT' query.
+  /// @brief      Specify the selection fields for the select query.
+  /// @param[in]  fields: The fields to add to the select clause.
   /// @returns    A reference to (*this)
+  /// @version    2020-10-02/GGB - Call to select() to reset the query and set the query type.
   /// @version    2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
-  /// @version    2017-08-20/GGB - Function created.
+  /// @version    2014-12-19/GGB - Function created.
 
-  sqlWriter &sqlWriter::select()
+  sqlWriter &sqlWriter::select(std::initializer_list<parameter> fields)
   {
     if (queryType != qt_none)
     {
@@ -1724,73 +1786,10 @@ namespace GCL
 
     queryType = qt_select;
 
-    return (*this);
-  }
-
-  /// @brief      Specify the selection fields for the select query.
-  /// @param[in]  fields: The fields to add to the select clause.
-  /// @returns    A reference to (*this)
-  /// @version    2020-10-02/GGB - Call to select() to reset the query and set the query type.
-  /// @version    2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
-  /// @version    2014-12-19/GGB - Function created.
-
-  sqlWriter &sqlWriter::select(std::initializer_list<std::string> fields)
-  {
-    select();
-
     for (auto elem : fields)
     {
       selectFields.push_back(elem);
     };
-
-    return *this;
-  }
-
-  /// @brief      Specify table name and fields for the select query.
-  /// @param[in]  tableName: The name of the table to append to each of the field names.
-  /// @param[in]  fields: The list of field names.
-  /// @returns    A reference to (*this)
-  /// @note       This can be called recursivly with different table and field specifiers.
-  /// @version    2020-10-02/GGB - Function created.
-
-  sqlWriter &sqlWriter::select(std::string const &tableName, std::initializer_list<std::string> fields)
-  {
-    select();
-
-    fromFields.emplace_back(tableName, "");
-
-    for (auto elem : fields)
-    {
-      selectFields.push_back(tableName + "." + elem);
-    };
-
-    return *this;
-  }
-
-  /// @brief      Specify the selection fields for the selectDistinct query.
-  /// @param[in]  fields: The fields to add to the select clause.
-  /// @returns    A reference to (*this)
-  /// @version    2022-04-08/GGB - Call to select() to reset the query and set the query type.
-
-  sqlWriter &sqlWriter::selectDistinct(std::initializer_list<std::string> columns)
-  {
-    select(columns);
-    distinct_ = true;
-
-    return *this;
-  }
-
-  /// @brief      Specify table name and fields for the SELECT DISTINCT query.
-  /// @param[in]  tableName: The name of the table to append to each of the field names.
-  /// @param[in]  columns: The list of field names.
-  /// @returns    A reference to (*this)
-  /// @note       This can be called recursivly with different table and field specifiers.
-  /// @version    2022-04-06/GGB - Function created.
-
-  sqlWriter &sqlWriter::selectDistinct(std::string const &tableName, std::initializer_list<std::string> columns)
-  {
-    select(tableName, columns);
-    distinct_ = true;
 
     return *this;
   }
@@ -1947,15 +1946,20 @@ namespace GCL
   /// @brief        Stores the value fields for the query.
   /// @param[in]    fields: The parameter values to include in the query.
   /// @returns      (*this)
+  /// @version      2022-07-23/GGB - Extended to allow INSERT INTO SELECT
   /// @version      2017-07-26/GGB - Changed code to use parameter rather than parameter pair.
   /// @version      2015-03-31/GGB - Function created.
 
   sqlWriter &sqlWriter::values(std::initializer_list<parameterStorage> fields)
   {
+    valueStorage valueFields;
+
     for (const auto &f : fields)
     {
       valueFields.emplace_back(f);
     };
+
+    insertValue = std::move(valueFields);
 
     return *this;
   }
@@ -1963,13 +1967,24 @@ namespace GCL
   /// @brief        Stores values passed in a standard vector.
   /// @param[in]    insertRows: The rows of values to insert.
   /// @returns      (*this)
+  /// @version      2022-07-23/GGB - Extended to allow INSERT INTO SELECT
   /// @version      2022-04-29/GGB - Function created.
 
   sqlWriter &sqlWriter::values(valueStorage &&insertRows)
   {
-    valueFields.clear();
+    insertValue = std::move(insertRows);
 
-    valueFields = std::move(insertRows);
+    return *this;
+  }
+
+  /// @brief        Stores the subquery for a INSERT INTO SELECT query.
+  /// @param[in]    subQuery: The rows of values to insert.
+  /// @returns      (*this)
+  /// @version      2022-07-23/GGB - Function created.
+
+  sqlWriter &sqlWriter::values(pointer_t subQuery)
+  {
+    insertValue = std::move(subQuery);
 
     return *this;
   }

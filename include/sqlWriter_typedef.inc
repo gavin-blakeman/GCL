@@ -19,6 +19,8 @@
   typedef std::vector<orderBy_t> orderByStorage_t;
 
   using valueStorage = std::vector<parameterVector_t>;     // This is to allow multiple insertions in one statement.
+  using valueType_t = std::variant<std::monostate, valueStorage, pointer_t>;
+
   typedef std::tuple<std::string, std::string, EJoin, std::string, std::string> parameterJoin;
 
   typedef std::vector<parameterJoin> joinStorage;
