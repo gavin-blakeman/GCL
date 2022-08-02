@@ -906,6 +906,7 @@ namespace GCL
 
   sqlWriter &sqlWriter::max(std::string const &column, std::string const &as)
   {
+    queryType = qt_select;
     maxFields.emplace_back(column, as);
     return (*this);
   }
@@ -919,6 +920,7 @@ namespace GCL
 
   sqlWriter &sqlWriter::min(std::string const &column, std::string const &as)
   {
+    queryType = qt_select;
     minFields.emplace_back(column, as);
     return (*this);
   }
