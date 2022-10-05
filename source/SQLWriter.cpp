@@ -31,7 +31,8 @@
 //
 // CLASSES INCLUDED:    CSQLWriter
 //
-// HISTORY:             2022-05-01 GGB - Added support for "Returning"
+// HISTORY:             2022-06-07 GGB - Expanded where clause functionality to support a broader range of statements
+//                      2022-05-01 GGB - Added support for "Returning"
 //                      2022-04-11 GGB - Converted to std::filesystem
 //                      2021-04-13 GGB - Added call functionality.
 //                      2020-04-25 GGB - Added offset functionality.
@@ -71,6 +72,37 @@ namespace GCL
   std::string const TABLE("TABLE");
   std::string const COLUMN("COLUMN");
   std::string const END("END");
+
+  /* QUERY as from statement (2022-09-16)
+   * ====================================
+   *
+   * A sub-query may be used as a table for the FROM clause. This can also include an "AS" statement for aliases.
+   *
+   * The subquery type is already supported in WHERE clauses. This needs to be extended to the FROM clause.
+   *
+   * subqueries are represented by using a pointer_t.
+   *
+   * Two from's currently supported
+   *    sqlWriter &from(std::string const &, std::string const & = "");
+   *    sqlWriter &from(std::initializer_list<std::string>);
+   *
+   * from is currently stored in
+   *  stringPairStorage fromFields;
+   *
+   *  typedef std::vector<stringPair> stringPairStorage;
+   *  typedef std::pair<std::string, std::string> stringPair;
+   *
+   *  Define:
+   *
+   *  using from_t = std::variant<std::string, pointer_t>;
+   *  using fromPair_t = std::pair<from_t, std::optional<std::string>>;
+   *  using fromStorage_t = std::vector<fromPair_t>
+   *
+   *  sqlWriter &from(std::string const &, std::optional<std::string> = std::nullopt);
+   *  sqlWriter &from(std::initializer_list<fromPair_t>);
+   *  sqlWriter &from(pointer_t, std::optional<std::string> = std::nullopt);
+   *
+   */
 
 
   /* INSERT INTO SELECT
@@ -874,13 +906,28 @@ namespace GCL
   /// @param[in]  alias: The alias to use for the table name.
   /// @returns    (*this)
   /// @throws     None.
+  /// @version    2022-09-16/GGGB - Updated to support sub-queries
   /// @version    2017-08-20/GGB - Function created.
 
-  sqlWriter &sqlWriter::from(std::string const &fromString, std::string const &alias)
+  sqlWriter &sqlWriter::from(std::string const &fromString, std::optional<std::string> alias)
   {
     fromFields.emplace_back(fromString, alias);
 
     return (*this);
+  }
+
+  /// @brief      Adds the table name to the from clause. @c from("tbl_name", "n")
+  /// @param[in]  fromString: The table name to add to the from clause.
+  /// @param[in]  alias: The alias to use for the table name.
+  /// @returns    (*this)
+  /// @throws     None.
+  /// @version    2022-09-16/GGB - Function created.
+
+  sqlWriter &sqlWriter::from(pointer_t subQuery, std::optional<std::string> alias)
+  {
+    fromFields.emplace_back(std::move(subQuery), alias);
+
+    return *this;
   }
 
   /// @brief        Searches the databaseMap and determines the mapped column names.
@@ -1014,6 +1061,7 @@ namespace GCL
 
   /// @brief Output the "FROM" clause as a string.
   /// @returns A string representation of the "FROM" clause.
+  /// @version 2022-09-16/GGB - Added functionality for sub-queries.
   /// @version 2016-05-08/GGB: Added support for table alisases and table maps.
   /// @version 2015-04-12/GGB: Function created.
 
@@ -1021,12 +1069,11 @@ namespace GCL
   {
     std::string returnValue = " FROM ";
     std::string tableName;
-    std::string tableAlias;
     bool first = true;
     std::vector<std::string>::const_iterator iterator;
 
     first = true;
-    for (auto element : fromFields)
+    for (auto const &element : fromFields)
     {
       if (first)
       {
@@ -1036,13 +1083,22 @@ namespace GCL
       {
         returnValue += ", ";
       };
-      tableName = element.first;
 
-      returnValue += tableName;
+      std::visit(overloaded
+                 {
+                   [&](std::string const &p)
+                   {
+                     returnValue += p;
+                   },
+                   [&](pointer_t const &pt)
+                   {
+                     returnValue += "(" + static_cast<std::string>(*pt) + ")";
+                   },
+                 }, std::get<0>(element));
 
-      if (element.second.length() != 0)
+      if (std::get<1>(element))
       {
-        returnValue += " AS " + tableAlias;
+        returnValue += " AS " + *std::get<1>(element);
       };
     }
 
@@ -2028,6 +2084,15 @@ namespace GCL
   std::string to_string(GCL::sqlWriter::bindValue const &bv)
   {
     return bv.to_string();
+  }
+
+  /// @brief      to_string function for a columnRef.
+  /// @param[in]  bv: The value to convert to a std::string.
+  /// @version    2022-09-19/GGB - Function created.
+
+  std::string to_string(GCL::sqlWriter::columnRef const &cr)
+  {
+    return cr.to_string();
   }
 
     /*

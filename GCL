@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2020 Gavin Blakeman.
+//                      Copyright 2013-2020, 2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -52,6 +52,7 @@
 #include "include/alarm/alarmCore.h"
 #include "include/alarm/alarmDaily.h"
 #include "include/alarm/alarmWeekly.h"
+#include "include/bitValue.h"
 #include "include/configurationReader/readerSections.hpp"
 #include "include/configurationReader/readerVanilla.hpp"
 #include "include/error.h"
@@ -65,6 +66,7 @@
 #include "include/Functions.h"
 #include "include/SQLWriter.h"
 #include "include/Resource.h"
+#include "include/pluginManager/pluginManager.h"
 
   // Inject the logger functions into the global namespace.
 

@@ -39,3 +39,9 @@
     std::variant<std::monostate, whereTest_t, whereLogical_t> base;
   };
 
+    // From Types
+
+  using from_t = std::variant<std::string, pointer_t>;
+  using fromPair_t = std::pair<from_t, std::optional<std::string>>;
+  using fromStorage_t = std::vector<fromPair_t>;
+

@@ -267,6 +267,7 @@ namespace GCL
     using CReaderCore::tagValueInt32;
     using CReaderCore::tagValueString;
     using CReaderCore::tagValueUInt16;
+    using CReaderCore::tagValueUInt64;
 
     /// @brief      Constructor for the class. A single constructor is provided and the default constructor is deleted.
     /// @param[in]  filename: The filename and path of the configuration file.
@@ -318,6 +319,19 @@ namespace GCL
     virtual std::optional<std::uint16_t> tagValueUInt16(std::string const &section, std::string const &tagName)
     {
       return std::move(tagValueUInt16(section + namespaceChar_ + tagName));
+    }
+
+    /// @brief      Returns an uint64 tag value.
+    /// @param[in]  section: The section to search for the tag.
+    /// @param[in]  tagName: The name of the tag to find.
+    /// @returns    A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
+    /// @throws     std::runtime_error - The value was not able to be converted.
+    /// @throws     std::out_of_range - The value was too large for the type.
+    /// @version    2022-09-27/GGB - Function created.
+
+    virtual std::optional<std::uint64_t> tagValueUInt64(std::string const &section, std::string const &tagName)
+    {
+      return std::move(tagValueUInt64(section + namespaceChar_ + tagName));
     }
 
     /// @brief Returns an int32 tag value.

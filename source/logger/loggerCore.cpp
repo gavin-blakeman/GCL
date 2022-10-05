@@ -337,7 +337,7 @@ namespace GCL
 
     void CLogger::addSink(PLoggerSink ls)
     {
-      UniqueLock sinkMutex;
+      UniqueLock ul{sinkMutex};
 
       sinkContainer.push_back(ls);
     }
@@ -434,7 +434,7 @@ namespace GCL
 
       while (!messageQueue.empty())
       {
-        UniqueLock sinkMutex;
+        UniqueLock ul{sinkMutex};
 
         TSinkContainer::iterator sinkIterator;
 

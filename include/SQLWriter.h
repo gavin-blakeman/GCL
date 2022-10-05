@@ -31,7 +31,8 @@
 //
 // CLASSES INCLUDED:    CSQLWriter
 //
-// HISTORY:             2022-05-01 GGB - Added support for "Returning"
+// HISTORY:             2022-06-07 GGB - Expanded where clause functionality to support a broader range of statements
+//                      2022-05-01 GGB - Added support for "Returning"
 //                      2022-04-11 GGB - Converted to std::filesystem
 //                      2021-04-13 GGB - Added call functionality.
 //                      2020-04-25 GGB - Added offset functionality.
@@ -155,6 +156,25 @@ namespace GCL
       std::string to_string() const { return value; }
     };
 
+    class columnRef
+    {
+    private:
+      std::string value;
+
+      columnRef() = delete;
+
+    public:
+      columnRef(std::string const &st) : value(st) {}
+      columnRef(std::string const &alias, std::string const &column) : value(alias + "." + column) {}
+
+      std::string to_string() const { return value; }
+
+      operator std::string() const
+      {
+        return to_string();
+      }
+    };
+
 #include "sqlWriter_typedef.inc"
 #include "sqlWriter_variables.inc"
 
@@ -202,8 +222,9 @@ namespace GCL
     sqlWriter &count(std::string const &, std::string const & = "");
     sqlWriter &deleteFrom(std::string const &);
     sqlWriter &distinct();
-    sqlWriter &from(std::string const &, std::string const & = "");
+    sqlWriter &from(std::string const &, std::optional<std::string> = std::nullopt);
     sqlWriter &from(std::initializer_list<std::string>);
+    sqlWriter &from(pointer_t, std::optional<std::string> = std::nullopt);
     sqlWriter &groupBy(std::string const &);
     sqlWriter &groupBy(columnNumber_t);
     sqlWriter &groupBy(std::initializer_list<std::string>);
@@ -268,6 +289,7 @@ namespace GCL
   }; // class sqlWriter
 
   std::string to_string(sqlWriter::bindValue const &);
+  std::string to_string(sqlWriter::columnRef const &);
   sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter::parameterVector_t);
   sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter::parameter);
   sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter::pointer_t);
@@ -282,10 +304,19 @@ namespace GCL
     return GCL::to_string(*ptr);
   }
 
+  template<>
+  inline std::string any::Manager_external<GCL::sqlWriter::columnRef>::S_toString(any const *anyp)
+  {
+    auto ptr = static_cast<GCL::sqlWriter::columnRef const *>(anyp->dataStorage.heapPointer);
+    return GCL::to_string(*ptr);
+  }
+
+  inline sqlWriter::columnRef operator"" _cr(const char *st, std::size_t)
+  {
+    return sqlWriter::columnRef(st);
+  }
+
 }  // namespace GCL
-
-
-
 
 
 #endif // GCL_CONTROL

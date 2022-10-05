@@ -42,6 +42,7 @@
 
   // Standard C++ library header files
 
+#include <atomic>
 #include <cstdint>
 #include <filesystem>
 #include <map>
@@ -53,37 +54,35 @@
 namespace GCL::plugin
 {
   using pluginHandle_t = std::uint32_t;
-  using pluginName_t = std::string;
+  using pluginName_t = std::filesystem::path;
   using pluginRefCount_t = std::uint16_t;
   using pluginPath_t = std::filesystem::path;
-  using symbol_t = std::string;
 
   class CPluginManager
   {
+  public:
     using searchPath_t = std::vector<pluginPath_t>;
-    using symbolMap_t = std::map<symbol_t, void *>;
+    using symbolMap_t = std::map<std::string, void *>;
 
     struct plugin_t
     {
-      pluginHandle_t pluginHandle;
       pluginName_t pluginName;
       pluginRefCount_t pluginRefCount;
       void *systemHandle;
       symbolMap_t symbolMap;
     };
 
-    using pluginVector_t = std::vector<plugin_t>;
-    using pluginNameMap_t = std::map<std::string, pluginVector_t::size_type>;
-    using pluginHandleMap_t = std::map<pluginHandle_t, pluginVector_t::size_type>;
+    using pluginMap_t = std::map<pluginHandle_t, plugin_t>;
+    using pluginNameMap_t = std::map<pluginName_t, pluginHandle_t>;
 
   private:
-    static pluginHandle_t lastPluginHandle;
+    static std::atomic<pluginHandle_t> lastPluginHandle;
 
-    pluginVector_t pluginVector;
     searchPath_t searchPaths;
-    bool appendPlugin;            ///< True = append "plugin_" to the front of the passed name.
+    bool appendPlugin = false;            ///< True = append "plugin_" to the front of the passed name.
     pluginNameMap_t pluginNameMap;
-    pluginHandleMap_t pluginHandleMap;
+    pluginMap_t pluginMap;
+    std::map<std::string, pluginHandle_t> aliasMap;
 
 
     CPluginManager(CPluginManager const &) = delete;
@@ -98,8 +97,9 @@ namespace GCL::plugin
     ~CPluginManager();
 
     bool addSearchPath(pluginPath_t const &);
-    pluginHandle_t loadPlugin(pluginName_t const &);
-    void *mapSymbol(pluginHandle_t,  symbol_t const &);
+    pluginHandle_t loadPlugin(pluginName_t const &, std::string const & = std::string());
+    void *mapSymbol(pluginHandle_t,  std::string const &, bool = false);
+    void *mapSymbol(std::string const &, std::string const &, bool = false);
   };
 }
 

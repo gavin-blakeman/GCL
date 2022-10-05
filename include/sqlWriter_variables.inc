@@ -19,7 +19,7 @@
   TDatabaseMap databaseMap;
   parameterVector_t selectFields;
   std::vector<std::string> returningFields_;
-  stringPairStorage fromFields;
+  fromStorage_t fromFields;
   std::string insertTable;
   valueType_t insertValue;
   groupByStorage groupByFields_;

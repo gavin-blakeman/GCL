@@ -51,14 +51,15 @@
 #include "include/GCLError.h"
 
 #if defined(unix) || defined(__unix__) || defined(__unix) || defined (__linux__)
-
 #include <dlfcn.h>
-
 #endif // unix type platforms
 
 
 namespace GCL::plugin
 {
+
+  std::atomic<pluginHandle_t> CPluginManager::lastPluginHandle;
+
   /// @brief    Class constructor.
   /// @version  2020-11-29/GGB - Function created.
 
@@ -68,14 +69,19 @@ namespace GCL::plugin
   }
 
   /// @brief    Class destructor. Need to ensure that all plugins are unloaded before exit.
-  /// #version  2020-11-29/GGB - Function created.
+  /// @version  2020-11-29/GGB - Function created.
 
   CPluginManager::~CPluginManager()
   {
+    for(auto &plugin: pluginMap)
+    {
+      dlclose(plugin.second.systemHandle);
+    }
 
+      // All other data is destructed by the destructor calls on the maps and vectors.
   }
 
-  /// @brief      Adds a search path to the list of search paths. Conver
+  /// @brief      Adds a search path to the list of search paths.
   /// @param[in]  path: The path to add to the exising list.
   /// @returns    true - the path was added. false - the path was not added (due to already having an equivilent.)
   /// @throws     GCL::
@@ -116,6 +122,7 @@ namespace GCL::plugin
   /// @brief      Loads the specified plugin. First checks if it is already loaded and if so returns the existing handle. If not
   ///             loaded, loads the plugin and returns the handle.
   /// @param[in]  pluginName: The name of the plugin to load.
+  /// @param[in]  alias: The alias name to use for the plugin. May be an empty string or not supplied.
   /// @note       1. The plugin name can include a full path, however this can create errors. Rather set the search paths for the
   ///               path and just pass the plugin name.
   /// @note       2. Unix and Linux will search /lib and /usr/lib. This appears to be unavoidable. Refer: dlopen(3)
@@ -123,17 +130,38 @@ namespace GCL::plugin
   /// @throws
   /// @version    2020-11-29/GGB - Function created.
 
-  pluginHandle_t CPluginManager::loadPlugin(pluginName_t const &pluginName)
+  pluginHandle_t CPluginManager::loadPlugin(pluginName_t const &pluginName, std::string const &alias)
   {
     pluginHandle_t pluginHandle;
     pluginNameMap_t::iterator foundItem;
 
-    if ((foundItem = pluginNameMap.find(pluginName)) != pluginNameMap.end())
+    if (pluginNameMap.contains(pluginName))
     {
         // plugin already loaded.
 
-      pluginHandle = pluginVector.at(foundItem->second).pluginHandle;   // This may throw.
-      pluginVector.at(foundItem->second).pluginRefCount++;
+      pluginHandle = pluginNameMap.at(pluginName);   // This may throw.
+      pluginMap[pluginHandle].pluginRefCount++;
+
+        // Is the alias also defined and correct.
+
+      if (!alias.empty() && aliasMap.contains(alias))
+      {
+        if (aliasMap[alias] != pluginHandle)
+        {
+            // Reusing the alias for a different plugin.
+
+          RUNTIME_ERROR("Resusing plugin alias for a different plugin.");
+        }
+      }
+      else
+      {
+          // Create an alternate alias for the plugin
+
+        if (!alias.empty())
+        {
+          aliasMap[alias] = pluginHandle;
+        };
+      }
     }
     else
     {
@@ -144,11 +172,21 @@ namespace GCL::plugin
         // Search all the paths to see if the library can be found. On Unix/Linux, also search /lib and /usr/lib
         // The name to be loaded is 'pluginName.so' or 'plugin_pluginName.so'
 
-      pluginName_t pluginToLoad = (appendPlugin ? "plugin_":"") + pluginName + ".so";
+      /// @todo The following line needs to be improved to select the .so only if required.
+
+      //pluginName_t pluginToLoad = (appendPlugin ? "plugin_":"") / pluginName / ".so";
+      pluginName_t pluginToLoad = pluginName;
 
       bool pluginFound = false;
       searchPath_t::iterator iter = searchPaths.begin();
       std::filesystem::path fileNameAndPath;
+
+      pluginFound = std::filesystem::is_regular_file(pluginToLoad);
+
+      if (pluginFound)
+      {
+        fileNameAndPath = pluginToLoad;
+      }
 
       while (iter != searchPaths.end() && !pluginFound)
       {
@@ -159,19 +197,34 @@ namespace GCL::plugin
 
       if (pluginFound)
       {
-        pluginVector.push_back({++lastPluginHandle, pluginName, 0, nullptr, symbolMap_t()});
-        pluginVector.back().systemHandle = dlopen(fileNameAndPath.c_str(), RTLD_LAZY);
+        pluginHandle = ++lastPluginHandle;
+        pluginMap[pluginHandle] = {pluginName, 0, nullptr, symbolMap_t()};
+        pluginNameMap[pluginName] = pluginHandle;
 
-        if (pluginVector.back().systemHandle != nullptr)
+        dlerror();
+        pluginMap[pluginHandle].systemHandle = dlopen(fileNameAndPath.c_str(), RTLD_NOW);
+
+        if (pluginMap[pluginHandle].systemHandle != nullptr)
         {
-          pluginVector.back().pluginRefCount++;
+          GCL::logger::INFOMESSAGE("Loaded plugin: " + fileNameAndPath.native());
+          pluginMap[pluginHandle].pluginRefCount++;
         }
         else
         {
-          RUNTIME_ERROR(boost::locale::translate("PluginManager: Directory does not exist."), E_PLUGINMANAGER_UNABLETOLOAD,
-                        LIBRARYNAME);
-        };
+          char *error = dlerror();
+          RUNTIME_ERROR(std::string(error), E_PLUGINMANAGER_UNABLETOMAP, LIBRARYNAME);
+          RUNTIME_ERROR(boost::locale::translate("PluginManager: Unable to load plugin: " + fileNameAndPath.native()));
+        }
 
+        if (!alias.empty())
+        {
+          aliasMap[alias] = pluginHandle;
+        }
+      }
+      else
+      {
+        RUNTIME_ERROR(boost::locale::translate("PluginManager: Plugin not found."), E_PLUGINMANAGER_UNABLETOLOAD,
+                      LIBRARYNAME);
       };
 
 #endif // unix type platforms
@@ -184,46 +237,50 @@ namespace GCL::plugin
   /// @brief      Maps a symbol in the specified plugin.
   /// @param[in]  pluginHandle: The plugin to query.
   /// @param[in]  symbol: The symbol to query.
+  /// @param[in]  cacheSymbol: true if the symbol should be cached.
   /// @returns    pointer to the symbol (or nullptr)
   /// @throws     GCL::runtime_error
   /// @throws     std::out_of_range - If the pluginHandle is invalid.
 
-  void *CPluginManager::mapSymbol(pluginHandle_t pluginHandle,  symbol_t const &symbol)
+  void *CPluginManager::mapSymbol(pluginHandle_t pluginHandle,  std::string const &symbol, bool cacheSymbol)
   {
     void *returnValue;
-    pluginVector_t::size_type handleIndex;
     symbolMap_t::iterator existingSymbol;
 
-    handleIndex = pluginHandleMap.at(pluginHandle); // This may throw if the item is not found.
-
-    if ((existingSymbol = pluginVector[handleIndex].symbolMap.find(symbol)) != pluginVector[handleIndex].symbolMap.end())
+    if (pluginMap.contains(pluginHandle))
     {
-      returnValue = existingSymbol->second;
-    }
-    else
-    {
-
-
-#if defined(unix) || defined(__unix__) || defined(__unix) || defined (__linux__)
-      char *error;
-
-      dlerror();
-      returnValue = dlsym(pluginVector[handleIndex].systemHandle, symbol.c_str());
-
-      if ((error = dlerror()) != nullptr)
+      if (pluginMap[pluginHandle].symbolMap.contains(symbol))
       {
-        RUNTIME_ERROR(std::string(error), E_PLUGINMANAGER_UNABLETOMAP, LIBRARYNAME);
+        returnValue = pluginMap[pluginHandle].symbolMap[symbol];
       }
       else
       {
-        pluginVector[handleIndex].symbolMap.emplace(symbol, returnValue);
-      };
+
+#if defined(unix) || defined(__unix__) || defined(__unix) || defined (__linux__)
+
+
+        dlerror();
+        returnValue = dlsym(pluginMap[pluginHandle].systemHandle, symbol.c_str());
+
+        if (returnValue == nullptr)
+        {
+          char *error = dlerror();
+          RUNTIME_ERROR(std::string(error), E_PLUGINMANAGER_UNABLETOMAP, LIBRARYNAME);
+        }
+        else if (cacheSymbol)
+        {
+          pluginMap[pluginHandle].symbolMap[symbol] = returnValue;
+        };
 
 #endif // unix type platforms
-
-
-    };
+      };
+    }
     return returnValue;
+  }
+
+  void *CPluginManager::mapSymbol(std::string const &pluginAlias, std::string const &symbol, bool cacheSymbol)
+  {
+    return mapSymbol(aliasMap[pluginAlias], symbol, cacheSymbol);
   }
 
 }   // namespace GCL::plugin
