@@ -52,7 +52,6 @@
 #include "include/alarm/alarmCore.h"
 #include "include/alarm/alarmDaily.h"
 #include "include/alarm/alarmWeekly.h"
-#include "include/bitValue.h"
 #include "include/configurationReader/readerSections.hpp"
 #include "include/configurationReader/readerVanilla.hpp"
 #include "include/error.h"

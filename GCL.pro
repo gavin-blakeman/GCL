@@ -74,7 +74,6 @@ HEADERS += \
     include/Resource.h \
     include/Functions.h \
     include/any.hpp \
-    include/bitValue.h \
     include/common.h \
     include/SQLWriter.h \
     include/dataParser/dataDelimited.h \
