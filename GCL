@@ -69,6 +69,7 @@
 
   // Inject the logger functions into the global namespace.
 
+using GCL::logger::LOGMESSAGE;
 using GCL::logger::CRITICALMESSAGE;
 using GCL::logger::ERRORMESSAGE;
 using GCL::logger::WARNINGMESSAGE;
@@ -83,5 +84,6 @@ using GCL::logger::TRACEEXIT;
   // Inject the error functions into the global namespace.
 
 using GCL::RUNTIME_ERROR;
+using GCL::CODE_ERROR;
 
 #endif //GCL_H

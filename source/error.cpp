@@ -148,22 +148,22 @@ namespace GCL
 
   /// @brief        Converts the error message to a string.
   /// @param[in]    fileName: The name of the source file having the error.
-  /// @param[in]    timeStamp: The build timestamp of the source file.
   /// @param[in]    lineNo: The line number that raises the error.
   /// @returns      String containing the error message details.
   /// @throws       std::bad_alloc
+  /// @version      2022-10-12/GGB - Removed parameter timeStamp. (Part of moving to std::source_location.
   /// @version      2020-09-06/GGB - Removed parameter library.
   /// @version      2020-06-14/GGB - Error text updated.
   /// @version      2015-07-28/GGB - Updated message to reflect library.
   /// @version      2014-12-25/GGB - Updated to working code.
   /// @version      2013-01-26/GGB - Function created
 
-  std::string CCodeError::errorMessage(std::string const &fileName, std::string const &timeStamp, std::size_t lineNo) const
+  std::string CCodeError::errorMessage(std::string const &fileName, std::size_t lineNo) const
   {
     std::ostringstream o;
 
     o << "Code Error. (Generally unreachable code)" << std::endl;
-    o << "File: " << fileName << " dated: " << timeStamp << " at line: " << lineNo << std::endl;
+    o << "File: " << fileName << " at line: " << lineNo << std::endl;
 
     return o.str();
   }

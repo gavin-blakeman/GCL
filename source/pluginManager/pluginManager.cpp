@@ -50,10 +50,6 @@
 #include "include/error.h"
 #include "include/GCLError.h"
 
-#if defined(unix) || defined(__unix__) || defined(__unix) || defined (__linux__)
-#include <dlfcn.h>
-#endif // unix type platforms
-
 
 namespace GCL::plugin
 {
@@ -65,7 +61,6 @@ namespace GCL::plugin
 
   CPluginManager::CPluginManager()
   {
-
   }
 
   /// @brief    Class destructor. Need to ensure that all plugins are unloaded before exit.
@@ -130,7 +125,7 @@ namespace GCL::plugin
   /// @throws
   /// @version    2020-11-29/GGB - Function created.
 
-  pluginHandle_t CPluginManager::loadPlugin(pluginName_t const &pluginName, std::string const &alias)
+  pluginHandle_t CPluginManager::loadPlugin(pluginName_t const &pluginName, int flags, std::string const &alias)
   {
     pluginHandle_t pluginHandle;
     pluginNameMap_t::iterator foundItem;
@@ -202,11 +197,11 @@ namespace GCL::plugin
         pluginNameMap[pluginName] = pluginHandle;
 
         dlerror();
-        pluginMap[pluginHandle].systemHandle = dlopen(fileNameAndPath.c_str(), RTLD_NOW);
+        pluginMap[pluginHandle].systemHandle = dlopen(fileNameAndPath.c_str(), flags);
 
         if (pluginMap[pluginHandle].systemHandle != nullptr)
         {
-          GCL::logger::INFOMESSAGE("Loaded plugin: " + fileNameAndPath.native());
+          GCL::logger::INFOMESSAGE("Loaded plugin: " + fileNameAndPath.filename().native());
           pluginMap[pluginHandle].pluginRefCount++;
         }
         else

@@ -40,6 +40,7 @@
   // Standard C++ library header files
 
 #include <cstdint>
+#include <source_location>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -134,15 +135,13 @@ namespace GCL
   private:
     size_t lineNo;
     std::string fileName;
-    std::string timeStamp;
 
-    std::string errorMessage(std::string const &, std::string const &, std::size_t) const;
+    std::string errorMessage(std::string const &, std::size_t) const;
 
   public:
-    inline explicit CCodeError(std::string fileName, std::string timeStamp, size_t lineNumber)
-      : std::runtime_error("Code Error.")
+    inline explicit CCodeError(std::string fileName, size_t lineNumber)  : std::runtime_error("Code Error.")
     {
-      LOGEXCEPTION(errorMessage(fileName, timeStamp, lineNumber));
+      LOGEXCEPTION(errorMessage(fileName, lineNumber));
     }
   };
 
@@ -179,7 +178,11 @@ namespace GCL
     throw GCL::runtime_error(errorString, errorCode, library);
   }
 
-#define CODE_ERROR (throw(GCL::CCodeError( __FILE__, __TIMESTAMP__, static_cast<size_t>(__LINE__)) ))
+  inline void CODE_ERROR(std::source_location const location = std::source_location::current())
+  {
+    throw(CCodeError(std::string(location.file_name()), location.line()));
+  }
+
 #define RUNTIME_ASSERT(EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert((#EXPRESSION),  __FILE__, __TIMESTAMP__, (size_t) __LINE__, (MESSAGE)); }}
 
 }	// namespace GCL

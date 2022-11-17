@@ -79,10 +79,10 @@ namespace GCL
     using tagValueContainer_t = std::unordered_map<std::string, std::string>;
     using sectionContainer_t = std::unordered_map<std::string, tagValueContainer_t>;
 
-    std::string sectionOpenChar_;               ///< The seperator character to use to open section declarations.
-    std::string sectionCloseChar_;              ///< The seperator character to use to close section declarations.
-    std::string namespaceChar_;                 ///< The seperator character to use to seperate namespace tag combinations.
-    sectionContainer_t sectionContainer;        ///< The container storing the section values and data.
+    std::string sectionOpenChar_;                 ///< The seperator character to use to open section declarations.
+    std::string sectionCloseChar_;                ///< The seperator character to use to close section declarations.
+    std::string namespaceChar_;                   ///< The seperator character to use to seperate namespace tag combinations.
+    mutable sectionContainer_t sectionContainer;  ///< The container storing the section values and data.
 
     CReaderSections() = delete;
     CReaderSections(CReaderSections const &) = delete;
@@ -98,7 +98,7 @@ namespace GCL
     /// @version 2020-11-30/GGB - Debugging function.
     /// @version 2020-04-27/GGB - Function created.
 
-    virtual std::optional<std::string> readTag(std::string const &sectionTagName)
+    virtual std::optional<std::string> readTag(std::string const &sectionTagName) const
     {
       std::optional<std::string> returnValue;
       std::size_t lineNumber = 0;

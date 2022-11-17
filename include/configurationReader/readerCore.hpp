@@ -70,9 +70,9 @@ namespace GCL
     std::string commentChar_;                 ///< Character(s) used to start comment lines.
     std::size_t lastLine_ = 0;                ///< Last line read in the file.
     std::size_t const readAhead_ = 10;        ///< Number of tags to read ahead.
-    bool readComplete_ = false;               ///< True if the entire file has been read.
+    mutable bool readComplete_ = false;       ///< True if the entire file has been read.
 
-    virtual std::optional<std::string> readTag(std::string const &) = 0;
+    virtual std::optional<std::string> readTag(std::string const &) const = 0;
 
     /// @brief Returns a double tag value.
     /// @param[in] to s: The name of the tag to find.
@@ -113,7 +113,7 @@ namespace GCL
     /// @throws std::out_of_range - The value was too large for the type.
     /// @version 2020-04-27/GGB - Function created.
 
-    virtual std::uint16_t string2UInt16(std::string const &s)
+    virtual std::uint16_t string2UInt16(std::string const &s) const
     {
       std::uint16_t returnValue;
 
@@ -245,7 +245,7 @@ namespace GCL
     /// @throws std::out_of_range - The value was too large for the type.
     /// @version 2020-04-27/GGB - Function created.
 
-    virtual std::optional<std::uint16_t> tagValueUInt16(std::string const &tagName)
+    virtual std::optional<std::uint16_t> tagValueUInt16(std::string const &tagName) const
     {
       std::optional<std::uint16_t> returnValue;
 

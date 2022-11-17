@@ -242,7 +242,7 @@ namespace GCL
       }
       catch(std::bad_any_cast &)
       {
-        CODE_ERROR;
+        CODE_ERROR();
       }
 
     }
@@ -338,7 +338,7 @@ namespace GCL
       }
       default:
       {
-        CODE_ERROR;
+        CODE_ERROR();
         break;
       }
     }
@@ -369,7 +369,7 @@ namespace GCL
 
     std::visit(overloaded
                {
-                 [&](std::monostate const &) { CODE_ERROR; },
+                 [&](std::monostate const &) { CODE_ERROR(); },
                  [&](whereTest_t const &wt) { returnValue = to_string(wt); },
                  [&](whereLogical_t const &wl) { returnValue = to_string(wl); },
                }, wv.base);
@@ -387,7 +387,7 @@ namespace GCL
 
     std::visit(overloaded
                {
-                 [&](std::monostate const &) { CODE_ERROR; },
+                 [&](std::monostate const &) { CODE_ERROR(); },
                  [&](valueStorage const &vs) { returnValue = to_string(vs); },
                  [&](pointer_t const &pt) { returnValue = "( " + static_cast<std::string>(*pt) + ") "; },
                }, values);
@@ -862,7 +862,7 @@ namespace GCL
       }
       default:
       {
-        CODE_ERROR;
+        CODE_ERROR();
       }
     };
 
@@ -1164,7 +1164,7 @@ namespace GCL
         }
         default:
         {
-          CODE_ERROR;
+          CODE_ERROR();
           break;
         }
 
@@ -1927,7 +1927,7 @@ namespace GCL
       }
       default:
       {
-        CODE_ERROR;
+        CODE_ERROR();
         break;
       };
     }

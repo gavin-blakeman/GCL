@@ -49,6 +49,10 @@
 #include <string>
 #include <vector>
 
+#if defined(unix) || defined(__unix__) || defined(__unix) || defined (__linux__)
+#include <dlfcn.h>
+#endif // unix type platforms
+
   // Miscellaneous library header files.
 
 namespace GCL::plugin
@@ -97,7 +101,7 @@ namespace GCL::plugin
     ~CPluginManager();
 
     bool addSearchPath(pluginPath_t const &);
-    pluginHandle_t loadPlugin(pluginName_t const &, std::string const & = std::string());
+    pluginHandle_t loadPlugin(pluginName_t const &, int = RTLD_NOW, std::string const & = std::string());
     void *mapSymbol(pluginHandle_t,  std::string const &, bool = false);
     void *mapSymbol(std::string const &, std::string const &, bool = false);
   };
