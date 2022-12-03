@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2014-2020 Gavin Blakeman.
+//                      Copyright 2014-2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -169,7 +169,9 @@ namespace GCL
 
     void CFileSink::rollFiles(void)
     {
-      std::filesystem::path logFileFullName = logFilePath / logFileName / logFileExt;
+      std::filesystem::path logFileFullName = logFilePath / logFileName;
+      logFileFullName += logFileExt;
+
       if (maxCopies > 0)
       {
         std::uint16_t copyIndex = maxCopies;
@@ -216,7 +218,7 @@ namespace GCL
       }
       else
       {
-        if ( std::filesystem::exists(openLogFileName) )
+        if ( std::filesystem::exists(logFileFullName) )
         {
           std::filesystem::remove(logFileFullName);
         };
@@ -325,14 +327,18 @@ namespace GCL
 
     /// @brief      Sets the rotation policy to a new one every startup (use) of the application.
     /// @param[in]  copies: The number of copies of the log file to keep.
+    /// @returns    *this
     /// @throws     None.
+    /// @version    2022-12-01/GGB - Changed return type.
     /// @version    2018-01-26/GGB - Removed all compression support
     /// @version    2018-01-19/GGB - Function created.
 
-    void CFileSink::setRotationPolicyUse(std::uint16_t copies)
+    CFileSink &CFileSink::setRotationPolicyUse(std::uint16_t copies)
     {
       rotationMethod = use;
       maxCopies = copies;
+
+      return *this;
     }
 
     /// @brief      Function to write the message to the logFile.

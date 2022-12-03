@@ -38,26 +38,41 @@
 
 #include <any>
 #include <cstdint>
+#include <istream>
 #include <map>
 #include <string>
 #include <vector>
 
 namespace GCL
 {
+  /// Used to parse general data streams.
+
   class CDataParser
   {
   public:
     using headerData_t = std::map<std::string, std::uint16_t>;
-    using data_t = std::any;
-    using dataLine_t = std::vector<std::any>;
+    using data_t = std::string;
+    using dataLine_t = std::vector<data_t>;
     using dataFile_t = std::vector<dataLine_t>;
 
   private:
   protected:
+    std::istream &inputStream;
     headerData_t headerData;
     dataFile_t dataFile;
 
+    virtual void processParseData() = 0;
+
   public:
+    CDataParser(std::istream &is) : inputStream(is) {}
+    virtual ~CDataParser() {}
+
+    dataFile_t const &data() noexcept { return dataFile; }
+    headerData_t const &header() noexcept { return headerData; }
+
+    void parseData() { processParseData(); }
+
+
   };
 
 } // namespace GCL

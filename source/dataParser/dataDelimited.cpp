@@ -35,11 +35,20 @@
 
   // Standard C++ library header files
 
-#include <sstream>
+#include <iostream>
 
+  // Miscellaneous libraries
+
+#include <boost/algorithm/string.hpp>
 
 namespace GCL
 {
+
+  CDelimitedParser::CDelimitedParser(std::istream &is, std::string const &dc, bool ih)
+    : CDataParser(is), includesHeader_(ih), delimiter_(dc)
+  {
+
+  }
 
   /// @brief      Reset all data in the instance
   /// @throws     None.
@@ -58,6 +67,13 @@ namespace GCL
     return *this;
   }
 
+  CDelimitedParser &CDelimitedParser::ignoreHeader(bool b) noexcept
+  {
+    ignoreHeader_ = b;
+
+    return *this;
+  }
+
   CDelimitedParser &CDelimitedParser::includesHeader(bool b) noexcept
   {
     includesHeader_ = b;
@@ -65,44 +81,87 @@ namespace GCL
     return *this;
   }
 
-  /// @brief      Parses a string and sets the data into the data structures.
-  /// @param[in]  dataString: The string containing the data to parse.
+  /// @brief Processes the entire file. Each token is pushed into the dataLine and dataFile as a string.
+  ///        The calling function is required to convert strings to alternate values.
+  /// @throws
+  /// @version 2022-11-29/GGB - Function created.
 
-  bool CDelimitedParser::parseData(std::string const &dataString)
+  void CDelimitedParser::processData()
   {
-    bool returnValue = false;
-
-    currentString = dataString;
-    currentPosn = 0;
-
-    if (!dataString.empty())
+    while (!inputStream.eof())
     {
-      if (includesHeader_)
-      {
-        returnValue = processHeader();
-      };
+      dataLine_t dataLine;
+      std::string szLine;
+      std::size_t tokenEnd;
+      std::string token;
 
-      if (returnValue)
+      std::getline(inputStream, szLine);
+      if (!inputStream.eof())     // eof is not asseted until attempt to read the empty stream.
       {
-        returnValue = processData();
-      };
-    };
+        while (szLine.size() != 0)
+        {
+          tokenEnd = szLine.find(",");
+          token = szLine.substr(0, tokenEnd);
+          dataLine.push_back(token);
 
-    return returnValue;
+          if (tokenEnd != std::string::npos)
+          {
+            szLine = szLine.substr(tokenEnd + 1);
+
+            // At least one more token.
+
+            if (szLine.size() == 0)
+            {
+                // The last token is an empty token.
+
+              token.clear();
+              dataLine.push_back(token);
+            }
+          }
+          else
+          {
+            szLine.clear();
+          }
+        }
+
+        dataFile.push_back(std::move(dataLine));
+      }
+    }
+  }
+
+  /// @brief      Parses a string and sets the data into the data structures.
+  /// @throws
+  /// @version 2022-12-01/GGB - Function created.
+
+  void CDelimitedParser::processParseData()
+  {
+    if (includesHeader_)
+    {
+      processHeader();
+    }
+    processData();
   }
 
   /// @brief      Processes the data for a header.
   /// @version    2020-10-13/GGB - Function created.
 
-  bool CDelimitedParser::processHeader()
+  void CDelimitedParser::processHeader()
   {
-      // Assume a number of fields, seperated by the seperator character(s).
 
-    std::string::size_type startIndex, endIndex;
+    if (ignoreHeader_)
+    {
+      std::string szLine;
 
-    startIndex = currentPosn;
+      std::getline(inputStream, szLine);
+    }
+    else
+    {
+       // Assume a number of fields, seperated by the seperator character(s).
 
-    return false;
+      std::string::size_type startIndex, endIndex;
+
+      startIndex = currentPosn;
+    }
 
   }
 }

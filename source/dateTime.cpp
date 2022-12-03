@@ -34,6 +34,11 @@
 
 #include "include/dateTime.h"
 
+  // Standard C++ library
+
+#include <iomanip>
+#include <sstream>
+
   // Miscellaneous library header files
 
 #include "boost/format.hpp"
@@ -73,6 +78,24 @@ namespace GCL
   std::string sprintTime(struct tm *dateTime)
   {
     return boost::str(boost::format("%1$02d:%2$02d:%3$02d") % dateTime->tm_hour % dateTime->tm_min % dateTime->tm_sec);
+  }
+
+  /// @brief Parses a YYYY-MM-DD into a std::chrono::system_clock instance
+  /// @param[in[ str: The string to parse
+  /// @returns The system_clock
+  /// @throws
+  /// @version 2022-11-29/GGB - Function created.
+
+  std::chrono::time_point<std::chrono::system_clock> parseDate(std::string const &str)
+  {
+    std::tm tm = {};
+    std::istringstream ss(str);
+
+    ss >> std::get_time(&tm, "%Y-%m-%d");
+
+    std::time_t t = std::mktime(&tm);
+
+    return std::chrono::system_clock::from_time_t(t);
   }
 
 }   // GCL

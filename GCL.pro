@@ -48,8 +48,8 @@ OBJECTS_DIR = "objects"
 
 
 INCLUDEPATH += \
-  "../MCL" \
-  "../SCL" \
+  "../MCL"
+#  "../SCL" \
 
 SOURCES += \
     source/dataParser/dataDelimited.cpp \

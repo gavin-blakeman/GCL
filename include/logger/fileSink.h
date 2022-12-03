@@ -98,7 +98,7 @@ namespace GCL
       void setRotationPolicySize(std::uint16_t copies, std::uintmax_t maxSize = 10 * 1024 * 1024);
       void setRotationPolicyDaily(std::uint16_t copies);
       void setRotationPolicyDays(std::uint16_t copies, std::uint16_t maxDays);
-      void setRotationPolicyUse(std::uint16_t copies);
+      CFileSink &setRotationPolicyUse(std::uint16_t copies);
 
     };
 

@@ -126,7 +126,7 @@ namespace GCL
         // Could not convert the value.
 
         DEBUGMESSAGE(e.what());
-        throw std::runtime_error("Unable to convert tag value to Uint16");
+        throw std::runtime_error("Unable to convert tag value to uint16.");
       };
 
       return returnValue;

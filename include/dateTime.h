@@ -36,6 +36,7 @@
 
   // Standard C++ library header files
 
+#include <chrono>
 #include <ctime>
 #include <string>
 
@@ -44,6 +45,8 @@ namespace GCL
   std::string sprintDate(std::tm *);
   std::string sprintDateTime(std::tm *);
   std::string sprintTime(std::tm *);
+
+  std::chrono::time_point<std::chrono::system_clock> parseDate(std::string const &);
 
 }
 

@@ -152,7 +152,7 @@ namespace GCL
     /// @throws None.
     /// @version 2014-12-24/GGB - Function created.
 
-    void CLoggerSink::writeRecord(PLoggerRecord &lr)
+    void CLoggerSink::writeRecord(PLoggerRecord const &lr)
     {
         // Check that the message should be logged.
 
@@ -353,7 +353,7 @@ namespace GCL
     {
       PLoggerRecord newRecord(new CLoggerRecord(s, m));
       {
-        UniqueLock queueMutex;
+        UniqueLock lock(queueMutex);
 
         messageQueue.push(newRecord);
       };

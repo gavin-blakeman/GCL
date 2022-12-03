@@ -143,7 +143,7 @@ namespace GCL
         typedef std::shared_lock<mutex_type>  SharedLock;
         typedef std::vector<PLoggerSink> TSinkContainer;
 
-        mutable mutex_type queueMutex;
+        mutable mutex_type queueMutex;              // Protects the message queue
         mutable mutex_type terminateMutex;
         bool terminateThread;
         mutable std::condition_variable_any cvQueueData;
@@ -200,7 +200,7 @@ namespace GCL
         void notice(bool f) { logSeverity.fNotice = f; }
         void warning(bool f) { logSeverity.fWarning = f; }
 
-        virtual void writeRecord(PLoggerRecord &);
+        virtual void writeRecord(PLoggerRecord const &);
     };
 
     CLogger &defaultLogger();

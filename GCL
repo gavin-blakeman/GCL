@@ -54,6 +54,8 @@
 #include "include/alarm/alarmWeekly.h"
 #include "include/configurationReader/readerSections.hpp"
 #include "include/configurationReader/readerVanilla.hpp"
+#include "include/dataParser/dataDelimited.h"
+#include "include/dataParser/dataParserCore.h"
 #include "include/error.h"
 #include "include/GCLError.h"
 #include "include/logger/loggerCore.h"

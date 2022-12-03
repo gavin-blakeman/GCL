@@ -34,15 +34,20 @@
 #ifndef DATADELIMITED_H
 #define DATADELIMITED_H
 
+  // Standard C++ library
+
+#include <string>
+
   // GCL header files
 
 #include "include/dataParser/dataParserCore.h"
 
 namespace GCL
 {
-  class CDelimitedParser : CDataParser
+  class CDelimitedParser : public CDataParser
   {
   private:
+    bool ignoreHeader_ = true;
     bool includesHeader_;
     std::string delimiter_;
 
@@ -50,16 +55,18 @@ namespace GCL
     std::string::size_type currentPosn;
 
   protected:
-    bool processHeader();
-    bool processData();
+    void processHeader();
+    void processData();
+    void processParseData() override;
 
   public:
-    CDelimitedParser();
+    CDelimitedParser(std::istream &is, std::string const &, bool = true);
 
     CDelimitedParser &delimiterCharacter(std::string const &) noexcept;
     CDelimitedParser &includesHeader(bool) noexcept;
+    CDelimitedParser &ignoreHeader(bool) noexcept;
 
-    bool parseData(std::string const &);
+
 
     void clear() noexcept;
   };
