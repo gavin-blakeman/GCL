@@ -132,6 +132,32 @@ namespace GCL
       return returnValue;
     }
 
+    /// @brief      Returns an uint32 tag value.
+    /// @param[in]  s: The name of the tag to find.
+    /// @returns    The string converted to a uint16.
+    /// @throws     std::runtime_error - The value was not able to be converted.
+    /// @throws     std::out_of_range - The value was too large for the type.
+    /// @version    2022-12-06/GGB - Function created.
+
+    virtual std::uint64_t string2UInt32(std::string const &s) const
+    {
+      std::uint64_t returnValue;
+
+      try
+      {
+        returnValue = boost::lexical_cast<std::uint32_t>(s);
+      }
+      catch(boost::bad_lexical_cast const &e)
+      {
+        // Could not convert the value.
+
+        DEBUGMESSAGE(e.what());
+        throw std::runtime_error("Unable to convert tag value to Uint16");
+      };
+
+      return returnValue;
+    }
+
     /// @brief      Returns an uint64 tag value.
     /// @param[in]  s: The name of the tag to find.
     /// @returns    The string converted to a uint16.
@@ -207,6 +233,27 @@ namespace GCL
 
     virtual ~CReaderCore() {}
 
+    /// @brief Returns a bool tag value.
+    /// @param[in] tagname: The tag to get.
+    /// @returns optional<bool>
+    /// @throws
+    /// @version 2022-12-03/GGB - Function created.
+
+    virtual std::optional<bool> tagValueBool(std::string const &tagname)
+    {
+      std::optional<bool> rv;
+
+      std::optional<std::string> value = readTag(tagname);
+
+      if (value)
+      {
+        boost::to_upper(*value);
+        rv = (*value == "TRUE");
+      };
+
+      return rv;
+    }
+
     /// @brief Returns a tag value.
     /// @param[in] tagName: The name of the tag to find.
     /// @returns A std::optional containing the data (if found)
@@ -254,6 +301,27 @@ namespace GCL
       if (value)
       {
         returnValue = string2UInt16(*value);
+      };
+
+      return returnValue;
+    }
+
+    /// @brief      Returns an uint32 tag value.
+    /// @param[in]  tagName: The name of the tag to find.
+    /// @returns    A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
+    /// @throws     std::runtime_error - The value was not able to be converted.
+    /// @throws     std::out_of_range - The value was too large for the type.
+    /// @version    2022-12-06/GGB - Function created.
+
+    virtual std::optional<std::uint32_t> tagValueUInt32(std::string const &tagName) const
+    {
+      std::optional<std::uint32_t> returnValue;
+
+      std::optional<std::string> value = readTag(tagName);
+
+      if (value)
+      {
+        returnValue = string2UInt32(*value);
       };
 
       return returnValue;

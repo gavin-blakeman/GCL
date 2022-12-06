@@ -321,6 +321,19 @@ namespace GCL
       return std::move(tagValueUInt16(section + namespaceChar_ + tagName));
     }
 
+    /// @brief      Returns an uint32 tag value.
+    /// @param[in]  section: The section to search for the tag.
+    /// @param[in]  tagName: The name of the tag to find.
+    /// @returns    A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
+    /// @throws     std::runtime_error - The value was not able to be converted.
+    /// @throws     std::out_of_range - The value was too large for the type.
+    /// @version    2022-12-06/GGB - Function created.
+
+    virtual std::optional<std::uint32_t> tagValueUInt32(std::string const &section, std::string const &tagName)
+    {
+      return std::move(CReaderCore::tagValueUInt32(section + namespaceChar_ + tagName));
+    }
+
     /// @brief      Returns an uint64 tag value.
     /// @param[in]  section: The section to search for the tag.
     /// @param[in]  tagName: The name of the tag to find.

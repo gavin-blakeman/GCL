@@ -96,6 +96,11 @@ namespace GCL
       std::string token;
 
       std::getline(inputStream, szLine);
+      if (szLine.ends_with('\r'))
+      {
+        szLine.pop_back();
+      }
+
       if (!inputStream.eof())     // eof is not asseted until attempt to read the empty stream.
       {
         while (szLine.size() != 0)
