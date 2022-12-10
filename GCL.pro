@@ -53,6 +53,7 @@ INCLUDEPATH += \
 
 SOURCES += \
     source/dataParser/dataDelimited.cpp \
+    source/logger/TextEditSink.cpp \
     source/pluginManager/pluginManager.cpp \
     source/string.cpp \
     source/Resource.cpp \
