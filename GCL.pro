@@ -36,8 +36,6 @@ TARGET = GCL
 TEMPLATE = lib
 CONFIG += staticlib
 
-QT -= core gui
-
 DEFINES += BOOST_CHRONO_DONT_PROVIDES_DEPRECATED_IO_SINCE_V2_0_0
 DEFINES += BOOST_THREAD_USE_LIB
 
@@ -49,11 +47,9 @@ OBJECTS_DIR = "objects"
 
 INCLUDEPATH += \
   "../MCL"
-#  "../SCL" \
 
 SOURCES += \
     source/dataParser/dataDelimited.cpp \
-    source/logger/TextEditSink.cpp \
     source/pluginManager/pluginManager.cpp \
     source/string.cpp \
     source/Resource.cpp \

@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2020 Gavin Blakeman.
+//                      Copyright 2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -37,6 +37,7 @@
   // Standard C++ library
 
 #include <string>
+#include <string_view>
 
   // GCL header files
 
@@ -47,14 +48,15 @@ namespace GCL
   class CDelimitedParser : public CDataParser
   {
   private:
-    bool ignoreHeader_ = true;
+    bool ignoreHeader_ = false;
     bool includesHeader_;
-    std::string delimiter_;
+    std::string delimiter_ = ",";
 
     std::string currentString;
     std::string::size_type currentPosn;
 
   protected:
+    void parseString(std::string_view &, dataLine_t &);
     void processHeader();
     void processData();
     void processParseData() override;

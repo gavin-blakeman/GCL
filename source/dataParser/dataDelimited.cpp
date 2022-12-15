@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2020 Gavin Blakeman.
+//                      Copyright 2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -92,8 +92,6 @@ namespace GCL
     {
       dataLine_t dataLine;
       std::string szLine;
-      std::size_t tokenEnd;
-      std::string token;
 
       std::getline(inputStream, szLine);
       if (szLine.ends_with('\r'))
@@ -103,36 +101,86 @@ namespace GCL
 
       if (!inputStream.eof())     // eof is not asseted until attempt to read the empty stream.
       {
-        while (szLine.size() != 0)
-        {
-          tokenEnd = szLine.find(",");
-          token = szLine.substr(0, tokenEnd);
-          dataLine.push_back(token);
+        std::string_view sv(szLine);
 
-          if (tokenEnd != std::string::npos)
-          {
-            szLine = szLine.substr(tokenEnd + 1);
-
-            // At least one more token.
-
-            if (szLine.size() == 0)
-            {
-                // The last token is an empty token.
-
-              token.clear();
-              dataLine.push_back(token);
-            }
-          }
-          else
-          {
-            szLine.clear();
-          }
-        }
+        parseString(sv, dataLine);
 
         dataFile.push_back(std::move(dataLine));
       }
     }
   }
+
+  /// @brief Parses a string with delimited values. This is used to read the headers as well as the data.
+  /// @param[in] sv: The string to process
+  /// @param[in] dataLine: The dataline to write the data to.
+  /// @throws
+  /// @version 2022-12-14/GGB - Function created.
+
+  void CDelimitedParser::parseString(std::string_view &sv, dataLine_t &dataLine)
+  {
+    std::size_t tokenEnd;
+    std::string_view token;
+
+    dataLine.clear();
+
+    while (sv.size() != 0)
+    {
+      if (sv.starts_with('"'))
+      {
+        tokenEnd = 1;
+        bool endFound = false;
+        while (!endFound)
+        {
+          tokenEnd = sv.find('"', tokenEnd);
+          if (sv[tokenEnd+1] != '"')
+          {
+            endFound = true;
+          }
+          else
+          {
+            tokenEnd += 2;
+          }
+        };
+        tokenEnd = sv.find(delimiter_, tokenEnd);
+        token = sv.substr(0, tokenEnd);
+
+        if (token.starts_with('"'))
+        {
+          token.remove_prefix(1);
+        }
+        if (token.ends_with('"'))
+        {
+          token.remove_suffix(1);
+        }
+      }
+      else
+      {
+        tokenEnd = sv.find(delimiter_);
+        token = sv.substr(0, tokenEnd);
+      };
+
+      dataLine.push_back(std::string{token});
+
+      if (tokenEnd != std::string::npos)
+      {
+        sv.remove_prefix(tokenEnd + 1);
+
+        // At least one more token.
+
+        if (sv.size() == 0)
+        {
+            // The last token is an empty token.
+
+          dataLine.push_back(std::string{token});
+        }
+      }
+      else
+      {
+        sv.remove_prefix(sv.size());
+      }
+    }
+  }
+
 
   /// @brief      Parses a string and sets the data into the data structures.
   /// @throws
@@ -152,20 +200,15 @@ namespace GCL
 
   void CDelimitedParser::processHeader()
   {
+    std::string szLine;
 
-    if (ignoreHeader_)
+    std::getline(inputStream, szLine);
+
+    if (!ignoreHeader_)
     {
-      std::string szLine;
+      std::string_view sv(szLine);
 
-      std::getline(inputStream, szLine);
-    }
-    else
-    {
-       // Assume a number of fields, seperated by the seperator character(s).
-
-      std::string::size_type startIndex, endIndex;
-
-      startIndex = currentPosn;
+      parseString(sv, headerData);
     }
 
   }

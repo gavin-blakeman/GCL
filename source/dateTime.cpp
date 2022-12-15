@@ -98,4 +98,16 @@ namespace GCL
     return std::chrono::system_clock::from_time_t(t);
   }
 
+  std::chrono::time_point<std::chrono::system_clock> parseDate(std::string const &str, std::string const &fmt)
+  {
+    std::tm tm = {};
+    std::istringstream ss(str);
+
+    ss >> std::get_time(&tm, fmt.c_str());
+
+    std::time_t t = std::mktime(&tm);
+
+    return std::chrono::system_clock::from_time_t(t);
+  }
+
 }   // GCL

@@ -47,6 +47,7 @@ namespace GCL
   std::string sprintTime(std::tm *);
 
   std::chrono::time_point<std::chrono::system_clock> parseDate(std::string const &);
+  std::chrono::time_point<std::chrono::system_clock> parseDate(std::string const &, std::string const &);
 
 }
 

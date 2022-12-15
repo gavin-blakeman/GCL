@@ -50,7 +50,6 @@ namespace GCL
   class CDataParser
   {
   public:
-    using headerData_t = std::map<std::string, std::uint16_t>;
     using data_t = std::string;
     using dataLine_t = std::vector<data_t>;
     using dataFile_t = std::vector<dataLine_t>;
@@ -58,7 +57,7 @@ namespace GCL
   private:
   protected:
     std::istream &inputStream;
-    headerData_t headerData;
+    dataLine_t headerData;
     dataFile_t dataFile;
 
     virtual void processParseData() = 0;
@@ -67,8 +66,8 @@ namespace GCL
     CDataParser(std::istream &is) : inputStream(is) {}
     virtual ~CDataParser() {}
 
-    dataFile_t const &data() noexcept { return dataFile; }
-    headerData_t const &header() noexcept { return headerData; }
+    dataFile_t &data() noexcept { return dataFile; }
+    dataLine_t &header() noexcept { return headerData; }
 
     void parseData() { processParseData(); }
 
