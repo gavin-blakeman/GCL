@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2020 Gavin Blakeman.
+//                      Copyright 2013-2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -46,82 +46,6 @@
 
 namespace GCL
 {
-  /// @brief Function to add an error message to the error message list.
-  /// @throws None.
-  /// @version 2018-09-21/GGB - Updated to use new errorMessages() function.
-  /// @version 2015-07-28/GGB - Function created.
-
-  bool CError::addErrorMessage(std::string library, TErrorCode code, std::string message)
-  {
-    errorMessages().emplace(library + std::to_string(code), SErrorEntry(library, code, message));
-
-    return true;
-  }
-
-  /// @brief Returns the string of the error message.
-  /// @returns The error message.
-  /// @version 2018-09-21/GGB - Updated to use new errorMessage() function.
-  /// @version 2013-01-26/GGB - Function created.
-
-  std::string CError::errorMessage() const
-  {
-    TErrorStore::const_iterator errorData;
-
-    if ((errorData = errorMessages().find(library_ + std::to_string(errorCode_))) == errorMessages().end() )
-    {
-        // Error message not found - Error code has not been defined.
-        // This is a non-recoverable error.
-
-      exit(0xFFFE);		// Non-recoverable error within an error
-    }
-    else
-    {
-      return (errorData->second.errorMessage);
-    };
-  }
-
-  /// @brief Construct and store the errorMessages map.
-  /// @returns Reference to the errorMessagesMap.
-  /// @note This uses the construct on first use idiom.
-  /// @throws None.
-  /// @version 2018-09-21/GGB - Function created.
-
-  CError::TErrorStore &CError::errorMessages()
-  {
-    static TErrorStore errorMessages_;
-
-    return errorMessages_;
-  }
-
-  /// @brief        Function to write the error message to a logFile.
-  /// @details      This is not automatically done in the library when an exception is thrown as the library may be able to recover
-  ///               from the exception without having to terminate.
-  /// @version      2018-09-21/GGB - Updated to use new errorMessage() function.
-  /// @version      2014-12-24/GGB - Function created.
-
-  void CError::logErrorMessage() const
-  {
-    TErrorStore::const_iterator errorData;
-
-    if ((errorData = errorMessages().find(library_ + std::to_string(errorCode_))) == errorMessages().end() )
-    {
-        // Error message not found - Error code has not been defined.
-        // This is a non-recoverable error.
-
-      GCL::logger::defaultLogger().logMessage(GCL::logger::error,
-                                           "Non recoverable error within an error in " + library_ + " library. Error Code: " +
-                                           boost::lexical_cast<std::string>(errorCode_) + ". Terminating");
-      exit(0xFFFE);		// Non-recoverable error within an error
-    }
-    else
-    {
-      GCL::logger::defaultLogger().logMessage(GCL::logger::warning,
-                                              "Library " + library_ + " error Code: " +
-                                              boost::lexical_cast<std::string>(errorData->second.errorCode) +
-                                           " - " + errorData->second.errorMessage);
-    };
-  }
-
   /// @brief        Converts the error message to a string.
   /// @param[in]    fileName: The name of the source file having the error.
   /// @param[in]    timeStamp: The build timestamp of the source file.

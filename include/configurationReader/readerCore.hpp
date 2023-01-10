@@ -313,7 +313,7 @@ namespace GCL
     /// @throws     std::out_of_range - The value was too large for the type.
     /// @version    2022-12-06/GGB - Function created.
 
-    virtual std::optional<std::uint32_t> tagValueUInt32(std::string const &tagName) const
+    virtual std::optional<std::uint32_t> tagValueUInt32(std::string const &tagName)
     {
       std::optional<std::uint32_t> returnValue;
 

@@ -57,48 +57,6 @@ namespace GCL
 
   typedef std::uint16_t TErrorCode;
 
-  /// @brief The CError class is used to throw exceptions to indicate errors within a library.
-  /// @details Errors can be of any type. The exception allows a library and error number within a library to be specified.
-  /// Each error has a library name, an error number and an error description. These can be loaded at runtime.
-
-  class [[deprecated]] CError : public std::runtime_error
-  {
-  private:
-    struct SErrorEntry
-    {
-    private:
-      SErrorEntry() = delete;
-
-    public:
-      std::string library;
-      TErrorCode errorCode;
-      std::string errorMessage;
-
-      SErrorEntry(std::string l, TErrorCode ec, std::string em) : library(l), errorCode(ec), errorMessage(em) {}
-    };
-
-  public:
-    typedef std::unordered_map<std::string, SErrorEntry> TErrorStore;
-
-  private:
-    std::string library_;
-    TErrorCode errorCode_;
-
-    static TErrorStore &errorMessages();
-
-  public:
-    inline explicit CError(std::string const & library, TErrorCode error) : std::runtime_error("Error"), library_(library),
-      errorCode_(error) {}
-
-    std::string library() const { return library_; }
-    TErrorCode errorCode() const { return errorCode_;}
-    std::string errorMessage() const;
-    void logErrorMessage() const;
-    bool isThisError(std::string library, TErrorCode errorCode) const { return ( (library_ == library) && (errorCode_ == errorCode)); }
-
-    static bool addErrorMessage(std::string, TErrorCode, std::string);
-  };
-
   /// @brief        The CRuntimeError class is used for reporting exceptions and errors. It is integrated with the logger and allows
   ///               exceptions to be thrown and errors reported.
   ///               Exceptions raised by CRuntimeError are not intended to be fatal and allow error management of calling functions.

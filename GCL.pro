@@ -51,8 +51,8 @@ INCLUDEPATH += \
 SOURCES += \
     source/dataParser/dataDelimited.cpp \
     source/pluginManager/pluginManager.cpp \
+    source/resource.cpp \
     source/string.cpp \
-    source/Resource.cpp \
     source/Functions.cpp \
     source/common.cpp \
     source/SQLWriter.cpp \
@@ -68,7 +68,6 @@ SOURCES += \
 
 HEADERS += \
     GCL \
-    include/Resource.h \
     include/Functions.h \
     include/any.hpp \
     include/common.h \
@@ -90,12 +89,14 @@ HEADERS += \
     include/configurationReader/readerCore.hpp \
     include/GCLError.h \
     include/pluginManager/pluginManager.h \
+    include/resource.h \
     include/traits.h
 
 OTHER_FILES += \
     changelog.txt
 
 DISTFILES += \
+    CMakeLists.txt \
     README \
     changelog.txt \
     include/sqlWriter_typedef.inc \

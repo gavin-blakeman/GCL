@@ -267,6 +267,7 @@ namespace GCL
     using CReaderCore::tagValueInt32;
     using CReaderCore::tagValueString;
     using CReaderCore::tagValueUInt16;
+    using CReaderCore::tagValueUInt32;
     using CReaderCore::tagValueUInt64;
 
     /// @brief      Constructor for the class. A single constructor is provided and the default constructor is deleted.

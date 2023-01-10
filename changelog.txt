@@ -1,4 +1,10 @@
-﻿2022-06
+﻿2022-12
+------
+REMOVE      Deprecated error functions
+RENAME      Resource.x to resource.x
+UPDATE      resource.x to remove warnings related to variable size.
+
+2022-06
 -------
 UPDATE:     TRACEENTER and TRACEEXIT to inline functions (where macros) usng C++20 std::source_location.
 UPDATE:     GCL Version to 2022.06.0000

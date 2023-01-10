@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2020, 2022 Gavin Blakeman.
+//                      Copyright 2013-2022 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -66,7 +66,7 @@
 #include "include/filesystem.h"
 #include "include/Functions.h"
 #include "include/SQLWriter.h"
-#include "include/Resource.h"
+#include "include/resource.h"
 #include "include/pluginManager/pluginManager.h"
 
   // Inject the logger functions into the global namespace.

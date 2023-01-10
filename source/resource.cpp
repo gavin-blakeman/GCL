@@ -34,7 +34,7 @@
 //
 //*********************************************************************************************************************************
 
-#include "include/Resource.h"
+#include "include/resource.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -104,11 +104,11 @@ namespace GCL
     percentCPU_ = counterVal.doubleValue;
 #elif defined (__linux__)
     FILE *file;
-    size_t totalUser;
-    size_t totalUserLow;
-    size_t totalSys;
-    size_t totalIdle;
-    size_t total;
+    system_t totalUser;
+    system_t totalUserLow;
+    system_t totalSys;
+    system_t totalIdle;
+    system_t total;
 
     file = fopen("/proc/stat", "r");
     fscanf(file, "cpu %Lu %Lu %Lu %Lu", &totalUser, &totalUserLow, &totalSys, &totalIdle);

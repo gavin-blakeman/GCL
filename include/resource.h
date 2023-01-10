@@ -38,50 +38,54 @@
 #define GCL_RESOURCE_H
 
 #include <cstddef>
+#include <cstdint>
 
 namespace GCL
 {
   class CResourceUsage
   {
-    private:
-      size_t totalRAM_;           ///< Total RAM in system
-      size_t usedRAM_;            ///< Total RAM used.
-      size_t totalSwap_;          ///< Total swap available
-      size_t usedSwap_;           ///< Total swap used.
+  public:
+    using system_t = unsigned long long; // Done in case windows needs different definition.
 
-      size_t lastTotalUser;       ///<
-      size_t lastTotalUserLow;
-      size_t lastTotalSys;
-      size_t lastTotalIdle;
+  private:
+    size_t totalRAM_;           ///< Total RAM in system
+    size_t usedRAM_;            ///< Total RAM used.
+    size_t totalSwap_;          ///< Total swap available
+    size_t usedSwap_;           ///< Total swap used.
 
-      double percentCPU_;         ///< Percent usage of the CPU
+    system_t lastTotalUser;       ///<
+    system_t lastTotalUserLow;
+    system_t lastTotalSys;
+    system_t lastTotalIdle;
+
+    double percentCPU_;         ///< Percent usage of the CPU
 
 #if defined(_WIN32)
-      PDH_HQUERY cpuQuery;
-      static PDH_HCOUNTER cpuTotal;
+    PDH_HQUERY cpuQuery;
+    static PDH_HCOUNTER cpuTotal;
 #endif
 
-    protected:
+  protected:
 
-    public:
-      CResourceUsage();
+  public:
+    CResourceUsage();
 
-      virtual void determineMemory();
-      virtual void determineCPU();
+    virtual void determineMemory();
+    virtual void determineCPU();
 
-      size_t totalRAM() { return totalRAM_; }
-      size_t usedRAM() {return usedRAM_; }
-      size_t processRAM() { return 0;}
+    size_t totalRAM() { return totalRAM_; }
+    size_t usedRAM() {return usedRAM_; }
+    size_t processRAM() { return 0;}
 
-      size_t totalVirtMemory() { return (totalRAM_  + totalSwap_); }
-      size_t usedVirtMemory() { return (usedRAM_ + usedSwap_); }
-      size_t processVirtMemory() {return 0;}
+    size_t totalVirtMemory() { return (totalRAM_  + totalSwap_); }
+    size_t usedVirtMemory() { return (usedRAM_ + usedSwap_); }
+    size_t processVirtMemory() {return 0;}
 
-      size_t totalSwapMemory() { return totalSwap_; }
-      size_t usedSwapMemory() { return usedSwap_; }
+    size_t totalSwapMemory() { return totalSwap_; }
+    size_t usedSwapMemory() { return usedSwap_; }
 
-      double usageCPU() { return percentCPU_; }
-      double processCPU() { return 0; }
+    double usageCPU() { return percentCPU_; }
+    double processCPU() { return 0; }
   };
 }
 

@@ -61,6 +61,8 @@ namespace GCL
     dataFile_t dataFile;
 
     virtual void processParseData() = 0;
+    virtual void processParseHeader() = 0;
+    virtual void processParseFile() = 0;
 
   public:
     CDataParser(std::istream &is) : inputStream(is) {}
@@ -70,6 +72,8 @@ namespace GCL
     dataLine_t &header() noexcept { return headerData; }
 
     void parseData() { processParseData(); }
+    void parseFile() { processParseFile(); }
+    void parseHeader() { processParseHeader(); }
 
 
   };

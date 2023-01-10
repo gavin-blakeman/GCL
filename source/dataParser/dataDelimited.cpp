@@ -86,7 +86,7 @@ namespace GCL
   /// @throws
   /// @version 2022-11-29/GGB - Function created.
 
-  void CDelimitedParser::processData()
+  void CDelimitedParser::processParseData()
   {
     while (!inputStream.eof())
     {
@@ -94,15 +94,25 @@ namespace GCL
       std::string szLine;
 
       std::getline(inputStream, szLine);
-      if (szLine.ends_with('\r'))
+
+      std::string_view sv(szLine);
+
+      if (sv.ends_with('\r')) // For windows
       {
-        szLine.pop_back();
+        sv.remove_suffix(1);
+      }
+
+      if (delimiterSE_ && sv.starts_with(delimiter_))
+      {
+        sv.remove_prefix(delimiter_.size());
+      }
+      if (delimiterSE_ && sv.ends_with(delimiter_))
+      {
+        sv.remove_suffix(delimiter_.size());
       }
 
       if (!inputStream.eof())     // eof is not asseted until attempt to read the empty stream.
       {
-        std::string_view sv(szLine);
-
         parseString(sv, dataLine);
 
         dataFile.push_back(std::move(dataLine));
@@ -186,19 +196,19 @@ namespace GCL
   /// @throws
   /// @version 2022-12-01/GGB - Function created.
 
-  void CDelimitedParser::processParseData()
+  void CDelimitedParser::processParseFile()
   {
     if (includesHeader_)
     {
-      processHeader();
+      processParseHeader();
     }
-    processData();
+    processParseData();
   }
 
   /// @brief      Processes the data for a header.
   /// @version    2020-10-13/GGB - Function created.
 
-  void CDelimitedParser::processHeader()
+  void CDelimitedParser::processParseHeader()
   {
     std::string szLine;
 
@@ -207,6 +217,15 @@ namespace GCL
     if (!ignoreHeader_)
     {
       std::string_view sv(szLine);
+
+      if (delimiterSE_ && sv.starts_with(delimiter_))
+      {
+        sv.remove_prefix(delimiter_.size());
+      }
+      if (delimiterSE_ && sv.ends_with(delimiter_))
+      {
+        sv.remove_suffix(delimiter_.size());
+      }
 
       parseString(sv, headerData);
     }
