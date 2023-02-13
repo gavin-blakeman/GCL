@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2022 Gavin Blakeman.
+//                      Copyright 2022-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -124,6 +124,7 @@ namespace GCL
   /// @param[in] sv: The string to process
   /// @param[in] dataLine: The dataline to write the data to.
   /// @throws
+  /// @version 2023-02-02/GGB - Bug#275 fixed
   /// @version 2022-12-14/GGB - Function created.
 
   void CDelimitedParser::parseString(std::string_view &sv, dataLine_t &dataLine)
@@ -181,7 +182,7 @@ namespace GCL
         {
             // The last token is an empty token.
 
-          dataLine.push_back(std::string{token});
+          dataLine.push_back(std::string{""});
         }
       }
       else

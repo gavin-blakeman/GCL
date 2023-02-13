@@ -54,6 +54,9 @@
 
 namespace GCL
 {
+  template<class T>
+  concept explicit_path =  std::same_as<T, std::filesystem::path>;
+
   using GCL::logger::DEBUGMESSAGE;
 
   class CReaderCore
@@ -218,7 +221,19 @@ namespace GCL
 
   public:
 
-    /// @brief Constructor for the class. A single constructor is provided and the default constructor is deleted.
+    /// @brief Constructor for the class.
+    ///     /// @param[in] seperatorChar: The character(s) used for seperating statements.
+    /// @param[in] commentChar: The character(s) used for indicating comments.
+    /// @throws std::bad_alloc
+    /// @version 2023-02-02/GGB - Function created.
+
+    CReaderCore(std::string seperatorChar = "=", std::string commentChar = "#")
+      : filename_(), seperatorChar_(seperatorChar), commentChar_(commentChar)
+    {
+
+    }
+
+    /// @brief Constructor for the class.
     /// @param[in] filename: The filename and path of the configuration file.
     /// @param[in] seperatorChar: The character(s) used for seperating statements.
     /// @param[in] commentChar: The character(s) used for indicating comments.
@@ -252,6 +267,15 @@ namespace GCL
       };
 
       return rv;
+    }
+
+    /// @brief Setter for the filename.
+    /// @param[in] fn: The filename.
+    /// @version 2023-02-02/GGB - Function created.
+
+    void filename(std::filesystem::path &fn)
+    {
+      filename_ = fn;
     }
 
     /// @brief Returns a tag value.

@@ -36,6 +36,7 @@
 
   // Standard C++ library header files
 
+#include <concepts>
 #include <cstdint>
 #include <exception>
 #include <filesystem>
@@ -270,7 +271,19 @@ namespace GCL
     using CReaderCore::tagValueUInt32;
     using CReaderCore::tagValueUInt64;
 
-    /// @brief      Constructor for the class. A single constructor is provided and the default constructor is deleted.
+    /// @brief      Constructor for the class.
+    /// @param[in]  seperatorChar: The character(s) used for seperating statements.
+    /// @param[in]  commentChar: The character(s) used for indicating comments.
+    /// @throws     std::bad_alloc
+    /// @version    2020-11-30/GGB - Changed to suse std::filesystem.
+    /// @version    2020-04-27/GGB - Function created.
+
+    CReaderSections(std::string seperatorChar = "=", std::string commentChar = "#")
+      :  CReaderCore(seperatorChar, commentChar), sectionOpenChar_("["), sectionCloseChar_("]"), namespaceChar_("/")
+    {
+    }
+
+    /// @brief      Constructor for the class.
     /// @param[in]  filename: The filename and path of the configuration file.
     /// @param[in]  seperatorChar: The character(s) used for seperating statements.
     /// @param[in]  commentChar: The character(s) used for indicating comments.
@@ -278,7 +291,9 @@ namespace GCL
     /// @version    2020-11-30/GGB - Changed to suse std::filesystem.
     /// @version    2020-04-27/GGB - Function created.
 
-    CReaderSections(std::filesystem::path const &filename, std::string seperatorChar = "=", std::string commentChar = "#")
+
+    template<class T>
+    CReaderSections(explicit_path auto const &filename, std::string seperatorChar = "=", std::string commentChar = "#")
       :  CReaderCore(filename, seperatorChar, commentChar), sectionOpenChar_("["), sectionCloseChar_("]"), namespaceChar_("/")
     {
     }

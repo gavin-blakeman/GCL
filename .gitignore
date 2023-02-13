@@ -7,3 +7,21 @@ Makefile
 *.autosave
 
 *.bak
+
+*.cmake
+
+*.make
+
+*.o
+
+*.d
+
+*.marks
+
+*.internal
+
+*.ts
+
+libGCL.a
+
+CMakeFiles/GCL.dir/
