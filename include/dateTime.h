@@ -42,12 +42,63 @@
 
 namespace GCL
 {
+
+  ///@brief Type used for storing dates.
+
+  class date_t
+  {
+  public:
+    date_t(std::chrono::time_point<std::chrono::system_clock> d) { value_ = d; }
+    date_t() { value_ = std::chrono::system_clock::now(); }
+    date_t &operator=(std::chrono::time_point<std::chrono::system_clock> d) { value_ = d; return *this; }
+    date_t &operator=(date_t const &d)
+    {
+      if (this != &d)
+      {
+        value_ = d.value_;
+      }
+      return *this;
+    }
+    bool operator <(date_t const &rhs) const
+    {
+      return (value_ < rhs.value_);
+    }
+
+    std::chrono::time_point<std::chrono::system_clock> date() const { return value_; }
+
+  private:
+    std::chrono::time_point<std::chrono::system_clock> value_;
+  };
+
+  ///@brief Type used for storing times.
+  class time_t
+  {
+  public:
+    time_t() { value_ = std::chrono::system_clock::now(); }
+    time_t(std::chrono::time_point<std::chrono::system_clock> t) { value_ = t; }
+
+    std::chrono::time_point<std::chrono::system_clock> time() const { return value_; }
+
+  private:
+    std::chrono::time_point<std::chrono::system_clock> value_;
+  };
+
+  ///@brief Type used for storing date/time combinations.
+  struct dateTime_t
+  {
+    std::chrono::time_point<std::chrono::system_clock> dateTime;
+  };
+
   std::string sprintDate(std::tm *);
   std::string sprintDateTime(std::tm *);
   std::string sprintTime(std::tm *);
 
   std::chrono::time_point<std::chrono::system_clock> parseDate(std::string const &);
   std::chrono::time_point<std::chrono::system_clock> parseDate(std::string const &, std::string const &);
+  std::chrono::time_point<std::chrono::system_clock> parseTime(std::string const &);
+  std::chrono::time_point<std::chrono::system_clock> parseTime(std::string const &, std::string const &);
+  std::chrono::time_point<std::chrono::system_clock> parseDateTime(std::string const &);
+  std::chrono::time_point<std::chrono::system_clock> parseDateTime(std::string const &, std::string const &);
 
 }
 

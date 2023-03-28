@@ -80,11 +80,11 @@ namespace GCL
     return boost::str(boost::format("%1$02d:%2$02d:%3$02d") % dateTime->tm_hour % dateTime->tm_min % dateTime->tm_sec);
   }
 
-  /// @brief Parses a YYYY-MM-DD into a std::chrono::system_clock instance
-  /// @param[in[ str: The string to parse
-  /// @returns The system_clock
+  /// @brief      Parses a YYYY-MM-DD into a std::chrono::system_clock instance
+  /// @param[in]  str: The string to parse
+  /// @returns    The system_clock
   /// @throws
-  /// @version 2022-11-29/GGB - Function created.
+  /// @version    2022-11-29/GGB - Function created.
 
   std::chrono::time_point<std::chrono::system_clock> parseDate(std::string const &str)
   {
@@ -98,7 +98,89 @@ namespace GCL
     return std::chrono::system_clock::from_time_t(t);
   }
 
+  /// @brief      Parses a YYYY-MM-DD into a std::chrono::system_clock instance
+  /// @param[in]  str: The string to parse
+  /// @param[in]  fmt: The format string.
+  /// @returns    The system_clock
+  /// @throws
+  /// @version    2022-11-29/GGB - Function created.
+
   std::chrono::time_point<std::chrono::system_clock> parseDate(std::string const &str, std::string const &fmt)
+  {
+    std::tm tm = {};
+    std::istringstream ss(str);
+
+    ss >> std::get_time(&tm, fmt.c_str());
+
+    std::time_t t = std::mktime(&tm);
+
+    return std::chrono::system_clock::from_time_t(t);
+  }
+
+  /// @brief      Parses a HH:MM:SS into a std::chrono::system_clock instance
+  /// @param[in]  str: The string to parse
+  /// @param[in]  fmt: The format string.
+  /// @returns    The parsed value
+  /// @throws
+  /// @version    2023-03-28/GGB - Function created.
+
+  std::chrono::time_point<std::chrono::system_clock> parseTime(std::string const &str)
+  {
+    std::tm tm = {};
+    std::istringstream ss(str);
+
+    ss >> std::get_time(&tm, "%H:%M:%S");
+
+    std::time_t t = std::mktime(&tm);
+
+    return std::chrono::system_clock::from_time_t(t);
+  }
+
+  /// @brief      Parses a HH:MM:SS into a std::chrono::system_clock instance
+  /// @param[in]  str: The string to parse
+  /// @param[in]  fmt: The format string.
+  /// @returns    The parsed value
+  /// @throws
+  /// @version    2023-03-28/GGB - Function created.
+
+  std::chrono::time_point<std::chrono::system_clock> parseTime(std::string const &str, std::string const &fmt)
+  {
+    std::tm tm = {};
+    std::istringstream ss(str);
+
+    ss >> std::get_time(&tm, fmt.c_str());
+
+    std::time_t t = std::mktime(&tm);
+
+    return std::chrono::system_clock::from_time_t(t);
+  }
+
+  /// @brief      Parses a HH:MM:SS into a std::chrono::system_clock instance
+  /// @param[in]  str: The string to parse
+  /// @returns    The parsed value
+  /// @throws
+  /// @version    2023-03-28/GGB - Function created.
+
+  std::chrono::time_point<std::chrono::system_clock> parseDateTime(std::string const &str)
+  {
+    std::tm tm = {};
+    std::istringstream ss(str);
+
+    ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+
+    std::time_t t = std::mktime(&tm);
+
+    return std::chrono::system_clock::from_time_t(t);
+  }
+
+  /// @brief      Parses a HH:MM:SS into a std::chrono::system_clock instance
+  /// @param[in]  str: The string to parse
+  /// @param[in]  fmt: The format string.
+  /// @returns    The parsed value
+  /// @throws
+  /// @version    2023-03-28/GGB - Function created.
+
+  std::chrono::time_point<std::chrono::system_clock> parseDateTime(std::string const &str, std::string const &fmt)
   {
     std::tm tm = {};
     std::istringstream ss(str);

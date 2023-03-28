@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2022 Gavin Blakeman.
+//                      Copyright 2013-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -31,7 +31,8 @@
 //
 // CLASSES INCLUDED:    CSQLWriter
 //
-// HISTORY:             2022-06-07 GGB - Expanded where clause functionality to support a broader range of statements
+// HISTORY:             2023-03-28 GGB - Changed use of GCL::any to std::variant to better support parameterised queries.
+//                      2022-06-07 GGB - Expanded where clause functionality to support a broader range of statements
 //                      2022-05-01 GGB - Added support for "Returning"
 //                      2022-04-11 GGB - Converted to std::filesystem
 //                      2021-04-13 GGB - Added call functionality.
@@ -58,7 +59,9 @@
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
 #include "boost/locale.hpp"
-//#include <SCL>
+#include "fmt/chrono.h"
+#include "fmt/format.h"
+#include "fmt/std.h"
 
   // GCL library header Files
 
@@ -114,8 +117,8 @@ namespace GCL
    *    valueStorage valueFields;
    *      of type
    *    using valueStorage = std::vector<parameterVector_t>;     // This is to allow multiple insertions in one statement.
-   *    using parameterVector_t = std::vector<parameter>;
-   *    using parameter = GCL::any;
+   *    using parameterVector_t = std::vector<parameter_t>;
+   *    using parameter = std::variant<...>
    *
    * IE, a vector of vectors containing parameters.
    *
@@ -224,33 +227,71 @@ namespace GCL
    *
    */
 
+  struct parameter_to_string
+  {
+    std::string operator()(std::uint8_t const &p) { return std::to_string(p); }
+    std::string operator()(std::uint16_t const &p) { return std::to_string(p); }
+    std::string operator()(std::uint32_t const &p) { return std::to_string(p); }
+    std::string operator()(std::uint64_t const &p) { return std::to_string(p); }
+    std::string operator()(std::int8_t const &p) { return std::to_string(p); }
+    std::string operator()(std::int16_t const &p) { return std::to_string(p); }
+    std::string operator()(std::int32_t const &p) { return std::to_string(p); }
+    std::string operator()(std::int64_t const &p) { return std::to_string(p); }
+    std::string operator()(float const &p) { return std::to_string(p); }
+    std::string operator()(double const &p) { return std::to_string(p); }
+    std::string operator()(date_t const p) { return fmt::format("{:%Y-%m-%d}", fmt::gmtime(p.date())); }
+    std::string operator()(time_t const p) { return fmt::format("{:%H:%M:%S}", fmt::gmtime(p.time())); }
+    std::string operator()(dateTime_t const p) { return fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::gmtime(p.dateTime)); }
+    std::string operator()(decimal_t const p) { return p.str(0, std::ios::fixed);; }
+
+    std::string operator()(std::string const &s) { return "'" + s + "'"; }
+    std::string operator()(sqlWriter::bindValue_t const &bvt) { return bvt.to_string(); }
+  };
+
+  struct selectExpression_to_string
+  {
+    std::string operator()(std::uint8_t const &p) { return std::to_string(p); }
+    std::string operator()(std::uint16_t const &p) { return std::to_string(p); }
+    std::string operator()(std::uint32_t const &p) { return std::to_string(p); }
+    std::string operator()(std::uint64_t const &p) { return std::to_string(p); }
+    std::string operator()(std::int8_t const &p) { return std::to_string(p); }
+    std::string operator()(std::int16_t const &p) { return std::to_string(p); }
+    std::string operator()(std::int32_t const &p) { return std::to_string(p); }
+    std::string operator()(std::int64_t const &p) { return std::to_string(p); }
+    std::string operator()(float const &p) { return std::to_string(p); }
+    std::string operator()(double const &p) { return std::to_string(p); }
+    std::string operator()(date_t const p) { return fmt::format("{:%Y-%m-%d}", fmt::gmtime(p.date())); }
+    std::string operator()(time_t const p) { return fmt::format("{:%H:%M:%S}", fmt::gmtime(p.time())); }
+    std::string operator()(dateTime_t const p) { return fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::gmtime(p.dateTime)); }
+    std::string operator()(decimal_t const p) { return p.str(0, std::ios::fixed);; }
+    std::string operator()(std::string const &s) { return s; }
+  };
+
+  struct groupBy_to_string
+  {
+    std::string operator()(std::string const &s) { return s; }
+    std::string operator()(std::size_t const &cn) { return std::to_string(cn); }
+  };
+
 
   // helper type for the visitor
   template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
   // explicit deduction guide (not needed as of C++20)
   template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-  std::string sqlWriter::to_string(parameter const &p) const
+  std::string sqlWriter::to_string(parameter_t const &p) const
   {
-    std::string returnValue;
+    return std::visit(parameter_to_string(), p);
+  }
 
-    if (p.type() == typeid(std::string))
-    {
-      try
-      {
-        returnValue = "'" + p.to_string() + "'";
-      }
-      catch(std::bad_any_cast &)
-      {
-        CODE_ERROR();
-      }
+  std::string sqlWriter::to_string(groupBy_t const &p) const
+  {
+    return std::visit(groupBy_to_string(), p);
+  }
 
-    }
-    else
-    {
-      returnValue = p.to_string();
-    };
-    return returnValue;
+  std::string sqlWriter::to_string(selectExpression_t const &p) const
+  {
+    return std::visit(selectExpression_to_string(), p);
   }
 
 
@@ -277,9 +318,9 @@ namespace GCL
       case neq:
       case nse:
       {
-        if (std::holds_alternative<parameter>(std::get<2>(w)))
+        if (std::holds_alternative<parameter_t>(std::get<2>(w)))
         {
-          returnValue += to_string(std::get<parameter>(std::get<2>(w)));
+          returnValue += to_string(std::get<parameter_t>(std::get<2>(w)));
         }
         else
         {
@@ -293,7 +334,7 @@ namespace GCL
         returnValue += "(";
         std::visit(overloaded
                    {
-                     [&](parameter const &p) { returnValue += to_string(p) + ")"; },
+                     [&](parameter_t const &p) { returnValue += to_string(p) + ")"; },
                      [&](parameterVector_t const &pv)
                      {
                        bool first = true;
@@ -431,31 +472,7 @@ namespace GCL
           returnValue += ", ";
         };
 
-        if (innerElement.type() == typeid(std::string))
-        {
-          returnValue += "'" + innerElement.to_string() + "'";
-        }
-        else if (innerElement.type() == typeid(bindValue))
-        {
-          std::string temp = innerElement.to_string();
-
-          if (temp.front() == ':')
-          {
-            returnValue += temp;
-          }
-          else if (temp.front() == '?')
-          {
-            returnValue += temp;
-          }
-          else
-          {
-            returnValue += ":" + temp;
-          }
-        }
-        else
-        {
-          returnValue += innerElement.to_string();
-        };
+        returnValue += to_string(innerElement);
       };
 
       returnValue += ")";
@@ -502,7 +519,7 @@ namespace GCL
   /// @throws     None
   /// @version    2021-04-13/GGB - Function created.
 
-  sqlWriter &sqlWriter::call(std::string const &procedureName, std::initializer_list<parameter> parameters)
+  sqlWriter &sqlWriter::call(std::string const &procedureName, std::initializer_list<parameter_t> parameters)
   {
     resetQuery();
     queryType = qt_call;
@@ -544,7 +561,7 @@ namespace GCL
 
     returnValue += procedureName_ + "(";
 
-    for (auto param: procedureParameters_)
+    for (auto const &param: procedureParameters_)
     {
       if (commaRequired)
       {
@@ -554,7 +571,7 @@ namespace GCL
       {
         commaRequired = true;
       };
-      returnValue += "'" + param.to_string() + "'";
+      returnValue += "'" + to_string(param) + "'";
     }
 
     returnValue += ")";
@@ -603,7 +620,7 @@ namespace GCL
       {
         returnValue += ", ";
       };
-      columnName = element.to_string();
+      columnName = to_string(element);
 
       returnValue += columnName;
     };
@@ -699,31 +716,7 @@ namespace GCL
       };
       returnValue += element.first + " = ";
 
-      if (element.second.type() == typeid(std::string))
-      {
-        returnValue += "'" + element.second.to_string() + "'";
-      }
-      else if (element.second.type() == typeid(bindValue))
-      {
-        std::string temp = element.second.to_string();
-
-        if (temp.front() == ':')
-        {
-          returnValue += temp;
-        }
-        else if (temp.front() == '?')
-        {
-          returnValue += temp;
-        }
-        else
-        {
-          returnValue += ":" + temp;
-        }
-      }
-      else
-      {
-        returnValue += element.second.to_string();
-      };
+      returnValue += to_string(element.second);
     };
 
     return returnValue;
@@ -814,17 +807,10 @@ namespace GCL
           };
 
           fieldNames += getColumnMappedName(element.first);
-          if (element.second.type() == typeid(std::string))
-          {
-            fieldValues += "'" + element.second.to_string() + "'";
-          }
-          else
-          {
-            fieldValues += element.second.to_string();
-          };
+          fieldValues += to_string(element.second);
         };
 
-        // Before we can create the insert query, we need to
+          // Before we can create the insert query, we need to
 
         returnValue = "INSERT INTO " + insertTable + "(";
         returnValue += fieldNames + ") VALUES (";
@@ -846,14 +832,7 @@ namespace GCL
           };
           fieldValues+= getColumnMappedName(element.first) + " = ";
 
-          if (element.second.type() == typeid(std::string))
-          {
-            fieldValues += "'" + element.second.to_string() + "'";
-          }
-          else
-          {
-            fieldValues += element.second.to_string();
-          };
+          fieldValues += to_string(element.second);
         };
 
         returnValue += fieldValues;
@@ -1124,7 +1103,7 @@ namespace GCL
       {
         returnValue += ", ";
       }
-      returnValue += column.to_string();
+      returnValue += to_string(column);
     }
 
     return returnValue;
@@ -1252,7 +1231,7 @@ namespace GCL
       {
         returnValue += ", ";
       };
-      columnName = field.to_string();
+      columnName = to_string(field);
 
       returnValue += columnName;
     };
@@ -1835,7 +1814,7 @@ namespace GCL
   /// @version    2019-12-08/GGB - If the query is restarted without resetQuery() being called, then resetQuery() will be called.
   /// @version    2014-12-19/GGB - Function created.
 
-  sqlWriter &sqlWriter::select(std::initializer_list<parameter> fields)
+  sqlWriter &sqlWriter::select(std::initializer_list<selectExpression_t> fields)
   {
     if (queryType != qt_none)
     {
@@ -1859,7 +1838,7 @@ namespace GCL
   /// @throws     None.
   /// @version  2017-08-21/GGB - Function created.
 
-  sqlWriter &sqlWriter::set(std::string const &columnName, parameter const &value)
+  sqlWriter &sqlWriter::set(std::string const &columnName, parameter_t const &value)
   {
     setFields.emplace_back(columnName, value);
 
@@ -2077,15 +2056,6 @@ namespace GCL
     return *this;
   }
 
-  /// @brief      to_string function for a bind value.
-  /// @param[in]  bv: The value to convert to a std::string.
-  /// @version    2020-09-24/GGB - Function created.
-
-  std::string to_string(GCL::sqlWriter::bindValue const &bv)
-  {
-    return bv.to_string();
-  }
-
   /// @brief      to_string function for a columnRef.
   /// @param[in]  bv: The value to convert to a std::string.
   /// @version    2022-09-19/GGB - Function created.
@@ -2100,7 +2070,7 @@ namespace GCL
      */
 
 
-  sqlWriter::whereVariant_t where_v(std::string col, operator_t op, sqlWriter::parameter param)
+  sqlWriter::whereVariant_t where_v(std::string col, operator_t op, sqlWriter::parameter_t param)
   {
     return {std::make_tuple(col, op, param)};
   }

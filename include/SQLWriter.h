@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2022 Gavin Blakeman.
+//                      Copyright 2013-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -31,7 +31,8 @@
 //
 // CLASSES INCLUDED:    CSQLWriter
 //
-// HISTORY:             2022-06-07 GGB - Expanded where clause functionality to support a broader range of statements
+// HISTORY:             2023-03-28 GGB - Changed use of GCL::any to std::variant to better support parameterised queries.
+//                      2022-06-07 GGB - Expanded where clause functionality to support a broader range of statements
 //                      2022-05-01 GGB - Added support for "Returning"
 //                      2022-04-11 GGB - Converted to std::filesystem
 //                      2021-04-13 GGB - Added call functionality.
@@ -49,6 +50,7 @@
 
   // Standard Header Files
 
+#include <chrono>
 #include <cstdint>
 #include <filesystem>
 #include <initializer_list>
@@ -65,7 +67,11 @@
 
   // Miscellaneous Library header files
 
-#include "include/any.hpp"
+#include "boost/multiprecision/mpfr.hpp"
+
+  // GCL Library header files
+
+#include "include/dateTime.h"
 
 /// @page page2 SQL Writer
 /// @tableofcontents
@@ -82,6 +88,16 @@
 
 namespace GCL
 {
+
+
+  /// @brief The decimal_t type is used for numbers that must have and maintain precision to a definite number of digits. This is
+  /// liked to the DECIMAL type used in databases. The MariaDB decimal type has 65 digits maximum and this is matched to the MariaDB
+  /// 65 digits.
+  /// @note The underlying implementation is larger than register size. All decimal_t function parameters should be passed by
+  /// reference and not by value.
+
+  using decimal_t = boost::multiprecision::number<boost::multiprecision::mpfr_float_backend<65>>;
+
   enum operator_t
   {
     eq,             ///< equals
@@ -104,6 +120,20 @@ namespace GCL
     NOT
   };
 
+  enum EOrderBy
+  {
+    ASC,            ///< Ascending
+    DESC            ///< Descending
+  };
+  enum EJoin
+  {
+    JOIN_INNER,     ///< Inner Join
+    JOIN_RIGHT,     ///< Outer Right Join
+    JOIN_LEFT,      ///< Outer Left Join
+    JOIN_FULL,      ///< Full outer join
+    JOIN_SELF,      ///< Self Join - This should not be passes to a function, but rather use the self-join function.
+  };
+
   class sqlWriter
   {
   private:
@@ -123,11 +153,7 @@ namespace GCL
 
   public:
     using columnNumber_t = std::uint32_t;
-    enum EOrderBy
-    {
-      ASC,            ///< Ascending
-      DESC            ///< Descending
-    };
+
     enum EDialect
     {
       MYSQL,          ///< MySQL Specific
@@ -135,26 +161,34 @@ namespace GCL
       MICROSOFT,      ///< Microsoft specific
       POSTGRE,        ///< Postgre database
     };
-    enum EJoin
-    {
-      JOIN_INNER,     ///< Inner Join
-      JOIN_RIGHT,     ///< Outer Right Join
-      JOIN_LEFT,      ///< Outer Left Join
-      JOIN_FULL,      ///< Full outer join
-      JOIN_SELF,      ///< Self Join - This should not be passes to a function, but rather use the self-join function.
-    };
 
-    class bindValue
+
+    class bindValue_t
     {
     private:
       std::string value;
 
-      bindValue() = delete;
+      bindValue_t() = delete;
     public:
-      bindValue(std::string const &st) : value(st) {}
+      bindValue_t(std::string const &st) : value(st) {}
 
-      std::string to_string() const { return value; }
+      std::string to_string() const
+      {
+        std::string rv;
+
+        if ( (value.front() == ':') || (value.front() == '?') )
+        {
+          rv += value;
+        }
+        else
+        {
+          rv = ":" + value;
+        }
+        return rv;
+      }
+
     };
+
 
     class columnRef
     {
@@ -204,7 +238,12 @@ namespace GCL
     std::string to_string(whereTest_t const &) const;
     std::string to_string(whereLogical_t const &) const;
     std::string to_string(whereVariant_t const &) const;
-    std::string to_string(parameter const &) const;
+
+    std::string to_string(parameter_t const &) const;
+    std::string to_string(groupBy_t const &) const;
+    std::string to_string(bindValue_t const &);
+    std::string to_string(columnRef const &);
+    std::string to_string(selectExpression_t const &) const;
 
     std::string to_string(valueType_t const &) const;
     std::string to_string(valueStorage const &) const;
@@ -218,7 +257,7 @@ namespace GCL
     void resetWhere();
     void resetValues();
 
-    sqlWriter &call(std::string const &, std::initializer_list<parameter>);
+    sqlWriter &call(std::string const &, std::initializer_list<parameter_t>);
     sqlWriter &count(std::string const &, std::string const & = "");
     sqlWriter &deleteFrom(std::string const &);
     sqlWriter &distinct();
@@ -240,9 +279,9 @@ namespace GCL
     sqlWriter &orderBy(std::initializer_list<std::pair<std::string, EOrderBy>>);
     sqlWriter &returning(std::string const &);
     sqlWriter &returning(std::initializer_list<std::string>);
-    sqlWriter &select(std::initializer_list<parameter>);
+    sqlWriter &select(std::initializer_list<selectExpression_t>);
     sqlWriter &selfJoin(std::string const &, std::string const &);
-    sqlWriter &set(std::string const &, parameter const &);
+    sqlWriter &set(std::string const &, parameter_t const &);
     sqlWriter &set(std::initializer_list<parameterPair>);
     sqlWriter &update(std::string const &);
     sqlWriter &upsert(std::string const &);
@@ -288,28 +327,26 @@ namespace GCL
 
   }; // class sqlWriter
 
-  std::string to_string(sqlWriter::bindValue const &);
-  std::string to_string(sqlWriter::columnRef const &);
   sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter::parameterVector_t);
-  sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter::parameter);
+  sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter::parameter_t);
   sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter::pointer_t);
   sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter &&);
   sqlWriter::whereVariant_t where_v(sqlWriter::whereVariant_t, logicalOperator_t, sqlWriter::whereVariant_t);
 
 
-  template<>
-  inline std::string any::Manager_external<GCL::sqlWriter::bindValue>::S_toString(any const *anyp)
-  {
-    auto ptr = static_cast<GCL::sqlWriter::bindValue const *>(anyp->dataStorage.heapPointer);
-    return GCL::to_string(*ptr);
-  }
+//  template<>
+//  inline std::string any::Manager_external<GCL::sqlWriter::bindValue>::S_toString(any const *anyp)
+//  {
+//    auto ptr = static_cast<GCL::sqlWriter::bindValue const *>(anyp->dataStorage.heapPointer);
+//    return GCL::to_string(*ptr);
+//  }
 
-  template<>
-  inline std::string any::Manager_external<GCL::sqlWriter::columnRef>::S_toString(any const *anyp)
-  {
-    auto ptr = static_cast<GCL::sqlWriter::columnRef const *>(anyp->dataStorage.heapPointer);
-    return GCL::to_string(*ptr);
-  }
+//  template<>
+//  inline std::string any::Manager_external<GCL::sqlWriter::columnRef>::S_toString(any const *anyp)
+//  {
+//    auto ptr = static_cast<GCL::sqlWriter::columnRef const *>(anyp->dataStorage.heapPointer);
+//    return GCL::to_string(*ptr);
+//  }
 
   inline sqlWriter::columnRef operator"" _cr(const char *st, std::size_t)
   {

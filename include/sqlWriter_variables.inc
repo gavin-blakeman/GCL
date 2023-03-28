@@ -17,7 +17,7 @@
   static logicalOperatorMap_t logicalOperatorMap;
   EDialect dialect = MYSQL;
   TDatabaseMap databaseMap;
-  parameterVector_t selectFields;
+  selectExpressionStorage_t selectFields;
   std::vector<std::string> returningFields_;
   fromStorage_t fromFields;
   std::string insertTable;
