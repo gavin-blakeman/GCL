@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2020 Gavin Blakeman.
+//                      Copyright 2020-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -51,6 +51,7 @@ namespace GCL
   TErrorCode const E_PLUGINMANAGER_NODIRECTORY    = 0x1100;
   TErrorCode const E_PLUGINMANAGER_UNABLETOLOAD   = 0x1101;
   TErrorCode const E_PLUGINMANAGER_UNABLETOMAP    = 0x1102;
+  TErrorCode const E_PLUGINMANAGER_UNABLETOUNLOAD = 0x1103;
 }
 
 #endif // GCLERROR_H

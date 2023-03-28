@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2020-2022 Gavin Blakeman.
+//                      Copyright 2020-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -292,7 +292,7 @@ namespace GCL
     /// @version    2020-04-27/GGB - Function created.
 
 
-    template<class T>
+    //template<class T>
     CReaderSections(explicit_path auto const &filename, std::string seperatorChar = "=", std::string commentChar = "#")
       :  CReaderCore(filename, seperatorChar, commentChar), sectionOpenChar_("["), sectionCloseChar_("]"), namespaceChar_("/")
     {

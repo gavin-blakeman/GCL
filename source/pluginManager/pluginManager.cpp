@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
-//                      Copyright 2020-2022 Gavin Blakeman.
+//                      Copyright 2020-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -43,11 +43,14 @@
   // Miscellaneous library header files
 
 #include "boost/locale.hpp"
+#include <fmt/format.h>
+#include <fmt/std.h>
 
   // GCL library
 
 #include "include/common.h"
 #include "include/error.h"
+#include "include/logger/loggerCore.h"
 #include "include/GCLError.h"
 
 
@@ -61,6 +64,7 @@ namespace GCL::plugin
 
   CPluginManager::CPluginManager()
   {
+    unloadAll();
   }
 
   /// @brief    Class destructor. Need to ensure that all plugins are unloaded before exit.
@@ -182,13 +186,15 @@ namespace GCL::plugin
       {
         fileNameAndPath = pluginToLoad;
       }
-
-      while (iter != searchPaths.end() && !pluginFound)
+      else
       {
-        fileNameAndPath = *iter / pluginToLoad;
-        pluginFound = std::filesystem::exists(fileNameAndPath);
-        iter++;
-      };
+        while (iter != searchPaths.end() && !pluginFound)
+        {
+          fileNameAndPath = *iter / pluginToLoad;
+          pluginFound = std::filesystem::exists(fileNameAndPath);
+          iter++;
+        };
+      }
 
       if (pluginFound)
       {
@@ -276,6 +282,32 @@ namespace GCL::plugin
   void *CPluginManager::mapSymbol(std::string const &pluginAlias, std::string const &symbol, bool cacheSymbol)
   {
     return mapSymbol(aliasMap[pluginAlias], symbol, cacheSymbol);
+  }
+
+  /// @brief Unload all the loaded plugins. (Called by the destructor, can also be called apart from the destructor.)
+  /// @version 2023-03-28/GGB - Function created.
+
+  void CPluginManager::unloadAll()
+  {
+    for (auto &plugin : pluginMap)
+    {
+      if (--plugin.second.pluginRefCount == 0)
+      {
+        logger::DEBUGMESSAGE(fmt::format("Closing plugin: {:s}", plugin.second.pluginName));
+        dlerror();
+        int error = dlclose(plugin.second.systemHandle);
+        if (error == 0)
+        {
+          plugin.second.symbolMap.clear();
+          logger::DEBUGMESSAGE(fmt::format("Plugin Closed: {:s}", plugin.second.pluginName));
+        }
+        else
+        {
+          char *error = dlerror();
+          RUNTIME_ERROR(std::string(error), E_PLUGINMANAGER_UNABLETOUNLOAD, LIBRARYNAME);
+        }
+      };
+    }
   }
 
 }   // namespace GCL::plugin

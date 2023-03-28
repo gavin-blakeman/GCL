@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
-//                      Copyright 2020-2022 Gavin Blakeman.
+//                      Copyright 2020-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -93,8 +93,6 @@ namespace GCL::plugin
     CPluginManager(CPluginManager &&) = delete;
     CPluginManager operator =(CPluginManager const &) = delete;
 
-    void unload();
-
   protected:
   public:
     CPluginManager();
@@ -104,6 +102,9 @@ namespace GCL::plugin
     pluginHandle_t loadPlugin(pluginName_t const &, int = RTLD_NOW, std::string const & = std::string());
     void *mapSymbol(pluginHandle_t,  std::string const &, bool = false);
     void *mapSymbol(std::string const &, std::string const &, bool = false);
+
+    void unload(pluginHandle_t);
+    void unloadAll();
   };
 }
 
