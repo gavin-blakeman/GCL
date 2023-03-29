@@ -189,7 +189,6 @@ namespace GCL
 
     };
 
-
     class columnRef
     {
     private:
