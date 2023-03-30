@@ -239,9 +239,9 @@ namespace GCL
     std::string operator()(std::int64_t const &p) { return std::to_string(p); }
     std::string operator()(float const &p) { return std::to_string(p); }
     std::string operator()(double const &p) { return std::to_string(p); }
-    std::string operator()(date_t const p) { return fmt::format("{:%Y-%m-%d}", fmt::gmtime(p.date())); }
-    std::string operator()(time_t const p) { return fmt::format("{:%H:%M:%S}", fmt::gmtime(p.time())); }
-    std::string operator()(dateTime_t const p) { return fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::gmtime(p.dateTime)); }
+    std::string operator()(date_t const p) { return fmt::format("'{:%Y-%m-%d}'", fmt::gmtime(p.date())); }
+    std::string operator()(time_t const p) { return fmt::format("'{:%H:%M:%S}'", fmt::gmtime(p.time())); }
+    std::string operator()(dateTime_t const p) { return fmt::format("'{:%Y-%m-%d %H:%M:%S}'", fmt::gmtime(p.dateTime)); }
     std::string operator()(decimal_t const p) { return p.str(0, std::ios::fixed);; }
 
     std::string operator()(std::string const &s) { return "'" + s + "'"; }
@@ -260,9 +260,9 @@ namespace GCL
     std::string operator()(std::int64_t const &p) { return std::to_string(p); }
     std::string operator()(float const &p) { return std::to_string(p); }
     std::string operator()(double const &p) { return std::to_string(p); }
-    std::string operator()(date_t const p) { return fmt::format("{:%Y-%m-%d}", fmt::gmtime(p.date())); }
-    std::string operator()(time_t const p) { return fmt::format("{:%H:%M:%S}", fmt::gmtime(p.time())); }
-    std::string operator()(dateTime_t const p) { return fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::gmtime(p.dateTime)); }
+    std::string operator()(date_t const p) { return fmt::format("'{:%Y-%m-%d}'", fmt::gmtime(p.date())); }
+    std::string operator()(time_t const p) { return fmt::format("'{:%H:%M:%S}'", fmt::gmtime(p.time())); }
+    std::string operator()(dateTime_t const p) { return fmt::format("'{:%Y-%m-%d %H:%M:%S}'", fmt::gmtime(p.dateTime)); }
     std::string operator()(decimal_t const p) { return p.str(0, std::ios::fixed);; }
     std::string operator()(std::string const &s) { return s; }
   };
