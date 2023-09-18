@@ -49,6 +49,7 @@ INCLUDEPATH += \
   "../MCL"
 
 SOURCES += \
+    source/ORM/ORM.cpp \
     source/dataParser/dataDelimited.cpp \
     source/pluginManager/pluginManager.cpp \
     source/resource.cpp \
@@ -69,6 +70,7 @@ SOURCES += \
 HEADERS += \
     GCL \
     include/Functions.h \
+    include/ORM/ORM.h \
     include/any.hpp \
     include/common.h \
     include/SQLWriter.h \
