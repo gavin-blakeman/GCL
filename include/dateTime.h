@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2017-2022 Gavin Blakeman.
+//                      Copyright 2017-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -48,6 +48,7 @@ namespace GCL
   class date_t
   {
   public:
+    date_t(date_t const &) = default;
     date_t(std::chrono::time_point<std::chrono::system_clock> d) { value_ = d; }
     date_t() { value_ = std::chrono::system_clock::now(); }
     date_t &operator=(std::chrono::time_point<std::chrono::system_clock> d) { value_ = d; return *this; }
