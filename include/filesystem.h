@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
-//                      Copyright 2018-2020 Gavin Blakeman.
+//                      Copyright 2018-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -39,17 +39,14 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
-namespace boost
+namespace std::filesystem
 {
-  namespace filesystem
-  {
 
-    bool file_readable(path const &);
+  bool file_readable(path const &);
 
-  } // namespace filesystem
-} // namespace boost
+} // namespace filesystem
 
 #endif // FILESYSTEM_H
 
