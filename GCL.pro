@@ -50,6 +50,10 @@ INCLUDEPATH += \
 
 SOURCES += \
     source/ORM/ORM.cpp \
+    source/ORM/column.cpp \
+    source/ORM/index.cpp \
+    source/ORM/join.cpp \
+    source/ORM/table.cpp \
     source/dataParser/dataDelimited.cpp \
     source/pluginManager/pluginManager.cpp \
     source/resource.cpp \
@@ -71,6 +75,11 @@ HEADERS += \
     GCL \
     include/Functions.h \
     include/ORM/ORM.h \
+    include/ORM/column.h \
+    include/ORM/database.h \
+    include/ORM/index.h \
+    include/ORM/join.h \
+    include/ORM/table.h \
     include/any.hpp \
     include/common.h \
     include/SQLWriter.h \
