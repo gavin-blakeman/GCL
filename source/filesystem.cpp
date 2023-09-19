@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
-//                      Copyright 2018-2020 Gavin Blakeman.
+//                      Copyright 2018-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -39,35 +39,33 @@
 
 #include "include/filesystem.h"
 
-namespace boost
+namespace std::filesystem
 {
-  namespace filesystem
+  /// @brief      Checks if the specified filename is readable. If the file does not exist, or there is any other error, the function
+  ///             returns false.
+  /// @param[in]  p: The filename (or path) to check.
+  /// @returns    true - if the filename or path is readable.
+  /// @returns    false - if the filename or path is not readable, or does not exist.
+  /// @throws     None.
+  /// @version    2023-09-19/GGB - Moved to std::filesystem.
+  /// @version    2018-05-20/GGB - Function created.
+
+  bool file_readable(path const &p)
   {
-    /// @brief Checks if the specified filename is readable. If the file does not exist, or there is any other error, the function
-    ///        returns false.
-    /// @param[in] p: The filename (or path) to check.
-    /// @returns true - if the filename or path is readable.
-    /// @returns false - if the filename or path is not readable, or does not exist.
-    /// @throws None.
-    /// @version 2018-05-20/GGB - Function created.
+    bool returnValue = false;
 
-    bool file_readable(path const &p)
+    if (exists(p))
     {
-      bool returnValue = false;
 
-      if (exists(p))
-      {
+      file_status fileStatus = status(p);
 
-        file_status fileStatus = status(p);
+      perms permissions = fileStatus.permissions();
 
-        perms permissions = fileStatus.permissions();
+      returnValue = ((permissions & std::filesystem::perms::owner_read) |
+                    (permissions & std::filesystem::perms::group_read) |
+                    (permissions & std::filesystem::perms::others_read)) != std::filesystem::perms::none;
+    };
+    return returnValue;
+  }
 
-        returnValue = (permissions & owner_read) |
-                      (permissions & group_read) |
-                      (permissions & others_read);
-      };
-      return returnValue;
-    }
-
-  } // namespace filesystem
-} // namespace boost
+} // namespace filesystem
