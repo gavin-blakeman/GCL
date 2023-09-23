@@ -149,7 +149,7 @@ namespace GCL::plugin
         {
             // Reusing the alias for a different plugin.
 
-          RUNTIME_ERROR("Resusing plugin alias for a different plugin.");
+          RUNTIME_ERROR("Reusing plugin alias for a different plugin.");
         }
       }
       else
