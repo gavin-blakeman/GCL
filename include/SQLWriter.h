@@ -3,9 +3,9 @@
 // PROJECT:							General Class Library
 // FILE:								SQLWriter
 // SUBSYSTEM:						Database library
-// LANGUAGE:						C++
+// LANGUAGE:						C++20
 // TARGET OS:						None - Standard C++
-// NAMESPACE:						GCL::sqlWriter
+// NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
@@ -29,9 +29,10 @@
 //                      SQL command strings to perform the database access.
 //                      Typical select query would be written as follows:
 //
-// CLASSES INCLUDED:    CSQLWriter
+// CLASSES INCLUDED:    sqlWriter
 //
-// HISTORY:             2023-03-28 GGB - Changed use of GCL::any to std::variant to better support parameterised queries.
+// HISTORY:             2023-09-23 GGB - Extended to support parameterised queries.
+//                      2023-03-28 GGB - Changed use of GCL::any to std::variant to better support parameterised queries.
 //                      2022-06-07 GGB - Expanded where clause functionality to support a broader range of statements
 //                      2022-05-01 GGB - Added support for "Returning"
 //                      2022-04-11 GGB - Converted to std::filesystem
@@ -68,6 +69,7 @@
   // Miscellaneous Library header files
 
 #include "boost/multiprecision/mpfr.hpp"
+#include "mariadb/mysql.h"
 
   // GCL Library header files
 
@@ -162,6 +164,26 @@ namespace GCL
       POSTGRE,        ///< Postgre database
     };
 
+    enum parameterType_t
+    {
+      PT_NONE,
+      PT_U8,
+      PT_U16,
+      PT_U32,
+      PT_U64,
+      PT_I8,
+      PT_I16,
+      PT_I32,
+      PT_I64,
+      PT_FLOAT,
+      PT_DOUBLE,
+      PT_DATE,
+      PT_TIME,
+      PT_DATETIME,
+      PT_DECIMAL,
+      PT_STRING,
+    };
+
 
     class bindValue_t
     {
@@ -211,55 +233,18 @@ namespace GCL
 #include "sqlWriter_typedef.inc"
 #include "sqlWriter_variables.inc"
 
-  private:
-    bool verifyOperator(std::string const &) const;
-
-  protected:
-    void setTableMap(std::string const &, std::string const &);
-    void setColumnMap(std::string const &, std::string const &, std::string const &);
-
-    std::string createSelectQuery() const;
-    std::string createInsertQuery() const;
-    std::string createUpdateQuery() const;
-    std::string createDeleteQuery() const;
-    std::string createUpsertQuery() const;
-    std::string createCall() const;
-
-    std::string createGroupByClause() const;
-    std::string createOrderByClause() const;
-    std::string createSelectClause() const;
-    std::string createFromClause() const;
-    std::string createJoinClause() const;
-    std::string createWhereClause() const;
-    std::string createSetClause() const;
-    std::string createLimitClause() const;
-
-    std::string to_string(whereTest_t const &) const;
-    std::string to_string(whereLogical_t const &) const;
-    std::string to_string(whereVariant_t const &) const;
-
-    std::string to_string(parameter_t const &) const;
-    std::string to_string(groupBy_t const &) const;
-    std::string to_string(bindValue_t const &);
-    std::string to_string(columnRef const &);
-    std::string to_string(selectExpression_t const &) const;
-
-    std::string to_string(valueType_t const &) const;
-    std::string to_string(valueStorage const &) const;
-
   public:
     operator std::string() const { return string(); }
 
-    void setDialect(EDialect d) {dialect = d;}
-
-    void resetQuery();
-    void resetWhere();
-    void resetValues();
-
     sqlWriter &call(std::string const &, std::initializer_list<parameter_t>);
+    std::size_t columnCount() const;
+    parameterType_t columnType(std::size_t) const;
+    void copyValues(std::vector<std::unique_ptr<std::uint8_t[]>> &, std::vector<std::vector<unsigned long>> &, std::vector<std::vector<enum_indicator_type>> &, std::vector<std::string> &) const;
     sqlWriter &count(std::string const &, std::string const & = "");
     sqlWriter &deleteFrom(std::string const &);
     sqlWriter &distinct();
+    sqlWriter &forShare() { forShare_ = true; return *this; }
+    sqlWriter &forUpdate() {forUpdate_ = true; return *this; }
     sqlWriter &from(std::string const &, std::optional<std::string> = std::nullopt);
     sqlWriter &from(std::initializer_list<std::string>);
     sqlWriter &from(pointer_t, std::optional<std::string> = std::nullopt);
@@ -269,6 +254,11 @@ namespace GCL
     sqlWriter &groupBy(std::initializer_list<columnNumber_t>);
     sqlWriter &insertInto(std::string, std::initializer_list<std::string>);
     sqlWriter &insertInto(std::string);
+    bool isInsertQuery() const { return queryType == qt_insert; }
+    bool isSelectQuery() const { return queryType == qt_select; }
+    bool isDeleteQuery() const { return queryType == qt_delete; }
+    bool isUpdateQuery() const { return (queryType == qt_update) || (queryType == qt_insert); }
+    bool isFunctionCall() const { return queryType == qt_call; }
     sqlWriter &join(std::initializer_list<parameterJoin>);
     sqlWriter &limit(std::uint64_t);
     sqlWriter &max(std::string const &, std::string const & = "");
@@ -276,16 +266,19 @@ namespace GCL
     sqlWriter &offset(std::uint64_t);
     sqlWriter &orderBy(std::string, EOrderBy);
     sqlWriter &orderBy(std::initializer_list<std::pair<std::string, EOrderBy>>);
+    void resetQuery();
+    void resetWhere();
+    void resetValues();
     sqlWriter &returning(std::string const &);
     sqlWriter &returning(std::initializer_list<std::string>);
+    std::size_t rowCount() const;
     sqlWriter &select(std::initializer_list<selectExpression_t>);
     sqlWriter &selfJoin(std::string const &, std::string const &);
     sqlWriter &set(std::string const &, parameter_t const &);
     sqlWriter &set(std::initializer_list<parameterPair>);
+    void setDialect(EDialect d) {dialect = d;}
     sqlWriter &update(std::string const &);
     sqlWriter &upsert(std::string const &);
-    sqlWriter &forShare() { forShare_ = true; return *this; }
-    sqlWriter &forUpdate() {forUpdate_ = true; return *this; }
 
     /// @brief      Adds a single where clause to the where list.
     /// @param[in]  columnName: The columnName to add
@@ -307,10 +300,11 @@ namespace GCL
     sqlWriter &where(whereVariant_t &&);
 
     sqlWriter &values(std::initializer_list<parameterStorage>);
-    sqlWriter &values(valueStorage &&);
+    sqlWriter &values(valueStorage_t &&);
     sqlWriter &values(pointer_t);
 
     std::string string() const;
+    std::string preparedQuery() const;
 
     virtual void readMapFile(std::filesystem::path const &);
 
@@ -322,7 +316,43 @@ namespace GCL
 
     static std::string sum(std::string const &);
 
+  private:
+    bool verifyOperator(std::string const &) const;
 
+  protected:
+    void setTableMap(std::string const &, std::string const &);
+    void setColumnMap(std::string const &, std::string const &, std::string const &);
+
+    std::string createSelectQuery() const;
+    std::string createInsertQuery(bool = false) const;
+    std::string createUpdateQuery() const;
+    std::string createDeleteQuery() const;
+    std::string createUpsertQuery() const;
+    std::string createCall() const;
+
+    std::string createGroupByClause() const;
+    std::string createOrderByClause() const;
+    std::string createSelectClause() const;
+    std::string createFromClause() const;
+    std::string createJoinClause() const;
+    std::string createWhereClause() const;
+    std::string createSetClause() const;
+    std::string createLimitClause() const;
+
+    parameterType_t parameterType(parameter_t const &) const;
+
+    std::string to_string(whereTest_t const &) const;
+    std::string to_string(whereLogical_t const &) const;
+    std::string to_string(whereVariant_t const &) const;
+
+    std::string to_string(parameter_t const &) const;
+    std::string to_string(groupBy_t const &) const;
+    std::string to_string(bindValue_t const &);
+    std::string to_string(columnRef const &);
+    std::string to_string(selectExpression_t const &) const;
+
+    std::string to_string(valueType_t const &) const;
+    std::string to_string(valueStorage_t const &) const;
 
   }; // class sqlWriter
 

@@ -3,9 +3,9 @@
 // PROJECT:							General Class Library
 // FILE:								SQLWriter
 // SUBSYSTEM:						Database library
-// LANGUAGE:						C++
+// LANGUAGE:						C++20
 // TARGET OS:						None - Standard C++
-// NAMESPACE:						GCL::sqlWriter
+// NAMESPACE:						GCL
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
@@ -29,9 +29,10 @@
 //                      SQL command strings to perform the database access.
 //                      Typical select query would be written as follows:
 //
-// CLASSES INCLUDED:    CSQLWriter
+// CLASSES INCLUDED:    sqWriter
 //
-// HISTORY:             2023-03-28 GGB - Changed use of GCL::any to std::variant to better support parameterised queries.
+// HISTORY:             2023-09-23 GGB - Extended to support parameterised queries.
+//                      2023-03-28 GGB - Changed use of GCL::any to std::variant to better support parameterised queries.
 //                      2022-06-07 GGB - Expanded where clause functionality to support a broader range of statements
 //                      2022-05-01 GGB - Added support for "Returning"
 //                      2022-04-11 GGB - Converted to std::filesystem
@@ -242,10 +243,31 @@ namespace GCL
     std::string operator()(date_t const p) { return fmt::format("'{:%Y-%m-%d}'", fmt::gmtime(p.date())); }
     std::string operator()(time_t const p) { return fmt::format("'{:%H:%M:%S}'", fmt::gmtime(p.time())); }
     std::string operator()(dateTime_t const p) { return fmt::format("'{:%Y-%m-%d %H:%M:%S}'", fmt::gmtime(p.dateTime)); }
-    std::string operator()(decimal_t const p) { return p.str(0, std::ios::fixed);; }
+    std::string operator()(decimal_t const p) { return p.str(0, std::ios::fixed); }
 
     std::string operator()(std::string const &s) { return "'" + s + "'"; }
     std::string operator()(sqlWriter::bindValue_t const &bvt) { return bvt.to_string(); }
+  };
+
+  struct parameter_to_type
+  {
+    sqlWriter::parameterType_t operator()(std::uint8_t const &) { return sqlWriter::PT_U8; }
+    sqlWriter::parameterType_t operator()(std::uint16_t const &) { return sqlWriter::PT_U16; }
+    sqlWriter::parameterType_t operator()(std::uint32_t const &) { return sqlWriter::PT_U32; }
+    sqlWriter::parameterType_t operator()(std::uint64_t const &) { return sqlWriter::PT_U64; }
+    sqlWriter::parameterType_t operator()(std::int8_t const &) { return sqlWriter::PT_I8; }
+    sqlWriter::parameterType_t operator()(std::int16_t const &) { return sqlWriter::PT_I16; }
+    sqlWriter::parameterType_t operator()(std::int32_t const &) { return sqlWriter::PT_I32; }
+    sqlWriter::parameterType_t operator()(std::int64_t const &) { return sqlWriter::PT_I64; }
+    sqlWriter::parameterType_t operator()(float const &) { return sqlWriter::PT_FLOAT; }
+    sqlWriter::parameterType_t operator()(double const &) { return sqlWriter::PT_DOUBLE; }
+    sqlWriter::parameterType_t operator()(date_t const ) { return sqlWriter::PT_DATE; }
+    sqlWriter::parameterType_t operator()(time_t const ) { return sqlWriter::PT_TIME; }
+    sqlWriter::parameterType_t operator()(dateTime_t const ) { return sqlWriter::PT_DATETIME; }
+    sqlWriter::parameterType_t operator()(decimal_t const ) { return sqlWriter::PT_DECIMAL; }
+
+    sqlWriter::parameterType_t operator()(std::string const &) { return sqlWriter::PT_STRING; }
+    sqlWriter::parameterType_t operator()(sqlWriter::bindValue_t const &) { CODE_ERROR(); }
   };
 
   struct selectExpression_to_string
@@ -284,6 +306,11 @@ namespace GCL
     return std::visit(parameter_to_string(), p);
   }
 
+  sqlWriter::parameterType_t sqlWriter::parameterType(parameter_t const &p) const
+  {
+    return std::visit(parameter_to_type(), p);
+  }
+
   std::string sqlWriter::to_string(groupBy_t const &p) const
   {
     return std::visit(groupBy_to_string(), p);
@@ -293,7 +320,6 @@ namespace GCL
   {
     return std::visit(selectExpression_to_string(), p);
   }
-
 
   /// @brief      Converts a whereTest_t to a string.
   /// @param[in]  w: The whereTest_t to convert.
@@ -429,7 +455,7 @@ namespace GCL
     std::visit(overloaded
                {
                  [&](std::monostate const &) { CODE_ERROR(); },
-                 [&](valueStorage const &vs) { returnValue = to_string(vs); },
+                 [&](valueStorage_t const &vs) { returnValue = to_string(vs); },
                  [&](pointer_t const &pt) { returnValue = "( " + static_cast<std::string>(*pt) + ") "; },
                }, values);
 
@@ -440,7 +466,7 @@ namespace GCL
   /// @param[in]  values: The values to convert to a string.
   /// @version    2022-07-23/GGB - Function created.
 
-  std::string sqlWriter::to_string(valueStorage const &valueFields) const
+  std::string sqlWriter::to_string(valueStorage_t const &valueFields) const
   {
     bool firstValue = true;
     bool firstRow = true;
@@ -534,6 +560,217 @@ namespace GCL
     return (*this);
   }
 
+  /// @brief      Returns the number of columns affected.
+  /// @details    The number of columns returned is dependant on the type of query.
+  /// @returns    The number of columns. This is dependent on the type of query.
+  /// @throws
+  /// @version    2023-09-23/GGB - Function created.
+
+  std::size_t sqlWriter::columnCount() const
+  {
+    std::size_t rv;
+
+    switch (queryType)
+    {
+      case qt_insert:
+      {
+        rv = selectFields.size();
+        break;
+      }
+      default:
+      {
+        CODE_ERROR();
+        break;
+      }
+    }
+
+    return rv;
+  }
+
+  /// @brief      Returns the type of the column. (Only insert, update and upsert queries)
+  /// @param[in]  columnNo: The number of the column.
+  /// @returns    The type of the column.
+  /// @throws
+  /// @version    2023-09-23/GGB - Function created.
+
+  sqlWriter::parameterType_t sqlWriter::columnType(std::size_t columnNo) const
+  {
+    parameterType_t rv = PT_NONE;
+
+    switch (queryType)
+    {
+      case qt_insert:
+      {
+        if (std::holds_alternative<valueStorage_t>(insertValue))
+        {
+          valueStorage_t const valueStorage = std::get<valueStorage_t>(insertValue);
+          parameterVector_t const &parameters = valueStorage.back();
+          rv = parameterType(parameters[columnNo]);
+        };
+        break;
+      }
+      default:
+      {
+        CODE_ERROR();
+        break;
+      }
+    }
+
+    return rv;
+  }
+
+  /// @brief Copies data from the valueStorage to the columnArrays for parameter queries.
+  /// @param[in]  columnData:
+  /// @param[in]  lengthData:
+  /// @throws
+  /// @version    2023-09-23/GGB - Function created.
+
+  void sqlWriter::copyValues(std::vector<std::unique_ptr<std::uint8_t[]>> &columnData,
+                             std::vector<std::vector<unsigned long>> &lengthData,
+                             std::vector<std::vector<enum_indicator_type>> &indicatorTypes,
+                             std::vector<std::string> &strings) const
+  {
+    std::size_t rowIndex = 0;
+    std::size_t columnIndex;
+
+    if (queryType == qt_insert)
+    {
+      if (std::holds_alternative<valueStorage_t>(insertValue))
+      {
+        for (auto const &outerElement : std::get<valueStorage_t>(insertValue))
+        {
+          columnIndex = 0;
+          for (auto const &innerElement : outerElement)
+          {
+            switch (parameterType(innerElement))
+            {
+              case PT_U8:
+              {
+                reinterpret_cast<std::uint8_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::uint8_t>(innerElement);
+                lengthData[columnIndex].emplace_back(sizeof(std::uint8_t));
+                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
+
+                std::cout << "Row: " << rowIndex << " Column: " << columnIndex << std::endl;
+                std::cout << "Value: " << reinterpret_cast<std::uint8_t *>(columnData[columnIndex].get())[rowIndex] << std::endl;
+                std::cout << "Length: " << lengthData[columnIndex].back() << std::endl;
+                std::cout << "Indicator: " << indicatorTypes[columnIndex].back() << std::endl;
+                break;
+              }
+              case PT_U16:
+              {
+                reinterpret_cast<std::uint16_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::uint16_t>(innerElement);
+                lengthData[columnIndex].emplace_back(sizeof(std::uint16_t));
+                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
+
+                std::cout << "Row: " << rowIndex << " Column: " << columnIndex << std::endl;
+                std::cout << "Value: " << reinterpret_cast<std::uint16_t *>(columnData[columnIndex].get())[rowIndex] << std::endl;
+                std::cout << "Length: " << lengthData[columnIndex].back() << std::endl;
+                std::cout << "Indicator: " << indicatorTypes[columnIndex].back() << std::endl;
+                break;
+              }
+              case PT_U32:
+              {
+                reinterpret_cast<std::uint32_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::uint32_t>(innerElement);
+                lengthData[columnIndex].emplace_back(sizeof(std::uint32_t));
+                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
+
+                std::cout << "Row: " << rowIndex << " Column: " << columnIndex << std::endl;
+                std::cout << "Value: " << reinterpret_cast<std::uint32_t *>(columnData[columnIndex].get())[rowIndex] << std::endl;
+                std::cout << "Length: " << lengthData[columnIndex].back() << std::endl;
+                std::cout << "Indicator: " << indicatorTypes[columnIndex].back() << std::endl;
+                break;
+              }
+              case PT_U64:
+              {
+                reinterpret_cast<std::uint64_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::uint64_t>(innerElement);
+                lengthData[columnIndex].emplace_back(sizeof(std::uint64_t));
+                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
+                break;
+              }
+              case PT_I8:
+              {
+                reinterpret_cast<std::int8_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::int8_t>(innerElement);
+                lengthData[columnIndex].emplace_back(sizeof(std::int8_t));
+                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
+                break;
+              }
+              case PT_I16:
+              {
+                reinterpret_cast<std::int16_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::int16_t>(innerElement);
+                lengthData[columnIndex].emplace_back(sizeof(std::int16_t));
+                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
+                break;
+              }
+              case PT_I32:
+              {
+                reinterpret_cast<std::int32_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::int32_t>(innerElement);
+                lengthData[columnIndex].emplace_back(sizeof(std::int32_t));
+                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
+                break;
+              }
+              case PT_I64:
+              {
+                reinterpret_cast<std::int64_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::int64_t>(innerElement);
+                lengthData[columnIndex].emplace_back(sizeof(std::int64_t));
+                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
+                break;
+              }
+              case PT_FLOAT:
+              {
+                reinterpret_cast<float *>(columnData[columnIndex].get())[rowIndex] = std::get<float>(innerElement);
+                lengthData[columnIndex].emplace_back(sizeof(float));
+                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
+                break;
+              }
+              case PT_DOUBLE:
+              {
+                reinterpret_cast<double *>(columnData[columnIndex].get())[rowIndex] = std::get<double >(innerElement);
+                lengthData[columnIndex].emplace_back(sizeof(double));
+                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
+                break;
+              }
+              case PT_DATE:
+              case PT_TIME:
+              case PT_DATETIME:
+              case PT_STRING:
+              {
+                strings.emplace_back(to_string(innerElement));
+                reinterpret_cast<char **>(columnData[columnIndex].get())[rowIndex] = strings.back().data();
+                lengthData[columnIndex].emplace_back(strings.back().length());
+                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
+
+                std::cout << "Row: " << rowIndex << " Column: " << columnIndex << std::endl;
+                std::cout << "Value: " << fmt::format("{:s}", reinterpret_cast<char **>(columnData[columnIndex].get())[rowIndex])  << std::endl;
+                if (columnIndex > 1)
+                  std::cout << "Value(-1): " << fmt::format("{:s}", reinterpret_cast<char **>(columnData[columnIndex-1].get())[rowIndex])  << std::endl;
+                std::cout << "Length: " << lengthData[columnIndex].back() << std::endl;
+                std::cout << "Indicator: " << indicatorTypes[columnIndex].back() << std::endl;
+                break;
+              }
+              case PT_DECIMAL:
+              case PT_NONE:
+              default:
+              {
+                CODE_ERROR();
+                break;
+              }
+            };
+            columnIndex++;
+          };
+          rowIndex++;
+        };
+      }
+      else
+      {
+        CODE_ERROR();
+      }
+    }
+    else
+    {
+      CODE_ERROR();
+    }
+  }
+
   /// @brief      Function to capture the count expression
   /// @param[in]  countExpression: The count expression to capture.
   /// @param[in]  countAs: The name for the count expression.
@@ -595,13 +832,15 @@ namespace GCL
   }
 
   /// @brief      Creates the string for an insert query.
+  /// @param[in]  preparedQuery: true if the quewry should be a prepared query.
   /// @returns    The Insert Query as a string.
   /// @throws     None.
+  /// @version    2023-09-23/GGB - Added the parameter preparedQuery to support preparedQueries.
   /// @version    2022-07-23/GGB - Changed the value storage to valueType_t and useing std::variant
   /// @version    2022-05-01/GGB - Added support for the 'RETURNING' function.
   /// @version    2015-03-31/GGB - Function created.
 
-  std::string sqlWriter::createInsertQuery() const
+  std::string sqlWriter::createInsertQuery(bool preparedQuery) const
   {
     std::string returnValue = "INSERT INTO " + insertTable + " (";
     bool firstValue = true;
@@ -627,7 +866,35 @@ namespace GCL
 
     returnValue += ") ";
 
-    returnValue += to_string(insertValue);
+    if (preparedQuery)
+    {
+      std::size_t placeHolderCount = selectFields.size();
+
+      if (placeHolderCount >= 1)
+      {
+        returnValue += " VALUES (";
+        firstValue = true;
+
+        while (placeHolderCount)
+        {
+          if (firstValue)
+          {
+            firstValue = false;
+            returnValue += " ?";
+          }
+          else
+          {
+            returnValue += ", ?";
+          }
+          placeHolderCount--;
+        }
+        returnValue += ") ";
+      }
+    }
+    else
+    {
+      returnValue += to_string(insertValue);      /// Creates the VALUES clause.
+    };
 
     if (!returningFields_.empty())
     {
@@ -1579,6 +1846,59 @@ namespace GCL
     return *this;
   }
 
+  /// @brief      Prepares a query. For insert queries, values are replaced with the relevant character.
+  /// @throws     GCL::CRuntimeError
+  /// @version    2023-09-23/GGB - Function created.
+
+  std::string sqlWriter::preparedQuery() const
+  {
+    std::string returnValue;
+
+    switch (queryType)
+    {
+      case qt_select:
+      {
+        returnValue = createSelectQuery();
+        break;
+      };
+      case qt_insert:
+      {
+        returnValue = createInsertQuery(true);
+        break;
+      };
+      case qt_update:
+      {
+        returnValue = createUpdateQuery();
+        break;
+      }
+      case qt_delete:
+      {
+        returnValue = createDeleteQuery();
+        break;
+      }
+      case qt_upsert:
+      {
+        returnValue = createUpsertQuery();
+        break;
+      }
+      case qt_call:
+      {
+        returnValue = createCall();
+        break;
+      }
+      default:
+      {
+        CODE_ERROR();
+        break;
+      };
+    }
+
+    return returnValue;
+
+
+
+  }
+
   /// @brief      Function to load a map file and store all the aliases.
   /// @param[in]  ifn: The file to read the database mapping from.
   /// @throws     GCL::CRuntimeError
@@ -1807,6 +2127,42 @@ namespace GCL
     return *this;
   }
 
+  /// @brief    Returns the number of inserion rows for an insert query.
+  /// @returns  The number of rows.
+  /// @version  2023-09-23/GGB - Function created.
+
+  std::size_t sqlWriter::rowCount() const
+  {
+    std::size_t rv = 0;
+
+    switch (queryType)
+    {
+      case qt_insert:
+      {
+        if (std::holds_alternative<valueStorage_t>(insertValue))
+        {
+          valueStorage_t const valueStorage = std::get<valueStorage_t>(insertValue);
+          rv = valueStorage.size();
+        }
+        else
+        {
+          CODE_ERROR();
+        }
+        break;
+
+        rv = selectFields.size();
+        break;
+      }
+      default:
+      {
+        CODE_ERROR();
+        break;
+      }
+    }
+
+    return rv;
+  }
+
   /// @brief      Specify the selection fields for the select query.
   /// @param[in]  fields: The fields to add to the select clause.
   /// @returns    A reference to (*this)
@@ -1989,7 +2345,7 @@ namespace GCL
 
   sqlWriter &sqlWriter::values(std::initializer_list<parameterStorage> fields)
   {
-    valueStorage valueFields;
+    valueStorage_t valueFields;
 
     for (const auto &f : fields)
     {
@@ -2007,7 +2363,7 @@ namespace GCL
   /// @version      2022-07-23/GGB - Extended to allow INSERT INTO SELECT
   /// @version      2022-04-29/GGB - Function created.
 
-  sqlWriter &sqlWriter::values(valueStorage &&insertRows)
+  sqlWriter &sqlWriter::values(valueStorage_t &&insertRows)
   {
     insertValue = std::move(insertRows);
 
@@ -2099,6 +2455,7 @@ namespace GCL
   {
     return {std::make_tuple(col, op, std::make_unique<sqlWriter>(std::move(rhs)))};
   }
+
 
 }  // namespace GCL
 

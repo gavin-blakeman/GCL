@@ -41,11 +41,8 @@ DEFINES += BOOST_THREAD_USE_LIB
 
 QMAKE_CXXFLAGS += -std=c++20
 
-DESTDIR = ""
-OBJECTS_DIR = "objects"
-
-
 INCLUDEPATH += \
+  "/usr/include/mariadb" \
   "../MCL"
 
 SOURCES += \
