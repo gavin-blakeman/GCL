@@ -229,6 +229,24 @@ namespace GCL
         return to_string();
       }
     };
+  public:
+    using parameter_t = std::variant<std::uint8_t,
+                                     std::uint16_t,
+                                     std::uint32_t,
+                                     std::uint64_t,
+                                     std::int8_t,
+                                     std::int16_t,
+                                     std::int32_t,
+                                     std::int64_t,
+                                     float,
+                                     double,
+                                     std::string,
+                                     date_t,
+                                     dateTime_t,
+                                     time_t,
+                                     /*std::vector<std::uint8_t> *, */
+                                     bindValue_t,
+                                     decimal_t>;
 
 #include "sqlWriter_typedef.inc"
 #include "sqlWriter_variables.inc"
@@ -239,7 +257,6 @@ namespace GCL
     sqlWriter &call(std::string const &, std::initializer_list<parameter_t>);
     std::size_t columnCount() const;
     parameterType_t columnType(std::size_t) const;
-    void copyValues(std::vector<std::unique_ptr<std::uint8_t[]>> &, std::vector<std::vector<unsigned long>> &, std::vector<std::vector<enum_indicator_type>> &, std::vector<std::string> &) const;
     sqlWriter &count(std::string const &, std::string const & = "");
     sqlWriter &deleteFrom(std::string const &);
     sqlWriter &distinct();
@@ -302,6 +319,7 @@ namespace GCL
     sqlWriter &values(std::initializer_list<parameterStorage>);
     sqlWriter &values(valueStorage_t &&);
     sqlWriter &values(pointer_t);
+    valueType_t const &values() const noexcept;
 
     std::string string() const;
     std::string preparedQuery() const;
@@ -320,6 +338,8 @@ namespace GCL
     bool verifyOperator(std::string const &) const;
 
   protected:
+    mutable bool preparingStatement = false;
+
     void setTableMap(std::string const &, std::string const &);
     void setColumnMap(std::string const &, std::string const &, std::string const &);
 

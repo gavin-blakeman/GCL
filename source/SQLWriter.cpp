@@ -230,6 +230,7 @@ namespace GCL
 
   struct parameter_to_string
   {
+    bool preparingClause;
     std::string operator()(std::uint8_t const &p) { return std::to_string(p); }
     std::string operator()(std::uint16_t const &p) { return std::to_string(p); }
     std::string operator()(std::uint32_t const &p) { return std::to_string(p); }
@@ -240,12 +241,46 @@ namespace GCL
     std::string operator()(std::int64_t const &p) { return std::to_string(p); }
     std::string operator()(float const &p) { return std::to_string(p); }
     std::string operator()(double const &p) { return std::to_string(p); }
-    std::string operator()(date_t const p) { return fmt::format("'{:%Y-%m-%d}'", fmt::gmtime(p.date())); }
-    std::string operator()(time_t const p) { return fmt::format("'{:%H:%M:%S}'", fmt::gmtime(p.time())); }
-    std::string operator()(dateTime_t const p) { return fmt::format("'{:%Y-%m-%d %H:%M:%S}'", fmt::gmtime(p.dateTime)); }
+    std::string operator()(date_t const p)
+    {
+      if (preparingClause)
+      {
+        return fmt::format("{:%Y-%m-%d}", fmt::gmtime(p.date()));
+      }
+      else
+      {
+        return fmt::format("'{:%Y-%m-%d}'", fmt::gmtime(p.date()));
+      };
+    }
+    std::string operator()(time_t const p)
+    {
+      if (preparingClause)
+      {
+        return fmt::format("{:%H:%M:%S}", fmt::gmtime(p.time()));
+      }
+      else
+      {
+        return fmt::format("'{:%H:%M:%S}'", fmt::gmtime(p.time()));
+      };
+    }
+    std::string operator()(dateTime_t const p)
+    {
+      if (preparingClause)
+      {
+        return fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::gmtime(p.dateTime));
+      }
+      else
+      {
+        return fmt::format("'{:%Y-%m-%d %H:%M:%S}'", fmt::gmtime(p.dateTime));
+      };
+    }
     std::string operator()(decimal_t const p) { return p.str(0, std::ios::fixed); }
 
-    std::string operator()(std::string const &s) { return "'" + s + "'"; }
+    std::string operator()(std::string const &s)
+    {
+      using namespace std::string_literals;
+      return (preparingClause ? ""s : "'"s) + s + (preparingClause ? ""s : "'"s);
+    }
     std::string operator()(sqlWriter::bindValue_t const &bvt) { return bvt.to_string(); }
   };
 
@@ -295,7 +330,6 @@ namespace GCL
     std::string operator()(std::size_t const &cn) { return std::to_string(cn); }
   };
 
-
   // helper type for the visitor
   template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
   // explicit deduction guide (not needed as of C++20)
@@ -303,7 +337,8 @@ namespace GCL
 
   std::string sqlWriter::to_string(parameter_t const &p) const
   {
-    return std::visit(parameter_to_string(), p);
+    parameter_to_string v{preparingStatement};
+    return std::visit(v, p);
   }
 
   sqlWriter::parameterType_t sqlWriter::parameterType(parameter_t const &p) const
@@ -617,158 +652,6 @@ namespace GCL
     }
 
     return rv;
-  }
-
-  /// @brief Copies data from the valueStorage to the columnArrays for parameter queries.
-  /// @param[in]  columnData:
-  /// @param[in]  lengthData:
-  /// @throws
-  /// @version    2023-09-23/GGB - Function created.
-
-  void sqlWriter::copyValues(std::vector<std::unique_ptr<std::uint8_t[]>> &columnData,
-                             std::vector<std::vector<unsigned long>> &lengthData,
-                             std::vector<std::vector<enum_indicator_type>> &indicatorTypes,
-                             std::vector<std::string> &strings) const
-  {
-    std::size_t rowIndex = 0;
-    std::size_t columnIndex;
-
-    if (queryType == qt_insert)
-    {
-      if (std::holds_alternative<valueStorage_t>(insertValue))
-      {
-        for (auto const &outerElement : std::get<valueStorage_t>(insertValue))
-        {
-          columnIndex = 0;
-          for (auto const &innerElement : outerElement)
-          {
-            switch (parameterType(innerElement))
-            {
-              case PT_U8:
-              {
-                reinterpret_cast<std::uint8_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::uint8_t>(innerElement);
-                lengthData[columnIndex].emplace_back(sizeof(std::uint8_t));
-                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
-
-                std::cout << "Row: " << rowIndex << " Column: " << columnIndex << std::endl;
-                std::cout << "Value: " << reinterpret_cast<std::uint8_t *>(columnData[columnIndex].get())[rowIndex] << std::endl;
-                std::cout << "Length: " << lengthData[columnIndex].back() << std::endl;
-                std::cout << "Indicator: " << indicatorTypes[columnIndex].back() << std::endl;
-                break;
-              }
-              case PT_U16:
-              {
-                reinterpret_cast<std::uint16_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::uint16_t>(innerElement);
-                lengthData[columnIndex].emplace_back(sizeof(std::uint16_t));
-                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
-
-                std::cout << "Row: " << rowIndex << " Column: " << columnIndex << std::endl;
-                std::cout << "Value: " << reinterpret_cast<std::uint16_t *>(columnData[columnIndex].get())[rowIndex] << std::endl;
-                std::cout << "Length: " << lengthData[columnIndex].back() << std::endl;
-                std::cout << "Indicator: " << indicatorTypes[columnIndex].back() << std::endl;
-                break;
-              }
-              case PT_U32:
-              {
-                reinterpret_cast<std::uint32_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::uint32_t>(innerElement);
-                lengthData[columnIndex].emplace_back(sizeof(std::uint32_t));
-                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
-
-                std::cout << "Row: " << rowIndex << " Column: " << columnIndex << std::endl;
-                std::cout << "Value: " << reinterpret_cast<std::uint32_t *>(columnData[columnIndex].get())[rowIndex] << std::endl;
-                std::cout << "Length: " << lengthData[columnIndex].back() << std::endl;
-                std::cout << "Indicator: " << indicatorTypes[columnIndex].back() << std::endl;
-                break;
-              }
-              case PT_U64:
-              {
-                reinterpret_cast<std::uint64_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::uint64_t>(innerElement);
-                lengthData[columnIndex].emplace_back(sizeof(std::uint64_t));
-                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
-                break;
-              }
-              case PT_I8:
-              {
-                reinterpret_cast<std::int8_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::int8_t>(innerElement);
-                lengthData[columnIndex].emplace_back(sizeof(std::int8_t));
-                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
-                break;
-              }
-              case PT_I16:
-              {
-                reinterpret_cast<std::int16_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::int16_t>(innerElement);
-                lengthData[columnIndex].emplace_back(sizeof(std::int16_t));
-                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
-                break;
-              }
-              case PT_I32:
-              {
-                reinterpret_cast<std::int32_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::int32_t>(innerElement);
-                lengthData[columnIndex].emplace_back(sizeof(std::int32_t));
-                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
-                break;
-              }
-              case PT_I64:
-              {
-                reinterpret_cast<std::int64_t *>(columnData[columnIndex].get())[rowIndex] = std::get<std::int64_t>(innerElement);
-                lengthData[columnIndex].emplace_back(sizeof(std::int64_t));
-                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
-                break;
-              }
-              case PT_FLOAT:
-              {
-                reinterpret_cast<float *>(columnData[columnIndex].get())[rowIndex] = std::get<float>(innerElement);
-                lengthData[columnIndex].emplace_back(sizeof(float));
-                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
-                break;
-              }
-              case PT_DOUBLE:
-              {
-                reinterpret_cast<double *>(columnData[columnIndex].get())[rowIndex] = std::get<double >(innerElement);
-                lengthData[columnIndex].emplace_back(sizeof(double));
-                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
-                break;
-              }
-              case PT_DATE:
-              case PT_TIME:
-              case PT_DATETIME:
-              case PT_STRING:
-              {
-                strings.emplace_back(to_string(innerElement));
-                reinterpret_cast<char **>(columnData[columnIndex].get())[rowIndex] = strings.back().data();
-                lengthData[columnIndex].emplace_back(strings.back().length());
-                indicatorTypes[columnIndex].emplace_back(STMT_INDICATOR_NONE);
-
-                std::cout << "Row: " << rowIndex << " Column: " << columnIndex << std::endl;
-                std::cout << "Value: " << fmt::format("{:s}", reinterpret_cast<char **>(columnData[columnIndex].get())[rowIndex])  << std::endl;
-                if (columnIndex > 1)
-                  std::cout << "Value(-1): " << fmt::format("{:s}", reinterpret_cast<char **>(columnData[columnIndex-1].get())[rowIndex])  << std::endl;
-                std::cout << "Length: " << lengthData[columnIndex].back() << std::endl;
-                std::cout << "Indicator: " << indicatorTypes[columnIndex].back() << std::endl;
-                break;
-              }
-              case PT_DECIMAL:
-              case PT_NONE:
-              default:
-              {
-                CODE_ERROR();
-                break;
-              }
-            };
-            columnIndex++;
-          };
-          rowIndex++;
-        };
-      }
-      else
-      {
-        CODE_ERROR();
-      }
-    }
-    else
-    {
-      CODE_ERROR();
-    }
   }
 
   /// @brief      Function to capture the count expression
@@ -2368,6 +2251,16 @@ namespace GCL
     insertValue = std::move(insertRows);
 
     return *this;
+  }
+
+  /// @brief        Returns a reference to the values for the query.
+  /// @returns      A const reference to the values.
+  /// @throws       None.
+  /// @version      2023-03-24/GGB - Function created.
+
+  sqlWriter::valueType_t const &sqlWriter::values() const noexcept
+  {
+    return insertValue;
   }
 
   /// @brief        Stores the subquery for a INSERT INTO SELECT query.
