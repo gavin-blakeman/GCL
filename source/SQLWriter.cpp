@@ -844,14 +844,18 @@ namespace GCL
   }
 
   /// @brief      Creates the set clause.
+  /// @param[in]  preparedQuery: Create a prepared query.
   /// @throws     GCL::CRuntimeAssert
+  /// @version    2023-09-26/GGB - Added support for prepared queries.
   /// @version    2017-08-21/GGB - Function created.
 
-  std::string sqlWriter::createSetClause() const
+  std::string sqlWriter::createSetClause(bool preparedQuery) const
   {
     RUNTIME_ASSERT(!setFields.empty(), boost::locale::translate("No Set fields defined for update query."));
 
     std::string returnValue = "SET ";
+
+
     bool firstValue = true;
 
     for (auto element : setFields)
@@ -866,34 +870,37 @@ namespace GCL
       };
       returnValue += element.first + " = ";
 
-      returnValue += to_string(element.second);
+      returnValue += preparedQuery ? "?" : to_string(element.second);
     };
 
     return returnValue;
-
   }
 
-  /// @brief Converts the query to a string. Specifically for an update query.
+  /// @brief      Converts the query to a string. Specifically for an update query.
+  /// @param[in]  preparedQuery: Create a prepared query.
   /// @throws
-  /// @version 2017-08-21/GGB - Function created.
+  /// @version    2023-09-26/GGB - Added support for prepared queries.
+  /// @version    2017-08-21/GGB - Function created.
 
-  std::string sqlWriter::createUpdateQuery() const
+  std::string sqlWriter::createUpdateQuery(bool preparedQuery) const
   {
     std::string returnValue = "UPDATE " + updateTable + " ";
 
-    returnValue += createSetClause();
+    returnValue += createSetClause(preparedQuery);
 
     returnValue += createWhereClause();
 
     return returnValue;
   }
 
-  /// @brief    Converts the upsert query to a string.
-  /// @throws   GCL::CRuntimeError
-  /// @version  2021-11-18/GGB - Updated to use std::variant with the where fields.
-  /// @version  2019-12-08/GGB - Function created.
+  /// @brief      Converts the upsert query to a string.
+  /// @param[in]  preparedQuery: true = preparing a query.
+  /// @throws     GCL::CRuntimeError
+  /// @version    2023-09-26/GGB - Added support for prepared queries
+  /// @version    2021-11-18/GGB - Updated to use std::variant with the where fields.
+  /// @version    2019-12-08/GGB - Function created.
 
-  std::string sqlWriter::createUpsertQuery() const
+  std::string sqlWriter::createUpsertQuery(bool preparedQuery) const
   {
     // Notes:
     //  1. The where() clauses should be populated. These need to be converted to insert clauses for the insert function.
@@ -910,39 +917,8 @@ namespace GCL
     {
       case MYSQL:
       {
-        // Create the field and value clauses for the insert into.
 
-//        for (auto const &element : whereFields)
-//        {
-//          if (firstValue)
-//          {
-//            firstValue = false;
-//          }
-//          else
-//          {
-//            fieldNames += ", ";
-//            fieldValues += ", ";
-//          };
-
-//          if (std::holds_alternative<parameterTriple>(element))
-//          {
-//            fieldNames += getColumnMappedName(std::get<0>(std::get<parameterTriple>(element)));
-//            if (std::get<2>(std::get<parameterTriple>(element)).type() == typeid(std::string))
-//            {
-//              fieldValues += "'" + std::get<2>(std::get<parameterTriple>(element)).to_string() + "'";
-//            }
-//            else
-//            {
-//              fieldValues += std::get<2>(std::get<parameterTriple>(element)).to_string();
-//            };
-//          }
-//          else
-//          {
-//            RUNTIME_ERROR(boost::locale::translate("Incorrect Parameter type"), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
-//          }
-//        };
-
-        // Add the set clause.
+          // Add the set clause.
 
         for (auto const &element : setFields)
         {
@@ -957,7 +933,7 @@ namespace GCL
           };
 
           fieldNames += getColumnMappedName(element.first);
-          fieldValues += to_string(element.second);
+          fieldValues += preparedQuery ? "?" : to_string(element.second);
         };
 
           // Before we can create the insert query, we need to
@@ -982,7 +958,7 @@ namespace GCL
           };
           fieldValues+= getColumnMappedName(element.first) + " = ";
 
-          fieldValues += to_string(element.second);
+          fieldValues += preparedQuery ? "?" : to_string(element.second);
         };
 
         returnValue += fieldValues;
@@ -1751,7 +1727,7 @@ namespace GCL
       };
       case qt_update:
       {
-        returnValue = createUpdateQuery();
+        returnValue = createUpdateQuery(true);
         break;
       }
       case qt_delete:
@@ -1761,7 +1737,7 @@ namespace GCL
       }
       case qt_upsert:
       {
-        returnValue = createUpsertQuery();
+        returnValue = createUpsertQuery(true);
         break;
       }
       case qt_call:
@@ -2100,12 +2076,12 @@ namespace GCL
     return *this;
   }
 
-  /// @brief Converts the query into an SQL query string.
-  /// @returns The SQL query as a string.
-  /// @throws None.
-  /// @version 2021-04-13/GGB - Added stored procedure calls.
-  /// @version 2019-12-08/GGB - Added UPSERT query.
-  /// @version 2017-08-12/GGB - Function created.
+  /// @brief      Converts the query into an SQL query string.
+  /// @returns    The SQL query as a string.
+  /// @throws     None.
+  /// @version    2021-04-13/GGB - Added stored procedure calls.
+  /// @version    2019-12-08/GGB - Added UPSERT query.
+  /// @version    2017-08-12/GGB - Function created.
 
   std::string sqlWriter::string() const
   {

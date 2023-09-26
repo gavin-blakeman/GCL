@@ -276,6 +276,7 @@ namespace GCL
     bool isDeleteQuery() const { return queryType == qt_delete; }
     bool isUpdateQuery() const { return (queryType == qt_update) || (queryType == qt_insert); }
     bool isFunctionCall() const { return queryType == qt_call; }
+    bool isReturning() const { return !returningFields_.empty(); }
     sqlWriter &join(std::initializer_list<parameterJoin>);
     sqlWriter &limit(std::uint64_t);
     sqlWriter &max(std::string const &, std::string const & = "");
@@ -345,9 +346,9 @@ namespace GCL
 
     std::string createSelectQuery() const;
     std::string createInsertQuery(bool = false) const;
-    std::string createUpdateQuery() const;
+    std::string createUpdateQuery(bool = false) const;
     std::string createDeleteQuery() const;
-    std::string createUpsertQuery() const;
+    std::string createUpsertQuery(bool = false) const;
     std::string createCall() const;
 
     std::string createGroupByClause() const;
@@ -356,7 +357,7 @@ namespace GCL
     std::string createFromClause() const;
     std::string createJoinClause() const;
     std::string createWhereClause() const;
-    std::string createSetClause() const;
+    std::string createSetClause(bool = false) const;
     std::string createLimitClause() const;
 
     parameterType_t parameterType(parameter_t const &) const;

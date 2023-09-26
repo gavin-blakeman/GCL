@@ -29,13 +29,13 @@
 
   using groupByStorage = std::vector<groupBy_t>;
   using parameterVector_t = std::vector<parameter_t>;
-  typedef std::pair<std::string, parameter_t> parameterPair;
+  using parameterPair = std::pair<std::string, parameter_t>;
   typedef std::pair<std::string, std::string> stringPair;
   using parameterTriple = std::tuple<std::string, std::string, parameter_t>;
   typedef std::pair<std::string, EOrderBy> orderBy_t;
 
   using parameterStorage = std::vector<parameter_t>;
-  typedef std::vector<parameterPair> pairStorage;
+  using pairStorage = std::vector<parameterPair>;
   using tripleStorage = std::vector<parameterTriple>;
   typedef std::vector<stringPair> stringPairStorage;
   typedef std::vector<orderBy_t> orderByStorage_t;
