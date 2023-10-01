@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2018-2022 Gavin Blakeman.
+//                      Copyright 2018-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -55,33 +55,16 @@ namespace GCL
 {
   namespace alarm
   {
-    typedef std::uint32_t alarmHandle_t;
-    typedef std::function<void(alarmHandle_t, void *)> callbackFunction_t;      // first parameter is the alarmHandle.
+    using alarmHandle_t = std::uint32_t;
+    using callbackFunction_t = std::function<void(alarmHandle_t, void *)>;      // first parameter is the alarmHandle.
                                                                                 // The second is user defined data.
     using timezone_t = std::int8_t;
+    using timePoint_t = std::chrono::time_point<std::chrono::system_clock>;
 
     class CAlarmCore;
 
     class CAlarmType
     {
-    private:
-      CAlarmCore *alarmCore_ = nullptr;
-      alarmHandle_t alarmHandle_;
-      callbackFunction_t callbackFunction_;
-      void *callbackData_;
-      bool publicHolidayDisable_ = true;
-      timezone_t timeZone_;
-
-        // Remove the undesirable constructors.
-
-      CAlarmType() = delete;
-      CAlarmType(CAlarmType const &) = delete;
-      CAlarmType(CAlarmType &&) = delete;
-      CAlarmType &operator =(CAlarmType const &) = delete;
-
-    protected:
-      virtual void executeCallback() const { callbackFunction_(alarmHandle_, callbackData_); }
-
     public:
       CAlarmType(timezone_t, callbackFunction_t callbackFunction, void *callbackData);
       virtual ~CAlarmType() {}
@@ -101,35 +84,27 @@ namespace GCL
       void timeZone(std::int8_t tz) { timeZone_ = tz; }
       std::int8_t timeZone() { return timeZone_; }
 
-      virtual void evaluateAlarm(std::tm const &) = 0;
+      virtual void evaluateAlarm(timePoint_t) = 0;
 
+    protected:
+      virtual void executeCallback() const { callbackFunction_(alarmHandle_, callbackData_); }
+
+    private:
+      CAlarmType() = delete;
+      CAlarmType(CAlarmType const &) = delete;
+      CAlarmType(CAlarmType &&) = delete;
+      CAlarmType &operator =(CAlarmType const &) = delete;
+
+      CAlarmCore *alarmCore_ = nullptr;
+      alarmHandle_t alarmHandle_;
+      callbackFunction_t callbackFunction_;
+      void *callbackData_;
+      bool publicHolidayDisable_ = true;
+      timezone_t timeZone_;
     };
 
     class CAlarmCore
     {
-    private:
-      typedef std::uint64_t dateHash_t;
-      typedef std::shared_mutex             mutex_type;
-      typedef std::unique_lock<mutex_type>  UniqueLock;
-      typedef std::shared_lock<mutex_type>  SharedLock;
-
-      typedef std::list<std::unique_ptr<CAlarmType>> TAlarmContainer;
-
-      alarmHandle_t lastAlarmHandle = 0;                  ///< The last alarm handle used.
-      mutable mutex_type terminateMutex;
-      bool terminateThread_ = false;
-      TAlarmContainer alarmContainer_;
-      std::thread *alarmThread_;
-      bool alarmLoopRunning = false;
-      bool localTime_ = true;
-      std::unordered_set<dateHash_t> publicHolidays_;
-
-      CAlarmCore(CAlarmCore const &) = delete;    // Remove potential for copy constructor.
-      dateHash_t dateHash(std::tm const &) const noexcept;
-
-    protected:
-      void alarmLoop();
-
     public:
       CAlarmCore();
       ~CAlarmCore();
@@ -144,6 +119,33 @@ namespace GCL
 
        void addPublicHoliday(std::tm const &ph) { publicHolidays_.insert(dateHash(ph)); }
        bool isPublicHoliday(std::tm const &) const;
+
+    protected:
+      void alarmLoop();
+
+    private:
+      CAlarmCore(CAlarmCore const &) = delete;
+      CAlarmCore &operator=(CAlarmCore const &) = delete;
+      CAlarmCore(CAlarmCore &&) = delete;
+      CAlarmCore &operator=(CAlarmCore &&) = delete;
+
+      using dateHash_t = std::uint64_t;
+      using mutex_type = std::shared_mutex;
+      using UniqueLock = std::unique_lock<mutex_type>;
+      using SharedLock = std::shared_lock<mutex_type>;
+      using TAlarmContainer = std::list<std::unique_ptr<CAlarmType>>;
+
+      alarmHandle_t lastAlarmHandle = 0;                  ///< The last alarm handle used.
+      mutable mutex_type terminateMutex;
+      bool terminateThread_ = false;
+      TAlarmContainer alarmContainer_;
+      std::thread *alarmThread_;
+      bool alarmLoopRunning = false;
+      bool localTime_ = true;
+      std::unordered_set<dateHash_t> publicHolidays_;
+
+      dateHash_t dateHash(std::tm const &) const noexcept;
+
     };
 
 

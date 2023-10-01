@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2018-2020 Gavin Blakeman.
+//                      Copyright 2018-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -24,8 +24,6 @@
 //                      see <http://www.gnu.org/licenses/>.
 //
 // OVERVIEW:
-//
-// CLASSES INCLUDED:
 //
 // HISTORY:             2018-07-06 GGB - File created
 //
@@ -42,20 +40,21 @@ namespace GCL
   {
     class CAlarmDaily : public CAlarmType
     {
-    private:
-
-
-
-      CAlarmDaily() = delete;
-      CAlarmDaily(CAlarmDaily const &) = delete;
-      CAlarmDaily(CAlarmDaily &&) = delete;
-      CAlarmDaily &operator =(CAlarmDaily const &) = delete;
-
-    protected:
     public:
       CAlarmDaily(timezone_t, std::uint32_t, callbackFunction_t, void *callbackData);
 
       virtual void evaluateAlarm();
+
+    protected:
+
+    private:
+      CAlarmDaily() = delete;
+      CAlarmDaily(CAlarmDaily const &) = delete;
+      CAlarmDaily(CAlarmDaily &&) = delete;
+      CAlarmDaily &operator=(CAlarmDaily const &) = delete;
+      CAlarmDaily &operator=(CAlarmDaily &&) = delete;
+
+      std::chrono::time_point<std::chrono::system_clock> nextActivation;
 
     };
 

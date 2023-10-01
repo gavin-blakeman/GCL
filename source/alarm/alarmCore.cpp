@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2018-2022 Gavin Blakeman.
+//                      Copyright 2018-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -44,12 +44,12 @@ namespace GCL
 
     using GCL::logger::CRITICALMESSAGE;
 
-    /// @brief Constructor for the CAlarmType class.
-    /// @param[in[ tz: The time zone to use for the alarm. (+- hours)
-    /// @param[in] callbackFunction: The callback function for the alarm.
-    /// @param[in] callbackData: The callback data to use with the callback function.
-    /// @throws None.
-    /// @version 2018-08-11/GGB - Function created.
+    /// @brief      Constructor for the CAlarmType class.
+    /// @param[in[  tz: The time zone to use for the alarm. (+- hours)
+    /// @param[in]  callbackFunction: The callback function for the alarm.
+    /// @param[in]  callbackData: The callback data to use with the callback function.
+    /// @throws     None.
+    /// @version    2018-08-11/GGB - Function created.
 
     CAlarmType::CAlarmType(timezone_t tz, callbackFunction_t callbackFunction, void *callbackData) :
       alarmHandle_(0), callbackFunction_(callbackFunction), callbackData_(callbackData), timeZone_(tz)
@@ -63,10 +63,10 @@ namespace GCL
     //
     //******************************************************************************************************************************
 
-    /// @brief Constructor for the alarmCore class.
-    /// @details Setup the thread to perform the alarm monitoring.
-    /// @throws std::runtime_error.
-    /// @version 2018-07-06/GGB - Function created.
+    /// @brief      Constructor for the alarmCore class. Starts the thread for the alarm loop.
+    /// @details    Setup the thread to perform the alarm monitoring.
+    /// @throws     std::runtime_error.
+    /// @version    2018-07-06/GGB - Function created.
 
     CAlarmCore::CAlarmCore()
     {
@@ -79,9 +79,9 @@ namespace GCL
       };
     }
 
-    /// @brief Destructor for the class.
-    /// @throws None.
-    /// @version 2018-07-06/GGB - Function created.
+    /// @brief      Destructor for the class.
+    /// @throws     None.
+    /// @version    2018-07-06/GGB - Function created.
 
     CAlarmCore::~CAlarmCore()
     {
@@ -91,11 +91,11 @@ namespace GCL
       };
     }
 
-    /// @brief Adds a new alarm to the alarm list.
-    /// @param[in] newAlarm: The new alarm to add to the list.
-    /// @returns The alarmHandle of the new alarm added.
-    /// @throws None.
-    /// @version 2018-07-06/GGB - Function created.
+    /// @brief      Adds a new alarm to the alarm list.
+    /// @param[in]  newAlarm: The new alarm to add to the list.
+    /// @returns    The alarmHandle of the new alarm added.
+    /// @throws     None.
+    /// @version    2018-07-06/GGB - Function created.
 
     std::pair<alarmHandle_t, CAlarmType *>  CAlarmCore::addAlarm(std::unique_ptr<CAlarmType> newAlarm)
     {
@@ -103,7 +103,7 @@ namespace GCL
       alarmContainer_.back()->alarmHandle(++lastAlarmHandle);
       alarmContainer_.back()->alarmCore(this);
 
-      //return lastAlarmHandle;
+      return std::make_pair(lastAlarmHandle, alarmContainer_.back().get());
     }
 
     /// @brief    The loop function to evaluate whether alarms are required. This is the thread function.
@@ -113,28 +113,16 @@ namespace GCL
     void CAlarmCore::alarmLoop()
     {
       bool mustTerminate = false;
-      std::tm currentTime;
-      std::time_t time;
 
       while (!mustTerminate)
       {
         std::this_thread::sleep_for(std::chrono::seconds(60));     // Wake up once per minute.
 
-        time = std::time(nullptr);
-        if (localTime_)
-        {
-          currentTime = *std::localtime(&time);
-        }
-        else
-        {
-          currentTime = *std::gmtime(&time);
-        };
-
           // Run over each of the alarms and call callback functions as required.
 
         for (auto &alarm: alarmContainer_)
         {
-          alarm->evaluateAlarm(currentTime);
+          alarm->evaluateAlarm(std::chrono::system_clock::now());
         };
 
         {
