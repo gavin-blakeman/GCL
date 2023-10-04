@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2020 Gavin Blakeman.
+//                      Copyright 2020-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -51,31 +51,43 @@ namespace GCL
   {
   public:
     using data_t = std::string;
-    using dataLine_t = std::vector<data_t>;
+    using dataLine_t = std::pair<std::size_t, std::vector<data_t>>;
     using dataFile_t = std::vector<dataLine_t>;
+    struct dataTable_t
+    {
+      dataLine_t headings;
+      dataFile_t data;
+    };
+    using dataTables_t = std::vector<dataTable_t>;
 
-  private:
-  protected:
-    std::istream &inputStream;
-    dataLine_t headerData;
-    dataFile_t dataFile;
-
-    virtual void processParseData() = 0;
-    virtual void processParseHeader() = 0;
-    virtual void processParseFile() = 0;
-
-  public:
     CDataParser(std::istream &is) : inputStream(is) {}
-    virtual ~CDataParser() {}
+    virtual ~CDataParser() = default;
 
-    dataFile_t &data() noexcept { return dataFile; }
-    dataLine_t &header() noexcept { return headerData; }
+    dataFile_t &data(std::size_t indx = 0)  { return dataFile(indx); }
+    dataLine_t &header(std::size_t indx = 0)  { return dataHeader(indx); }
+    dataTable_t &dataTable(std::size_t indx = 0) { return dataTables_[indx]; }
+    std::size_t tableCount() const { return dataTables_.size(); }
 
     void parseData() { processParseData(); }
     void parseFile() { processParseFile(); }
     void parseHeader() { processParseHeader(); }
 
+  protected:
+    std::istream &inputStream;
+    dataTables_t dataTables_;
 
+    virtual void processParseData() = 0;
+    virtual void processParseHeader() = 0;
+    virtual void processParseFile() = 0;
+    virtual dataFile_t &dataFile(std::size_t indx);
+    virtual dataLine_t &dataHeader(std::size_t indx);
+
+  private:
+    CDataParser() = delete;
+    CDataParser(CDataParser const &) = delete;
+    CDataParser(CDataParser &&) = delete;
+    CDataParser &operator=(CDataParser const &) = delete;
+    CDataParser &operator=(CDataParser &&) = delete;
   };
 
 } // namespace GCL

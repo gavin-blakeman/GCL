@@ -47,6 +47,8 @@ INCLUDEPATH += \
 
 SOURCES += \
     source/dataParser/dataDelimited.cpp \
+    source/dataParser/dataParserCore.cpp \
+    source/dataParser/dataParser_SAPBKG.cpp \
     source/pluginManager/pluginManager.cpp \
     source/resource.cpp \
     source/string.cpp \
@@ -71,6 +73,7 @@ HEADERS += \
     include/SQLWriter.h \
     include/dataParser/dataDelimited.h \
     include/dataParser/dataParserCore.h \
+    include/dataParser/dataParser_SAPBKG.h \
     include/dateTime.h \
     include/config.h \
     include/filesystem.h \

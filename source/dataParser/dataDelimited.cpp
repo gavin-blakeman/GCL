@@ -52,12 +52,12 @@ namespace GCL
 
   /// @brief      Reset all data in the instance
   /// @throws     None.
+  /// @version    2023-10-03/GGB - Updated to reflect changes to base class.
   /// @version    2020-10-13/GGB - Function created.
 
   void CDelimitedParser::clear() noexcept
   {
-    headerData.clear();
-    dataFile.clear();
+    dataTables_.clear();
   }
 
   CDelimitedParser &CDelimitedParser::delimiterCharacter(std::string const &c) noexcept
@@ -81,10 +81,10 @@ namespace GCL
     return *this;
   }
 
-  /// @brief Processes the entire file. Each token is pushed into the dataLine and dataFile as a string.
-  ///        The calling function is required to convert strings to alternate values.
+  /// @brief      Processes the entire file. Each token is pushed into the dataLine and dataFile as a string.
+  ///             The calling function is required to convert strings to alternate values.
   /// @throws
-  /// @version 2022-11-29/GGB - Function created.
+  /// @version    2022-11-29/GGB - Function created.
 
   void CDelimitedParser::processParseData()
   {
@@ -115,24 +115,23 @@ namespace GCL
       {
         parseString(sv, dataLine);
 
-        dataFile.push_back(std::move(dataLine));
+        dataTables_.back().data.push_back(std::move(dataLine));
       }
     }
   }
 
-  /// @brief Parses a string with delimited values. This is used to read the headers as well as the data.
-  /// @param[in] sv: The string to process
-  /// @param[in] dataLine: The dataline to write the data to.
+  /// @brief      Parses a string with delimited values. This is used to read the headers as well as the data.
+  /// @param[in]  sv: The string to process
+  /// @param[in]  dataLine: The dataline to write the data to.
   /// @throws
-  /// @version 2023-02-02/GGB - Bug#275 fixed
-  /// @version 2022-12-14/GGB - Function created.
+  /// @version    2022-12-14/GGB - Function created.
 
   void CDelimitedParser::parseString(std::string_view &sv, dataLine_t &dataLine)
   {
     std::size_t tokenEnd;
     std::string_view token;
 
-    dataLine.clear();
+    dataLine.second.clear();
 
     while (sv.size() != 0)
     {
@@ -170,7 +169,7 @@ namespace GCL
         token = sv.substr(0, tokenEnd);
       };
 
-      dataLine.push_back(std::string{token});
+      dataLine.second.push_back(std::string{token});
 
       if (tokenEnd != std::string::npos)
       {
@@ -182,7 +181,7 @@ namespace GCL
         {
             // The last token is an empty token.
 
-          dataLine.push_back(std::string{""});
+          dataLine.second.push_back(std::string{token});
         }
       }
       else
@@ -228,7 +227,7 @@ namespace GCL
         sv.remove_suffix(delimiter_.size());
       }
 
-      parseString(sv, headerData);
+      parseString(sv, dataTables_.back().headings);
     }
 
   }

@@ -19,7 +19,15 @@ ADD_LIBRARY(GCL ${PROJECT_SOURCE_DIR}/source/common.cpp
                 ${PROJECT_SOURCE_DIR}/source/resource.cpp
                 ${PROJECT_SOURCE_DIR}/source/SQLWriter.cpp
                 ${PROJECT_SOURCE_DIR}/source/string.cpp
+                ${PROJECT_SOURCE_DIR}/source/alarm/alarmCore.cpp
+                ${PROJECT_SOURCE_DIR}/source/alarm/alarmDaily.cpp
+                ${PROJECT_SOURCE_DIR}/source/alarm/alarmWeekly.cpp
                 ${PROJECT_SOURCE_DIR}/source/dataParser/dataDelimited.cpp
+                ${PROJECT_SOURCE_DIR}/source/dataParser/dataParserCore.cpp
+                ${PROJECT_SOURCE_DIR}/source/dataParser/dataParser_SAPBKG.cpp
                 ${PROJECT_SOURCE_DIR}/source/logger/fileSink.cpp
                 ${PROJECT_SOURCE_DIR}/source/logger/loggerCore.cpp
-                ${PROJECT_SOURCE_DIR}/source/logger/streamSink.cpp)
+                ${PROJECT_SOURCE_DIR}/source/logger/streamSink.cpp
+                ${PROJECT_SOURCE_DIR}/source/logger/TextEditSink.cpp
+                ${PROJECT_SOURCE_DIR}/source/pluginManager/pluginManager.cpp
+              )

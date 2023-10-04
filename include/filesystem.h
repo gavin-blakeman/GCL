@@ -39,14 +39,20 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
+  // Standard C++ library
+
 #include <filesystem>
+#include <list>
+#include <string_view>
 
-namespace std::filesystem
+namespace GCL
 {
+  using fileList_t = std::list<std::filesystem::path>;
 
-  bool file_readable(path const &);
+  bool file_readable(std::filesystem::path const &);
+  void expandFileList(std::string_view &&, fileList_t &);
 
-} // namespace filesystem
+}
 
 #endif // FILESYSTEM_H
 

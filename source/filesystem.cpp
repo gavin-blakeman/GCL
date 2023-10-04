@@ -5,8 +5,8 @@
 // SUBSYSTEM:						std::filesystem or boost::filesystem extensions.
 // LANGUAGE:						C++
 // TARGET OS:						None.
-// LIBRARY DEPENDANCE:	boost::filesystem
-// NAMESPACE:						boost::filesystem
+// LIBRARY DEPENDANCE:
+// NAMESPACE:
 // AUTHOR:							Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
@@ -39,27 +39,91 @@
 
 #include "include/filesystem.h"
 
-namespace std::filesystem
+  // Miscellaneous library header files.
+
+#include <boost/algorithm/string.hpp>
+#include <boost/utility/string_view.hpp>
+
+  // GCL header files
+
+#include "include/error.h"
+
+namespace GCL
 {
-  /// @brief      Checks if the specified filename is readable. If the file does not exist, or there is any other error, the function
-  ///             returns false.
+  /// @brief      Expands a comma or semi-colon delimited list of files into a list of paths.
+  /// @param[in]  svList: A string_view of the list of files.
+  /// @param[out] fileList: The list of files.
+
+  void expandFileList(std::string_view &&svList, fileList_t &fileList)
+  {
+    std::size_t tokenEnd;
+
+    while (!svList.empty())
+    {
+      svList = boost::trim_copy(svList);
+
+      if (svList[0] == '"')
+      {
+          // Filename demarkated with a string. Find the end of the string.
+
+        tokenEnd = svList.find('"', 1);
+        fileList.emplace_back(svList.substr(1, tokenEnd-1));
+        if (tokenEnd == std::string_view::npos)
+        {
+          RUNTIME_ERROR("Unterminated file name. (File name starts with a '""' and does not terminate.");
+        }
+        else
+        {
+          svList.remove_prefix(tokenEnd);
+          if (!svList.empty())
+          {
+            if (svList[0] == ',' || svList[0] == ';')
+            {
+              svList.remove_prefix(1);
+            }
+          }
+        }
+      }
+      else
+      {
+        tokenEnd = svList.find(",;");
+        std::string szToken;
+        if (tokenEnd != std::string_view::npos)
+        {
+          szToken = svList.substr(0, tokenEnd);
+          svList.remove_prefix(tokenEnd + 1);
+        }
+        else
+        {
+          szToken = svList;
+          svList.remove_prefix(svList.size());
+        };
+
+        boost::trim(szToken);
+        fileList.emplace_back(szToken);
+      };
+    };
+  }
+
+  /// @brief      Checks if the specified filename is readable. If the file does not exist, or there is any other error, the
+  ///             function  false.
   /// @param[in]  p: The filename (or path) to check.
   /// @returns    true - if the filename or path is readable.
   /// @returns    false - if the filename or path is not readable, or does not exist.
   /// @throws     None.
-  /// @version    2023-09-19/GGB - Moved to std::filesystem.
+  /// @version    2023-10-02/GGB - Converted to uese std::filesystem.
   /// @version    2018-05-20/GGB - Function created.
 
-  bool file_readable(path const &p)
+  bool file_readable(std::filesystem::path const &p)
   {
     bool returnValue = false;
 
     if (exists(p))
     {
 
-      file_status fileStatus = status(p);
+      std::filesystem::file_status fileStatus = status(p);
 
-      perms permissions = fileStatus.permissions();
+      std::filesystem::perms permissions = fileStatus.permissions();
 
       returnValue = ((permissions & std::filesystem::perms::owner_read) |
                     (permissions & std::filesystem::perms::group_read) |
@@ -68,4 +132,5 @@ namespace std::filesystem
     return returnValue;
   }
 
-} // namespace filesystem
+
+}

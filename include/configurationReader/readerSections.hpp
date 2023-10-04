@@ -49,6 +49,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/locale.hpp>
+#include <fmt/format.h>
+#include <fmt/std.h>
 
   // GCL library header files.
 
@@ -144,7 +146,7 @@ namespace GCL
 
         if (!ifs.is_open())
         {
-          RUNTIME_ERROR(boost::locale::translate("Unable to open configuration file."));
+          RUNTIME_ERROR(fmt::format(fmt::runtime(boost::locale::gettext("Unable to open configuration file {:s}.")), filename_));
         };
 
           // Read through the already read lines quickly without any translation.
@@ -292,7 +294,6 @@ namespace GCL
     /// @version    2020-04-27/GGB - Function created.
 
 
-    //template<class T>
     CReaderSections(explicit_path auto const &filename, std::string seperatorChar = "=", std::string commentChar = "#")
       :  CReaderCore(filename, seperatorChar, commentChar), sectionOpenChar_("["), sectionCloseChar_("]"), namespaceChar_("/")
     {

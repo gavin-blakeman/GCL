@@ -47,6 +47,20 @@ namespace GCL
 {
   class CDelimitedParser : public CDataParser
   {
+  public:
+    CDelimitedParser(std::istream &is, std::string const &, bool = true);
+
+    CDelimitedParser &delimiterCharacter(std::string const &) noexcept;
+    CDelimitedParser &includesHeader(bool) noexcept;
+    CDelimitedParser &ignoreHeader(bool) noexcept;
+    CDelimitedParser &delimiterSE(bool se) noexcept { delimiterSE_ = se; return *this; }
+
+  protected:
+    void parseString(std::string_view &, dataLine_t &);
+    void processParseHeader() override;
+    void processParseData() override;
+    void processParseFile() override;
+
   private:
     bool ignoreHeader_ = false;
     bool includesHeader_;
@@ -55,20 +69,6 @@ namespace GCL
 
     std::string currentString;
     std::string::size_type currentPosn;
-
-  protected:
-    void parseString(std::string_view &, dataLine_t &);
-    void processParseHeader() override;
-    void processParseData() override;
-    void processParseFile() override;
-
-  public:
-    CDelimitedParser(std::istream &is, std::string const &, bool = true);
-
-    CDelimitedParser &delimiterCharacter(std::string const &) noexcept;
-    CDelimitedParser &includesHeader(bool) noexcept;
-    CDelimitedParser &ignoreHeader(bool) noexcept;
-    CDelimitedParser &delimiterSE(bool se) noexcept { delimiterSE_ = se; return *this; }
 
 
 
