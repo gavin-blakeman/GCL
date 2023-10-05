@@ -78,28 +78,129 @@ namespace GCL
 
   class CReaderSections : public CReaderCore
   {
-  private:
-    using tagValueContainer_t = std::unordered_map<std::string, std::string>;
-    using sectionContainer_t = std::unordered_map<std::string, tagValueContainer_t>;
+  public:
+    using CReaderCore::tagValueDouble;
+    using CReaderCore::tagValueInt32;
+    using CReaderCore::tagValueString;
+    using CReaderCore::tagValueUInt16;
+    using CReaderCore::tagValueUInt32;
+    using CReaderCore::tagValueUInt64;
 
-    std::string sectionOpenChar_;                 ///< The seperator character to use to open section declarations.
-    std::string sectionCloseChar_;                ///< The seperator character to use to close section declarations.
-    std::string namespaceChar_;                   ///< The seperator character to use to seperate namespace tag combinations.
-    mutable sectionContainer_t sectionContainer;  ///< The container storing the section values and data.
+    /// @brief      Constructor for the class.
+    /// @param[in]  seperatorChar: The character(s) used for seperating statements.
+    /// @param[in]  commentChar: The character(s) used for indicating comments.
+    /// @throws     std::bad_alloc
+    /// @version    2020-11-30/GGB - Changed to suse std::filesystem.
+    /// @version    2020-04-27/GGB - Function created.
 
-    CReaderSections() = delete;
-    CReaderSections(CReaderSections const &) = delete;
-    CReaderSections(CReaderSections &&) = delete;
-    CReaderSections &operator =(CReaderSections const &) = delete;
+    CReaderSections(std::string seperatorChar = "=",
+                    std::string commentChar = "#")
+      :  CReaderCore(seperatorChar, commentChar), sectionOpenChar_("["), sectionCloseChar_("]"), namespaceChar_("/")
+    {
+    }
+
+    /// @brief      Constructor for the class.
+    /// @param[in]  filename: The filename and path of the configuration file.
+    /// @param[in]  seperatorChar: The character(s) used for seperating statements.
+    /// @param[in]  commentChar: The character(s) used for indicating comments.
+    /// @throws     std::bad_alloc
+    /// @version    2020-11-30/GGB - Changed to suse std::filesystem.
+    /// @version    2020-04-27/GGB - Function created.
+
+
+    CReaderSections(explicit_path auto const &filename,
+                    std::string seperatorChar = "=",
+                    std::string commentChar = "#")
+      :  CReaderCore(filename, seperatorChar, commentChar), sectionOpenChar_("["), sectionCloseChar_("]"), namespaceChar_("/")
+    {
+    }
+
+    virtual ~CReaderSections() {}
+
+    /// @brief Returns a tag value.
+    /// @param[in] section: The section to search for the tag.
+    /// @param[in] tagName: The name of the tag to find.
+    /// @returns A std::optional containing the data (if found)
+    /// @throws
+    /// @version 2020-04-27/GGB - Function created.
+
+    virtual std::optional<std::string> tagValueString(std::string const &section, std::string const &tagName)
+    {
+      return std::move(readTag(section + namespaceChar_ + tagName));
+    }
+
+    /// @brief Returns a double tag value.
+    /// @param[in] section: The section to search for the tag.
+    /// @param[in] tagName: The name of the tag to find.
+    /// @returns A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
+    /// @throws std::runtime_error - The value was not able to be converted.
+    /// @version 2020-04-27/GGB - Function created.
+
+    virtual std::optional<double> tagValueDouble(std::string const &section, std::string const &tagName)
+    {
+      return std::move(tagValueDouble(section + namespaceChar_ + tagName));
+    }
+
+    /// @brief Returns an uint16 tag value.
+    /// @param[in] section: The section to search for the tag.
+    /// @param[in] tagName: The name of the tag to find.
+    /// @returns A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
+    /// @throws std::runtime_error - The value was not able to be converted.
+    /// @throws std::out_of_range - The value was too large for the type.
+    /// @version 2020-04-27/GGB - Function created.
+
+    virtual std::optional<std::uint16_t> tagValueUInt16(std::string const &section, std::string const &tagName)
+    {
+      return std::move(tagValueUInt16(section + namespaceChar_ + tagName));
+    }
+
+    /// @brief      Returns an uint32 tag value.
+    /// @param[in]  section: The section to search for the tag.
+    /// @param[in]  tagName: The name of the tag to find.
+    /// @returns    A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
+    /// @throws     std::runtime_error - The value was not able to be converted.
+    /// @throws     std::out_of_range - The value was too large for the type.
+    /// @version    2022-12-06/GGB - Function created.
+
+    virtual std::optional<std::uint32_t> tagValueUInt32(std::string const &section, std::string const &tagName)
+    {
+      return std::move(CReaderCore::tagValueUInt32(section + namespaceChar_ + tagName));
+    }
+
+    /// @brief      Returns an uint64 tag value.
+    /// @param[in]  section: The section to search for the tag.
+    /// @param[in]  tagName: The name of the tag to find.
+    /// @returns    A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
+    /// @throws     std::runtime_error - The value was not able to be converted.
+    /// @throws     std::out_of_range - The value was too large for the type.
+    /// @version    2022-09-27/GGB - Function created.
+
+    virtual std::optional<std::uint64_t> tagValueUInt64(std::string const &section, std::string const &tagName)
+    {
+      return std::move(tagValueUInt64(section + namespaceChar_ + tagName));
+    }
+
+    /// @brief Returns an int32 tag value.
+    /// @param[in] section: The section to search for the tag.
+    /// @param[in] tagName: The name of the tag to find.
+    /// @returns A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
+    /// @throws std::runtime_error - The value was not able to be converted.
+    /// @throws std::out_of_range - The value was too large for the type.
+    /// @version 2020-04-27/GGB - Function created.
+
+    virtual std::optional<std::int32_t> tagValueInt32(std::string const &section, std::string const &tagName)
+    {
+      return std::move(tagValueInt32(section + namespaceChar_ + tagName));
+    }
 
   protected:
 
-    /// @brief Reads the configuration file until the tag value is found.
-    /// @param[in] sectionTagName: The section and tag seperated by a namespace seperator.
-    /// @returns Standard optional with the value if found. If the tag is not found then the optional has no value.
+    /// @brief      Reads the configuration file until the tag value is found.
+    /// @param[in]  sectionTagName: The section and tag seperated by a namespace seperator.
+    /// @returns    Standard optional with the value if found. If the tag is not found then the optional has no value.
     /// @throws
-    /// @version 2020-11-30/GGB - Debugging function.
-    /// @version 2020-04-27/GGB - Function created.
+    /// @version    2020-11-30/GGB - Debugging function.
+    /// @version    2020-04-27/GGB - Function created.
 
     virtual std::optional<std::string> readTag(std::string const &sectionTagName) const
     {
@@ -265,120 +366,22 @@ namespace GCL
       return returnValue;
     }
 
-  public:
-    using CReaderCore::tagValueDouble;
-    using CReaderCore::tagValueInt32;
-    using CReaderCore::tagValueString;
-    using CReaderCore::tagValueUInt16;
-    using CReaderCore::tagValueUInt32;
-    using CReaderCore::tagValueUInt64;
+  private:
+    using tagValueContainer_t = std::unordered_map<std::string, std::string>;
+    using sectionContainer_t = std::unordered_map<std::string, tagValueContainer_t>;
 
-    /// @brief      Constructor for the class.
-    /// @param[in]  seperatorChar: The character(s) used for seperating statements.
-    /// @param[in]  commentChar: The character(s) used for indicating comments.
-    /// @throws     std::bad_alloc
-    /// @version    2020-11-30/GGB - Changed to suse std::filesystem.
-    /// @version    2020-04-27/GGB - Function created.
+    std::string sectionOpenChar_;                 ///< The seperator character to use to open section declarations.
+    std::string sectionCloseChar_;                ///< The seperator character to use to close section declarations.
+    std::string namespaceChar_;                   ///< The seperator character to use to seperate namespace tag combinations.
+    mutable sectionContainer_t sectionContainer;  ///< The container storing the section values and data.
 
-    CReaderSections(std::string seperatorChar = "=", std::string commentChar = "#")
-      :  CReaderCore(seperatorChar, commentChar), sectionOpenChar_("["), sectionCloseChar_("]"), namespaceChar_("/")
-    {
-    }
-
-    /// @brief      Constructor for the class.
-    /// @param[in]  filename: The filename and path of the configuration file.
-    /// @param[in]  seperatorChar: The character(s) used for seperating statements.
-    /// @param[in]  commentChar: The character(s) used for indicating comments.
-    /// @throws     std::bad_alloc
-    /// @version    2020-11-30/GGB - Changed to suse std::filesystem.
-    /// @version    2020-04-27/GGB - Function created.
+    CReaderSections() = delete;
+    CReaderSections(CReaderSections const &) = delete;
+    CReaderSections(CReaderSections &&) = delete;
+    CReaderSections &operator =(CReaderSections const &) = delete;
 
 
-    CReaderSections(explicit_path auto const &filename, std::string seperatorChar = "=", std::string commentChar = "#")
-      :  CReaderCore(filename, seperatorChar, commentChar), sectionOpenChar_("["), sectionCloseChar_("]"), namespaceChar_("/")
-    {
-    }
-
-    virtual ~CReaderSections() {}
-
-    /// @brief Returns a tag value.
-    /// @param[in] section: The section to search for the tag.
-    /// @param[in] tagName: The name of the tag to find.
-    /// @returns A std::optional containing the data (if found)
-    /// @throws
-    /// @version 2020-04-27/GGB - Function created.
-
-    virtual std::optional<std::string> tagValueString(std::string const &section, std::string const &tagName)
-    {
-      return std::move(readTag(section + namespaceChar_ + tagName));
-    }
-
-    /// @brief Returns a double tag value.
-    /// @param[in] section: The section to search for the tag.
-    /// @param[in] tagName: The name of the tag to find.
-    /// @returns A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
-    /// @throws std::runtime_error - The value was not able to be converted.
-    /// @version 2020-04-27/GGB - Function created.
-
-    virtual std::optional<double> tagValueDouble(std::string const &section, std::string const &tagName)
-    {
-      return std::move(tagValueDouble(section + namespaceChar_ + tagName));
-    }
-
-    /// @brief Returns an uint16 tag value.
-    /// @param[in] section: The section to search for the tag.
-    /// @param[in] tagName: The name of the tag to find.
-    /// @returns A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
-    /// @throws std::runtime_error - The value was not able to be converted.
-    /// @throws std::out_of_range - The value was too large for the type.
-    /// @version 2020-04-27/GGB - Function created.
-
-    virtual std::optional<std::uint16_t> tagValueUInt16(std::string const &section, std::string const &tagName)
-    {
-      return std::move(tagValueUInt16(section + namespaceChar_ + tagName));
-    }
-
-    /// @brief      Returns an uint32 tag value.
-    /// @param[in]  section: The section to search for the tag.
-    /// @param[in]  tagName: The name of the tag to find.
-    /// @returns    A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
-    /// @throws     std::runtime_error - The value was not able to be converted.
-    /// @throws     std::out_of_range - The value was too large for the type.
-    /// @version    2022-12-06/GGB - Function created.
-
-    virtual std::optional<std::uint32_t> tagValueUInt32(std::string const &section, std::string const &tagName)
-    {
-      return std::move(CReaderCore::tagValueUInt32(section + namespaceChar_ + tagName));
-    }
-
-    /// @brief      Returns an uint64 tag value.
-    /// @param[in]  section: The section to search for the tag.
-    /// @param[in]  tagName: The name of the tag to find.
-    /// @returns    A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
-    /// @throws     std::runtime_error - The value was not able to be converted.
-    /// @throws     std::out_of_range - The value was too large for the type.
-    /// @version    2022-09-27/GGB - Function created.
-
-    virtual std::optional<std::uint64_t> tagValueUInt64(std::string const &section, std::string const &tagName)
-    {
-      return std::move(tagValueUInt64(section + namespaceChar_ + tagName));
-    }
-
-    /// @brief Returns an int32 tag value.
-    /// @param[in] section: The section to search for the tag.
-    /// @param[in] tagName: The name of the tag to find.
-    /// @returns A std::optional containing the data (if found and converted) A false optional implies the tag could was no found.
-    /// @throws std::runtime_error - The value was not able to be converted.
-    /// @throws std::out_of_range - The value was too large for the type.
-    /// @version 2020-04-27/GGB - Function created.
-
-    virtual std::optional<std::int32_t> tagValueInt32(std::string const &section, std::string const &tagName)
-    {
-      return std::move(tagValueInt32(section + namespaceChar_ + tagName));
-    }
-
-
-  }; // class
+  };
 
 } // namespace GCL
 

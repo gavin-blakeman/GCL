@@ -2,32 +2,42 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.14 FATAL_ERROR)
 
-PROJECT(GCL)
+PROJECT(GCL DESCRIPTION "General Class Library")
 
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED True)
 
-SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/GCL)
+SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_LIST_DIR})
+set(SOURCES
+  source/common.cpp
+  source/dateTime.cpp
+  source/error.cpp
+  source/filesystem.cpp
+  source/Functions.cpp
+  source/resource.cpp
+  source/SQLWriter.cpp
+  source/string.cpp
+  source/alarm/alarmCore.cpp
+  source/alarm/alarmDaily.cpp
+  source/alarm/alarmWeekly.cpp
+  source/dataParser/dataDelimited.cpp
+  source/dataParser/dataParserCore.cpp
+  source/dataParser/dataParser_SAPBKG.cpp
+  source/logger/fileSink.cpp
+  source/logger/loggerCore.cpp
+  source/logger/streamSink.cpp
+  source/pluginManager/pluginManager.cpp)
+set(HEADERS
+  include/SQLWriter.h
+  include/common.h
+  include/config.h
+  include/dateTime.h
+  include/error.h
+  include/filesystem.h
+  include/resource.h)
 
-ADD_LIBRARY(GCL ${PROJECT_SOURCE_DIR}/source/common.cpp
-                ${PROJECT_SOURCE_DIR}/source/dateTime.cpp
-                ${PROJECT_SOURCE_DIR}/source/error.cpp
-                ${PROJECT_SOURCE_DIR}/source/filesystem.cpp
-                ${PROJECT_SOURCE_DIR}/source/Functions.cpp
-                ${PROJECT_SOURCE_DIR}/source/resource.cpp
-                ${PROJECT_SOURCE_DIR}/source/SQLWriter.cpp
-                ${PROJECT_SOURCE_DIR}/source/string.cpp
-                ${PROJECT_SOURCE_DIR}/source/alarm/alarmCore.cpp
-                ${PROJECT_SOURCE_DIR}/source/alarm/alarmDaily.cpp
-                ${PROJECT_SOURCE_DIR}/source/alarm/alarmWeekly.cpp
-                ${PROJECT_SOURCE_DIR}/source/dataParser/dataDelimited.cpp
-                ${PROJECT_SOURCE_DIR}/source/dataParser/dataParserCore.cpp
-                ${PROJECT_SOURCE_DIR}/source/dataParser/dataParser_SAPBKG.cpp
-                ${PROJECT_SOURCE_DIR}/source/logger/fileSink.cpp
-                ${PROJECT_SOURCE_DIR}/source/logger/loggerCore.cpp
-                ${PROJECT_SOURCE_DIR}/source/logger/streamSink.cpp
-                ${PROJECT_SOURCE_DIR}/source/logger/TextEditSink.cpp
-                ${PROJECT_SOURCE_DIR}/source/pluginManager/pluginManager.cpp
-              )
+add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
+
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

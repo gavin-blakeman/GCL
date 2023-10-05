@@ -57,6 +57,7 @@ namespace GCL
   void expandFileList(std::string_view &&svList, fileList_t &fileList)
   {
     std::size_t tokenEnd;
+    std::string szToken;
 
     while (!svList.empty())
     {
@@ -86,8 +87,7 @@ namespace GCL
       }
       else
       {
-        tokenEnd = svList.find(",;");
-        std::string szToken;
+        tokenEnd = svList.find_first_of(",;");
         if (tokenEnd != std::string_view::npos)
         {
           szToken = svList.substr(0, tokenEnd);
