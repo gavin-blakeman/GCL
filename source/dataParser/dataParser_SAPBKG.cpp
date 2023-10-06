@@ -39,6 +39,8 @@
 #include <string_view>
 #include <vector>
 
+  // Miscellaneous library header files
+
 namespace GCL
 {
 
@@ -136,7 +138,7 @@ namespace GCL
                 svLine = szLine;
                 determineColumnWidths(svLine, columnWidths);
               }
-              else if (dataTables_.back().headings != headings)
+              else if (dataTables_.back().headings.second != headings.second)
               {
                 dataTables_.push_back({});
                 dataTables_.back().headings = std::move(headings);
@@ -156,7 +158,7 @@ namespace GCL
             }
             else
             {
-              dataTables_.back().data.emplace_back(std::move(tokeniseLine(svLine)));
+              dataTables_.back().data.emplace_back(std::move(tokeniseLine(svLine, columnWidths)));
               dataTables_.back().data.back().first = lineNumber;
             }
             break;
@@ -205,7 +207,7 @@ namespace GCL
       tokenEnd = svLine.find("|", 0);
       if (tokenEnd != std::string_view::npos)
       {
-        rv.second.push_back(std::string{svLine.substr(0, tokenEnd- 1)});
+        rv.second.push_back(std::string{svLine.substr(0, tokenEnd)});
         svLine.remove_prefix(tokenEnd + 1);
       };
     }
@@ -242,17 +244,21 @@ namespace GCL
     std::vector<std::string> columnHeadings;
 
     columnData.clear();
+    columnStart++;
 
     while (columnStart < svLine.length())
     {
-      columnStart++;
       columnEnd = svLine.find("|", columnStart);
       if (columnEnd != std::string_view::npos)
       {
         columnData.emplace_back(columnStart, columnEnd - columnStart);
         columnHeadings.emplace_back(svLine.substr(columnData.back().first, columnData.back().second));
-        columnStart = columnEnd;
-      };
+        columnStart = columnEnd + 1;
+      }
+      else
+      {
+        columnStart = svLine.length();
+      }
     }
   }
 
