@@ -179,7 +179,7 @@ namespace GCL
 
     while (indx < svLine.length() && rv)
     {
-      if (svLine[indx] != '-')
+      if (svLine[indx++] != '-')
       {
         rv = false;
       }
@@ -198,11 +198,16 @@ namespace GCL
     dataLine_t rv;
     std::size_t tokenEnd;
 
+    svLine.remove_prefix(1);  // Remove the initial "|"
+
     while (!svLine.empty())
     {
-      tokenEnd = svLine.find("|");
-      rv.second.push_back(std::string{svLine.substr(0, tokenEnd- 1 )});
-      svLine.remove_prefix(tokenEnd + 1);
+      tokenEnd = svLine.find("|", 0);
+      if (tokenEnd != std::string_view::npos)
+      {
+        rv.second.push_back(std::string{svLine.substr(0, tokenEnd- 1)});
+        svLine.remove_prefix(tokenEnd + 1);
+      };
     }
 
     return rv;
@@ -234,6 +239,7 @@ namespace GCL
   void CSAPBKGParser::determineColumnWidths(std::string_view &svLine, columnData_t &columnData)
   {
     std::size_t columnStart = 0, columnEnd;
+    std::vector<std::string> columnHeadings;
 
     columnData.clear();
 
@@ -241,8 +247,12 @@ namespace GCL
     {
       columnStart++;
       columnEnd = svLine.find("|", columnStart);
-      columnData.emplace_back(columnStart, columnEnd - columnStart - 1);
-      columnStart = columnEnd;
+      if (columnEnd != std::string_view::npos)
+      {
+        columnData.emplace_back(columnStart, columnEnd - columnStart);
+        columnHeadings.emplace_back(svLine.substr(columnData.back().first, columnData.back().second));
+        columnStart = columnEnd;
+      };
     }
   }
 

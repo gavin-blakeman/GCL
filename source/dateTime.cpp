@@ -38,6 +38,7 @@
 
 #include <iomanip>
 #include <sstream>
+#include <stdexcept>
 
   // Miscellaneous library header files
 
@@ -84,6 +85,7 @@ namespace GCL
   /// @param[in]  str: The string to parse
   /// @returns    The system_clock
   /// @throws
+  /// @version    2023-10-06/GGB - Throws std::runtime error when unable to convert.
   /// @version    2022-11-29/GGB - Function created.
 
   std::chrono::time_point<std::chrono::system_clock> parseDate(std::string const &str)
@@ -92,8 +94,14 @@ namespace GCL
     std::istringstream ss(str);
 
     ss >> std::get_time(&tm, "%Y-%m-%d");
+    if (ss.fail())
+    {
+      throw(std::runtime_error("Unable to convert string to date value"));
+    }
 
     std::time_t t = std::mktime(&tm);
+
+
 
     return std::chrono::system_clock::from_time_t(t);
   }
@@ -103,6 +111,7 @@ namespace GCL
   /// @param[in]  fmt: The format string.
   /// @returns    The system_clock
   /// @throws
+  /// @version    2023-10-06/GGB - Throws std::runtime error when unable to convert.
   /// @version    2022-11-29/GGB - Function created.
 
   std::chrono::time_point<std::chrono::system_clock> parseDate(std::string const &str, std::string const &fmt)
@@ -111,6 +120,10 @@ namespace GCL
     std::istringstream ss(str);
 
     ss >> std::get_time(&tm, fmt.c_str());
+    if (ss.fail())
+    {
+      throw(std::runtime_error("Unable to convert string to date value"));
+    }
 
     std::time_t t = std::mktime(&tm);
 
@@ -122,6 +135,7 @@ namespace GCL
   /// @param[in]  fmt: The format string.
   /// @returns    The parsed value
   /// @throws
+  /// @version    2023-10-06/GGB - Throws std::runtime error when unable to convert.
   /// @version    2023-03-28/GGB - Function created.
 
   std::chrono::time_point<std::chrono::system_clock> parseTime(std::string const &str)
@@ -130,6 +144,10 @@ namespace GCL
     std::istringstream ss(str);
 
     ss >> std::get_time(&tm, "%H:%M:%S");
+    if (ss.fail())
+    {
+      throw(std::runtime_error("Unable to convert string to date value"));
+    }
 
     std::time_t t = std::mktime(&tm);
 
@@ -141,6 +159,7 @@ namespace GCL
   /// @param[in]  fmt: The format string.
   /// @returns    The parsed value
   /// @throws
+  /// @version    2023-10-06/GGB - Throws std::runtime error when unable to convert.
   /// @version    2023-03-28/GGB - Function created.
 
   std::chrono::time_point<std::chrono::system_clock> parseTime(std::string const &str, std::string const &fmt)
@@ -149,6 +168,10 @@ namespace GCL
     std::istringstream ss(str);
 
     ss >> std::get_time(&tm, fmt.c_str());
+    if (ss.fail())
+    {
+      throw(std::runtime_error("Unable to convert string to date value"));
+    }
 
     std::time_t t = std::mktime(&tm);
 
@@ -159,6 +182,7 @@ namespace GCL
   /// @param[in]  str: The string to parse
   /// @returns    The parsed value
   /// @throws
+  /// @version    2023-10-06/GGB - Throws std::runtime error when unable to convert.
   /// @version    2023-03-28/GGB - Function created.
 
   std::chrono::time_point<std::chrono::system_clock> parseDateTime(std::string const &str)
@@ -167,6 +191,10 @@ namespace GCL
     std::istringstream ss(str);
 
     ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+    if (ss.fail())
+    {
+      throw(std::runtime_error("Unable to convert string to date value"));
+    }
 
     std::time_t t = std::mktime(&tm);
 
@@ -178,6 +206,7 @@ namespace GCL
   /// @param[in]  fmt: The format string.
   /// @returns    The parsed value
   /// @throws
+  /// @version    2023-10-06/GGB - Throws std::runtime error when unable to convert.
   /// @version    2023-03-28/GGB - Function created.
 
   std::chrono::time_point<std::chrono::system_clock> parseDateTime(std::string const &str, std::string const &fmt)
@@ -186,6 +215,10 @@ namespace GCL
     std::istringstream ss(str);
 
     ss >> std::get_time(&tm, fmt.c_str());
+    if (ss.fail())
+    {
+      throw(std::runtime_error("Unable to convert string to date value"));
+    }
 
     std::time_t t = std::mktime(&tm);
 
