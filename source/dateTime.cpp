@@ -101,8 +101,6 @@ namespace GCL
 
     std::time_t t = std::mktime(&tm);
 
-
-
     return std::chrono::system_clock::from_time_t(t);
   }
 

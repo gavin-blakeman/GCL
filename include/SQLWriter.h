@@ -69,7 +69,6 @@
   // Miscellaneous Library header files
 
 #include "boost/multiprecision/mpfr.hpp"
-#include "mariadb/mysql.h"
 
   // GCL Library header files
 

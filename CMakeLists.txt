@@ -6,6 +6,7 @@ PROJECT(GCL DESCRIPTION "General Class Library")
 
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_CXX_FLAGS "-fPIC")
 
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
 
@@ -27,15 +28,35 @@ set(SOURCES
   source/logger/fileSink.cpp
   source/logger/loggerCore.cpp
   source/logger/streamSink.cpp
-  source/pluginManager/pluginManager.cpp)
+  source/pluginManager/pluginManager.cpp
+  )
 set(HEADERS
-  include/SQLWriter.h
+  GCL
+  include/Functions.h
+  include/any.hpp
   include/common.h
-  include/config.h
+  include/SQLWriter.h
+  include/dataParser/dataDelimited.h
+  include/dataParser/dataParserCore.h
+  include/dataParser/dataParser_SAPBKG.h
   include/dateTime.h
-  include/error.h
+  include/config.h
   include/filesystem.h
-  include/resource.h)
+  include/alarm/alarmCore.h
+  include/alarm/alarmDaily.h
+  include/alarm/alarmWeekly.h
+  include/error.h
+  include/logger/loggerCore.h
+  include/logger/fileSink.h
+  include/logger/streamSink.h
+  include/configurationReader/readerSections.hpp
+  include/configurationReader/readerVanilla.hpp
+  include/configurationReader/readerCore.hpp
+  include/GCLError.h
+  include/pluginManager/pluginManager.h
+  include/resource.h
+  include/traits.h
+  )
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
 

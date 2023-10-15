@@ -224,8 +224,8 @@ namespace GCL::plugin
       }
       else
       {
-        RUNTIME_ERROR(boost::locale::translate("PluginManager: Plugin not found."), E_PLUGINMANAGER_UNABLETOLOAD,
-                      LIBRARYNAME);
+        //RUNTIME_ERROR(fmt::format(fmt::runtime(boost::locale::gettext("Unable to open configuration file {:s}.")), filename_));
+        RUNTIME_ERROR(fmt::format(fmt::runtime(boost::locale::gettext("PluginManager: Plugin {:s} not found.")), pluginToLoad));
       };
 
 #endif // unix type platforms
