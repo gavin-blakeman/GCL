@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2014-2022 Gavin Blakeman.
+//                      Copyright 2014-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -63,6 +63,7 @@
   // Miscellaneous library header files.
 
 #include <boost/format.hpp>
+#include <fmt/format.h>
 
 namespace GCL
 {
@@ -254,6 +255,7 @@ namespace GCL
     /// @throws
     /// @version    2020-08-31/GGB - Converted from macro to function.
 
+    [[deprecated]]
     inline void ERRORMESSAGE(boost::format const &message)
     {
       ERRORMESSAGE(boost::str(message));
@@ -294,6 +296,7 @@ namespace GCL
     /// @throws
     /// @version    2020-10-03/GGB - Converted from macro to function.
 
+    [[deprecated]]
     inline void INFOMESSAGE(boost::format const &message)
     {
       INFOMESSAGE(boost::str(message));
@@ -340,7 +343,7 @@ namespace GCL
       defaultLogger().logMessage(exception, message);
     }
 
-    inline void TRACEENTER(std::source_location const location = std::source_location::current())
+    inline void TRACE_ENTER(std::source_location const location = std::source_location::current())
     {
       defaultLogger().logMessage(GCL::logger::trace,
                                  "Entering Function: " + std::string(location.function_name()) +
@@ -348,13 +351,41 @@ namespace GCL
                                  ". Line: " + std::to_string(location.line()));
     }
 
-    inline void TRACEEXIT(std::source_location const location = std::source_location::current())
+    inline void TRACE_EXIT(std::source_location const location = std::source_location::current())
     {
       defaultLogger().logMessage(GCL::logger::trace,
                                  "Exiting Function: " + std::string(location.function_name()) +
                                  ". File: " + std::string(location.file_name()) +
                                  ". Line: " + std::to_string(location.line()));
     }
+
+
+    /// @brief      Trace function to trace a line.
+    /// @param[in]  location: Source code location.
+    /// @throws
+    /// @version    2023-10-16/GGB - Function created.
+
+    inline void TRACE_LINE(std::source_location const location = std::source_location::current())
+    {
+      defaultLogger().logMessage(GCL::logger::trace,
+                                 "Passing Line: " + std::string(location.function_name()) +
+                                 ". File: " + std::string(location.file_name()) +
+                                 ". Line: " + std::to_string(location.line()));
+    }
+
+    /// @brief      Trace function to flag an unexpected condition.
+    /// @param[in]  location: Source code location.
+    /// @throws
+    /// @version    2023-10-16/GGB - Function created.
+
+    inline void TRACE_UNEXPECTED(std::source_location const location = std::source_location::current())
+    {
+      defaultLogger().logMessage(GCL::logger::trace,
+                                 "Unexpected branch: " + std::string(location.function_name()) +
+                                 ". File: " + std::string(location.file_name()) +
+                                 ". Line: " + std::to_string(location.line()));
+    }
+
 
   } // namespace logger
 } // namespace GCL

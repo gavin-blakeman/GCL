@@ -82,8 +82,10 @@ using GCL::logger::INFOMESSAGE;
 using GCL::logger::DEBUGMESSAGE;
 using GCL::logger::LOGEXCEPTION;
 using GCL::logger::TRACEMESSAGE;
-using GCL::logger::TRACEENTER;
-using GCL::logger::TRACEEXIT;
+using GCL::logger::TRACE_ENTER;
+using GCL::logger::TRACE_EXIT;
+using GCL::logger::TRACE_LINE;
+using GCL::logger::TRACE_UNEXPECTED;
 
   // Inject the error functions into the global namespace.
 

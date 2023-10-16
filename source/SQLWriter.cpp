@@ -983,7 +983,7 @@ namespace GCL
 
   std::string sqlWriter::createWhereClause() const
   {
-    logger::TRACEENTER();
+    logger::TRACE_ENTER();
     std::string returnValue = "";
 
     if (!std::holds_alternative<std::monostate>(whereClause_.base))
@@ -991,7 +991,7 @@ namespace GCL
       returnValue += " WHERE " + to_string(whereClause_);
     }
 
-    logger::TRACEEXIT();
+    logger::TRACE_EXIT();
     return returnValue;
   }
 
