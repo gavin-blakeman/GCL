@@ -29,6 +29,7 @@
 
   using groupByStorage = std::vector<groupBy_t>;
   using parameterVector_t = std::vector<parameter_t>;
+  using parameterSet_t = std::set<parameter_t>;
   using parameterPair = std::pair<std::string, parameter_t>;
   typedef std::pair<std::string, std::string> stringPair;
   using parameterTriple = std::tuple<std::string, std::string, parameter_t>;
@@ -49,7 +50,7 @@
 
     // Where Types
 
-  using parameterVariant_t = std::variant<parameter_t, parameterVector_t, pointer_t>;
+  using parameterVariant_t = std::variant<parameter_t, parameterVector_t, parameterSet_t, pointer_t>;
   using whereTest_t = std::tuple<std::string, operator_t, parameterVariant_t>;
 
   struct whereVariant_t;

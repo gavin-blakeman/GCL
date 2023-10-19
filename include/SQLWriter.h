@@ -73,6 +73,7 @@
   // GCL Library header files
 
 #include "include/dateTime.h"
+#include "include/error.h"
 
 /// @page page2 SQL Writer
 /// @tableofcontents
@@ -108,7 +109,7 @@ namespace GCL
     lte,            ///< less than equal to
     neq,
     nse,
-    in,
+    in,             ///< IN  - Parameter should be a set or vector.
     between,
     nin
   };
@@ -186,12 +187,12 @@ namespace GCL
 
     class bindValue_t
     {
-    private:
-      std::string value;
-
-      bindValue_t() = delete;
     public:
       bindValue_t(std::string const &st) : value(st) {}
+      bool operator<(bindValue_t const &rhs) const
+      {
+        return (value < rhs.value);
+      }
 
       std::string to_string() const
       {
@@ -207,7 +208,10 @@ namespace GCL
         }
         return rv;
       }
+    private:
+      std::string value;
 
+      bindValue_t() = delete;
     };
 
     class columnRef
@@ -377,10 +381,34 @@ namespace GCL
   }; // class sqlWriter
 
   sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter::parameterVector_t);
+  sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter::parameterSet_t);
   sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter::parameter_t);
   sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter::pointer_t);
   sqlWriter::whereVariant_t where_v(std::string, operator_t, sqlWriter &&);
   sqlWriter::whereVariant_t where_v(sqlWriter::whereVariant_t, logicalOperator_t, sqlWriter::whereVariant_t);
+
+  /// @brief      Parameter variant to handle a parameterSet.
+  /// @param[in]  col: The column name.
+  /// @param[in]  op: The operator to apply. (Should be IN or NOT IN)
+  /// @param[in]  param: The set containing the parameters.
+  /// @returns    The where variant.
+  /// @note       This convertss the set to a vector to handle the '<" problem created by the date class.
+  /// @version    2023-10-19/GGB - Function created.
+
+  template<typename T>
+  sqlWriter::whereVariant_t where_v(std::string col, operator_t op, std::set<T> const &param)
+  {
+    RUNTIME_ASSERT((op == in) || (op == nin), "Only IN and NIN operators allowed with parameter sets.");
+
+    sqlWriter::parameterSet_t paramSet;
+
+    for (auto const p : param)
+    {
+      paramSet.emplace(p);
+    }
+
+    return {std::make_tuple(col, op, paramSet)};
+  }
 
 
 //  template<>

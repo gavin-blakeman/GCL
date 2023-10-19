@@ -78,16 +78,34 @@ namespace GCL
     time_t() { value_ = std::chrono::system_clock::now(); }
     time_t(std::chrono::time_point<std::chrono::system_clock> t) { value_ = t; }
 
+    bool operator <(time_t const &rhs) const
+    {
+      return (value_ < rhs.value_);
+    }
+
     std::chrono::time_point<std::chrono::system_clock> time() const { return value_; }
+
 
   private:
     std::chrono::time_point<std::chrono::system_clock> value_;
   };
 
   ///@brief Type used for storing date/time combinations.
-  struct dateTime_t
+  class dateTime_t
   {
-    std::chrono::time_point<std::chrono::system_clock> dateTime;
+  public:
+    dateTime_t() { value_ = std::chrono::system_clock::now(); }
+    dateTime_t(std::chrono::time_point<std::chrono::system_clock> t) { value_ = t; }
+    bool operator <(dateTime_t const &rhs) const
+    {
+      return (value_ < rhs.value_);
+    }
+
+    std::chrono::time_point<std::chrono::system_clock> dateTime() const { return value_; }
+
+  private:
+
+    std::chrono::time_point<std::chrono::system_clock> value_;
   };
 
   std::string sprintDate(std::tm *);

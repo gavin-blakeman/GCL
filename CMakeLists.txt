@@ -56,6 +56,8 @@ set(HEADERS
   include/pluginManager/pluginManager.h
   include/resource.h
   include/traits.h
+  include/sqlWriter_typedef.inc
+  include/sqlWriter_variables.inc
   )
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})

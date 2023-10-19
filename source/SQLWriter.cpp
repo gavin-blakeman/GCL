@@ -267,11 +267,11 @@ namespace GCL
     {
       if (preparingClause)
       {
-        return fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::gmtime(p.dateTime));
+        return fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::gmtime(p.dateTime()));
       }
       else
       {
-        return fmt::format("'{:%Y-%m-%d %H:%M:%S}'", fmt::gmtime(p.dateTime));
+        return fmt::format("'{:%Y-%m-%d %H:%M:%S}'", fmt::gmtime(p.dateTime()));
       };
     }
     std::string operator()(decimal_t const p) { return p.str(0, std::ios::fixed); }
@@ -319,7 +319,7 @@ namespace GCL
     std::string operator()(double const &p) { return std::to_string(p); }
     std::string operator()(date_t const p) { return fmt::format("'{:%Y-%m-%d}'", fmt::gmtime(p.date())); }
     std::string operator()(time_t const p) { return fmt::format("'{:%H:%M:%S}'", fmt::gmtime(p.time())); }
-    std::string operator()(dateTime_t const p) { return fmt::format("'{:%Y-%m-%d %H:%M:%S}'", fmt::gmtime(p.dateTime)); }
+    std::string operator()(dateTime_t const p) { return fmt::format("'{:%Y-%m-%d %H:%M:%S}'", fmt::gmtime(p.dateTime())); }
     std::string operator()(decimal_t const p) { return p.str(0, std::ios::fixed);; }
     std::string operator()(std::string const &s) { return s; }
   };
@@ -397,6 +397,24 @@ namespace GCL
                    {
                      [&](parameter_t const &p) { returnValue += to_string(p) + ")"; },
                      [&](parameterVector_t const &pv)
+                     {
+                       bool first = true;
+
+                       for (auto const &p : pv)
+                       {
+                         if (first)
+                         {
+                           first = false;
+                         }
+                         else
+                         {
+                           returnValue += ", ";
+                         }
+                         returnValue += to_string(p);
+                       }
+                       returnValue += ")";
+                     },
+                     [&](parameterSet_t const &pv)
                      {
                        bool first = true;
 
@@ -2302,6 +2320,20 @@ namespace GCL
 
   sqlWriter::whereVariant_t where_v(std::string col, operator_t op, sqlWriter::parameterVector_t param)
   {
+    return {std::make_tuple(col, op, param)};
+  }
+
+  /// @brief      Parameter variant to handle a parameterSet.
+  /// @param[in]  col: The column name.
+  /// @param[in]  op: The operator to apply. (Should be IN or NOT IN)
+  /// @param[in]  param: The set containing the parameters.
+  /// @returns    The where variant.
+  /// @version    2023-10-19/GGB - Function created.
+
+  sqlWriter::whereVariant_t where_v(std::string col, operator_t op, sqlWriter::parameterSet_t param)
+  {
+    RUNTIME_ASSERT((op == in) || (op == nin), "Only IN and NIN operators allowed with parameter sets.");
+
     return {std::make_tuple(col, op, param)};
   }
 
