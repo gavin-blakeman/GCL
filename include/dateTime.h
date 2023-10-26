@@ -67,6 +67,11 @@ namespace GCL
 
     std::chrono::time_point<std::chrono::system_clock> date() const { return value_; }
 
+    std::chrono::days operator-(date_t rhs)
+    {
+      return std::chrono::duration_cast<std::chrono::days>(value_- rhs.value_);
+    }
+
   private:
     std::chrono::time_point<std::chrono::system_clock> value_;
   };
