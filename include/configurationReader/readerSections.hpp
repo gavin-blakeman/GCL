@@ -117,12 +117,12 @@ namespace GCL
 
     virtual ~CReaderSections() {}
 
-    /// @brief Returns a tag value.
-    /// @param[in] section: The section to search for the tag.
-    /// @param[in] tagName: The name of the tag to find.
-    /// @returns A std::optional containing the data (if found)
+    /// @brief      Returns a tag value.
+    /// @param[in]  section: The section to search for the tag.
+    /// @param[in]  tagName: The name of the tag to find.
+    /// @returns    A std::optional containing the data (if found)
     /// @throws
-    /// @version 2020-04-27/GGB - Function created.
+    /// @version    2020-04-27/GGB - Function created.
 
     virtual std::optional<std::string> tagValueString(std::string const &section, std::string const &tagName)
     {

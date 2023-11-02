@@ -100,17 +100,16 @@ namespace GCL
 
     struct CSeverity
     {
-      public:
-        bool fCritical;
-        bool fError;
-        bool fWarning;
-        bool fNotice;
-        bool fInfo;
-        bool fDebug;
-        bool fException;
-        bool fTrace;
+      bool fCritical = false;
+      bool fError = false;
+      bool fWarning = false;
+      bool fNotice = false;
+      bool fInfo = false;
+      bool fDebug = false;
+      bool fException = false;
+      bool fTrace = false;
 
-        bool allow(ESeverity);
+      bool allow(ESeverity);
     };
 
     class CLoggerSink;
@@ -138,6 +137,21 @@ namespace GCL
 
     class CLogger
     {
+    public:
+       CLogger();
+       virtual ~CLogger();
+
+       virtual void addSink(PLoggerSink ls);
+       virtual bool removeSink(PLoggerSink ls);
+
+       CLoggerSink *defaultStreamSink() { return defaultStreamSink_.get(); }
+       void removeDefaultStreamSink();
+
+       virtual void logMessage(ESeverity, std::string const &);
+       virtual void logMessage(ESeverity s, boost::format const &m) { logMessage(s, boost::str(m)); }
+
+       virtual void shutDown();
+
       private:
         typedef std::shared_mutex             mutex_type;
         typedef std::unique_lock<mutex_type>  UniqueLock;
@@ -161,25 +175,24 @@ namespace GCL
         ESeverity logSeverity;
 
         virtual void writer();
-
-      public:
-        CLogger();
-        virtual ~CLogger();
-
-        virtual void addSink(PLoggerSink ls);
-        virtual bool removeSink(PLoggerSink ls);
-
-        CLoggerSink *defaultStreamSink() { return defaultStreamSink_.get(); }
-        void removeDefaultStreamSink();
-
-        virtual void logMessage(ESeverity, std::string const &);
-        virtual void logMessage(ESeverity s, boost::format const &m) { logMessage(s, boost::str(m)); }
-
-        virtual void shutDown();
     };
 
     class CLoggerSink
     {
+    public:
+      CLoggerSink();
+      void setLogLevel(CSeverity severity);
+
+      void timeStamp(bool nts) { timeStamp_ = nts;}
+      void severityStamp(bool nss) { severityStamp_ = nss;}
+
+      void trace(bool f) { logSeverity.fTrace = f; }
+      void debug(bool f) { logSeverity.fDebug = f; }
+      void info(bool f) { logSeverity.fInfo = f; }
+      void notice(bool f) { logSeverity.fNotice = f; }
+      void warning(bool f) { logSeverity.fWarning = f; }
+
+      virtual void writeRecord(PLoggerRecord const &);
       private:
         bool timeStamp_     : 1;
         bool severityStamp_ : 1;
@@ -187,32 +200,17 @@ namespace GCL
 
       protected:
         virtual void write(std::string const &) = 0;
-
-      public:
-        CLoggerSink();
-        void setLogLevel(CSeverity severity);
-
-        void timeStamp(bool nts) { timeStamp_ = nts;}
-        void severityStamp(bool nss) { severityStamp_ = nss;}
-
-        void trace(bool f) { logSeverity.fTrace = f; }
-        void debug(bool f) { logSeverity.fDebug = f; }
-        void info(bool f) { logSeverity.fInfo = f; }
-        void notice(bool f) { logSeverity.fNotice = f; }
-        void warning(bool f) { logSeverity.fWarning = f; }
-
-        virtual void writeRecord(PLoggerRecord const &);
     };
 
     CLogger &defaultLogger();
 
       // Some inline functions to simplify life
 
-    /// @brief Function to log a message.
-    /// @param[in] severity: The severity of the message.
-    /// @param[in] message: The message to log.
+    /// @brief      Function to log a message.
+    /// @param[in]  severity: The severity of the message.
+    /// @param[in]  message: The message to log.
     /// @throws
-    /// @version 2020-06-13/GGB - Converted from macro to function.
+    /// @version    2020-06-13/GGB - Converted from macro to function.
 
     inline void LOGMESSAGE(ESeverity severity, std::string const &message)
     {
@@ -229,11 +227,11 @@ namespace GCL
       defaultLogger().logMessage(critical, message);
     }
 
-    /// @brief Function to log a critical message.
-    /// @param[in] logger: The logger to use for logging.
-    /// @param[in] message: The message to log.
+    /// @brief      Function to log a critical message.
+    /// @param[in]  logger: The logger to use for logging.
+    /// @param[in]  message: The message to log.
     /// @throws
-    /// @version 2020-06-13/GGB - Converted from macro to function.
+    /// @version    2020-06-13/GGB - Converted from macro to function.
 
     inline void CRITICALMESSAGE(CLogger &logger, std::string const &message)
     {

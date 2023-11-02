@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2014-2022 Gavin Blakeman.
+//                      Copyright 2014-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -28,7 +28,8 @@
 //
 // CLASSES INCLUDED:    CLogger
 //
-// HISTORY:             2015-09-22 GGB - AIRDAS 2015.09 release
+// HISTORY:             2023-11-01 GGB - ADD deletion of unsed constructors. (Move and operator =)
+//                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2014-12-25 GGB - Development of class for "Observatory Weather System - Service"
 //
 //*********************************************************************************************************************************
@@ -52,6 +53,7 @@ namespace GCL
   {
     class CFileSink : public CLoggerSink
     {
+    public:
       enum ERotationMethod
       {
         days,               ///< A new log file is created every rotationDays days
@@ -60,7 +62,30 @@ namespace GCL
         use                 ///< A new log file is created every use (includes date and time in filename)
       };
 
+      CFileSink(std::filesystem::path const &, std::filesystem::path const &, std::filesystem::path const & =".log");
+      virtual ~CFileSink();
+
+      void openLogFile();
+
+      void setLogFileName(std::string const &filePath, std::string const &fileName, std::string const &fileExt = ".log");
+      void setRotationPolicySize(std::uint16_t copies, std::uintmax_t maxSize = 10 * 1024 * 1024);
+      void setRotationPolicyDaily(std::uint16_t copies);
+      void setRotationPolicyDays(std::uint16_t copies, std::uint16_t maxDays);
+      CFileSink &setRotationPolicyUse(std::uint16_t copies);
+
+    protected:
+      std::ofstream logFile;
+
+      virtual void rotateLogFile();
+      virtual void write(std::string const &);
+
     private:
+      CFileSink() = delete;
+      CFileSink(CFileSink const &) = delete;
+      CFileSink(CFileSink &&) = delete;
+      CFileSink &operator=(CFileSink const &) = delete;
+      CFileSink &operator=(CFileSink &&) = delete;
+
       std::filesystem::path logFilePath;
       std::filesystem::path logFileName;
       std::filesystem::path logFileExt;
@@ -77,28 +102,9 @@ namespace GCL
       std::uint16_t rotationDays;                     ///< Number of days between rotations.
       bool useUTC = true;                             ///< Use UTC for determining start of days.
 
-      CFileSink() = delete;
-      CFileSink(CFileSink const &) = delete;
+
 
       void rollFiles(void);
-
-    protected:
-      std::ofstream logFile;
-
-      virtual void rotateLogFile();
-      virtual void write(std::string const &);
-
-    public:
-      CFileSink(std::filesystem::path const &, std::filesystem::path const &, std::filesystem::path const & =".log");
-      virtual ~CFileSink();
-
-      void openLogFile();
-
-      void setLogFileName(std::string const &filePath, std::string const &fileName, std::string const &fileExt = ".log");
-      void setRotationPolicySize(std::uint16_t copies, std::uintmax_t maxSize = 10 * 1024 * 1024);
-      void setRotationPolicyDaily(std::uint16_t copies);
-      void setRotationPolicyDays(std::uint16_t copies, std::uint16_t maxDays);
-      CFileSink &setRotationPolicyUse(std::uint16_t copies);
 
     };
 

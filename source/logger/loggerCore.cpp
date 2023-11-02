@@ -57,9 +57,9 @@ namespace GCL
   namespace logger
   {
 
-    /// @brief Return a reference to the default file logger.
-    /// @note Optionally create the logger.
-    /// @version 2014-12-21/GGB - Function created.
+    /// @brief      Return a reference to the default file logger.
+    /// @throws     None.
+    /// @version    2014-12-21/GGB - Function created.
 
     CLogger &defaultLogger()
     {
@@ -73,13 +73,13 @@ namespace GCL
     //
     //******************************************************************************************************************************
 
-    /// @brief Check if the criticality is allowed
-    /// @param[in] s: The severity to check.
-    /// @returns true if the severity is allowed
-    /// @returns false otherwise
-    /// @throws None.
-    /// @version 2020-06-14/GGB - Added exception support.
-    /// @version 2016-05-06/GGB - Updated to allow critical errors.
+    /// @brief      Check if the criticality is allowed
+    /// @param[in]  s: The severity to check.
+    /// @returns    true if the severity is allowed
+    /// @returns    false otherwise
+    /// @throws     None.
+    /// @version    2020-06-14/GGB - Added exception support.
+    /// @version    2016-05-06/GGB - Updated to allow critical errors.
 
     bool CSeverity::allow(ESeverity s)
     {
@@ -329,11 +329,11 @@ namespace GCL
       };
     }
 
-    /// @brief Adds an output streamm into the container.
-    /// @param[in] ls: The logger sink to add to the logger.
-    /// @throws None.
-    /// @version 2015-09-19/GGB - Added locking to the sink container.
-    /// @version 2014-12-24/GGB - Function created.
+    /// @brief      Adds an output streamm into the container.
+    /// @param[in]  ls: The logger sink to add to the logger.
+    /// @throws     None.
+    /// @version    2015-09-19/GGB - Added locking to the sink container.
+    /// @version    2014-12-24/GGB - Function created.
 
     void CLogger::addSink(PLoggerSink ls)
     {
@@ -360,10 +360,10 @@ namespace GCL
       cvQueueData.notify_one();
     }
 
-    /// @brief Function to remove the default stream sink if it is not needed. The default stream sink is created in the
-    ///        constructor to ensure that the logger will always have an output.
-    /// @throws None.
-    /// @version 2018-08-13/GGB - Function created.
+    /// @brief      Function to remove the default stream sink if it is not needed. The default stream sink is created in the
+    ///             constructor to ensure that the logger will always have an output.
+    /// @throws     None.
+    /// @version    2018-08-13/GGB - Function created.
 
     void CLogger::removeDefaultStreamSink()
     {

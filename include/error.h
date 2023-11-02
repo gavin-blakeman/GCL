@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2022 Gavin Blakeman.
+//                      Copyright 2013-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -131,12 +131,12 @@ namespace GCL
 
   /// @brief Function to throw a runtime error.
 
-  inline void RUNTIME_ERROR(std::string const &errorString, TErrorCode errorCode = 0, std::string const &library = "")
+  [[noreturn]] inline void RUNTIME_ERROR(std::string const &errorString, TErrorCode errorCode = 0, std::string const &library = "")
   {
     throw GCL::runtime_error(errorString, errorCode, library);
   }
 
-  inline void CODE_ERROR(std::source_location const location = std::source_location::current())
+  [[noreturn]] inline void CODE_ERROR(std::source_location const location = std::source_location::current())
   {
     throw(CCodeError(std::string(location.file_name()), location.line()));
   }

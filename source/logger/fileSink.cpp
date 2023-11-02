@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2014-2022 Gavin Blakeman.
+//                      Copyright 2014-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -63,24 +63,24 @@ namespace GCL
     //
     //******************************************************************************************************************************
 
-    /// @brief Constructor for the class.
-    /// @param[in] lfp: Log file path.
-    /// @param[in] lfn: Log file name.
-    /// @param[in] lfe: Log File Extension. The extension to use. <".log">
-    /// @throws None.
-    /// @version 2022-07-10/GGB - Changed boost::filesystem to std::filesystem
-    /// @version 2018-08-18/GGB - Split log file name over three variables.
-    /// @version 2017-01-26/GGB - Use a single variable for storing the path and name.
-    /// @version 2014-07-22/GGB - Function created.
+    /// @brief      Constructor for the class.
+    /// @param[in]  lfp: Log file path.
+    /// @param[in]  lfn: Log file name.
+    /// @param[in]  lfe: Log File Extension. The extension to use. <".log">
+    /// @throws     None.
+    /// @version    2022-07-10/GGB - Changed boost::filesystem to std::filesystem
+    /// @version    2018-08-18/GGB - Split log file name over three variables.
+    /// @version    2017-01-26/GGB - Use a single variable for storing the path and name.
+    /// @version    2014-07-22/GGB - Function created.
 
     CFileSink::CFileSink(std::filesystem::path const &lfp, std::filesystem::path const &lfn, std::filesystem::path const &lfe)
       : CLoggerSink(), logFilePath(lfp), logFileName(lfn), logFileExt(lfe), logFile()
     {
     }
 
-    /// @brief Destructor for the class. Only needs to close the file. The parent takes care of the closing of the thread.
-    /// @throws None.
-    /// @version 2014-07-22/GGB - Function created.
+    /// @brief      Destructor for the class. Only needs to close the file. The parent takes care of the closing of the thread.
+    /// @throws     None.
+    /// @version    2014-07-22/GGB - Function created.
 
     CFileSink::~CFileSink()
     {
@@ -163,9 +163,9 @@ namespace GCL
       };
     }
 
-    /// @brief Function to roll the files. IE move the files down the numbering order by 1.
-    /// @pre 1. The variable "logFileFullName" needs to be fully assigned.
-    /// @version 2018-01-26/GGB - Function created.
+    /// @brief      Function to roll the files. IE move the files down the numbering order by 1.
+    /// @pre        1. The variable "logFileFullName" needs to be fully assigned.
+    /// @version    2018-01-26/GGB - Function created.
 
     void CFileSink::rollFiles(void)
     {
