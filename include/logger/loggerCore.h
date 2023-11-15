@@ -62,7 +62,6 @@
 
   // Miscellaneous library header files.
 
-#include <boost/format.hpp>
 #include <fmt/format.h>
 
 namespace GCL
@@ -148,7 +147,6 @@ namespace GCL
        void removeDefaultStreamSink();
 
        virtual void logMessage(ESeverity, std::string const &);
-       virtual void logMessage(ESeverity s, boost::format const &m) { logMessage(s, boost::str(m)); }
 
        virtual void shutDown();
 
@@ -248,17 +246,6 @@ namespace GCL
       defaultLogger().logMessage(error, message);
     }
 
-    /// @brief      Function to log an error message.
-    /// @param[in]  message: The message to log.
-    /// @throws
-    /// @version    2020-08-31/GGB - Converted from macro to function.
-
-    [[deprecated]]
-    inline void ERRORMESSAGE(boost::format const &message)
-    {
-      ERRORMESSAGE(boost::str(message));
-    }
-
     /// @brief      Function to log an warning message.
     /// @param[in]  message: The message to log.
     /// @throws
@@ -289,17 +276,6 @@ namespace GCL
       defaultLogger().logMessage(info, message);
     }
 
-    /// @brief      Function to log an information message.
-    /// @param[in]  message: The message to log.
-    /// @throws
-    /// @version    2020-10-03/GGB - Converted from macro to function.
-
-    [[deprecated]]
-    inline void INFOMESSAGE(boost::format const &message)
-    {
-      INFOMESSAGE(boost::str(message));
-    }
-
     /// @brief Function to log an debug message.
     /// @param[in] message: The message to log.
     /// @throws
@@ -308,17 +284,6 @@ namespace GCL
     inline void DEBUGMESSAGE(std::string const &message)
     {
       defaultLogger().logMessage(debug, message);
-    }
-
-    /// @brief      Function to log an debug message.
-    /// @param[in]  message: The message to log.
-    /// @throws
-    /// @version    2020-09-08/GGB - Function created.
-
-    [[deprecated]]
-    inline void DEBUGMESSAGE(boost::format const &message)
-    {
-      DEBUGMESSAGE(boost::str(message));
     }
 
     /// @brief Function to log a trace function entry point.

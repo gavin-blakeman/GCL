@@ -42,7 +42,7 @@
 
   // Miscellaneous library header files
 
-#include "boost/format.hpp"
+#include <fmt/format.h>
 
 namespace GCL
 {
@@ -54,8 +54,8 @@ namespace GCL
 
   std::string sprintDate(std::tm *dateTime)
   {
-    return boost::str(boost::format("%1$04d-%2$02d-%3$02d") % (dateTime->tm_year + 1900) %
-                      (dateTime->tm_mon + 1) % dateTime->tm_mday);
+//    return fmt::format("%1$04d-%2$02d-%3$02d") % (dateTime->tm_year + 1900) %
+//                      (dateTime->tm_mon + 1) % dateTime->tm_mday);
   }
 
   /// @brief      Outputs the passed date time as a string value.
@@ -66,8 +66,8 @@ namespace GCL
 
   std::string sprintDateTime(std::tm *dateTime)
   {
-    return boost::str(boost::format("%1$04d-%2$02d-%3$02d %4$02d:%5$02d:%6$02d") % (dateTime->tm_year + 1900) %
-                      (dateTime->tm_mon +1) % dateTime->tm_mday % dateTime->tm_hour % dateTime->tm_min % dateTime->tm_sec);
+//    return boost::format("%1$04d-%2$02d-%3$02d %4$02d:%5$02d:%6$02d") % (dateTime->tm_year + 1900) %
+//                      (dateTime->tm_mon +1) % dateTime->tm_mday % dateTime->tm_hour % dateTime->tm_min % dateTime->tm_sec);
   }
 
   /// @brief      Outputs the passed time as a string value.
@@ -78,7 +78,7 @@ namespace GCL
 
   std::string sprintTime(struct tm *dateTime)
   {
-    return boost::str(boost::format("%1$02d:%2$02d:%3$02d") % dateTime->tm_hour % dateTime->tm_min % dateTime->tm_sec);
+    //return boost::str(boost::format("%1$02d:%2$02d:%3$02d") % dateTime->tm_hour % dateTime->tm_min % dateTime->tm_sec);
   }
 
   /// @brief      Parses a YYYY-MM-DD into a std::chrono::system_clock instance

@@ -44,7 +44,6 @@
 
   // Miscellaneous library header files
 
-#include "boost/format.hpp"
 #include "boost/locale.hpp"
 
   // GCL Library header files.
@@ -182,7 +181,7 @@ namespace GCL
 
           // Delete the last file if necessary.
 
-        number = boost::str( boost::format("%1$02d") % copyIndex);      /// @todo Limitation in boost::format cannot support variable lenght *
+        //number = boost::str( boost::format("%1$02d") % copyIndex);      /// @todo Limitation in boost::format cannot support variable lenght *
         fnNew = openLogFileName;
         fnNew += "." + number;
 
@@ -197,7 +196,7 @@ namespace GCL
 
         for (; copyIndex > 0; copyIndex--)
         {
-          number = boost::str( boost::format("%1$02d") % copyIndex);
+          //number = boost::str( boost::format("%1$02d") % copyIndex);
           fnOld = logFileFullName;
           fnOld += "." + number;
 

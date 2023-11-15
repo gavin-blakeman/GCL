@@ -45,7 +45,6 @@
 
   // Boost libraries
 
-#include <boost/format.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
 
 namespace GCL
@@ -126,7 +125,7 @@ namespace GCL
     std::uint16_t min = std::floor((seconds % 3600) / 60);
     std::uint16_t sec = seconds % 60;
 
-    return boost::str(boost::format("%|02d|:%|02d|:%|02d|") % hrs % min % sec);
+    //return boost::str(boost::format("%|02d|:%|02d|:%|02d|") % hrs % min % sec);
   }
 
   /// @brief Formats a double in HMS format with the required number of decimal places.
