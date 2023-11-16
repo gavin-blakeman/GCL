@@ -44,20 +44,33 @@
 namespace GCL
 {
 
+  /// @brief      Parse the data. Just forwards the call to processParseFile();
+  /// @throws
+  /// @version    2023-10-02/GGB - Function created.
 
   void CSAPBKGParser::processParseData()
   {
-    processParseFile();
+    if (!parsingComplete)
+    {
+      processParseFile();
+    };
   }
+
+  /// @brief      Parse the header. Just forwards the call to processParseFile();
+  /// @throws
+  /// @version    2023-10-02/GGB - Function created.
 
   void CSAPBKGParser::processParseHeader()
   {
-    processParseFile();
+    if (!parsingComplete)
+    {
+      processParseFile();
+    }
   }
 
   /// @brief      Parses the entire file.
   /// @throws
-
+  /// @version    2023-10-02/GGB - Function created.
 
   void CSAPBKGParser::processParseFile()
   {
@@ -168,13 +181,15 @@ namespace GCL
       }
       lineNumber++;
     }
+    parsingComplete = true;
   }
 
   /// @brief      Tests if a line only consists of '-' characters.
   /// @param[in]  svLine: The line to test.
+  /// @throws     None.
   /// @returns    true if the line is only '-' characters.
 
-  bool CSAPBKGParser::testLineDash(std::string_view const &svLine)
+  bool CSAPBKGParser::testLineDash(std::string_view const &svLine) noexcept
   {
     bool rv = true;
     std::size_t indx = 0;
@@ -215,7 +230,10 @@ namespace GCL
     return rv;
   }
 
-  /// @brief      Tokenise a line when the widths are known. (Data)
+  /// @brief      Tokenise a line when the widths are known. (Data) It is possible that the SAP files do not accurately follow
+  ///             the column widths. The column width may be less than, or more that the widths determined by the headers.
+  ///             This is the reason for the tests to check if the inter-colum character is in fact a '|'. If it is not, the
+  ///             line will be toeknised using the alternate tokeniser.
   /// @param[in]  svLine: The line to tokenise.
   /// @param[in]  columnWidths: The widths of each column.
   /// @returns    A dataLine containing all the data from the line.
@@ -224,13 +242,29 @@ namespace GCL
   GCL::CDataParser::dataLine_t CSAPBKGParser::tokeniseLine(std::string_view &svLine, columnData_t const & columnWidths)
   {
     dataLine_t rv;
+    bool parseFail = false;
 
     for (auto const &columnWidth : columnWidths)
     {
-      rv.second.push_back(std::string{svLine.substr(columnWidth.first, columnWidth.second)});
+      if (svLine[std::get<2>(columnWidth)] != '|')
+      {
+        parseFail = true;
+        break;
+      }
+      else
+      {
+        rv.second.push_back(std::string{svLine.substr(std::get<0>(columnWidth), std::get<1>(columnWidth))});
+      };
     }
 
-    return rv;
+    if (parseFail)
+    {
+      return tokeniseLine(svLine);
+    }
+    else
+    {
+      return rv;
+    };
   }
 
   /// @brief      Determines the start and width of each column.
@@ -251,8 +285,8 @@ namespace GCL
       columnEnd = svLine.find("|", columnStart);
       if (columnEnd != std::string_view::npos)
       {
-        columnData.emplace_back(columnStart, columnEnd - columnStart);
-        columnHeadings.emplace_back(svLine.substr(columnData.back().first, columnData.back().second));
+        columnData.emplace_back(columnStart, columnEnd - columnStart, columnEnd);
+        columnHeadings.emplace_back(svLine.substr(columnStart, columnEnd - columnStart));
         columnStart = columnEnd + 1;
       }
       else

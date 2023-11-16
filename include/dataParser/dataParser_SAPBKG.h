@@ -38,7 +38,7 @@
   // Standard C++ library
 
 #include <iostream>
-
+#include <tuple>
 
   // GCL header files
 
@@ -67,7 +67,7 @@ namespace GCL
       CSAPBKGParser &operator=(CSAPBKGParser const &) = delete;
       CSAPBKGParser &operator=(CSAPBKGParser &&) = delete;
 
-      using columnWidth_t = std::pair<std::size_t, std::size_t>;
+      using columnWidth_t = std::tuple<std::size_t, std::size_t, std::size_t>; // Start, Width, InterColumn.
       using columnData_t = std::vector<columnWidth_t>;
 
       bool parsingComplete = false;
@@ -76,7 +76,7 @@ namespace GCL
       virtual void processParseHeader() override;
       virtual void processParseFile() override;
 
-      bool testLineDash(std::string_view const &);
+      bool testLineDash(std::string_view const &) noexcept;
       dataLine_t tokeniseLine(std::string_view &);
       dataLine_t tokeniseLine(std::string_view &, columnData_t const &);
       void determineColumnWidths(std::string_view &, columnData_t &);
