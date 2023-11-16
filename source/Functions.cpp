@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015, 2017-2022 Gavin Blakeman.
+//                      Copyright 2015, 2017-2023 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -43,9 +43,10 @@
 #include <sstream>
 #include <vector>
 
-  // Boost libraries
+  // Miscellaneous libraries
 
 #include <boost/date_time/gregorian/gregorian.hpp>
+#include <fmt/format.h>
 
 namespace GCL
 {
@@ -117,6 +118,7 @@ namespace GCL
   /// @param[in]  seconds: number of seconds past midnight.
   /// @returns    The time as a string HH:mm:ss.ss
   /// @throws
+  /// @version    2023-11-16/GGB - Updated to use fmt::format.
   /// @version    2017-08-11/GGB - Function created.
 
   std::string sprintfHMS(std::uint32_t const &seconds)
@@ -125,7 +127,7 @@ namespace GCL
     std::uint16_t min = std::floor((seconds % 3600) / 60);
     std::uint16_t sec = seconds % 60;
 
-    //return boost::str(boost::format("%|02d|:%|02d|:%|02d|") % hrs % min % sec);
+    return fmt::format("{:02d}:{:02d}:{:02d}", hrs, min, sec);
   }
 
   /// @brief Formats a double in HMS format with the required number of decimal places.
