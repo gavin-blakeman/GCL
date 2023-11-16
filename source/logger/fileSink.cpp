@@ -28,7 +28,8 @@
 //
 // CLASSES INCLUDED:    CLogger
 //
-// HISTORY:             2018-01-27 GGB - Removed all compression support. Do not see any way to make this truly system independent.
+// HISTORY:             2023-11-16 GGB - Removed useage of boost::format.
+//                      2018-01-27 GGB - Removed all compression support. Do not see any way to make this truly system independent.
 //                      2018-01-26 GGB - Remove CFileSink default constructor.
 //                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2014-12-25 GGB - Development of class for "Observatory Weather System - Service"
@@ -45,6 +46,7 @@
   // Miscellaneous library header files
 
 #include "boost/locale.hpp"
+#include <fmt/format.h>
 
   // GCL Library header files.
 
@@ -164,6 +166,8 @@ namespace GCL
 
     /// @brief      Function to roll the files. IE move the files down the numbering order by 1.
     /// @pre        1. The variable "logFileFullName" needs to be fully assigned.
+    /// @throws
+    /// @version    2023-11-16/GGB - Removed use of boost::format.
     /// @version    2018-01-26/GGB - Function created.
 
     void CFileSink::rollFiles(void)
@@ -181,7 +185,7 @@ namespace GCL
 
           // Delete the last file if necessary.
 
-        //number = boost::str( boost::format("%1$02d") % copyIndex);      /// @todo Limitation in boost::format cannot support variable lenght *
+        number = fmt::format("{:2d}", copyIndex);
         fnNew = openLogFileName;
         fnNew += "." + number;
 
@@ -196,7 +200,7 @@ namespace GCL
 
         for (; copyIndex > 0; copyIndex--)
         {
-          //number = boost::str( boost::format("%1$02d") % copyIndex);
+          number = fmt::format("{:2d}", copyIndex);
           fnOld = logFileFullName;
           fnOld += "." + number;
 
