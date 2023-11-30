@@ -95,17 +95,18 @@ namespace GCL
   /// @brief        Creates the message string for the runtime assertion.
   /// @param[in]    expression: The expression that failed.
   /// @param[in]    fileName: The name of the source file that generated the error.
-  /// @param[in]    timeStamp: The build timestamp.
   /// @param[in]    lineNumber: The line number that created the exception.
   /// @param[in]    message: The message to associate with the exception.
   /// @returns      A string to use for creating a standardised description for the exception.
   /// @throws       std::bad_alloc
+  /// @version      2023-11-30.GGB - Changed to reflect move to std::source_location
   /// @version      2020-09-06/GGB - Removed parameter library.
   /// @version      2020-04-14/GGB - Function created.
 
   std::string CRuntimeAssert::errorMessage(std::string const &expression,
-                                           std::string const &fileName, std::string const &timeStamp,
-                                           std::size_t lineNumber, std::string const &message) const
+                                           std::string const &fileName,
+                                           std::size_t lineNumber,
+                                           std::string const &message) const
   {
     std::string messageString;
 
