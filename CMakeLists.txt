@@ -60,7 +60,15 @@ set(HEADERS
   include/sqlWriter_variables.inc
   )
 
+set(DIRECTORIES
+  ../MCL
+  ../SCL
+  ${fmt_DIR}
+  ${Boost_INCLUDE_DIRS}
+  )
+
 add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
 
-
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME}
+                           PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+                           PRIVATE ${DIRECTORIES})

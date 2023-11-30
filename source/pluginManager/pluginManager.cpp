@@ -43,8 +43,8 @@
   // Miscellaneous library header files
 
 #include "boost/locale.hpp"
-#include <fmt/format.h>
-#include <fmt/std.h>
+#include "fmt/format.h"
+#include "fmt/std.h"
 
   // GCL library
 
@@ -284,8 +284,8 @@ namespace GCL::plugin
     return mapSymbol(aliasMap[pluginAlias], symbol, cacheSymbol);
   }
 
-  /// @brief Unload all the loaded plugins. (Called by the destructor, can also be called apart from the destructor.)
-  /// @version 2023-03-28/GGB - Function created.
+  /// @brief      Unload all the loaded plugins. (Called by the destructor, can also be called apart from the destructor.)
+  /// @version    2023-03-28/GGB - Function created.
 
   void CPluginManager::unloadAll()
   {
