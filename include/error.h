@@ -49,8 +49,6 @@
 
 #include "include/logger/loggerCore.h"
 
-#ifndef GCL_CONTROL
-
 namespace GCL
 {
   using GCL::logger::LOGEXCEPTION;
@@ -110,16 +108,16 @@ namespace GCL
 
   class CRuntimeAssert: public std::runtime_error
   {
-  private:
-    std::string errorMessage(std::string const &, std::string const &, std::string const &, std::size_t, std::string const &) const;
-
   public:
-    explicit CRuntimeAssert(std::string const &expression, std::string const &fileName,
-                            std::string const &timeStamp, size_t lineNumber, std::string const &message)
+    explicit CRuntimeAssert(std::string const &expression, std::string const &message,
+                            std::source_location const location = std::source_location::current())
       : std::runtime_error("Runtime Assert")
     {
-      LOGEXCEPTION(errorMessage(expression, fileName, timeStamp, lineNumber, message));
+      LOGEXCEPTION(errorMessage(expression, std::string(location.file_name()),
+                                location.line(), message));
     }
+  private:
+    std::string errorMessage(std::string const &, std::string const &, std::size_t, std::string const &) const;
   };
 
   class search_error : public std::runtime_error
@@ -141,16 +139,8 @@ namespace GCL
     throw(CCodeError(std::string(location.file_name()), location.line()));
   }
 
-#define RUNTIME_ASSERT(EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert((#EXPRESSION),  __FILE__, __TIMESTAMP__, (size_t) __LINE__, (MESSAGE)); }}
+  #define RUNTIME_ASSERT(EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert((#EXPRESSION), (MESSAGE)); }}
 
 }	// namespace GCL
-
-#else // GCL_CONTROL
-
-#define ERROR(LIBRARY, ERROR)
-#define CODE_ERROR
-#define RUNTIME_ASSERT(EXPRESSION, MESSAGE)
-
-#endif // GCL_CONTROL
 
 #endif // GCL_ERROR_H

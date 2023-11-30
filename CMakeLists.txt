@@ -1,4 +1,4 @@
-﻿# GCL Library CMAKE file
+# GCL Library CMAKE file
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.14 FATAL_ERROR)
 
