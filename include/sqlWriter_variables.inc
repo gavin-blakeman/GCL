@@ -42,3 +42,4 @@
 
   bool forUpdate_ = false;
   bool forShare_ = false;
+  bool preparedStatement_ = false;

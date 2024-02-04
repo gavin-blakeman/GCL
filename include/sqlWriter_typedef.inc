@@ -48,7 +48,7 @@
 
   typedef std::vector<parameterJoin> joinStorage;
 
-    // Where Types
+    // Where clause types
 
   using parameterVariant_t = std::variant<parameter_t, parameterVector_t, parameterSet_t, pointer_t>;
   using whereTest_t = std::tuple<std::string, operator_t, parameterVariant_t>;
@@ -64,7 +64,7 @@
 
     // From Types
 
-  using from_t = std::variant<std::string, pointer_t>;
-  using fromPair_t = std::pair<from_t, std::optional<std::string>>;
+  using from_t = std::variant<std::string, pointer_t>;                ///!< Field/SubQuery
+  using fromPair_t = std::pair<from_t, std::optional<std::string>>;   ///!< Field:
   using fromStorage_t = std::vector<fromPair_t>;
 

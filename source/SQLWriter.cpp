@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2023 Gavin Blakeman.
+//                      Copyright 2013-2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -71,7 +71,6 @@
 
 namespace GCL
 {
-
   std::string const TABLE("TABLE");
   std::string const COLUMN("COLUMN");
   std::string const END("END");
@@ -227,9 +226,13 @@ namespace GCL
    *
    */
 
+  /* The struct below is used for converting the parameters to strings. This is needed for non-parameterised queries
+   * where the values need to be converted to strings.
+   */
   struct parameter_to_string
   {
-    bool preparingClause;
+    bool preparingClause; // Indicates that the statement is for a prepared statement.
+
     std::string operator()(std::uint8_t const &p) { return std::to_string(p); }
     std::string operator()(std::uint16_t const &p) { return std::to_string(p); }
     std::string operator()(std::uint32_t const &p) { return std::to_string(p); }
@@ -280,9 +283,13 @@ namespace GCL
       using namespace std::string_literals;
       return (preparingClause ? ""s : "'"s) + s + (preparingClause ? ""s : "'"s);
     }
-    std::string operator()(sqlWriter::bindValue_t const &bvt) { return bvt.to_string(); }
+    std::string operator()(sqlWriter::bindValue_t const &bvt)
+    {
+      return bvt.to_string();
+    }
   };
 
+  /* Returns the type of the parameter. */
   struct parameter_to_type
   {
     sqlWriter::parameterType_t operator()(std::uint8_t const &) { return sqlWriter::PT_U8; }
@@ -299,7 +306,6 @@ namespace GCL
     sqlWriter::parameterType_t operator()(time_t const ) { return sqlWriter::PT_TIME; }
     sqlWriter::parameterType_t operator()(dateTime_t const ) { return sqlWriter::PT_DATETIME; }
     sqlWriter::parameterType_t operator()(decimal_t const ) { return sqlWriter::PT_DECIMAL; }
-
     sqlWriter::parameterType_t operator()(std::string const &) { return sqlWriter::PT_STRING; }
     sqlWriter::parameterType_t operator()(sqlWriter::bindValue_t const &) { CODE_ERROR(); }
   };
@@ -336,7 +342,7 @@ namespace GCL
 
   std::string sqlWriter::to_string(parameter_t const &p) const
   {
-    parameter_to_string v{preparingStatement};
+    parameter_to_string v{preparedStatement_};
     return std::visit(v, p);
   }
 
@@ -362,7 +368,6 @@ namespace GCL
 
   std::string sqlWriter::to_string(whereTest_t const &w) const
   {
-
     std::string returnValue = "(";
 
     returnValue += std::get<0>(w) + " ";
@@ -559,13 +564,6 @@ namespace GCL
     return returnValue;
   }
 
-
-  //******************************************************************************************************************************
-  //
-  // CSQLWriter
-  //
-  //******************************************************************************************************************************
-
   sqlWriter::operatorMap_t sqlWriter::operatorMap =
   {
     {eq, "="},
@@ -587,8 +585,6 @@ namespace GCL
     {XOR, "XOR"},
     {NOT, "NOT"}
   };
-
-
 
   /// @brief      Function to create a call procedure.
   /// @param[in]  procedureName: The name of the procedure to call.
@@ -740,7 +736,7 @@ namespace GCL
   /// @version    2022-05-01/GGB - Added support for the 'RETURNING' function.
   /// @version    2015-03-31/GGB - Function created.
 
-  std::string sqlWriter::createInsertQuery(bool preparedQuery) const
+  std::string sqlWriter::createInsertQuery() const
   {
     std::string returnValue = "INSERT INTO " + insertTable + " (";
     bool firstValue = true;
@@ -766,7 +762,7 @@ namespace GCL
 
     returnValue += ") ";
 
-    if (preparedQuery)
+    if (preparedStatement_)
     {
       std::size_t placeHolderCount = selectFields.size();
 
@@ -899,11 +895,11 @@ namespace GCL
   /// @version    2023-09-26/GGB - Added support for prepared queries.
   /// @version    2017-08-21/GGB - Function created.
 
-  std::string sqlWriter::createUpdateQuery(bool preparedQuery) const
+  std::string sqlWriter::createUpdateQuery() const
   {
     std::string returnValue = "UPDATE " + updateTable + " ";
 
-    returnValue += createSetClause(preparedQuery);
+    returnValue += createSetClause(preparedStatement_);
 
     returnValue += createWhereClause();
 
@@ -911,13 +907,12 @@ namespace GCL
   }
 
   /// @brief      Converts the upsert query to a string.
-  /// @param[in]  preparedQuery: true = preparing a query.
   /// @throws     GCL::CRuntimeError
   /// @version    2023-09-26/GGB - Added support for prepared queries
   /// @version    2021-11-18/GGB - Updated to use std::variant with the where fields.
   /// @version    2019-12-08/GGB - Function created.
 
-  std::string sqlWriter::createUpsertQuery(bool preparedQuery) const
+  std::string sqlWriter::createUpsertQuery() const
   {
     // Notes:
     //  1. The where() clauses should be populated. These need to be converted to insert clauses for the insert function.
@@ -950,7 +945,7 @@ namespace GCL
           };
 
           fieldNames += getColumnMappedName(element.first);
-          fieldValues += preparedQuery ? "?" : to_string(element.second);
+          fieldValues += preparedStatement_ ? "?" : to_string(element.second);
         };
 
           // Before we can create the insert query, we need to
@@ -975,7 +970,7 @@ namespace GCL
           };
           fieldValues+= getColumnMappedName(element.first) + " = ";
 
-          fieldValues += preparedQuery ? "?" : to_string(element.second);
+          fieldValues += preparedStatement_ ? "?" : to_string(element.second);
         };
 
         returnValue += fieldValues;
@@ -992,13 +987,14 @@ namespace GCL
   }
 
   /// @brief      Converts the where clause to a string for creating the SQL string.
+  /// @param[in]  preparedQuery: true if the quewry should be a prepared query.
   /// @returns    The where clause.
   /// @throws
   /// @version    2022-06-02/GGB - Added support for 'IN'
   /// @version    2021-11-18/GGB - Updated to use std::variant with the where fields.
   /// @version    2015-05-24/GGB - Function created.
 
-  std::string sqlWriter::createWhereClause() const
+  std::string sqlWriter::createWhereClause(bool preparedQuery) const
   {
     logger::TRACE_ENTER();
     std::string returnValue = "";
@@ -1062,6 +1058,232 @@ namespace GCL
   std::string sqlWriter::getColumnMappedName(std::string const &columnName) const
   {
     std::string returnValue = columnName;
+
+    return returnValue;
+  }
+
+  /// @brief  Return the mapped table name.
+    /// @todo Implement the getTableMap function. (Bug# 0000194)
+
+    std::string sqlWriter::getTableMappedName(std::string const &search) const
+    {
+      std::string returnValue = search;
+
+      return returnValue;
+    }
+
+  /// @brief      Determines if the stored query has any bind values.
+  /// @returns    true - if there are bind values.
+  /// @version    2024-02-03/GGB - Function created.
+
+  bool sqlWriter::hasBindValues() const
+  {
+    bool returnValue = false;
+
+    switch (queryType)
+    {
+      case qt_select:
+      case qt_delete:
+      {
+          // Only the where clause needs to be tested,
+
+        std::visit(overloaded
+        {
+          [&](std::monostate const &) { CODE_ERROR(); },
+          [&](whereTest_t const &wt) { returnValue = returnValue || hasBindValues(wt); },
+          [&](whereLogical_t const &wl) { returnValue = returnValue || hasBindValues(wl); },
+        }, whereClause_.base);
+        break;
+      }
+      case qt_update:
+      {
+        // Need to check the where clause and the set clause.
+        // Set clause is a vector<std::pair<string, parameter_t>>
+
+        std::visit(overloaded
+        {
+          [&](std::monostate const &) { CODE_ERROR(); },
+          [&](whereTest_t const &wt) { returnValue = hasBindValues(wt); },
+          [&](whereLogical_t const &wl) { returnValue = hasBindValues(wl); },
+        }, whereClause_.base);
+
+        if (!returnValue)
+        {
+          for (auto const &parameter: setFields)
+          {
+            returnValue = returnValue || std::holds_alternative<bindValue_t>(parameter.second);
+          }
+        }
+        break;
+      }
+      case qt_insert:
+      {
+        returnValue = hasBindValues(insertValue);
+        break;
+      }
+      default:
+      {
+        CODE_ERROR();
+        // Does not return.
+      }
+    }
+
+    return returnValue;
+  }
+
+  /// @brief      Tests of a whereTest clause has bind parameters.
+  /// @param[in]  wl: The where testclause to test.
+  /// @returns    true if the clause has bind parameters.
+  /// @version    2024-02-03/GGB - Function created.
+
+  bool sqlWriter::hasBindValues(whereTest_t const &wt) const
+  {
+    bool returnValue = false;
+
+    switch(std::get<1>(wt))
+    {
+      case eq:
+      case gt:
+      case lt:
+      case gte:
+      case lte:
+      case neq:
+      case nse:
+      case in:
+      case nin:
+      {
+        std::visit(overloaded
+         {
+           [&](parameter_t const &p)
+           {
+             if (std::holds_alternative<bindValue_t>(p))
+             {
+               returnValue = true;
+             }
+           },
+           [&](parameterVector_t const &pv)
+           {
+             for (auto const &p : pv)
+             {
+               if (std::holds_alternative<bindValue_t>(p))
+               {
+                 returnValue = true;
+               }
+             }
+           },
+           [&](parameterSet_t const &pv)
+           {
+             for (auto const &p : pv)
+             {
+               if (std::holds_alternative<bindValue_t>(p))
+               {
+                 returnValue = true;
+                 break;
+               }
+             }
+           },
+           [&](pointer_t const &pt)
+           {
+             returnValue = returnValue || pt->hasBindValues();
+           },
+         }, std::get<2>(wt));
+        break;
+      };
+      case between:
+      {
+        if (std::holds_alternative<parameterVector_t>(std::get<2>(wt)))
+        {
+          returnValue = returnValue || std::holds_alternative<bindValue_t>(std::get<parameterVector_t>(std::get<2>(wt))[0]);
+          returnValue = returnValue || std::holds_alternative<bindValue_t>(std::get<parameterVector_t>(std::get<2>(wt))[1]);
+        }
+        break;
+      }
+      default:
+      {
+        CODE_ERROR();
+        break;
+      }
+    }
+    return returnValue;
+  }
+
+  /// @brief      Tests of a whereLogical clause has bind parameters.
+  /// @param[in]  wl: The where logical clause to test.
+  /// @returns    true if the clause has bind parameters.
+  /// @version    2024-02-03/GGB - Function created.
+
+  bool sqlWriter::hasBindValues(whereLogical_t const &wl) const
+  {
+    return hasBindValues(*std::get<0>(wl)) || hasBindValues(*std::get<2>(wl));
+  }
+
+  /// @brief      Tests of a whereVariant clause has bind parameters.
+  /// @param[in]  wl: The where variant clause to test.
+  /// @returns    true if the clause has bind parameters.
+  /// @version    2024-02-03/GGB - Function created.
+
+  bool sqlWriter::hasBindValues(whereVariant_t const &wv) const
+  {
+    bool returnValue;
+
+    std::visit(overloaded
+    {
+      [&](std::monostate const &) { returnValue = false; },
+      [&](whereTest_t const &wt) { returnValue = hasBindValues(wt); },
+      [&](whereLogical_t const &wl) { returnValue = hasBindValues(wl); },
+    }, wv.base);
+
+    return returnValue;
+  }
+
+  /// @brief      Determine if the valueType has any bind values.
+  /// @param[in]  vt: The value type to test.
+  /// @returns    true - If there are bind parameters.
+  /// @throws
+  /// @version    2024-02-04
+
+  bool sqlWriter::hasBindValues(valueType_t const &vt) const
+  {
+    bool returnValue;
+
+    std::visit(overloaded
+    {
+      [&](std::monostate const &) { CODE_ERROR(); },
+      [&](valueStorage_t const &vs) { returnValue = hasBindValues(vs); },
+      [&](pointer_t const &pt) { returnValue = pt->hasBindValues(); },
+    }, vt);
+
+    return returnValue;
+  }
+
+  /// @brief      Determine if the valueType has any bind values.
+  /// @param[in]  p: The parameter to test.
+  /// @returns    true - If there are bind parameters.
+  /// @throws
+  /// @version    2024-02-04
+
+  bool sqlWriter::hasBindValues(parameter_t const &p) const
+  {
+    return std::holds_alternative<bindValue_t>(p);
+  }
+
+  /// @brief      Determine if the valueStorage has any bind values.
+  /// @param[in]  p: The parameter to test.
+  /// @returns    true - If there are bind parameters.
+  /// @throws
+  /// @version    2024-02-04
+
+  bool sqlWriter::hasBindValues(valueStorage_t const &vs) const
+  {
+    bool returnValue = false;
+
+    for (auto &outerElement : vs)
+    {
+      for (auto &innerElement : outerElement)
+      {
+        returnValue = returnValue || hasBindValues(innerElement);
+      };
+    };
 
     return returnValue;
   }
@@ -1451,6 +1673,7 @@ namespace GCL
   }
 
   /// @brief      Produces the string for a SELECT query.
+  /// @param[in]  preparedQuery: true if the quewry should be a prepared query.
   /// @returns    A string containing the select clause.
   /// @throws     None.
   /// @version    2021-04-11/GGB - Added support for "FOR SHARE" and "FOR UPDATE"
@@ -1720,59 +1943,6 @@ namespace GCL
     };
 
     return *this;
-  }
-
-  /// @brief      Prepares a query. For insert queries, values are replaced with the relevant character.
-  /// @throws     GCL::CRuntimeError
-  /// @version    2023-09-23/GGB - Function created.
-
-  std::string sqlWriter::preparedQuery() const
-  {
-    std::string returnValue;
-
-    switch (queryType)
-    {
-      case qt_select:
-      {
-        returnValue = createSelectQuery();
-        break;
-      };
-      case qt_insert:
-      {
-        returnValue = createInsertQuery(true);
-        break;
-      };
-      case qt_update:
-      {
-        returnValue = createUpdateQuery(true);
-        break;
-      }
-      case qt_delete:
-      {
-        returnValue = createDeleteQuery();
-        break;
-      }
-      case qt_upsert:
-      {
-        returnValue = createUpsertQuery(true);
-        break;
-      }
-      case qt_call:
-      {
-        returnValue = createCall();
-        break;
-      }
-      default:
-      {
-        CODE_ERROR();
-        break;
-      };
-    }
-
-    return returnValue;
-
-
-
   }
 
   /// @brief      Function to load a map file and store all the aliases.
@@ -2146,25 +2316,244 @@ namespace GCL
     return returnValue;
   }
 
-  /// @brief  Return the mapped table name.
-  /// @todo Implement the getTableMap function. (Bug# 0000194)
-
-  std::string sqlWriter::getTableMappedName(std::string const &search) const
+  sqlWriter &sqlWriter::selfJoin(std::string const &, std::string const &)
   {
-    std::string returnValue = search;
+    CODE_ERROR(); // not yet implemented.
+    return *this;
+  }
+
+  /// @brief      Determines if a function should be parameterised. This checks for input strings in certain clauses depending on
+  ///             the type of the query.
+  /// @details    shouldParameterise is different from hasBindValues as shouldParameterise focusses on whether there are strings
+  ///             that should be parameterised.
+  ///             SELECT: Only the where clause needs checking.
+  ///             UPDATE: The where clause, and the set values need checking.
+  ///             INSERT: The values need checking.
+  ///             DELETE: The where clause needs checking.
+  /// @returns    true if the  query should be parameterised.
+  /// @throws
+  /// @version    2024-02-04/GGB - Function created.
+
+  bool sqlWriter::shouldParameterise() const
+  {
+    bool returnValue = false;
+
+        switch (queryType)
+        {
+          case qt_select:
+          case qt_delete:
+          {
+              // Only the where clause needs to be tested,
+
+            std::visit(overloaded
+            {
+              [&](std::monostate const &) { CODE_ERROR(); },
+              [&](whereTest_t const &wt) { returnValue = returnValue || shouldParameterise(wt); },
+              [&](whereLogical_t const &wl) { returnValue = returnValue || shouldParameterise(wl); },
+            }, whereClause_.base);
+            break;
+          }
+          case qt_update:
+          {
+            // Need to check the where clause and the set clause.
+            // Set clause is a vector<std::pair<string, parameter_t>>
+
+            std::visit(overloaded
+            {
+              [&](std::monostate const &) { CODE_ERROR(); },
+              [&](whereTest_t const &wt) { returnValue = shouldParameterise(wt); },
+              [&](whereLogical_t const &wl) { returnValue = shouldParameterise(wl); },
+            }, whereClause_.base);
+
+            if (!returnValue)
+            {
+              //using pairStorage = std::vector<parameterPair>;
+
+              for (auto const &parameter: setFields)
+              {
+                returnValue = returnValue || std::holds_alternative<std::string>(parameter.second);
+              }
+            }
+            break;
+          }
+          case qt_insert:
+          {
+            returnValue = shouldParameterise(insertValue);
+            break;
+          }
+          default:
+          {
+            CODE_ERROR();
+            // Does not return.
+          }
+        }
+
+        return returnValue;
+  }
+
+  /// @brief      Tests a whereTest for whether the query should be parameterised.
+  /// @param[in]  wt: The whereTest to test.
+  /// @returns    true is the query should be parameterised.
+  /// @throws
+  /// @version    2024-02-04/GGB - Function created.
+
+  bool sqlWriter::shouldParameterise(whereTest_t const &wt) const
+  {
+    bool returnValue = false;
+
+    switch(std::get<1>(wt))
+    {
+      case eq:
+      case gt:
+      case lt:
+      case gte:
+      case lte:
+      case neq:
+      case nse:
+      case in:
+      case nin:
+      {
+        std::visit(overloaded
+         {
+           [&](parameter_t const &p)
+           {
+             if (std::holds_alternative<std::string>(p))
+             {
+               returnValue = true;
+             }
+           },
+           [&](parameterVector_t const &pv)
+           {
+             for (auto const &p : pv)
+             {
+               if (std::holds_alternative<std::string>(p))
+               {
+                 returnValue = true;
+               }
+             }
+           },
+           [&](parameterSet_t const &pv)
+           {
+             for (auto const &p : pv)
+             {
+               if (std::holds_alternative<std::string>(p))
+               {
+                 returnValue = true;
+                 break;
+               }
+             }
+           },
+           [&](pointer_t const &pt)
+           {
+             returnValue = returnValue || pt->hasBindValues();
+           },
+         }, std::get<2>(wt));
+        break;
+      };
+      case between:
+      {
+        if (std::holds_alternative<parameterVector_t>(std::get<2>(wt)))
+        {
+          returnValue = returnValue || std::holds_alternative<std::string>(std::get<parameterVector_t>(std::get<2>(wt))[0]);
+          returnValue = returnValue || std::holds_alternative<std::string>(std::get<parameterVector_t>(std::get<2>(wt))[1]);
+        }
+        break;
+      }
+      default:
+      {
+        CODE_ERROR();
+        break;
+      }
+    }
+    return returnValue;
+  }
+
+  /// @brief      Tests a whereLogical for whether the query should be parameterised.
+  /// @param[in]  wt: The whereTest to test.
+  /// @returns    true is the query should be parameterised.
+  /// @throws
+  /// @version    2024-02-04/GGB - Function created.
+
+  bool sqlWriter::shouldParameterise(whereLogical_t const &wl) const
+  {
+    return hasBindValues(*std::get<0>(wl)) || hasBindValues(*std::get<2>(wl));
+  }
+
+  /// @brief      Tests a whereLogical for whether the query should be parameterised.
+  /// @param[in]  wt: The whereTest to test.
+  /// @returns    true is the query should be parameterised.
+  /// @throws
+  /// @version    2024-02-04/GGB - Function created.
+
+  bool sqlWriter::shouldParameterise(whereVariant_t const &wv) const
+  {
+    bool returnValue;
+
+    std::visit(overloaded
+    {
+      [&](std::monostate const &) { returnValue = false; },
+      [&](whereTest_t const &wt) { returnValue = hasBindValues(wt); },
+      [&](whereLogical_t const &wl) { returnValue = hasBindValues(wl); },
+    }, wv.base);
 
     return returnValue;
+  }
+
+  /// @brief      Determines if a valueType should be parameterised.
+  /// @param[in]  vt: The value type to test.
+  /// @returns    true - If the query should be parameterised.
+  /// @throws
+  /// @version    2024-02-04/GGB - Function created.
+
+  bool sqlWriter::shouldParameterise(valueType_t const &vt) const
+  {
+    bool returnValue;
+
+    std::visit(overloaded
+               {
+                 [&](std::monostate const &) { CODE_ERROR(); },
+                 [&](valueStorage_t const &vs) { returnValue = shouldParameterise(vs); },
+                 [&](pointer_t const &pt) { returnValue = pt->shouldParameterise();},
+               }, vt);
+
+    return returnValue;
+  }
+
+  /// @brief      Tests valueStorage to determine if the query should be parameterised.
+  /// @param[in]  vs: The value storage to test.
+  /// @returns    true if the storage should be parameterised.
+  /// @throws
+  /// @version    2024-02-04/GGB - Function created.
+
+  bool sqlWriter::shouldParameterise(valueStorage_t const &vs) const
+  {
+    bool returnValue = false;
+
+    for (auto &outerElement : vs)
+    {
+      for (auto &innerElement : outerElement)
+      {
+        returnValue = returnValue || shouldParameterise(innerElement);
+      };
+    };
+
+    return returnValue;
+  }
+
+  /// @brief      Determines if the parameter needs to be parameterised.
+  /// @param[in]  p: The parameter to test.
+  /// @returns    true of the query should be parameterised.
+  /// @throws
+  /// @version    2024-02-04/GGB - Function created.
+
+  bool sqlWriter::shouldParameterise(parameter_t const &p) const
+  {
+    return std::holds_alternative<std::string>(p);
   }
 
   std::string sqlWriter::sum(std::string const &col)
   {
     return "SUM(" + col + ")";
-  }
-
-  sqlWriter &sqlWriter::selfJoin(std::string const &, std::string const &)
-  {
-
-    return *this;
   }
 
   /// @brief Sets the table name for an update query.
@@ -2298,6 +2687,69 @@ namespace GCL
     return *this;
   }
 
+  std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> sqlWriter::createWhereParameters() const
+  {
+    logger::TRACE_ENTER();
+    std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> returnValue;
+
+    if (!std::holds_alternative<std::monostate>(whereClause_.base))
+    {
+      to_parameter(whereClause_);
+    }
+
+    logger::TRACE_EXIT();
+    return returnValue;
+  }
+
+  /// @brief    Returns a list containing all the whereParameters. This is needed for parameterised queries.
+  /// @returns  A list of parameters
+  /// @throws
+  /// @version  2024-01-19/GGB - Function created.
+
+  std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> sqlWriter::to_parameter(whereVariant_t const &wv) const
+  {
+    /* The whereClause_ has all the parameters. What is needed is to iterate the parameters in order to
+     * produce the list.
+     */
+
+    std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> returnValue;
+
+    //v1.insert(v1.end(), make_move_iterator(v2.begin()), make_move_iterator(v2.end()));
+
+    std::visit(overloaded
+               {
+                 [&](std::monostate const &) { CODE_ERROR(); },
+                 [&](whereTest_t const &wt)
+                 {
+                   auto temp = to_parameter(wv);
+                   returnValue.insert(returnValue.end(), std::make_move_iterator(temp.begin()), std::make_move_iterator(temp.end()));
+                 },
+                 [&](whereLogical_t const &wl)
+                 {
+                   auto temp = to_parameter(wv);
+                   returnValue.insert(returnValue.end(), std::make_move_iterator(temp.begin()), std::make_move_iterator(temp.end()));
+                 },
+               }, wv.base);
+
+    return returnValue;
+  }
+
+  /// @brief      Converts a whereTest_t to a string.
+  /// @param[in]  w: The whereTest_t to convert.
+  /// @throws
+  /// @version    2022-06-07/GGB - Function created.
+
+  std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> sqlWriter::to_parameter(whereLogical_t const &wl) const
+  {
+//    std::string returnValue = " (";
+
+//    returnValue += to_string(*std::get<0>(wl));
+//    returnValue += " " + logicalOperatorMap[std::get<1>(wl)] + " ";
+//    returnValue += to_string(*std::get<2>(wl)) + ")";
+
+//    return returnValue;
+  }
+
   /// @brief      to_string function for a columnRef.
   /// @param[in]  bv: The value to convert to a std::string.
   /// @version    2022-09-19/GGB - Function created.
@@ -2358,4 +2810,3 @@ namespace GCL
 
 
 }  // namespace GCL
-
