@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2023 Gavin Blakeman.
+//                      Copyright 2013-2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -45,10 +45,6 @@
 #include <string>
 #include <unordered_map>
 
-  // GCL library header files
-
-#include "include/logger/loggerCore.h"
-
 namespace GCL
 {
   using GCL::logger::LOGEXCEPTION;
@@ -73,11 +69,7 @@ namespace GCL
     std::string errorMessage() const;
 
   public:
-    runtime_error(std::string const &errorString, TErrorCode errorCode = 0, std::string const &library = "") :
-      std::runtime_error(errorString), errorCode_(errorCode), library_(library)
-    {
-      LOGEXCEPTION(errorMessage());
-    }
+    runtime_error(std::string const &errorString, TErrorCode errorCode = 0, std::string const &library = "");
 
   };
 
@@ -95,10 +87,7 @@ namespace GCL
     std::string errorMessage(std::string const &, std::size_t) const;
 
   public:
-    inline explicit CCodeError(std::string fileName, size_t lineNumber)  : std::runtime_error("Code Error.")
-    {
-      LOGEXCEPTION(errorMessage(fileName, lineNumber));
-    }
+    explicit CCodeError(std::string fn, size_t ln);
   };
 
   /// @brief    The CRuntimeAssert class throws exceptions to indicate assertion failures within a library.
@@ -110,12 +99,7 @@ namespace GCL
   {
   public:
     explicit CRuntimeAssert(std::string const &expression, std::string const &message,
-                            std::source_location const location = std::source_location::current())
-      : std::runtime_error("Runtime Assert")
-    {
-      LOGEXCEPTION(errorMessage(expression, std::string(location.file_name()),
-                                location.line(), message));
-    }
+                            std::source_location const location = std::source_location::current());
   private:
     std::string errorMessage(std::string const &, std::string const &, std::size_t, std::string const &) const;
   };

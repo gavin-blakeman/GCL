@@ -61,7 +61,7 @@
 #include "include/error.h"
 #include "include/GCLError.h"
 #include "include/logger/loggerCore.h"
-#include "include/logger/fileSink.h"
+#include "include/logger/sinks/fileSink.h"
 #include "include/logger/streamSink.h"
 #include "include/common.h"
 #include "include/dateTime.h"

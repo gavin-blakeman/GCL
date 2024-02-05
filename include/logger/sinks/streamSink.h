@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2014-2020 Gavin Blakeman.
+//                      Copyright 2014-2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -52,14 +52,21 @@ namespace GCL
 
     class CStreamSink: public CLoggerSink
     {
-      private:
-        std::ostream &outputStream;
-
-      protected:
       public:
         CStreamSink(std::ostream &);
         virtual ~CStreamSink() {}
-        virtual void write(std::string const &);
+        
+        virtual void writeRecord(CLoggerRecord const &);
+      
+      private:
+        CStreamSink() = delete;
+        CStreamSink(CStreamSink const &) = delete;
+        CStreamSink(CStreamSink &&) = delete;
+        CStreamSink &operator=(CStreamSink const &) = delete;
+        CStreamSink &operator=(CStreamSink &&) = delete;
+        
+        std::ostream &outputStream;
+      
     };
 
   }   // namespace logger

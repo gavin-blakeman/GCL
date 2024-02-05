@@ -1,15 +1,15 @@
-﻿//*********************************************************************************************************************************
+//*********************************************************************************************************************************
 //
-// PROJECT:							General Class Library
-// FILE:								common
-// SUBSYSTEM:						Common definitions
-// LANGUAGE:						C++
-// TARGET OS:						None.
-// NAMESPACE:						GCL
-// AUTHOR:							Gavin Blakeman (GGB)
+// PROJECT:             General Class Library
+// FILE:                baseRecord.h
+// SUBSYSTEM:           Logging Functions
+// LANGUAGE:            C++20
+// TARGET OS:           None - Standard C++
+// NAMESPACE:           GCL
+// AUTHOR:              Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015-2024 Gavin Blakeman.
+//                      Copyright 2013-2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -23,30 +23,16 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
+// OVERVIEW:
 //
-// OVERVIEW:						Common definitions that can be used by multiple files
+// CLASSES INCLUDED:    CBaseRecord
 //
-//
-// CLASSES INCLUDED:		None
-//
-// CLASS HIERARCHY:     None.
-//
-//
-// HISTORY:             2015-09-22 GGB - AIRDAS 2015.09 release
-//                      2015-06-29 GGB - File created.
+// HISTORY:             2024-02-05 GGB - Functions split from loggerCore into seperate files
 //
 //*********************************************************************************************************************************
 
-#ifndef GCL_COMMON_H
-#define GCL_COMMON_H
+#include "include/logger/records/baseRecord.h"
 
-#include <string>
-
-namespace GCL
+namespace GCL::logger
 {
-  std::string const LIBRARYNAME       = "GCL";
-
-  std::string getVersionString();
-}
-
-#endif // GCL_COMMON_H
+} // namespace
