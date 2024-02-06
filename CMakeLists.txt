@@ -25,8 +25,9 @@ set(SOURCES
   source/dataParser/dataDelimited.cpp
   source/dataParser/dataParserCore.cpp
   source/dataParser/dataParser_SAPBKG.cpp  
-  source/logger/defaultLogger.cpp
+  source/logger/loggerManager.cpp
   source/logger/loggerCore.cpp
+  source/logger/filters/baseFilter.cpp
   source/logger/filters/debugFilter.cpp
   source/logger/queues/baseQueue.cpp
   source/logger/queues/queueQueue.cpp
@@ -53,7 +54,7 @@ set(HEADERS
   include/alarm/alarmDaily.h
   include/alarm/alarmWeekly.h
   include/error.h
-  include/logger/defaultLogger.h
+  include/logger/loggerManager.h
   include/logger/loggerCore.h
   include/logger/filters/baseFilter.h
   include/logger/filters/debugFilter.h

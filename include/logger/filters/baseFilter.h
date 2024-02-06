@@ -54,7 +54,7 @@ namespace GCL::logger
     std::optional<std::string> recordString(CBaseRecord const &r) { return processRecordString(r); }
 
   private:
-    virtual std::optional<std::string> processRecordString(CBaseRecord const &) = 0;
+    virtual std::optional<std::string> processRecordString(CBaseRecord const &);
   };
 } // namespace
 

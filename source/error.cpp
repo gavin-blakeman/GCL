@@ -46,7 +46,7 @@
 
   // GCL library header files
 
-#include "include/logger/defaultLogger.h"
+#include "../include/logger/loggerManager.h"
 
 namespace GCL
 {

@@ -215,32 +215,35 @@ namespace GCL::logger
 
   void CLogger::shutDown()
   {
-    // Obtain a unique lock on the terminate mutex to write the value.
-
+    if (writerThread)
     {
-      uniqueLock writeLock(terminateMutex);
-      terminateThread = true;
-    }  // Lock released at this point.
-    cvQueueData.notify_one();   // Notify the queue to run.
+      // Obtain a unique lock on the terminate mutex to write the value.
 
-    writerThread->join();
-    writerThread.reset(nullptr);
-
-    // There should not be any messages, but empty the queue to be sure. In this case the queue does not need to be locked as
-    // the thread has been terminated.
-
-    while (!messageQueue->empty())
-    {
-      CBaseRecord const &record = messageQueue->front();
-
-      uniqueLock ul{sinkMutex};
-      for (auto &sink : logSinks)
       {
-        sink.second->writeRecord(record);
-      }
+        uniqueLock writeLock(terminateMutex);
+        terminateThread = true;
+      }  // Lock released at this point.
+      cvQueueData.notify_one();   // Notify the queue to run.
 
-      messageQueue->pop();
-    };
+      writerThread->join();
+      writerThread.reset(nullptr);
+
+      // There should not be any messages, but empty the queue to be sure. In this case the queue does not need to be locked as
+      // the thread has been terminated.
+
+      while (!messageQueue->empty())
+      {
+        CBaseRecord const &record = messageQueue->front();
+
+        uniqueLock ul{sinkMutex};
+        for (auto &sink : logSinks)
+        {
+          sink.second->writeRecord(record);
+        }
+
+        messageQueue->pop();
+      };
+    }
   }
 
   /// @brief      This is the threaded function that executes concurrently.

@@ -46,11 +46,11 @@
 #include "fmt/format.h"
 #include "fmt/std.h"
 
-  // GCL library
+ #include "../../include/logger/loggerManager.h"
+ // GCL library
 
 #include "include/common.h"
 #include "include/error.h"
-#include "include/logger/defaultLogger.h"
 #include "include/GCLError.h"
 
 
