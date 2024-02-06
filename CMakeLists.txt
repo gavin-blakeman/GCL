@@ -29,9 +29,10 @@ set(SOURCES
   source/logger/loggerCore.cpp
   source/logger/filters/debugFilter.cpp
   source/logger/queues/baseQueue.cpp
-  source/logger/queues/defaultQueue.cpp
+  source/logger/queues/queueQueue.cpp
   source/logger/records/baseRecord.cpp
   source/logger/records/debugRecord.cpp
+  source/logger/sinks/baseSink.cpp
   source/logger/sinks/fileSink.cpp
   source/logger/sinks/streamSink.cpp
   source/pluginManager/pluginManager.cpp
@@ -57,7 +58,7 @@ set(HEADERS
   include/logger/filters/baseFilter.h
   include/logger/filters/debugFilter.h
   include/logger/queues/baseQueue.h
-  include/logger/queues/defaultQueue.h
+  include/logger/queues/queueQueue.h
   include/logger/records/baseRecord.h
   include/logger/records/debugRecord.h
   include/logger/sinks/baseSink.h
@@ -82,6 +83,7 @@ set(DIRECTORIES
   )
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
+
 
 target_include_directories(${PROJECT_NAME}
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}

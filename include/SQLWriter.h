@@ -75,6 +75,7 @@
 
 #include "include/dateTime.h"
 #include "include/error.h"
+#include "include/logger/defaultLogger.h"
 
 /// @page page2 SQL Writer
 /// @tableofcontents

@@ -41,6 +41,7 @@
 // GCL header files
 
 #include "include/logger/records/baseRecord.h"
+#include "include/dateTime.h"
 
 namespace GCL::logger
 {
@@ -52,7 +53,8 @@ namespace GCL::logger
     CDebugRecord(severity_t, std::string const &);
     virtual ~CDebugRecord() = default;
 
-    virtual std::string to_string() const noexcept = 0;
+    severity_t severity() const noexcept { return severity_; }
+    dateTime_t timeStamp() const noexcept { return timeStamp_; }
 
   private:
     CDebugRecord() = delete;
@@ -60,6 +62,9 @@ namespace GCL::logger
     CDebugRecord(CDebugRecord &&) = delete;
     CDebugRecord &operator=(CDebugRecord const &) = delete;
     CDebugRecord &operator=(CDebugRecord &&) = delete;
+
+    severity_t severity_;
+    dateTime_t timeStamp_;
 
   };
 } // namespace

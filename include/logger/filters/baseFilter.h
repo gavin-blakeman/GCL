@@ -31,9 +31,17 @@
 //
 //*********************************************************************************************************************************
 
+#ifndef GCL_LOGGER_FILTERS_BASEFILTER_H
+#define GCL_LOGGER_FILTERS_BASEFILTER_H
+
 // Standard C++ header files
 
 #include <optional>
+#include <string>
+
+// GCL header files
+
+#include "include/logger/records/baseRecord.h"
 
 namespace GCL::logger
 {
@@ -43,9 +51,11 @@ namespace GCL::logger
     CBaseFilter() = default;
     virtual ~CBaseFilter() = default;
 
-    std::optional<std::string> recordString(CBaseRecord const *r) { return processRecordString(r); }
+    std::optional<std::string> recordString(CBaseRecord const &r) { return processRecordString(r); }
 
   private:
-    virtual std::optional<std::string> processRecordString(CBaseRecord const *) = 0;
+    virtual std::optional<std::string> processRecordString(CBaseRecord const &) = 0;
   };
 } // namespace
+
+#endif // GCL_LOGGER_FILTERS_BASEFILTER_H

@@ -39,23 +39,29 @@
 #include <any>
 #include <chrono>
 #include <string>
+#include <ostream>
 
 namespace GCL::logger
 {
   class CBaseRecord
   {
   public:
-    CBaseRecord() = default;
+    CBaseRecord(std::string const &txt) : recordText(txt) {}
     virtual ~CBaseRecord() = default;
 
-    virtual std::string to_string(std::string const &) const noexcept = 0;
+    std::string text() const noexcept { return recordText; }
 
   private:
+    CBaseRecord() = delete;
     CBaseRecord(CBaseRecord const &) = delete;
     CBaseRecord(CBaseRecord &&) = delete;
     CBaseRecord &operator=(CBaseRecord const &) = delete;
     CBaseRecord &operator=(CBaseRecord &&) = delete;
+
+    std::string recordText;
   };
+
+  std::ostream& operator<<(std::ostream&, CBaseRecord const &);
 } // namespace
 
 #endif // GCL_LOGGER_BASERECORD_H

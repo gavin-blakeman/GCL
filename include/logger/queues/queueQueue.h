@@ -1,7 +1,7 @@
 //*********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// FILE:                baseQueue.h
+// FILE:                queueQueue.h
 // SUBSYSTEM:           Logging Functions
 // LANGUAGE:            C++20
 // TARGET OS:           None - Standard C++
@@ -25,57 +25,45 @@
 //
 // OVERVIEW:
 //
-// CLASSES INCLUDED:    CBaseQueue
+// CLASSES INCLUDED:    CQueueQueue
 //
 // HISTORY:             2024-02-05 GGB - Functions split from loggerCore into seperate files
 //
 //*********************************************************************************************************************************
 
-#ifndef GCL_LOGGER_QUEUES_BASEQUEUE_H
-#define GCL_LOGGER_QUEUES_BASEQUEUE_H
+#ifndef GCL_LOGGER_QUEUES_QUEUEQUEUE_H
+#define GCL_LOGGER_QUEUES_QUEUEQUEUE_H
 
-  // Standard C++ library header files
+// Standard C++ library
 
-#include <memory>
-#include <mutex>
-#include <shared_mutex>
+#include <queue>
 
-  // Logger header files
+// GCL header files
 
-#include "include/logger/records/baseRecord.h"
+#include "include/logger/queues/baseQueue.h"
 
 namespace GCL::logger
 {
-  class CBaseQueue
+  class CQueueQueue : public CBaseQueue
   {
-    public:
-      CBaseQueue() = default;
-      virtual ~CBaseQueue() = default;
+  public:
+    CQueueQueue() = default;
+    virtual ~CQueueQueue() = default;
 
-      CBaseRecord const &front() const;
-      void push(std::unique_ptr<CBaseRecord> &&);
-      void pop();
+  private:
+    CQueueQueue(CQueueQueue const &) = delete;
+    CQueueQueue(CQueueQueue &&) = delete;
+    CQueueQueue &operator=(CQueueQueue const &) = delete;
+    CQueueQueue &operator=(CQueueQueue &&) = delete;
 
-      bool empty() const noexcept;
+    std::queue<std::unique_ptr<CBaseRecord>> queue;
 
-    protected:
-      using mutex_type = std::shared_mutex;
-      using uniqueLock = std::unique_lock<mutex_type>;
-      using sharedLock = std::unique_lock<mutex_type>;
-
-      mutable mutex_type queueMutex;
-
-    private:
-      CBaseQueue(CBaseQueue const &) = delete;
-      CBaseQueue(CBaseQueue &&) = delete;
-      CBaseQueue &operator=(CBaseQueue const &) = delete;
-      CBaseQueue &operator=(CBaseQueue &&) = delete;
-
-      virtual CBaseRecord const &processFront() const = 0;
-      virtual void processPush(std::unique_ptr<CBaseRecord> &&) = 0;
-      virtual void processPop() = 0;
-      virtual bool processEmpty() const noexcept = 0;
+    virtual CBaseRecord const &processFront() const override;
+    virtual void processPush(std::unique_ptr<CBaseRecord> &&) override;
+    virtual void processPop() override;
+    virtual bool processEmpty() const noexcept override;
   };
+
 }
 
-#endif // GCL_LOGGER_QUEUES_BASEQUEUE_H
+#endif // GCL_LOGGER_QUEUES_QUEUEQUEUE_H

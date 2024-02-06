@@ -1,4 +1,4 @@
-//*********************************************************************************************************************************
+﻿//*********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
 // FILE:                debugFilter.cpp
@@ -33,25 +33,81 @@
 
 #include "include/logger/filters/debugFilter.h"
 
+// Miscellaneous libraries
+
+#include <fmt/format.h>
+#include <fmt/chrono.h>
+#include <fmt/std.h>
+
+// GCL header files
+
+#include "include/logger/records/debugRecord.h"
+
 namespace GCL::logger
 {
+  /// @brief      Class constructor.
+  /// @param[in]  cmp: The map of criticalities and text.
+  /// @throws
+  /// @version    2024-02-06/GGB - Function created.
 
-  CDebugFilter::CDebugFilter(criticalityMap_t &&cmp, criticalityMask_t &&cmk)
-  : criticalityMap(std::move(cmp)), criticalityMask(std::move(cmk))
+  CDebugFilter::CDebugFilter(criticalityMap_t &&cmp) : criticalityMap(std::move(cmp))
   {
   }
 
-  std::optional<std::string> CDebugFilter::processRecordString(CBaseRecord const *record)
-  {
-    std::optional<std::string> rv;
+  /// @brief      Class constructor.
+  /// @param[in]  cmp: The map of criticalities and text.
+  /// @param[in]  cmk: The set of criticalities to process
+  /// @throws
+  /// @version    2024-02-06/GGB - Function created.
 
-    if (record.contains("Criticality") and criticalityMask.contains(record.get<criticality_t>("Criticality")))
+  CDebugFilter::CDebugFilter(criticalityMap_t &&cmp, criticalityMask_t &&cmk)
+      : criticalityMap(std::move(cmp)), criticalityMask(std::move(cmk))
+  {
+  }
+
+  /// @brief      Adds tests to the mask.
+  /// @param[in]  toAdd: The mask set to add
+  /// @throws
+  /// @version    2024-02-06/GGB - Function created.
+
+  void CDebugFilter::addMask(criticalityMask_t &&toAdd)
+  {
+    criticalityMask.merge(std::move(toAdd));
+  }
+
+  /// @brief      Create the record string.
+  /// @param[in]  record: The record to process.
+  /// @returns    The text to output.
+  /// @throws
+  /// @version    2024-02-06/GGB - Function created.
+
+  std::optional<std::string> CDebugFilter::processRecordString(CBaseRecord const &record)
+  {
+    std::optional<std::string> returnValue;
+
+    try
     {
-      rv = fmt::format("{:%Y-%m-%d-%HH:MM:ss.sss"}, record.get<dateTime_t>("TimeStamp"));
-      rv += " [" + criticalityMap.at(record.get<criticality_t>("Criticality")) "] ";
-      rv += record.get<std::string>("Text");
+      CDebugRecord const &debugRecord = dynamic_cast<CDebugRecord const &>(record);
+
+
+      if (criticalityMask.contains(debugRecord.severity()))
+      {
+        std::string rv = fmt::format("{:%Y-%m-%d %H:%M:%S} [{:s}] - {:s}",
+                                     debugRecord.timeStamp().dateTime(),
+                                     criticalityMap.at(debugRecord.severity()),
+                                     record.text());
+        returnValue = rv;
+      }
+    }
+    catch(std::bad_cast &w)
+    {
+
+    }
+    catch(...)
+    {
+
     }
 
-  return rv;
+  return returnValue;
 }
 } // namespace

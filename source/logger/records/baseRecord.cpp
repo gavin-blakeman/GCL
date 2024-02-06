@@ -35,4 +35,17 @@
 
 namespace GCL::logger
 {
+  /// @brief      Writes a record to stream.
+  /// @param[in]  os: The stream to writ to.
+  /// @param[in]  record: The record to write.
+  /// @returns    The ostrean
+  /// @throws
+  /// @version    2024-02-06/GGB - Function created.
+
+  std::ostream& operator<<(std::ostream& os, CBaseRecord const &record)
+  {
+    os << record.text();
+    return os;
+  }
+
 } // namespace

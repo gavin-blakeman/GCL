@@ -31,7 +31,8 @@
 // CLASS HEIRARCHY:     CLoggerSink
 //                        - CStreamSink
 //
-// HISTORY:             2015-09-22 GGB - AIRDAS 2015.09 release
+// HISTORY:             2024-02-05 GGB - Rewrite to a flexible approach to enable additional functionality to be added.
+//                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2014-12-28 GGB - Development of class for "Observatory Weather System - Service"
 //
 //*********************************************************************************************************************************
@@ -39,39 +40,37 @@
 #ifndef GCL_STREAMSINK_H
 #define GCL_STREAMSINK_H
 
-#ifndef GCL_CONTROL
-
-#include "loggerCore.h"
+// Standard C++ library
 
 #include <ostream>
 
-namespace GCL
+// Logger header files
+
+#include "baseSink.h"
+
+namespace GCL::logger
 {
-  namespace logger
+
+  class CStreamSink: public CBaseSink
   {
+  public:
+    CStreamSink(std::shared_ptr<CBaseFilter>, std::ostream &);
+    virtual ~CStreamSink() = default;
 
-    class CStreamSink: public CLoggerSink
-    {
-      public:
-        CStreamSink(std::ostream &);
-        virtual ~CStreamSink() {}
-        
-        virtual void writeRecord(CLoggerRecord const &);
-      
-      private:
-        CStreamSink() = delete;
-        CStreamSink(CStreamSink const &) = delete;
-        CStreamSink(CStreamSink &&) = delete;
-        CStreamSink &operator=(CStreamSink const &) = delete;
-        CStreamSink &operator=(CStreamSink &&) = delete;
-        
-        std::ostream &outputStream;
-      
-    };
+    virtual void writeRecord(CBaseRecord const &);
 
-  }   // namespace logger
-}   // namespace GCL
+  private:
+    CStreamSink() = delete;
+    CStreamSink(CStreamSink const &) = delete;
+    CStreamSink(CStreamSink &&) = delete;
+    CStreamSink &operator=(CStreamSink const &) = delete;
+    CStreamSink &operator=(CStreamSink &&) = delete;
 
-#endif // GCL_CONTROL
+    std::ostream &outputStream;
+
+  };
+
+}   // namespace
+
 
 #endif // GCL_STREAMSINK_H

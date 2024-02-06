@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2014-2020 Gavin Blakeman.
+//                      Copyright 2014-2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -31,33 +31,43 @@
 // CLASS HEIRARCHY:     CLoggerSink
 //                        - CStreamSink
 //
-// HISTORY:             2015-09-22 GGB - AIRDAS 2015.09 release
+// HISTORY:             2024-02-05 GGB - Rewrite to a flexible approach to enable additional functionality to be added.
+//                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2014-12-28 GGB - Development of class for "Observatory Weather System - Service"
 //
 //*********************************************************************************************************************************
 
-#include "include/logger/streamSink.h"
+#include "include/logger/sinks/streamSink.h"
 
-namespace GCL
+// GCL Header files
+
+#include "include/logger/records/baseRecord.h"
+
+namespace GCL::logger
 {
-  namespace logger
+  /// @brief      Default class constructor.
+  /// @param[in]  os: The stream to associate with the sink.
+  /// @version  2014-12-28/GGB - Function created.
+
+  CStreamSink::CStreamSink(std::shared_ptr<CBaseFilter> filt, std::ostream &os) : CBaseSink(std::move(filt)), outputStream(os)
   {
-    /// @brief Default class constructor.
-    /// @param[in] os: The stream to associate with the sink.
-    /// @version 2014-12-28/GGB - Function created.
+  }
 
-    CStreamSink::CStreamSink(std::ostream &os) : CLoggerSink(), outputStream(os)
+  /// @brief      This is the function to write the message to the stream.
+  /// @param[in]  record: The record to write.
+  /// @version    2024-02-06/GGB - Changed parameter to CBaseRecord.
+  /// @version    2014-12-28/GGB - Function created.
+
+  void CStreamSink::writeRecord(CBaseRecord const &record)
+  {
+    std::optional<std::string> os = filter_->recordString(record);
+
+    if (os)
     {
-    }
+      outputStream << *os << std::endl;
+    };
 
-    /// @brief This is the function to write the message to the stream.
-    /// @param[in] s: The string to write to the stream.
-    /// @version 2014-12-28/GGB - Function created.
 
-    void CStreamSink::write(std::string const &s)
-    {
-      outputStream << s << std::endl;
-    }
+  }
 
-  }   // namespace logger
-}   // namespace GCL
+}   // namespace

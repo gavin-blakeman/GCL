@@ -48,6 +48,7 @@
 
 #include "boost/locale.hpp"
 #include <fmt/format.h>
+#include <fmt/chrono.h>
 
 // GCL Library header files.
 
@@ -64,6 +65,7 @@ namespace GCL::logger
   //******************************************************************************************************************************
 
   /// @brief      Constructor for the class.
+  /// @param[in]  filt: The filter to associate with the sink.
   /// @param[in]  lfp: Log file path.
   /// @param[in]  lfn: Log file name.
   /// @param[in]  lfe: Log File Extension. The extension to use. <".log">
@@ -73,8 +75,8 @@ namespace GCL::logger
   /// @version    2017-01-26/GGB - Use a single variable for storing the path and name.
   /// @version    2014-07-22/GGB - Function created.
 
-  CFileSink::CFileSink(std::filesystem::path const &lfp, std::filesystem::path const &lfn, std::filesystem::path const &lfe)
-      : CBaseSink(), logFilePath(lfp), logFileName(lfn), logFileExt(lfe), logFile()
+  CFileSink::CFileSink(std::shared_ptr<CBaseFilter> filt, std::filesystem::path const &lfp, std::filesystem::path const &lfn, std::filesystem::path const &lfe)
+      : CBaseSink(std::move(filt)), logFilePath(lfp), logFileName(lfn), logFileExt(lfe), logFile()
   {
   }
 
@@ -107,21 +109,9 @@ namespace GCL::logger
       };
       case daily:
       {
-        char szLocalTime[80];
-        time_t CurrentTime;
-        struct tm *localTime;
+        date_t currentDate;   // Default initialises to now.
 
-        std::time(&CurrentTime);
-        localTime = std::localtime(&CurrentTime);
-        if (std::strftime(szLocalTime, sizeof(szLocalTime), "%Y%m%d", localTime) == 0)
-        {
-          // The string length should not exceed 80 characters. If it does, this is bad and just exit with an error.
-
-          CODE_ERROR();
-          // Does not return.
-        };
-
-        logFileFullName += std::string(szLocalTime);
+        logFileFullName += fmt::format("{:%Y%m%d}", currentDate.date());
         logFileFullName += logFileExt;
         break;
       };
@@ -154,8 +144,6 @@ namespace GCL::logger
 
     if (!logFile.good() || !logFile.is_open())
     {
-      std::cerr << std::filesystem::current_path().string() << std::endl;
-      std::cerr << "Unable to open log file. Exiting." << std::endl;
       RUNTIME_ERROR(boost::locale::translate("LOGGER: Unable to open log file."), E_LOGGER_UNABLETOOPENFILE, LIBRARYNAME);
     }
     else
@@ -345,12 +333,12 @@ namespace GCL::logger
   }
 
   /// @brief      Function to write the message to the logFile.
-  /// @param[in]  s: String to write to the logFile.
+  /// @param[in]  record: The record to write.
   /// @throws     None.
   /// @version    2015-06-01/GGB - Added functionality to rotate based on date.
   /// @version    2014-12-24/GGB - Function created.
 
-  void CFileSink::write(std::string const &s)
+  void CFileSink::writeRecord(CBaseRecord const &record)
   {
     if (!logFile.is_open())
     {
@@ -360,10 +348,14 @@ namespace GCL::logger
     if (rotationMethod == daily)
     {
       std::time_t currentTime;
-      std::time(&currentTime);
     };
 
-    logFile << s << std::endl;
+    std::optional<std::string> os = filter_->recordString(record);
+
+    if (os)
+    {
+      logFile << *os << std::endl;
+    };
 
     if (rotationMethod == size)
     {

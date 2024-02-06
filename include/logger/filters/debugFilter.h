@@ -55,10 +55,12 @@ namespace GCL::logger
     using criticalityMap_t = std::map<criticality_t, std::string>;
     using criticalityMask_t = std::set<criticality_t>;
 
+    CDebugFilter(criticalityMap_t &&);
     CDebugFilter(criticalityMap_t &&, criticalityMask_t &&);
 
     void clearMask() noexcept { criticalityMask.clear(); }
     void addMask(std::initializer_list<criticality_t>);
+    void addMask(criticalityMask_t &&);
 
   private:
     CDebugFilter() = delete;
@@ -70,7 +72,7 @@ namespace GCL::logger
     criticalityMap_t const criticalityMap;
     criticalityMask_t criticalityMask;
 
-    virtual std::optional<std::string> processRecordString(CBaseRecord const *) = 0;
+    virtual std::optional<std::string> processRecordString(CBaseRecord const &);
   };
 } // namespace
 

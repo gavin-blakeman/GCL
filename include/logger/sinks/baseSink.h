@@ -34,6 +34,10 @@
 #ifndef GCL_LOGGER_LOGGERSINK_H
 #define GCL_LOGGER_LOGGERSINK_H
 
+// Standard C++ library
+
+#include <memory>
+
 // GCL header files
 
 #include "include/logger/filters/baseFilter.h"
@@ -46,16 +50,18 @@ namespace GCL::logger
   class CBaseSink
   {
   public:
-    CBaseSink() = default;
+    CBaseSink(std::shared_ptr<CBaseFilter>);
     virtual ~CBaseSink() = default;
 
-    virtual void writeRecord(CBaseRecord const *) = 0;
-    CBaseFilter *filter() { return filter_.get(); }
+    virtual void writeRecord(CBaseRecord const &) = 0;
+    CBaseFilter &filter() { return *filter_; }
+    std::shared_ptr<CBaseFilter>  getFilter() { return filter_; }
 
   protected:
-    T filter_;
+    std::shared_ptr<CBaseFilter> filter_;
 
   private:
+    CBaseSink() = delete;
     CBaseSink(CBaseSink const &) = delete;
     CBaseSink(CBaseSink &&) = delete;
     CBaseSink &operator=(CBaseSink const &) = delete;

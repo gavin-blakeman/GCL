@@ -47,8 +47,6 @@
 
 namespace GCL
 {
-  using GCL::logger::LOGEXCEPTION;
-
   typedef std::uint16_t TErrorCode;
 
   /// @brief        The CRuntimeError class is used for reporting exceptions and errors. It is integrated with the logger and allows

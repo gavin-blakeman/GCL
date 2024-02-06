@@ -34,7 +34,7 @@
 //
 //*********************************************************************************************************************************
 
-#include "../error.h"
+#include "include/error.h"
 
   // Standard C++ library header files.
 
@@ -46,10 +46,12 @@
 
   // GCL library header files
 
-//#include "include/logger/loggerCore.h"
+#include "include/logger/defaultLogger.h"
 
 namespace GCL
 {
+  using logger::LOGEXCEPTION;
+
   runtime_error::runtime_error(std::string const &errorString, TErrorCode errorCode, std::string const &library)
       : std::runtime_error(errorString), errorCode_(errorCode), library_(library)
   {

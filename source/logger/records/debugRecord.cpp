@@ -42,85 +42,8 @@ namespace GCL::logger
   /// @throws     None.
   /// @version    2014-07-20/GGB - Function created.
 
-  CDebugRecord::CDebugRecord(ESeverity s, std::string const &t)
+  CDebugRecord::CDebugRecord(severity_t s, std::string const &t) : CBaseRecord(t), severity_(s), timeStamp_(std::chrono::system_clock::now())
   {
-    data_.emplace()
-    timeStamp = std::chrono::system_clock::now();
   }
 
-  /// @brief Writes the logger message to the log file.
-  /// @param[in] ts: timestamp
-  /// @param[in] ss: message string.
-  /// @returns A std::string containing the combined timestamp and string.
-  /// @throws None.
-  /// @version 2020-06-14/GGB - Added [exception] for exception.
-  /// @version 2020-04-26/GGB - [Information] changed to [info]
-  /// @version 2019-10-23/GGB - Updated to use std::chrono.
-  /// @version 2014-07-21/GGB - Function created.
-
-  std::string CDebugRecord::writeRecord(bool ts, bool ss) const
-  {
-    std::ostringstream os;
-
-    SharedLock recordMutex;
-
-    if (ts)
-    {
-      std::time_t now_c = std::chrono::system_clock::to_time_t(timeStamp);
-      os << "[" << std::put_time(std::localtime(&now_c), "%F %T") << "] ";
-    };
-
-    if (ss)
-    {
-      switch (severity)
-      {
-        case critical:
-        {
-          os << "[critical] ";
-          break;
-        }
-        case error:
-        {
-          os << "[error] ";
-          break;
-        };
-        case warning:
-        {
-          os << "[warning] ";
-          break;
-        };
-        case notice:
-        {
-          os << "[notice] ";
-          break;
-        };
-        case info:
-        {
-          os << "[info] ";
-          break;
-        };
-        case debug:
-        {
-          os << "[debug] ";
-          break;
-        };
-        case exception:
-        {
-          os << "[exception] ";
-          break;
-        }
-        case trace:
-        {
-          os << "[trace] ";
-          break;
-        };
-        default:
-          break;
-      };
-    };
-
-    os << message << std::flush;
-
-    return ( os.str() );
-  }
 } // namespace

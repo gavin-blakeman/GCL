@@ -62,7 +62,7 @@ namespace GCL::logger
       use                 ///< A new log file is created every use (includes date and time in filename)
     };
 
-    CFileSink(std::filesystem::path const &, std::filesystem::path const &, std::filesystem::path const & =".log");
+    CFileSink(std::shared_ptr<CBaseFilter>, std::filesystem::path const &, std::filesystem::path const &, std::filesystem::path const & =".log");
     virtual ~CFileSink();
 
     void openLogFile();
@@ -101,8 +101,6 @@ namespace GCL::logger
     std::uintmax_t rotationSize = 10 * 1024 * 1024; ///< Maximum allowable log file size
     std::uint16_t rotationDays = 8;                 ///< Number of days between rotations.
     bool useUTC = true;                             ///< Use UTC for determining start of days.
-
-
 
     void rollFiles(void);
 

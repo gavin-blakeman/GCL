@@ -1,7 +1,7 @@
 //*********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// FILE:                baseQueue.h
+// FILE:                queueQueue.h
 // SUBSYSTEM:           Logging Functions
 // LANGUAGE:            C++20
 // TARGET OS:           None - Standard C++
@@ -25,57 +25,70 @@
 //
 // OVERVIEW:
 //
-// CLASSES INCLUDED:    CBaseQueue
+// CLASSES INCLUDED:    CQueueQueue
 //
 // HISTORY:             2024-02-05 GGB - Functions split from loggerCore into seperate files
 //
 //*********************************************************************************************************************************
 
-#ifndef GCL_LOGGER_QUEUES_BASEQUEUE_H
-#define GCL_LOGGER_QUEUES_BASEQUEUE_H
+#include "include/logger/queues/queueQueue.h"
 
-  // Standard C++ library header files
+  // GCL header files
 
-#include <memory>
-#include <mutex>
-#include <shared_mutex>
-
-  // Logger header files
-
-#include "include/logger/records/baseRecord.h"
+#include "include/error.h"
 
 namespace GCL::logger
 {
-  class CBaseQueue
+
+  /// @brief      Moves a new item into the queue
+  /// @param[in]  r: The record to be moved to the queue.
+  /// @throws
+  /// @version    2024-02-06/GGB - Function created.
+
+  void CQueueQueue::processPush(std::unique_ptr<CBaseRecord> &&r)
   {
-    public:
-      CBaseQueue() = default;
-      virtual ~CBaseQueue() = default;
+    queue.push(std::move(r));
+  }
 
-      CBaseRecord const &front() const;
-      void push(std::unique_ptr<CBaseRecord> &&);
-      void pop();
+  /// @brief      Pops the first item off the queue.
+  /// @throws
+  /// @version    2024-02-06/GGB - Function created.
 
-      bool empty() const noexcept;
+  void CQueueQueue::processPop()
+  {
+    if (!queue.empty())
+    {
+      queue.pop();
+    };
+  }
 
-    protected:
-      using mutex_type = std::shared_mutex;
-      using uniqueLock = std::unique_lock<mutex_type>;
-      using sharedLock = std::unique_lock<mutex_type>;
+  /// @brief      Determines if the queue is empty.
+  /// @returns    true if the queue is empty.
+  /// @throws
+  /// @version    2024-02-06/GGB - Function created.
 
-      mutable mutex_type queueMutex;
+  bool CQueueQueue::processEmpty() const noexcept
+  {
+    return queue.empty();
+  }
 
-    private:
-      CBaseQueue(CBaseQueue const &) = delete;
-      CBaseQueue(CBaseQueue &&) = delete;
-      CBaseQueue &operator=(CBaseQueue const &) = delete;
-      CBaseQueue &operator=(CBaseQueue &&) = delete;
+  /// @brief      Returns the front item in the queue.
+  /// @returns    The first item in the queue.
+  /// @throws
+  /// @version    2024-02-06/GGB - Function created.
 
-      virtual CBaseRecord const &processFront() const = 0;
-      virtual void processPush(std::unique_ptr<CBaseRecord> &&) = 0;
-      virtual void processPop() = 0;
-      virtual bool processEmpty() const noexcept = 0;
-  };
-}
+  CBaseRecord const &CQueueQueue::processFront() const
+  {
+    if (!queue.empty())
+    {
+      return *queue.front();
+    }
+    else
+    {
+      CODE_ERROR();
+      // Does not return.
+    }
+  }
 
-#endif // GCL_LOGGER_QUEUES_BASEQUEUE_H
+
+};  // namespace
