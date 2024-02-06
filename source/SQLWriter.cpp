@@ -2612,7 +2612,7 @@ namespace GCL
   {
     valueStorage_t valueFields;
 
-    for (const auto &f : fields)
+    for (auto const &f : fields)
     {
       valueFields.emplace_back(f);
     };

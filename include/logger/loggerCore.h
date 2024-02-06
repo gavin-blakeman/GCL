@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2014-2023 Gavin Blakeman.
+//                      Copyright 2014-2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -27,10 +27,9 @@
 //                      The class has been designed as a lightweight easy to use class.
 //
 // CLASSES INCLUDED:    CLogger
-//                      CLoggerRecord
-//                      CLoggerSink
 //
-// HISTORY:             2022-06-09 GGB - Replace macros TRACENETER and TRACEEXIT with functions.
+// HISTORY:             2024-02-05 GGB - Rewrite to a flexible approach to enable additional functionality to be added.
+//                      2022-06-09 GGB - Replace macros TRACENETER and TRACEEXIT with functions.
 //                      2019-10-22 GGB - Changed Boost::thread to std::thread
 //                      2018-08-12 GGB - gnuCash-pud debugging and release.
 //                      2015-09-22 GGB - AIRDAS 2015.09 release
@@ -41,15 +40,14 @@
 #ifndef GCL_LOGGER_LOGGERCORE_H
 #define GCL_LOGGER_LOGGERCORE_H
 
-#ifndef GCL_CONTROL
-
-  // Standard C++ libraries
+// Standard C++ libraries
 
 #include <chrono>
 #include <condition_variable>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <queue>
@@ -60,300 +58,93 @@
 #include <thread>
 #include <vector>
 
-  // Miscellaneous library header files.
+// Miscellaneous library header files.
 
+#include "boost/locale.hpp"
 #include <fmt/format.h>
 
-namespace GCL
+// GCL header files
+
+#include "include/common.h"
+#include "include/GCLError.h"
+#include "include/logger/records/baseRecord.h"
+#include "include/logger/queues/baseQueue.h"
+#include "include/logger/sinks/baseSink.h"
+
+namespace GCL::logger
 {
-  namespace logger
+  /// @page page1 Logger
+  /// @tableofcontents
+  /// The logger classes provide a lightweight logging mechanism for logging errors, debug and diagnostic information, as well
+  /// as tracing code execution.
+  /// @section sec1 Overview
+  /// The logger implementation consists of a core class CLogger, sink classes and a message class.
+  /// The logger is multi-threaded allowing the messages to be logged and output asynchronously.
+  /// Logger sinks are used to output the log information. Standard sinks are provided for streams (eg, std::cout), files and
+  /// also for a Qt text edit control.Any number of sinks can be registered with the logger core.
+  /// When a messsage is logged, the core writes the message to all the sinks in turn. This is done on a parallel thread to enable
+  /// the main application to continue executing.
+  /// @section sec2 Severity
+  /// Each message has a severity assigned. The severity determines if the message will be captured by any specific sink. Thus it
+  /// is possible to have a sink, sinking to an error file for critical and error messages, and another sink, sinking to a log
+  /// file for all other messages except debug and trace messages.
+  /// The major components of the logger are
+  /// CLogger - The core logging component. One instance is created for each type of log required.
+  /// Records - Records are logging records. The record contains the data to be logged. Records are created and added to the log
+  ///           queue
+  /// Queue - The queue that ensures that the messages are processed in the correct order. The default queue is a simple FIFO queue,
+  ///         but it is possible to create queues that process in different orders. (Priority, LIFO, Alarm))
+  /// Filter - Filters manage which records are processed and which records are simply discarded. The filter converts the
+  ///          information in the record into an output string/message.
+  /// Sinks - Sinks present or store the information.
+  /// A logging system then consists of the following:
+  /// A single CLogger that manages all the records. It contains a single queue and multiple sinks.
+  /// Each sink has an filter. The filter converts to records to strings for output/storage by the sink.
+
+  class CLogger
   {
+  public:
+    CLogger();
+    ~CLogger();
 
-    /// @page page1 Logger
-    /// @tableofcontents
-    /// The logger classes provide a lightweight logging mechanism for logging errors, debug and diagnostic information, as well
-    /// as tracing code execution.
-    /// @section sec1 Overview
-    /// The logger implementation consists of a core class CLogger, sink classes and a message class.
-    /// The logger is multi-threaded allowing the messages to be logged and output asynchronously.
-    /// Logger sinks are used to output the log information. Standard sinks are provided for streams (eg, std::cout), files and
-    /// also for a Qt text edit control.Any number of sinks can be registered with the logger core.
-    /// When a messsage is logged, the core writes the message to all the sinks in turn. This is done on a parallel thread to enable
-    /// the main application to continue executing.
-    /// @section sec2 Severity
-    /// Each message has a severity assigned. The severity determines if the message will be captured by any specific sink. Thus it
-    /// is possible to have a sink, sinking to an error file for critical and error messages, and another sink, sinking to a log
-    /// file for all other messages except debug and trace messages.
+    void addQueue(std::unique_ptr<CBaseQueue> &&);
 
-    enum ESeverity
-    {
-      trace,      ///< Lowest level log severity. Used for tracing program execution through function entry/exit.
-      exception,  ///< Used to capture exceptions. These do not need to be actioned as the code may manage them.
-      debug,      ///< Used to display debugging messages.
-      info,       ///< Information messages.
-      notice,     ///< Legal notices etc.
-      warning,    ///< Failure of action. Normally built into program logic. (Time outs etc)
-      error,      ///< Failure of program function. May be recoverable.
-      critical,   ///< Non-recoverable failure.
-    };
+    void addSink(std::string const &, std::unique_ptr<CBaseSink>);
+    bool removeSink(std::string const &);
+    CBaseSink &sink(std::string const &) const;
 
-    struct CSeverity
-    {
-      bool fCritical = false;
-      bool fError = false;
-      bool fWarning = false;
-      bool fNotice = false;
-      bool fInfo = false;
-      bool fDebug = false;
-      bool fException = false;
-      bool fTrace = false;
+    void logMessage(std::unique_ptr<CBaseRecord> &&);
 
-      bool allow(ESeverity);
-    };
+    void startup();
+    void shutDown();
 
-    class CLoggerSink;
-    typedef std::shared_ptr<CLoggerSink> PLoggerSink;
+  protected:
+    void writer();
 
-    class CLoggerRecord
-    {
-      typedef std::shared_mutex             mutex_type;
-      typedef std::shared_lock<mutex_type>  SharedLock;
-      typedef std::unique_lock<mutex_type>  ExclusiveLock;
+  private:
+    CLogger(CLogger const &) = delete;
+    CLogger(CLogger &&) = delete;
+    CLogger &operator=(CLogger const &) = delete;
+    CLogger &operator=(CLogger &&) = delete;
 
-    private:
-      mutable mutex_type recordMutex;                                   ///< Mutex for access control to the record.
+    typedef std::shared_mutex             mutex_type;
+    using uniqueLock = std::unique_lock<mutex_type>;
+    typedef std::shared_lock<mutex_type>  SharedLock;
+    using logSinks_t = std::map<std::string, std::unique_ptr<CBaseSink>>;
 
-    public:
-      std::chrono::system_clock::time_point timeStamp;
-      ESeverity severity;
-      std::string message;
+    mutable mutex_type queueMutex;              // Protects the message queue
+    mutable mutex_type terminateMutex;
+    bool terminateThread;
+    mutable std::condition_variable_any cvQueueData;
 
-      CLoggerRecord(ESeverity, std::string const &);
+    std::unique_ptr<CBaseQueue> messageQueue;
 
-      std::string writeRecord(bool ts, bool ss) const;
-    };
-    typedef std::shared_ptr<CLoggerRecord> PLoggerRecord;
+    mutable mutex_type sinkMutex;
+    logSinks_t logSinks;
 
-    class CLogger
-    {
-    public:
-       CLogger();
-       virtual ~CLogger();
+    std::unique_ptr<std::thread> writerThread;
+  };
 
-       virtual void addSink(PLoggerSink ls);
-       virtual bool removeSink(PLoggerSink ls);
-
-       CLoggerSink *defaultStreamSink() { return defaultStreamSink_.get(); }
-       void removeDefaultStreamSink();
-
-       virtual void logMessage(ESeverity, std::string const &);
-
-       virtual void shutDown();
-
-      private:
-        typedef std::shared_mutex             mutex_type;
-        typedef std::unique_lock<mutex_type>  UniqueLock;
-        typedef std::shared_lock<mutex_type>  SharedLock;
-        typedef std::vector<PLoggerSink> TSinkContainer;
-
-        mutable mutex_type queueMutex;              // Protects the message queue
-        mutable mutex_type terminateMutex;
-        bool terminateThread;
-        mutable std::condition_variable_any cvQueueData;
-
-        mutable mutex_type sinkMutex;
-        TSinkContainer sinkContainer;
-
-        std::unique_ptr<std::thread> writerThread;
-        PLoggerSink defaultStreamSink_;                        ///< Stream sink created in constructor to ensure logger always works.
-
-        std::queue<PLoggerRecord> messageQueue;
-
-      protected:
-        ESeverity logSeverity;
-
-        virtual void writer();
-    };
-
-    class CLoggerSink
-    {
-    public:
-      CLoggerSink();
-      void setLogLevel(CSeverity severity);
-
-      void timeStamp(bool nts) { timeStamp_ = nts;}
-      void severityStamp(bool nss) { severityStamp_ = nss;}
-
-      void trace(bool f) { logSeverity.fTrace = f; }
-      void debug(bool f) { logSeverity.fDebug = f; }
-      void info(bool f) { logSeverity.fInfo = f; }
-      void notice(bool f) { logSeverity.fNotice = f; }
-      void warning(bool f) { logSeverity.fWarning = f; }
-
-      virtual void writeRecord(PLoggerRecord const &);
-      private:
-        bool timeStamp_     : 1;
-        bool severityStamp_ : 1;
-        CSeverity logSeverity;
-
-      protected:
-        virtual void write(std::string const &) = 0;
-    };
-
-    CLogger &defaultLogger();
-
-      // Some inline functions to simplify life
-
-    /// @brief      Function to log a message.
-    /// @param[in]  severity: The severity of the message.
-    /// @param[in]  message: The message to log.
-    /// @throws
-    /// @version    2020-06-13/GGB - Converted from macro to function.
-
-    inline void LOGMESSAGE(ESeverity severity, std::string const &message)
-    {
-      defaultLogger().logMessage(severity, message);
-    }
-
-    /// @brief Function to log a critical message.
-    /// @param[in] message: The message to log.
-    /// @throws
-    /// @version 2020-06-13/GGB - Converted from macro to function.
-
-    inline void CRITICALMESSAGE(std::string const &message)
-    {
-      defaultLogger().logMessage(critical, message);
-    }
-
-    /// @brief      Function to log a critical message.
-    /// @param[in]  logger: The logger to use for logging.
-    /// @param[in]  message: The message to log.
-    /// @throws
-    /// @version    2020-06-13/GGB - Converted from macro to function.
-
-    inline void CRITICALMESSAGE(CLogger &logger, std::string const &message)
-    {
-      logger.logMessage(critical, message);
-    }
-
-    /// @brief      Function to log an error message.
-    /// @param[in]  message: The message to log.
-    /// @throws
-    /// @version    2020-06-13/GGB - Converted from macro to function.
-
-    inline void ERRORMESSAGE(std::string const &message)
-    {
-      defaultLogger().logMessage(error, message);
-    }
-
-    /// @brief      Function to log an warning message.
-    /// @param[in]  message: The message to log.
-    /// @throws
-    /// @version    2020-06-13/GGB - Converted from macro to function.
-
-    inline void WARNINGMESSAGE(std::string const &message)
-    {
-      defaultLogger().logMessage(warning, message);
-    }
-
-    /// @brief Function to log a notice message.
-    /// @param[in] message: The message to log.
-    /// @throws
-    /// @version 2020-06-13/GGB - Converted from macro to function.
-
-    inline void NOTICEMESSAGE(std::string const &message)
-    {
-      defaultLogger().logMessage(notice, message);
-    }
-
-    /// @brief      Function to log an information message.
-    /// @param[in]  message: The message to log.
-    /// @throws
-    /// @version    2020-06-13/GGB - Converted from macro to function.
-
-    inline void INFOMESSAGE(std::string const &message)
-    {
-      defaultLogger().logMessage(info, message);
-    }
-
-    /// @brief Function to log an debug message.
-    /// @param[in] message: The message to log.
-    /// @throws
-    /// @version 2020-06-13/GGB - Converted from macro to function.
-
-    inline void DEBUGMESSAGE(std::string const &message)
-    {
-      defaultLogger().logMessage(debug, message);
-    }
-
-    /// @brief Function to log a trace function entry point.
-    /// @param[in] message: The message to log.
-    /// @throws
-    /// @version 2020-06-13/GGB - Converted from macro to function.
-
-    inline void TRACEMESSAGE(std::string const &message)
-    {
-      defaultLogger().logMessage(trace, message);
-    }
-
-    /// @brief Function to log an exception.
-    /// @param[in] message: The message to log.
-    /// @throws
-    /// @version 2020-06-14/GGB - Converted from macro to function.
-
-    inline void LOGEXCEPTION(std::string const &message)
-    {
-      defaultLogger().logMessage(exception, message);
-    }
-
-    inline void TRACE_ENTER(std::source_location const location = std::source_location::current())
-    {
-      defaultLogger().logMessage(GCL::logger::trace,
-                                 "Entering Function: " + std::string(location.function_name()) +
-                                 ". File: " + std::string(location.file_name()) +
-                                 ". Line: " + std::to_string(location.line()));
-    }
-
-    inline void TRACE_EXIT(std::source_location const location = std::source_location::current())
-    {
-      defaultLogger().logMessage(GCL::logger::trace,
-                                 "Exiting Function: " + std::string(location.function_name()) +
-                                 ". File: " + std::string(location.file_name()) +
-                                 ". Line: " + std::to_string(location.line()));
-    }
-
-
-    /// @brief      Trace function to trace a line.
-    /// @param[in]  location: Source code location.
-    /// @throws
-    /// @version    2023-10-16/GGB - Function created.
-
-    inline void TRACE_LINE(std::source_location const location = std::source_location::current())
-    {
-      defaultLogger().logMessage(GCL::logger::trace,
-                                 "Passing Line: " + std::string(location.function_name()) +
-                                 ". File: " + std::string(location.file_name()) +
-                                 ". Line: " + std::to_string(location.line()));
-    }
-
-    /// @brief      Trace function to flag an unexpected condition.
-    /// @param[in]  location: Source code location.
-    /// @throws
-    /// @version    2023-10-16/GGB - Function created.
-
-    inline void TRACE_UNEXPECTED(std::source_location const location = std::source_location::current())
-    {
-      defaultLogger().logMessage(GCL::logger::trace,
-                                 "Unexpected branch: " + std::string(location.function_name()) +
-                                 ". File: " + std::string(location.file_name()) +
-                                 ". Line: " + std::to_string(location.line()));
-    }
-
-
-  } // namespace logger
-} // namespace GCL
-
-#endif    // GCL_CONTROL
-
+} // namespace GCL::logger
 
 #endif // GCL_LOGGER_LOGGERCORE_H

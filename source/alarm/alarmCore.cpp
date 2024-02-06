@@ -35,13 +35,12 @@
 
   // Miscellaneous library header files.
 
-#include "include/logger/loggerCore.h"
+#include "include/logger/defaultLogger.h"
 
 namespace GCL
 {
   namespace alarm
   {
-
     using GCL::logger::CRITICALMESSAGE;
 
     /// @brief      Constructor for the CAlarmType class.

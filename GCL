@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2023 Gavin Blakeman.
+//                      Copyright 2013-2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -27,7 +27,8 @@
 //
 // CLASSES INCLUDED:    None
 //
-// HISTORY:             2023-10-03 GGB - Added the SAP background file data parser.
+// HISTORY:             2024-02-06 GGB - Added files for the updated logger module.
+//											2023-10-03 GGB - Added the SAP background file data parser.
 //                      2018-07-06 GGB - Added alarm module.
 //                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2015-07-06 GGB - Updated Error files.
@@ -60,9 +61,17 @@
 #include "include/dataParser/dataParser_SAPBKG.h"
 #include "include/error.h"
 #include "include/GCLError.h"
+#include "include/logger/defaultLogger.h"
 #include "include/logger/loggerCore.h"
-#include "include/logger/fileSink.h"
-#include "include/logger/streamSink.h"
+#include "include/logger/filters/baseFilter.h"
+#include "include/logger/filters/debugFilter.h"
+#include "include/logger/queues/baseQueue.h"
+#include "include/logger/queues/queueQueue.h"
+#include "include/logger/records/baseRecord.h"
+#include "include/logger/records/debugRecord.h"
+#include "include/logger/sinks/baseSink.h"
+#include "include/logger/sinks/fileSink.h"
+#include "include/logger/sinks/streamSink.h"
 #include "include/common.h"
 #include "include/dateTime.h"
 #include "include/filesystem.h"

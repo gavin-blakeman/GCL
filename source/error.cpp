@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2023 Gavin Blakeman.
+//                      Copyright 2013-2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -44,8 +44,20 @@
 
 #include <boost/lexical_cast.hpp>
 
+  // GCL library header files
+
+#include "include/logger/defaultLogger.h"
+
 namespace GCL
 {
+  using logger::LOGEXCEPTION;
+
+  runtime_error::runtime_error(std::string const &errorString, TErrorCode errorCode, std::string const &library)
+      : std::runtime_error(errorString), errorCode_(errorCode), library_(library)
+  {
+    LOGEXCEPTION(errorMessage());
+  }
+
   /// @brief        Converts the error message to a string.
   /// @param[in]    fileName: The name of the source file having the error.
   /// @param[in]    timeStamp: The build timestamp of the source file.
@@ -70,6 +82,11 @@ namespace GCL
     return o.str();
   }
 
+  CCodeError::CCodeError(std::string fn, size_t ln) : std::runtime_error("Code Error."), fileName(fn),lineNo(ln)
+  {
+    LOGEXCEPTION(errorMessage(fileName, lineNo));
+  }
+
   /// @brief        Converts the error message to a string.
   /// @param[in]    fileName: The name of the source file having the error.
   /// @param[in]    lineNo: The line number that raises the error.
@@ -90,6 +107,12 @@ namespace GCL
     o << "File: " << fileName << " at line: " << lineNo << std::endl;
 
     return o.str();
+  }
+
+  CRuntimeAssert::CRuntimeAssert(std::string const &expression, std::string const &message, std::source_location const location)
+        : std::runtime_error("Runtime Assert")
+  {
+    LOGEXCEPTION(errorMessage(expression, std::string(location.file_name()), location.line(), message));
   }
 
   /// @brief        Creates the message string for the runtime assertion.

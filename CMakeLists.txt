@@ -24,10 +24,17 @@ set(SOURCES
   source/alarm/alarmWeekly.cpp
   source/dataParser/dataDelimited.cpp
   source/dataParser/dataParserCore.cpp
-  source/dataParser/dataParser_SAPBKG.cpp
-  source/logger/fileSink.cpp
+  source/dataParser/dataParser_SAPBKG.cpp  
+  source/logger/defaultLogger.cpp
   source/logger/loggerCore.cpp
-  source/logger/streamSink.cpp
+  source/logger/filters/debugFilter.cpp
+  source/logger/queues/baseQueue.cpp
+  source/logger/queues/queueQueue.cpp
+  source/logger/records/baseRecord.cpp
+  source/logger/records/debugRecord.cpp
+  source/logger/sinks/baseSink.cpp
+  source/logger/sinks/fileSink.cpp
+  source/logger/sinks/streamSink.cpp
   source/pluginManager/pluginManager.cpp
   )
 set(HEADERS
@@ -46,9 +53,17 @@ set(HEADERS
   include/alarm/alarmDaily.h
   include/alarm/alarmWeekly.h
   include/error.h
+  include/logger/defaultLogger.h
   include/logger/loggerCore.h
-  include/logger/fileSink.h
-  include/logger/streamSink.h
+  include/logger/filters/baseFilter.h
+  include/logger/filters/debugFilter.h
+  include/logger/queues/baseQueue.h
+  include/logger/queues/queueQueue.h
+  include/logger/records/baseRecord.h
+  include/logger/records/debugRecord.h
+  include/logger/sinks/baseSink.h
+  include/logger/sinks/fileSink.h
+  include/logger/sinks/streamSink.h
   include/configurationReader/readerSections.hpp
   include/configurationReader/readerVanilla.hpp
   include/configurationReader/readerCore.hpp
@@ -68,6 +83,7 @@ set(DIRECTORIES
   )
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
+
 
 target_include_directories(${PROJECT_NAME}
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
