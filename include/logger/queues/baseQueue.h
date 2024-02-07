@@ -36,6 +36,7 @@
 
   // Standard C++ library header files
 
+#include <condition_variable>
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
@@ -60,10 +61,11 @@ namespace GCL::logger
 
     protected:
       using mutex_type = std::shared_mutex;
-      using uniqueLock = std::unique_lock<mutex_type>;
-      using sharedLock = std::unique_lock<mutex_type>;
+      using writeLock = std::unique_lock<mutex_type>;
+      using readLock = std::unique_lock<mutex_type>;
 
       mutable mutex_type queueMutex;
+      mutable std::condition_variable_any cvQueueData;
 
     private:
       CBaseQueue(CBaseQueue const &) = delete;

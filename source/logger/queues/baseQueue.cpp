@@ -44,8 +44,7 @@ namespace GCL::logger
 
   CBaseRecord const &CBaseQueue::front() const
   {
-    sharedLock sl(queueMutex);
-
+    readLock sl(queueMutex);
     return processFront();
   }
 
@@ -56,8 +55,7 @@ namespace GCL::logger
 
   void CBaseQueue::push(std::unique_ptr<CBaseRecord> &&r)
   {
-    uniqueLock ul(queueMutex);
-
+    writeLock ul(queueMutex);
     processPush(std::move(r));
   }
 
@@ -67,15 +65,13 @@ namespace GCL::logger
 
   void CBaseQueue::pop()
   {
-    uniqueLock ul(queueMutex);
-
+    writeLock ul(queueMutex);
     processPop();
   }
 
   bool CBaseQueue::empty() const noexcept
   {
-    uniqueLock ul(queueMutex);
-
+    writeLock ul(queueMutex);
     return processEmpty();
   }
 

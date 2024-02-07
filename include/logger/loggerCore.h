@@ -42,8 +42,8 @@
 
 // Standard C++ libraries
 
+#include <atomic>
 #include <chrono>
-#include <condition_variable>
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
@@ -51,6 +51,7 @@
 #include <memory>
 #include <mutex>
 #include <queue>
+#include <semaphore>
 #include <shared_mutex>
 #include <source_location>
 #include <sstream>
@@ -132,14 +133,12 @@ namespace GCL::logger
     typedef std::shared_lock<mutex_type>  SharedLock;
     using logSinks_t = std::map<std::string, std::unique_ptr<CBaseSink>>;
 
-    mutable mutex_type queueMutex;              // Protects the message queue
-    mutable mutex_type terminateMutex;
-    bool terminateThread;
-    mutable std::condition_variable_any cvQueueData;
+    std::binary_semaphore messageWaiting;
+    std::atomic_flag terminateThread;
 
     std::unique_ptr<CBaseQueue> messageQueue;
 
-    mutable mutex_type sinkMutex;
+    mutable mutex_type sinkMutex;                 // Mutex protecting the sinks.
     logSinks_t logSinks;
 
     std::unique_ptr<std::thread> writerThread;

@@ -55,7 +55,9 @@ namespace GCL::logger
     using criticalityMap_t = std::map<criticality_t, std::string>;
     using criticalityMask_t = std::set<criticality_t>;
 
+    CDebugFilter(criticalityMap_t const &);
     CDebugFilter(criticalityMap_t &&);
+    CDebugFilter(criticalityMap_t const &, criticalityMask_t const &);
     CDebugFilter(criticalityMap_t &&, criticalityMask_t &&);
 
     void clearMask() noexcept { criticalityMask.clear(); }

@@ -33,6 +33,10 @@
 
 #include "include/logger/filters/debugFilter.h"
 
+  // Standard C++ libraries
+
+#include <iostream>
+
 // Miscellaneous libraries
 
 #include <fmt/format.h>
@@ -50,8 +54,29 @@ namespace GCL::logger
   /// @throws
   /// @version    2024-02-06/GGB - Function created.
 
+  CDebugFilter::CDebugFilter(criticalityMap_t const &cm) : criticalityMap(cm.begin(), cm.end())
+  {
+  }
+
+  /// @brief      Class constructor.
+  /// @param[in]  cmp: The map of criticalities and text.
+  /// @throws
+  /// @version    2024-02-06/GGB - Function created.
+
   CDebugFilter::CDebugFilter(criticalityMap_t &&cmp) : criticalityMap(std::move(cmp))
   {
+  }
+
+  /// @brief      Class constructor.
+  /// @param[in]  cmp: The map of criticalities and text.
+  /// @param[in]  cmk: The set of criticalities to process
+  /// @throws
+  /// @version    2024-02-06/GGB - Function created.
+
+  CDebugFilter::CDebugFilter(criticalityMap_t const &cmp, criticalityMask_t const &cm)
+    : criticalityMap(cmp.begin(), cmp.end()), criticalityMask(cm.begin(), cm.end())
+  {
+
   }
 
   /// @brief      Class constructor.
@@ -92,7 +117,7 @@ namespace GCL::logger
 
       if (criticalityMask.contains(debugRecord.severity()))
       {
-        std::string rv = fmt::format("{:%Y-%m-%d %H:%M:%S} [{:s}] - {:s}",
+        std::string rv = fmt::format("{:%Y-%m-%d %H:%M:%S} [{:s}] {:s}",
                                      debugRecord.timeStamp().dateTime(),
                                      criticalityMap.at(debugRecord.severity()),
                                      record.text());
@@ -101,7 +126,7 @@ namespace GCL::logger
     }
     catch(std::bad_cast &w)
     {
-
+      std::cerr << "Bad Cast in CDebugFilter::processRecordString: " << w.what() << std::endl;
     }
     catch(...)
     {

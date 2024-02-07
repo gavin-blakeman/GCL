@@ -38,6 +38,7 @@
 
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 
 // GCL library
@@ -47,17 +48,18 @@
 
 namespace GCL::logger
 {
+  std::string const DEFAULT_LOGGER{"DEFAULT"};
+
   class CLoggerManager
   {
   public:
     static void addLogger(std::string const &, std::unique_ptr<CLogger>);
     static bool hasLogger(std::string const &) noexcept;
     static void removeLogger(std::string const &);
-    static void setActiveLogger(std::string const &);
-    static void setDefaultLogger();
+    static void setDefaultLogger(std::string const & = DEFAULT_LOGGER);
 
     static CLogger &defaultLogger();
-    static CLogger &currentLogger();
+    static CLogger &namedLogger(std::string const &);
 
     static void terminateAllLoggers();
 
@@ -70,7 +72,7 @@ namespace GCL::logger
     CLoggerManager &operator=(CLoggerManager &&) = delete;
 
     static std::map<std::string, std::unique_ptr<CLogger>> availableLoggers;
-    static thread_local std::pair<std::string, CLogger *> activeLogger;
+    static std::pair<std::string, CLogger *> activeLogger;
 
     static void createDefaultLogger();
   };
@@ -99,7 +101,7 @@ namespace GCL::logger
 
   inline void LOGMESSAGE(severity_e severity, std::string const &message)
   {
-    CLoggerManager::currentLogger().logMessage(std::make_unique<CDebugRecord>(severity, message));
+    CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(severity, message));
   }
 
   /// @brief Function to log a critical message.
@@ -109,7 +111,7 @@ namespace GCL::logger
 
   inline void CRITICALMESSAGE(std::string const &message)
   {
-    CLoggerManager::currentLogger().logMessage(std::make_unique<CDebugRecord>(s_critical, message));
+    CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(s_critical, message));
   }
 
   /// @brief      Function to log an error message.
@@ -119,7 +121,7 @@ namespace GCL::logger
 
   inline void ERRORMESSAGE(std::string const &message)
   {
-    CLoggerManager::currentLogger().logMessage(std::make_unique<CDebugRecord>(s_error, message));
+    CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(s_error, message));
   }
 
   /// @brief      Function to log an warning message.
@@ -129,7 +131,7 @@ namespace GCL::logger
 
   inline void WARNINGMESSAGE(std::string const &message)
   {
-    CLoggerManager::currentLogger().logMessage(std::make_unique<CDebugRecord>(s_warning, message));
+    CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(s_warning, message));
   }
 
   /// @brief Function to log a notice message.
@@ -139,7 +141,7 @@ namespace GCL::logger
 
   inline void NOTICEMESSAGE(std::string const &message)
   {
-    CLoggerManager::currentLogger().logMessage(std::make_unique<CDebugRecord>(s_notice, message));
+    CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(s_notice, message));
   }
 
   /// @brief      Function to log an information message.
@@ -147,9 +149,16 @@ namespace GCL::logger
   /// @throws
   /// @version    2020-06-13/GGB - Converted from macro to function.
 
-  inline void INFOMESSAGE(std::string const &message)
+  inline void INFOMESSAGE(std::string const &message, std::optional<std::string> const &namedLogger = std::optional<std::string>())
   {
-    CLoggerManager::currentLogger().logMessage(std::make_unique<CDebugRecord>(s_information, message));
+    if (namedLogger)
+    {
+      CLoggerManager::namedLogger(*namedLogger).logMessage(std::make_unique<CDebugRecord>(s_information, message));
+    }
+    else
+    {
+      CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(s_information, message));
+    }
   }
 
   /// @brief Function to log an debug message.
@@ -159,7 +168,7 @@ namespace GCL::logger
 
   inline void DEBUGMESSAGE(std::string const &message)
   {
-    CLoggerManager::currentLogger().logMessage(std::make_unique<CDebugRecord>(s_debug, message));
+    CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(s_debug, message));
   }
 
   /// @brief Function to log a trace function entry point.
@@ -169,7 +178,7 @@ namespace GCL::logger
 
   inline void TRACEMESSAGE(std::string const &message)
   {
-    CLoggerManager::currentLogger().logMessage(std::make_unique<CDebugRecord>(s_trace, message));
+    CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(s_trace, message));
   }
 
   /// @brief Function to log an exception.
@@ -179,12 +188,12 @@ namespace GCL::logger
 
   inline void LOGEXCEPTION(std::string const &message)
   {
-    CLoggerManager::currentLogger().logMessage(std::make_unique<CDebugRecord>(s_exception, message));
+    CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(s_exception, message));
   }
 
   inline void TRACE_ENTER(std::source_location const location = std::source_location::current())
   {
-    CLoggerManager::currentLogger().logMessage(std::make_unique<CDebugRecord>(s_trace,
+    CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(s_trace,
                                "Entering Function: " + std::string(location.function_name()) +
                                ". File: " + std::string(location.file_name()) +
                                ". Line: " + std::to_string(location.line())));
@@ -192,7 +201,7 @@ namespace GCL::logger
 
   inline void TRACE_EXIT(std::source_location const location = std::source_location::current())
   {
-    CLoggerManager::currentLogger().logMessage(std::make_unique<CDebugRecord>(s_trace,
+    CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(s_trace,
                                "Exiting Function: " + std::string(location.function_name()) +
                                ". File: " + std::string(location.file_name()) +
                                ". Line: " + std::to_string(location.line())));
@@ -206,7 +215,7 @@ namespace GCL::logger
 
   inline void TRACE_LINE(std::source_location const location = std::source_location::current())
   {
-    CLoggerManager::currentLogger().logMessage(std::make_unique<CDebugRecord>(s_trace,
+    CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(s_trace,
                                "Passing Line: " + std::string(location.function_name()) +
                                ". File: " + std::string(location.file_name()) +
                                ". Line: " + std::to_string(location.line())));
@@ -219,7 +228,7 @@ namespace GCL::logger
 
   inline void TRACE_UNEXPECTED(std::source_location const location = std::source_location::current())
   {
-    CLoggerManager::currentLogger().logMessage(std::make_unique<CDebugRecord>(s_trace,
+    CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(s_trace,
                                "Unexpected branch: " + std::string(location.function_name()) +
                                ". File: " + std::string(location.file_name()) +
                                ". Line: " + std::to_string(location.line())));

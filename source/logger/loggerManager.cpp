@@ -31,7 +31,7 @@
 //
 //*********************************************************************************************************************************
 
-#include "../../include/logger/loggerManager.h"
+#include "include/logger/loggerManager.h"
 #include "include/logger/queues/queueQueue.h"
 #include "include/logger/sinks/streamSink.h"
 #include "include/logger/filters/debugFilter.h"
@@ -39,7 +39,7 @@
 namespace GCL::logger
 {
   std::map<std::string, std::unique_ptr<CLogger>> CLoggerManager::availableLoggers;
-  thread_local std::pair<std::string, CLogger *> CLoggerManager::activeLogger = {"", nullptr};
+  std::pair<std::string, CLogger *> CLoggerManager::activeLogger = {"", nullptr};
 
   /// @brief      Adds a new logger into the map of available loggers.
   /// @param[in]  name: The name of the logger.
@@ -58,7 +58,7 @@ namespace GCL::logger
 
   void CLoggerManager::createDefaultLogger()
   {
-    CDebugFilter::criticalityMap_t criticalityMap =
+    CDebugFilter::criticalityMap_t const criticalityMap =
     {
         { s_critical, "CRITICAL"},
         { s_error, "ERROR"},
@@ -71,7 +71,7 @@ namespace GCL::logger
     };
 
     std::unique_ptr<CLogger> logger = std::make_unique<CLogger>();
-    std::shared_ptr<CDebugFilter> filter = std::make_shared<CDebugFilter>(std::move(criticalityMap));
+    std::shared_ptr<CDebugFilter> filter = std::make_shared<CDebugFilter>(criticalityMap);
     std::unique_ptr<CBaseSink> sink = std::make_unique<CStreamSink>(filter, std::cout);
     logger->addQueue(std::make_unique<CQueueQueue>());
     logger->addSink("cout", std::move(sink));
@@ -80,7 +80,7 @@ namespace GCL::logger
 
     if (activeLogger.second == nullptr)
     {
-      setActiveLogger("DEFAULT");
+      setDefaultLogger(DEFAULT_LOGGER);
     };
   }
 
@@ -89,28 +89,32 @@ namespace GCL::logger
   /// @throws
   /// @version    2024-02-06/GGB - Function created.
 
-  CLogger &CLoggerManager::currentLogger()
+  CLogger &CLoggerManager::namedLogger(std::string const &name)
   {
-    if (!availableLoggers.contains("DEFAULT"))
+    if (availableLoggers.contains(name))
     {
-      createDefaultLogger();
+      return *availableLoggers.at(name);
     }
-    if (activeLogger.second == nullptr)
+    else
     {
-      setActiveLogger("DEFAULT");
+      CODE_ERROR();
+      // Does not return.
     }
-
     return *activeLogger.second;
   }
 
   CLogger &CLoggerManager::defaultLogger()
   {
-    if (!availableLoggers.contains("DEFAULT"))
+    if (activeLogger.second == nullptr)
     {
-      createDefaultLogger();
+      if (!availableLoggers.contains(DEFAULT_LOGGER))
+      {
+        createDefaultLogger();
+      }
+      setDefaultLogger();
     }
 
-    return *availableLoggers.at("DEFAULT");
+    return *activeLogger.second;
   }
 
   /// @brief      Tests if a specific logger exists.
@@ -133,6 +137,10 @@ namespace GCL::logger
   {
     if ( (name != "DEFAULT") && availableLoggers.contains(name))
     {
+      if (activeLogger.first == name)
+      {
+        setDefaultLogger();
+      }
       availableLoggers.erase(name);
     }
   }
@@ -142,30 +150,19 @@ namespace GCL::logger
   /// @throws
   /// @version    2024-02-06/GGB - Function created.
 
-  void CLoggerManager::setActiveLogger(std::string const &name)
+  void CLoggerManager::setDefaultLogger(std::string const &name)
   {
-    if (availableLoggers.contains(name) && (activeLogger.first != name))
+    if (availableLoggers.contains(name))
     {
-      activeLogger.first = name;
-      activeLogger.second = availableLoggers.at(name).get();
+      if (activeLogger.first != name)
+      {
+        activeLogger.first = name;
+        activeLogger.second = availableLoggers.at(name).get();
+      };
     }
     else
     {
       CODE_ERROR();
-      // Does not return.
-    }
-  }
-
-  void CLoggerManager::setDefaultLogger()
-  {
-    if (activeLogger.first != "DEFAULT")
-    {
-      activeLogger.first = "DEFAULT";
-      activeLogger.second = availableLoggers.at("DEFAULT").get();
-    }
-    else
-    {
-      CODE_ERROR(); // The default logger has been removed.
       // Does not return.
     }
   }
@@ -180,12 +177,7 @@ namespace GCL::logger
     {
       logger.second->shutDown();      // This should flush the queue. If not, the next step does flush the queues.
     }
-    for (auto &logger: availableLoggers)
-    {
-      logger.second.reset();          // Delete the objects.
-    }
-
-
+    availableLoggers.clear();
   }
 
 } // namespace

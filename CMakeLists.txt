@@ -76,18 +76,20 @@ set(HEADERS
   include/sqlWriter_variables.inc
   )
 
-set(DIRECTORIES
+set(DIRECTORIES	
   ../MCL
   ../SCL
   ${fmt_DIR}
   ${Boost_INCLUDE_DIRS}
   )
+set(LIBRARIES
+	Boost::locale
+	)
 
-add_library(${PROJECT_NAME} STATIC ${SOURCES} ${HEADERS})
-
-
+add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
 target_include_directories(${PROJECT_NAME}
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
                            PRIVATE ${DIRECTORIES})
+target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 
 ADD_SUBDIRECTORY(test)

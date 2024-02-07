@@ -61,46 +61,21 @@ namespace GCL::logger
   /// @version 2018-08-13/GGB - Bug #141 - Added auto-creation of std::cerr sink.
   /// @version 2014-12-24/GGB - Function created.
 
-  CLogger::CLogger() : terminateThread(false), writerThread(nullptr)
+  CLogger::CLogger() : terminateThread(false), writerThread(nullptr), messageWaiting(0)
   {
   }
 
   /// @brief      Destructor for the class.
   /// @throws     None.
   /// @details    Needs too finish the thread and destroy the thread object.
+  /// @version    2024-02-07/GGB - Updated to just call shutDown.
   /// @version    2019-10-22/GGB - 1. Changed writerThread to a std::unique_ptr
   ///                              2. Changed writerThread from a boost::thread to a std::thread
   /// @version    2014-12-24/GGB - Function created.
 
   CLogger::~CLogger()
   {
-    if (writerThread)
-    {
-      // Request all threads to terminate.
-      {
-        uniqueLock lock(terminateMutex);
-        terminateThread = true;
-      }
-      cvQueueData.notify_one();
-
-      writerThread->join();
-      writerThread.reset(nullptr);
-
-      // There should not be any messages, but empty the queue to be sure.
-
-      while (!messageQueue->empty())
-      {
-        CBaseRecord const &record = messageQueue->front();
-
-        uniqueLock ul{sinkMutex};
-        for (auto &sink : logSinks)
-        {
-          sink.second->writeRecord(record);
-        }
-
-        messageQueue->pop();
-      };
-    };
+    shutDown();
   }
 
   //// @brief     Adds the specified queue to the logger. If there is an existing queue, it will be deleted.
@@ -155,17 +130,14 @@ namespace GCL::logger
   /// @brief      Creates a log message in place on the queue.
   /// @param[in]  record: The message to log.
   /// @throws     std::bad_alloc
+  /// @version    2024-02-07/GGB - Updated to use atomic_flag and semaphores.
   /// @version    2014-12-25/GGB - Changed to create the logger record immediately on entry. The log record is also a smart pointer.
   /// @version    2014-07-20/GGB - Function created.
 
   void CLogger::logMessage(std::unique_ptr<CBaseRecord> &&record)
   {
-    {
-      uniqueLock lock(queueMutex);
-
-      messageQueue->push(std::move(record));
-    };
-    cvQueueData.notify_one();
+    messageQueue->push(std::move(record));
+    messageWaiting.release();
   }
 
   /// @brief      Returns a pointer to the specified sink.
@@ -208,6 +180,7 @@ namespace GCL::logger
 
   /// @brief      Shuts down the writer thread.
   /// @throws     None.
+  /// @version    2024-02-07/GGB - Updated to use atomic_flag and semaphores.
   /// @version    2019-10-22/GGB - 1. Changed writerThread to a std::unique_ptr
   ///                              2. Changed writerThread from a boost::thread to a std::thread
   /// @version    2015-09-19/GGB - Added locking to the sink container.
@@ -217,19 +190,11 @@ namespace GCL::logger
   {
     if (writerThread)
     {
-      // Obtain a unique lock on the terminate mutex to write the value.
-
-      {
-        uniqueLock writeLock(terminateMutex);
-        terminateThread = true;
-      }  // Lock released at this point.
-      cvQueueData.notify_one();   // Notify the queue to run.
+      terminateThread.test_and_set();
+      messageWaiting.release();         // Ensure the thread unblocks
 
       writerThread->join();
       writerThread.reset(nullptr);
-
-      // There should not be any messages, but empty the queue to be sure. In this case the queue does not need to be locked as
-      // the thread has been terminated.
 
       while (!messageQueue->empty())
       {
@@ -250,6 +215,7 @@ namespace GCL::logger
   /// @details    Whenever a message is added to the queue, this is the function that writes it to the stream.
   /// @note       The writer thread may be called and active before sinks and queues are available.
   /// @throws     None.
+  /// @version    2024-02-07/GGB - Updated to use atomic_flag and semaphores.
   /// @version    2016-05-07/GGB - Updated locking strategy to remove a number of errors.
   /// @version    2015-09-19/GGB - Added locking to the sink container.
   /// @version    2014-12-24/GGB - Updated to write to multiple streams.
@@ -257,43 +223,22 @@ namespace GCL::logger
 
   void CLogger::writer()
   {
-    bool mustTerminate = false;
-
-    while (!mustTerminate)
+    while (!terminateThread.test())
     {
-      // Waiting part of the writer. Implement using a shared lock. The shared lock will be released once data is put in the
-      // queue and notify is called.
-      {
-        SharedLock readLock(queueMutex);
-        while (messageQueue->empty())
-        {
-          cvQueueData.wait(readLock);             // Wait for notify from adding data. NB. This also unlocks the mutex!
-        }
-      }    // The shared lock is released on exit from the code block.
+      messageWaiting.acquire();
 
       while (!messageQueue->empty())
       {
         CBaseRecord const &record = messageQueue->front();
-
-        uniqueLock ul{sinkMutex};
-        for (auto &sink : logSinks)
         {
-          sink.second->writeRecord(record);
+          uniqueLock ul{sinkMutex};
+          for (auto &sink : logSinks)
+          {
+            sink.second->writeRecord(record);
+          }
         }
-
-        // Need to have write access to the queue. Request a Unique lock.
-
-        {
-          uniqueLock writeLock(queueMutex);
-          messageQueue->pop();
-        };  // Unique lock released on exit from code block.
+        messageQueue->pop();
       };
-
-      // Lock the terminateMutex to get the value of terminateThread.
-      {
-        SharedLock lock(terminateMutex);
-        mustTerminate = terminateThread;
-      }
     };
   }
 

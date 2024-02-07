@@ -121,6 +121,7 @@ namespace GCL::plugin
   /// @brief      Loads the specified plugin. First checks if it is already loaded and if so returns the existing handle. If not
   ///             loaded, loads the plugin and returns the handle.
   /// @param[in]  pluginName: The name of the plugin to load.
+  /// @param[in]  flags: Flags to apply to the dlopen.
   /// @param[in]  alias: The alias name to use for the plugin. May be an empty string or not supplied.
   /// @note       1. The plugin name can include a full path, however this can create errors. Rather set the search paths for the
   ///               path and just pass the plugin name.
