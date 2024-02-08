@@ -51,7 +51,6 @@
 
 #include "include/common.h"
 #include "include/error.h"
-#include "include/GCLError.h"
 
 
 namespace GCL::plugin
@@ -112,7 +111,7 @@ namespace GCL::plugin
     }
     else
     {
-      RUNTIME_ERROR(boost::locale::translate("PluginManager: Directory does not exist."), E_PLUGINMANAGER_NODIRECTORY, LIBRARYNAME);
+      RUNTIME_ERROR(boost::locale::translate("PluginManager: Directory does not exist."));
     };
 
     return returnValue;
@@ -214,7 +213,7 @@ namespace GCL::plugin
         else
         {
           char *error = dlerror();
-          RUNTIME_ERROR(std::string(error), E_PLUGINMANAGER_UNABLETOMAP, LIBRARYNAME);
+          RUNTIME_ERROR(std::string(error));
           RUNTIME_ERROR(boost::locale::translate("PluginManager: Unable to load plugin: " + fileNameAndPath.native()));
         }
 
@@ -267,7 +266,7 @@ namespace GCL::plugin
         if (returnValue == nullptr)
         {
           char *error = dlerror();
-          RUNTIME_ERROR(std::string(error), E_PLUGINMANAGER_UNABLETOMAP, LIBRARYNAME);
+          RUNTIME_ERROR(std::string(error));
         }
         else if (cacheSymbol)
         {
@@ -305,7 +304,7 @@ namespace GCL::plugin
         else
         {
           char *error = dlerror();
-          RUNTIME_ERROR(std::string(error), E_PLUGINMANAGER_UNABLETOUNLOAD, LIBRARYNAME);
+          RUNTIME_ERROR(std::string(error));
         }
       };
     }

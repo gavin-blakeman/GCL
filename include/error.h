@@ -40,6 +40,7 @@
   // Standard C++ library header files
 
 #include <cstdint>
+#include <optional>
 #include <source_location>
 #include <stdexcept>
 #include <string>
@@ -47,7 +48,6 @@
 
 namespace GCL
 {
-  typedef std::uint16_t TErrorCode;
 
   /// @brief        The CRuntimeError class is used for reporting exceptions and errors. It is integrated with the logger and allows
   ///               exceptions to be thrown and errors reported.
@@ -55,20 +55,25 @@ namespace GCL
 
   class runtime_error : public std::runtime_error
   {
+  public:
+    using errorType_t = std::uint_least16_t;
+    using errorCode_t = std::uint_least16_t;
+
+    runtime_error(std::string const &, errorType_t, errorCode_t, std::optional<std::string> const & = std::optional<std::string>());
+    runtime_error(std::string const &, std::optional<std::string> const & = std::optional<std::string>());
+    virtual ~runtime_error() = default;
+
+    std::string errorMessage() const;
+
   private:
-    TErrorCode errorCode_;
-    std::string library_;
+    errorType_t errorType_;
+    errorCode_t errorCode_;
 
     runtime_error() = delete;
     runtime_error(runtime_error const &) = delete;
     runtime_error(runtime_error &&) = delete;
-    runtime_error operator =(runtime_error const &) = delete;
-
-    std::string errorMessage() const;
-
-  public:
-    runtime_error(std::string const &errorString, TErrorCode errorCode = 0, std::string const &library = "");
-
+    runtime_error &operator =(runtime_error const &) = delete;
+    runtime_error &operator=(runtime_error &&) = delete;
   };
 
   /// @brief        The CCodeError class is used to throw exceptions to indicate code errors within a library.
@@ -111,9 +116,24 @@ namespace GCL
 
   /// @brief Function to throw a runtime error.
 
-  [[noreturn]] inline void RUNTIME_ERROR(std::string const &errorString, TErrorCode errorCode = 0, std::string const &library = "")
+  [[noreturn]] inline void RUNTIME_ERROR(std::string const &message,
+                                         runtime_error::errorType_t et,
+                                         runtime_error::errorCode_t ec,
+                                         std::optional<std::string> const &namedLogger = std::optional<std::string>())
   {
-    throw GCL::runtime_error(errorString, errorCode, library);
+    throw GCL::runtime_error(message, et, ec, namedLogger);
+  }
+
+  /// @brief      Throw a runtime error.
+  /// @param[in]  message: The message for the exception.
+  /// @param[in]  namedLogger: The logger to use for logging.
+  /// @throws
+  /// @version    2024-02-08/GGB - Function created.
+
+  [[noreturn]] inline void RUNTIME_ERROR(std::string const &errorString,
+                                         std::optional<std::string> const &namedLogger = std::optional<std::string>())
+  {
+    throw GCL::runtime_error(errorString, namedLogger);
   }
 
   [[noreturn]] inline void CODE_ERROR(std::source_location const location = std::source_location::current())

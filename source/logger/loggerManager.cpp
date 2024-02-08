@@ -32,6 +32,11 @@
 //*********************************************************************************************************************************
 
 #include "include/logger/loggerManager.h"
+
+// GCL header files
+
+#include "include/error.h"
+
 #include "include/logger/queues/queueQueue.h"
 #include "include/logger/sinks/streamSink.h"
 #include "include/logger/filters/debugFilter.h"

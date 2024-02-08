@@ -54,7 +54,6 @@
 
 #include "include/common.h"
 #include "include/error.h"
-#include "include/GCLError.h"
 
 namespace GCL::logger
 {
@@ -144,7 +143,7 @@ namespace GCL::logger
 
     if (!logFile.good() || !logFile.is_open())
     {
-      RUNTIME_ERROR(boost::locale::translate("LOGGER: Unable to open log file."), E_LOGGER_UNABLETOOPENFILE, LIBRARYNAME);
+      RUNTIME_ERROR(boost::locale::translate("LOGGER: Unable to open log file."));
     }
     else
     {

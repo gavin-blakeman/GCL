@@ -43,19 +43,33 @@
   // Miscellaneous library header files.
 
 #include <boost/lexical_cast.hpp>
+#include <fmt/format.h>
+#include <fmt/std.h>
 
   // GCL library header files
 
-#include "../include/logger/loggerManager.h"
+#include "include/logger/loggerManager.h"
 
 namespace GCL
 {
   using logger::LOGEXCEPTION;
 
-  runtime_error::runtime_error(std::string const &errorString, TErrorCode errorCode, std::string const &library)
-      : std::runtime_error(errorString), errorCode_(errorCode), library_(library)
+  runtime_error::runtime_error(std::string const &m, errorType_t et, errorCode_t ec, std::optional<std::string> const &namedLogger)
+      : std::runtime_error(m), errorType_(et), errorCode_(ec)
   {
-    LOGEXCEPTION(errorMessage());
+    LOGEXCEPTION(errorMessage(), namedLogger);
+  }
+
+  /// @brief      Constructor
+  /// @param[in]  message: The error message.
+  /// @param[in]  namedLogger: The named logger to use.
+  /// @throws
+  /// @version    2024-02-08/GGB - Function created.
+
+  runtime_error::runtime_error(std::string const &message, std::optional<std::string> const &namedLogger)
+  : std::runtime_error(message)
+  {
+    LOGEXCEPTION(errorMessage(), namedLogger);
   }
 
   /// @brief        Converts the error message to a string.
@@ -68,18 +82,15 @@ namespace GCL
 
   std::string runtime_error::errorMessage() const
   {
-    std::ostringstream o;
-
-    o << "Runtime Error - " << what() << " Error Code: " << errorCode_;
-
-    if (!library_.empty())
+    if (errorType_ && errorCode_)
     {
-      o << " Library: " << library_;
-    };
+      return fmt::format("Runtime Error: Type: {:Ld}, Code: {:Ld} - {:s}", errorType_, errorCode_, what());
+    }
+    else
+    {
+      return fmt::format("Runtime Error: {:s}", what());
+    }
 
-    o << std::endl;
-
-    return o.str();
   }
 
   CCodeError::CCodeError(std::string fn, size_t ln) : std::runtime_error("Code Error."), fileName(fn),lineNo(ln)

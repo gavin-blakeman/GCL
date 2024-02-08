@@ -47,8 +47,7 @@
 
 // GCL include headers
 
-#include "../error.h"
-
+#include "include/error.h"
 
 namespace GCL::logger
 {
@@ -173,7 +172,7 @@ namespace GCL::logger
 
       if (!writerThread)
       {
-        RUNTIME_ERROR(boost::locale::translate("LOGGER: Unable to start thread."), E_LOGGER_UNABLETOSTARTTHREAD, LIBRARYNAME);
+        RUNTIME_ERROR(boost::locale::translate("LOGGER: Unable to start thread."));
       };
     }
   }

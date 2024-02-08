@@ -67,7 +67,6 @@
 // GCL header files
 
 #include "include/common.h"
-#include "include/GCLError.h"
 #include "include/logger/records/baseRecord.h"
 #include "include/logger/queues/baseQueue.h"
 #include "include/logger/sinks/baseSink.h"

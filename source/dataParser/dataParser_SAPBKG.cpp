@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2020-2023 Gavin Blakeman.
+//                      Copyright 2020-2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -35,6 +35,7 @@
 
   // Standard C++ libraries
 
+#include <limits>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -85,6 +86,7 @@ namespace GCL
     stateMachine_t state = SM_START;
     dataLine_t headings;
     std::size_t lineNumber = 0;
+    std::size_t lineMax = lineLimit ? *lineLimit : std::numeric_limits<std::size_t>::max();
 
       /* The file consists of a heading section, (with varying layouts), and a data section that consits of an indeterminite
        * number of pages.
@@ -95,7 +97,7 @@ namespace GCL
 
     dataTables_.clear();
 
-    while (!inputStream.eof())
+    while (!inputStream.eof() && (lineNumber < lineMax) )
     {
       std::string szLine;
 

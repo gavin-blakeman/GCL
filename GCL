@@ -60,7 +60,6 @@
 #include "include/dataParser/dataParserCore.h"
 #include "include/dataParser/dataParser_SAPBKG.h"
 #include "include/error.h"
-#include "include/GCLError.h"
 #include "include/logger/loggerManager.h"
 #include "include/logger/loggerCore.h"
 #include "include/logger/filters/baseFilter.h"

@@ -67,7 +67,6 @@
 
 #include "include/common.h"
 #include "include/error.h"
-#include "include/GCLError.h"
 
 namespace GCL
 {
@@ -849,7 +848,7 @@ namespace GCL
       }
       default:
       {
-        RUNTIME_ERROR(boost::locale::translate("Unknown dialect"), E_SQLWRITER_UNKNOWNDIALECT, LIBRARYNAME);
+        RUNTIME_ERROR(boost::locale::translate("Unknown dialect"));
       }
     }
 
@@ -1692,8 +1691,7 @@ namespace GCL
     }
     else
     {
-      RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: No Select fields in select clause."), E_SQLWRITER_NOSELECTFIELDS,
-                    LIBRARYNAME);
+      RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: No Select fields in select clause."));
     };
 
     if (!fromFields.empty())
@@ -1702,8 +1700,7 @@ namespace GCL
     }
     else
     {
-      RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: No from fields in select clause."), E_SQLWRITER_NOFROMFIELD,
-                    LIBRARYNAME);
+      RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: No from fields in select clause."));
     };
 
     if (!joinFields.empty())
@@ -2008,13 +2005,13 @@ namespace GCL
             {
               std::clog << "Error in SQL map file: " << ifn << std::endl;
               std::clog << "Syntax command on line: " << lineNumber << " - COLUMN directive found, but no TABLE directive in force." << std::endl;
-              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
+              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."));
             }
             else if (szToken1.empty())
             {
               std::clog << "Error in SQL map file: " << ifn << std::endl;
               std::clog << "Syntax command on line: " << lineNumber << " - COLUMN directive found, column name." << std::endl;
-              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
+              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."));
             }
             else if ( (*databaseMap.find(currentTable)).second.columnData.find(szToken1) ==
                       (*databaseMap.find(currentTable)).second.columnData.end())
@@ -2036,20 +2033,19 @@ namespace GCL
             {
               std::clog << "Error in SQL map file: " << ifn << std::endl;
               std::clog << "Syntax command on line: " << lineNumber << " - TABLE directive found, but a TABLE directive is already specified." << std::endl;
-              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
+              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."));
             }
             else if (szToken1.empty() )
             {
               std::clog << "Error in SQL map file: " << ifn << std::endl;
               std::clog << "Syntax command on line: " << lineNumber << " - TABLE directive found, but no table name." << std::endl;
-              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
+              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."));
             }
             else if (databaseMap.find(szToken1) == databaseMap.end())
             {
               std::clog << "Error in SQL map file: " << ifn << std::endl;
               std::clog << "Error on line: " << lineNumber << " - Invalid Table name." << std::endl;
-              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Invalid Table Name."), E_SQLWRITER_INVALIDTABLENAME,
-                            LIBRARYNAME);
+              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Invalid Table Name."));
             }
             else
             {
@@ -2074,14 +2070,14 @@ namespace GCL
             {
               std::clog << "Error in SQL map file: " << ifn << std::endl;
               std::clog << "Syntax command on line: " << lineNumber << std::endl;
-              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."), E_SQLWRITER_SYNTAXERROR, LIBRARYNAME);
+              RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Syntax Error."));
             };
           }
           else
           {
             std::clog << "Error in SQL map file: " << ifn << std::endl;
             std::clog << "Invalid command on line: " << lineNumber << std::endl;
-            RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Invalid Command."), E_SQLWRITER_INVALIDCOMMAND, LIBRARYNAME);
+            RUNTIME_ERROR(boost::locale::translate("MAPPED SQL WRITER: Invalid Command."));
           };
         };
 

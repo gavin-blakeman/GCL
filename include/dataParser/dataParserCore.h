@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2020-2023 Gavin Blakeman.
+//                      Copyright 2020-2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -40,6 +40,7 @@
 #include <cstdint>
 #include <istream>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -70,11 +71,13 @@ namespace GCL
 
     void parseData() { processParseData(); }
     void parseFile() { processParseFile(); }
+    void parseFile(std::size_t ll) { lineLimit = ll; processParseFile(); }
     void parseHeader() { processParseHeader(); }
 
   protected:
     std::istream &inputStream;
     dataTables_t dataTables_;
+    std::optional<std::size_t> lineLimit;     ///< Only parse the file up to the line limit.
 
     virtual void processParseData() = 0;
     virtual void processParseHeader() = 0;

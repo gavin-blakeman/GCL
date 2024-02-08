@@ -68,7 +68,6 @@ set(HEADERS
   include/configurationReader/readerSections.hpp
   include/configurationReader/readerVanilla.hpp
   include/configurationReader/readerCore.hpp
-  include/GCLError.h
   include/pluginManager/pluginManager.h
   include/resource.h
   include/traits.h
