@@ -262,7 +262,7 @@ namespace GCL
     sqlWriter(sqlWriter &&) = default;
 //    sqlWriter &operator=(sqlWriter const &);
 //    sqlWriter &operator=(sqlWriter &&);
-//    ~sqlWriter();
+    virtual ~sqlWriter() = default;
 
     operator std::string() const { return string(); }
 

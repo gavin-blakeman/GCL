@@ -66,8 +66,8 @@ namespace GCL
     std::string errorMessage() const;
 
   private:
-    errorType_t errorType_;
-    errorCode_t errorCode_;
+    errorType_t errorType_ = 0;
+    errorCode_t errorCode_ = 0;
 
     runtime_error() = delete;
     runtime_error(runtime_error const &) = delete;
