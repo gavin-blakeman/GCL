@@ -48,6 +48,10 @@
 
 namespace GCL
 {
+  namespace logger
+  {
+    class CLogger;    // Forward declaration needed.
+  }
 
   /// @brief        The CRuntimeError class is used for reporting exceptions and errors. It is integrated with the logger and allows
   ///               exceptions to be thrown and errors reported.
@@ -59,8 +63,8 @@ namespace GCL
     using errorType_t = std::uint_least16_t;
     using errorCode_t = std::uint_least16_t;
 
-    runtime_error(std::string const &, errorType_t, errorCode_t, std::optional<std::string> const & = std::optional<std::string>());
-    runtime_error(std::string const &, std::optional<std::string> const & = std::optional<std::string>());
+    runtime_error(std::string const &, errorType_t, errorCode_t, logger::CLogger * = nullptr);
+    runtime_error(std::string const &, logger::CLogger * = nullptr);
     virtual ~runtime_error() = default;
 
     std::string errorMessage() const;
@@ -119,7 +123,7 @@ namespace GCL
   [[noreturn]] inline void RUNTIME_ERROR(std::string const &message,
                                          runtime_error::errorType_t et,
                                          runtime_error::errorCode_t ec,
-                                         std::optional<std::string> const &namedLogger = std::optional<std::string>())
+                                         logger::CLogger *namedLogger = nullptr)
   {
     throw GCL::runtime_error(message, et, ec, namedLogger);
   }
@@ -131,7 +135,7 @@ namespace GCL
   /// @version    2024-02-08/GGB - Function created.
 
   [[noreturn]] inline void RUNTIME_ERROR(std::string const &errorString,
-                                         std::optional<std::string> const &namedLogger = std::optional<std::string>())
+                                         logger::CLogger *namedLogger = nullptr)
   {
     throw GCL::runtime_error(errorString, namedLogger);
   }

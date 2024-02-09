@@ -52,9 +52,10 @@
 
 namespace GCL
 {
+
   using logger::LOGEXCEPTION;
 
-  runtime_error::runtime_error(std::string const &m, errorType_t et, errorCode_t ec, std::optional<std::string> const &namedLogger)
+  runtime_error::runtime_error(std::string const &m, errorType_t et, errorCode_t ec, logger::CLogger *namedLogger)
       : std::runtime_error(m), errorType_(et), errorCode_(ec)
   {
     LOGEXCEPTION(errorMessage(), namedLogger);
@@ -66,7 +67,7 @@ namespace GCL
   /// @throws
   /// @version    2024-02-08/GGB - Function created.
 
-  runtime_error::runtime_error(std::string const &message, std::optional<std::string> const &namedLogger)
+  runtime_error::runtime_error(std::string const &message, logger::CLogger *namedLogger)
   : std::runtime_error(message)
   {
     LOGEXCEPTION(errorMessage(), namedLogger);

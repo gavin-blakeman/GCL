@@ -89,8 +89,6 @@ namespace GCL::logger
     s_exception,
   };
 
-
-
   // Some inline functions to simplify life
 
   /// @brief      Function to log a message.
@@ -119,11 +117,11 @@ namespace GCL::logger
   /// @throws
   /// @version    2020-06-13/GGB - Converted from macro to function.
 
-  inline void ERRORMESSAGE(std::string const &message, std::optional<std::string> const &namedLogger = std::optional<std::string>())
+  inline void ERRORMESSAGE(std::string const &message, CLogger *namedLogger = nullptr)
   {
-    if (namedLogger)
+    if (namedLogger != nullptr)
     {
-      CLoggerManager::namedLogger(*namedLogger).logMessage(std::make_unique<CDebugRecord>(s_error, message));
+      namedLogger->logMessage(std::make_unique<CDebugRecord>(s_error, message));
     }
     else
     {
@@ -156,11 +154,11 @@ namespace GCL::logger
   /// @throws
   /// @version    2020-06-13/GGB - Converted from macro to function.
 
-  inline void INFOMESSAGE(std::string const &message, std::optional<std::string> const &namedLogger = std::optional<std::string>())
+  inline void INFOMESSAGE(std::string const &message, CLogger *namedLogger = nullptr)
   {
-    if (namedLogger)
+    if (namedLogger != nullptr)
     {
-      CLoggerManager::namedLogger(*namedLogger).logMessage(std::make_unique<CDebugRecord>(s_information, message));
+      namedLogger->logMessage(std::make_unique<CDebugRecord>(s_information, message));
     }
     else
     {
@@ -193,11 +191,11 @@ namespace GCL::logger
   /// @throws
   /// @version 2020-06-14/GGB - Converted from macro to function.
 
-  inline void LOGEXCEPTION(std::string const &message, std::optional<std::string> const &namedLogger = std::optional<std::string>())
+  inline void LOGEXCEPTION(std::string const &message, CLogger *namedLogger = nullptr)
   {
-    if (namedLogger)
+    if (namedLogger != nullptr)
     {
-      CLoggerManager::namedLogger(*namedLogger).logMessage(std::make_unique<CDebugRecord>(s_exception, message));
+      namedLogger->logMessage(std::make_unique<CDebugRecord>(s_exception, message));
     }
     else
     {
