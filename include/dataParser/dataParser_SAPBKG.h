@@ -55,17 +55,17 @@ namespace GCL
    * table and the data will be concatenated.
    */
 
-  class CSAPBKGParser : public CDataParser
+  class CSAPBKGTokeniser : public CDataTokeniser
   {
     public:
-      CSAPBKGParser(std::istream &ifs) : CDataParser(ifs) {}
+      CSAPBKGTokeniser(dataTables_t &dt, std::istream &ifs) : CDataTokeniser(dt, ifs) {}
 
     private:
-      CSAPBKGParser() = delete;
-      CSAPBKGParser(CSAPBKGParser const &) = delete;
-      CSAPBKGParser(CSAPBKGParser &&) = delete;
-      CSAPBKGParser &operator=(CSAPBKGParser const &) = delete;
-      CSAPBKGParser &operator=(CSAPBKGParser &&) = delete;
+      CSAPBKGTokeniser() = delete;
+      CSAPBKGTokeniser(CSAPBKGTokeniser const &) = delete;
+      CSAPBKGTokeniser(CSAPBKGTokeniser &&) = delete;
+      CSAPBKGTokeniser &operator=(CSAPBKGTokeniser const &) = delete;
+      CSAPBKGTokeniser &operator=(CSAPBKGTokeniser &&) = delete;
 
       using columnWidth_t = std::tuple<std::size_t, std::size_t, std::size_t>; // Start, Width, InterColumn.
       using columnData_t = std::vector<columnWidth_t>;

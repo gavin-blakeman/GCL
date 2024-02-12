@@ -48,7 +48,7 @@ namespace GCL
 {
   /// Used to parse general data streams.
 
-  class CDataParser
+  class CDataTokeniser
   {
   public:
     using data_t = std::string;
@@ -61,8 +61,8 @@ namespace GCL
     };
     using dataTables_t = std::vector<dataTable_t>;
 
-    CDataParser(std::istream &is) : inputStream(is) {}
-    virtual ~CDataParser() = default;
+    CDataTokeniser(dataTables_t &dt, std::istream &is) : inputStream(is), dataTables_(dt) {}
+    virtual ~CDataTokeniser() = default;
 
     dataFile_t &data(std::size_t indx = 0)  { return dataFile(indx); }
     dataLine_t &header(std::size_t indx = 0)  { return dataHeader(indx); }
@@ -76,7 +76,7 @@ namespace GCL
 
   protected:
     std::istream &inputStream;
-    dataTables_t dataTables_;
+    dataTables_t &dataTables_;
     std::optional<std::size_t> lineLimit;     ///< Only parse the file up to the line limit.
 
     virtual void processParseData() = 0;
@@ -86,11 +86,11 @@ namespace GCL
     virtual dataLine_t &dataHeader(std::size_t indx);
 
   private:
-    CDataParser() = delete;
-    CDataParser(CDataParser const &) = delete;
-    CDataParser(CDataParser &&) = delete;
-    CDataParser &operator=(CDataParser const &) = delete;
-    CDataParser &operator=(CDataParser &&) = delete;
+    CDataTokeniser() = delete;
+    CDataTokeniser(CDataTokeniser const &) = delete;
+    CDataTokeniser(CDataTokeniser &&) = delete;
+    CDataTokeniser &operator=(CDataTokeniser const &) = delete;
+    CDataTokeniser &operator=(CDataTokeniser &&) = delete;
   };
 
 } // namespace GCL

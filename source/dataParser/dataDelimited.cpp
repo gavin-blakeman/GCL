@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2022-2023 Gavin Blakeman.
+//                      Copyright 2022-2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -44,8 +44,8 @@
 namespace GCL
 {
 
-  CDelimitedParser::CDelimitedParser(std::istream &is, std::string const &dc, bool ih)
-    : CDataParser(is), includesHeader_(ih), delimiter_(dc)
+  CDelimitedParser::CDelimitedParser(dataTables_t &dt, std::istream &is, std::string const &dc, bool ih)
+    : CDataTokeniser(dt, is), includesHeader_(ih), delimiter_(dc)
   {
 
   }

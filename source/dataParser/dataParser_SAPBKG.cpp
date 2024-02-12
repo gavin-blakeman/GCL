@@ -49,7 +49,7 @@ namespace GCL
   /// @throws
   /// @version    2023-10-02/GGB - Function created.
 
-  void CSAPBKGParser::processParseData()
+  void CSAPBKGTokeniser::processParseData()
   {
     if (!parsingComplete)
     {
@@ -61,7 +61,7 @@ namespace GCL
   /// @throws
   /// @version    2023-10-02/GGB - Function created.
 
-  void CSAPBKGParser::processParseHeader()
+  void CSAPBKGTokeniser::processParseHeader()
   {
     if (!parsingComplete)
     {
@@ -73,7 +73,7 @@ namespace GCL
   /// @throws
   /// @version    2023-10-02/GGB - Function created.
 
-  void CSAPBKGParser::processParseFile()
+  void CSAPBKGTokeniser::processParseFile()
   {
     enum stateMachine_t
     {
@@ -191,7 +191,7 @@ namespace GCL
   /// @throws     None.
   /// @returns    true if the line is only '-' characters.
 
-  bool CSAPBKGParser::testLineDash(std::string_view const &svLine) noexcept
+  bool CSAPBKGTokeniser::testLineDash(std::string_view const &svLine) noexcept
   {
     bool rv = true;
     std::size_t indx = 0;
@@ -212,7 +212,7 @@ namespace GCL
   /// @returns    A dataLine containing all the data.
   /// @version    2023-10-02/GGB - Function created.
 
-  GCL::CDataParser::dataLine_t CSAPBKGParser::tokeniseLine(std::string_view &svLine)
+  GCL::CDataTokeniser::dataLine_t CSAPBKGTokeniser::tokeniseLine(std::string_view &svLine)
   {
     dataLine_t rv;
     std::size_t tokenEnd;
@@ -241,7 +241,7 @@ namespace GCL
   /// @returns    A dataLine containing all the data from the line.
   /// @version    2023-10-02/GGB - Function created.
 
-  GCL::CDataParser::dataLine_t CSAPBKGParser::tokeniseLine(std::string_view &svLine, columnData_t const & columnWidths)
+  GCL::CDataTokeniser::dataLine_t CSAPBKGTokeniser::tokeniseLine(std::string_view &svLine, columnData_t const & columnWidths)
   {
     dataLine_t rv;
     bool parseFail = false;
@@ -274,7 +274,7 @@ namespace GCL
   /// @param[out] columnData: The start and width of each column.
   /// @version    2023-10-02/GGB - Function created.
 
-  void CSAPBKGParser::determineColumnWidths(std::string_view &svLine, columnData_t &columnData)
+  void CSAPBKGTokeniser::determineColumnWidths(std::string_view &svLine, columnData_t &columnData)
   {
     std::size_t columnStart = 0, columnEnd;
     std::vector<std::string> columnHeadings;

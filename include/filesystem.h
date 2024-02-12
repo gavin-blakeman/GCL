@@ -2,14 +2,14 @@
 //
 // PROJECT:							General Class Library
 // FILE:								filesystem
-// SUBSYSTEM:						std::filesystem or boost::filesystem extensions.
+// SUBSYSTEM:           filesystem extensions.
 // LANGUAGE:						C++
 // TARGET OS:						None.
 // NAMESPACE:						boost::filesystem
 // AUTHOR:							Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
-//                      Copyright 2018-2023 Gavin Blakeman.
+//                      Copyright 2018-2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General

@@ -40,14 +40,14 @@
 namespace GCL
 {
 
-  CDataParser::dataFile_t &CDataParser::dataFile(std::size_t indx)
+  CDataTokeniser::dataFile_t &CDataTokeniser::dataFile(std::size_t indx)
   {
     RUNTIME_ASSERT(indx < dataTables_.size(), "Requested index is greater than the number of tables.");
 
     return dataTables_[indx].data;
   }
 
-  CDataParser::dataLine_t &CDataParser::dataHeader(std::size_t indx)
+  CDataTokeniser::dataLine_t &CDataTokeniser::dataHeader(std::size_t indx)
   {
     RUNTIME_ASSERT(indx < dataTables_.size(), "Requested index is greater than the number of tables.");
 
