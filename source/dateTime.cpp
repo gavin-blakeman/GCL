@@ -47,10 +47,74 @@
 
 namespace GCL
 {
+  /// @brief      Returns the month of the date.
+  /// @returns    The month value.
+  /// @throws
+  /// @version    2024-02-13/GGB - Function created.
+
   std::chrono::month date_t::month() const
   {
     std::chrono::year_month_day ymd(std::chrono::floor<std::chrono::days>(value_));
     return ymd.month();
+  }
+
+  /// @brief      Returns the year of the date.
+  /// @returns    The month value.
+  /// @throws
+  /// @version    2024-02-13/GGB - Function created.
+
+  std::chrono::year date_t::year() const
+  {
+    std::chrono::year_month_day ymd(std::chrono::floor<std::chrono::days>(value_));
+    return ymd.year();
+  }
+
+  /// @brief      Returns the first day of the month that the date falls within.
+  /// @returns    The month value.
+  /// @throws
+  /// @version    2024-02-13/GGB - Function created.
+
+  date_t date_t::monthStart() const
+  {
+    using namespace std::chrono;
+
+    year_month_day ymd(year(), month(), 1d);
+    return date_t(sys_days(ymd));
+  }
+
+  date_t date_t::monthEnd() const
+  {
+    using namespace std::chrono;
+
+    month_day_last mdl(month());
+    year_month_day_last ymd(year(), mdl);
+    return date_t(sys_days(ymd));
+  }
+
+  /// @brief      Returns the last day of the year that the date falls within.
+  /// @returns    The month value.
+  /// @throws
+  /// @version    2024-02-13/GGB - Function created.
+
+  date_t date_t::yearEnd() const
+  {
+    using namespace std::chrono;
+
+    year_month_day ymd(year(), std::chrono::December, 31d);
+    return date_t(sys_days(ymd));
+  }
+
+  /// @brief      Returns the first day of the year that the date falls within.
+  /// @returns    The month value.
+  /// @throws
+  /// @version    2024-02-13/GGB - Function created.
+
+  date_t date_t::yearStart() const
+  {
+    using namespace std::chrono;
+
+    year_month_day ymd(year(), std::chrono::January, 1d);
+    return date_t(sys_days(ymd));
   }
 
   /// @brief      Outputs the passed date as a string value.

@@ -64,6 +64,7 @@ namespace GCL
     }
     bool operator <(date_t const &rhs) const { return (value_ < rhs.value_); }
     bool operator <=(date_t const &rhs) const { return (value_ <= rhs.value_); }
+    bool operator >(date_t const &rhs) const { return (value_ > rhs.value_); }
     bool operator >=(date_t const &rhs) const { return (value_ >= rhs.value_); }
     bool operator !=(date_t const rhs) const { return (value_ != rhs.value_); }
 
@@ -75,6 +76,13 @@ namespace GCL
     }
 
     std::chrono::month month() const;
+    std::chrono::year year() const;
+
+    date_t monthStart() const;
+    date_t monthEnd() const;
+
+    date_t yearStart() const;
+    date_t yearEnd() const;
 
 
     static date_t max() { return valueType::max(); }
