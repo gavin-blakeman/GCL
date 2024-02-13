@@ -48,6 +48,8 @@ namespace GCL
   class date_t
   {
   public:
+    using valueType = std::chrono::time_point<std::chrono::system_clock>;
+
     date_t() { value_ = std::chrono::system_clock::now(); }
     date_t(date_t const &) = default;
     date_t(std::chrono::time_point<std::chrono::system_clock> d) { value_ = d; }
@@ -60,20 +62,26 @@ namespace GCL
       }
       return *this;
     }
-    bool operator <(date_t const &rhs) const
-    {
-      return (value_ < rhs.value_);
-    }
+    bool operator <(date_t const &rhs) const { return (value_ < rhs.value_); }
+    bool operator <=(date_t const &rhs) const { return (value_ <= rhs.value_); }
+    bool operator >=(date_t const &rhs) const { return (value_ >= rhs.value_); }
+    bool operator !=(date_t const rhs) const { return (value_ != rhs.value_); }
 
     std::chrono::time_point<std::chrono::system_clock> date() const { return value_; }
 
-    std::chrono::days operator-(date_t rhs)
+    std::chrono::days operator-(date_t const &rhs) const
     {
       return std::chrono::duration_cast<std::chrono::days>(value_- rhs.value_);
     }
 
+    std::chrono::month month() const;
+
+
+    static date_t max() { return valueType::max(); }
+    static date_t min() { return valueType::min(); }
+
   private:
-    std::chrono::time_point<std::chrono::system_clock> value_;
+     valueType value_;
   };
 
   ///@brief Type used for storing times.

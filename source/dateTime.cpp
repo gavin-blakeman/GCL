@@ -10,7 +10,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2017-2023 Gavin Blakeman.
+//                      Copyright 2017-2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -47,6 +47,12 @@
 
 namespace GCL
 {
+  std::chrono::month date_t::month() const
+  {
+    std::chrono::year_month_day ymd(std::chrono::floor<std::chrono::days>(value_));
+    return ymd.month();
+  }
+
   /// @brief      Outputs the passed date as a string value.
   /// @param[in]  dateTime: Structure with the date value.
   /// @returns    A string containing the date/time (YYYY-MM-DD)
