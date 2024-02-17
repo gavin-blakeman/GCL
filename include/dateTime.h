@@ -52,16 +52,13 @@ namespace GCL
 
     date_t() { value_ = std::chrono::system_clock::now(); }
     date_t(date_t const &) = default;
+    date_t(date_t &&) = default;
     date_t(std::chrono::time_point<std::chrono::system_clock> d) { value_ = d; }
+
     date_t &operator=(std::chrono::time_point<std::chrono::system_clock> d) { value_ = d; return *this; }
-    date_t &operator=(date_t const &d)
-    {
-      if (this != &d)
-      {
-        value_ = d.value_;
-      }
-      return *this;
-    }
+    date_t &operator=(date_t const &d) = default;
+    date_t &operator=(date_t &&) = default;
+
     bool operator <(date_t const &rhs) const { return (value_ < rhs.value_); }
     bool operator <=(date_t const &rhs) const { return (value_ <= rhs.value_); }
     bool operator >(date_t const &rhs) const { return (value_ > rhs.value_); }
@@ -97,7 +94,12 @@ namespace GCL
   {
   public:
     time_t() { value_ = std::chrono::system_clock::now(); }
+    time_t(time_t const &) = default;
+    time_t(time_t &&) = default;
     time_t(std::chrono::time_point<std::chrono::system_clock> t) { value_ = t; }
+
+    time_t &operator=(time_t const &) = default;
+    time_t &operator=(time_t &&) = default;
 
     bool operator <(time_t const &rhs) const
     {
@@ -116,7 +118,14 @@ namespace GCL
   {
   public:
     dateTime_t() { value_ = std::chrono::system_clock::now(); }
+    dateTime_t(dateTime_t const &) = default;
+    dateTime_t(dateTime_t &&) = default;
+
     dateTime_t(std::chrono::time_point<std::chrono::system_clock> t) { value_ = t; }
+
+    dateTime_t &operator=(dateTime_t const &) = default;
+    dateTime_t &operator=(dateTime_t &&) = default;
+
     bool operator <(dateTime_t const &rhs) const
     {
       return (value_ < rhs.value_);

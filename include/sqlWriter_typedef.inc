@@ -59,7 +59,23 @@
   struct whereVariant_t
   {
   public:
+    whereVariant_t() = default;
+    whereVariant_t(whereVariant_t const &) = default;
+    whereVariant_t(whereVariant_t &&) = default;
+    whereVariant_t(whereTest_t &&wt) : base(std::move(wt)) {}
+    whereVariant_t(whereLogical_t &&wl) : base(std::move(wl)) {}
+    whereVariant_t(std::string const &s, operator_t o, parameterVariant_t &&p)
+    {
+      whereTest_t wt = std::make_tuple(s, o, std::move(p));
+      base = std::move(wt);
+    }
+
+    whereVariant_t &operator=(whereVariant_t const &) = default;
+    whereVariant_t &operator=(whereVariant_t &&) = default;
+
     std::variant<std::monostate, whereTest_t, whereLogical_t> base;
+
+
   };
 
     // From Types

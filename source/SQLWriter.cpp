@@ -2730,20 +2730,20 @@ namespace GCL
     return returnValue;
   }
 
-  /// @brief      Converts a whereTest_t to a string.
+  /// @brief      Converts a whereTest_t to a parameter.
   /// @param[in]  w: The whereTest_t to convert.
   /// @throws
   /// @version    2022-06-07/GGB - Function created.
 
   std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> sqlWriter::to_parameter(whereLogical_t const &wl) const
   {
-//    std::string returnValue = " (";
+    std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> returnValue;
 
 //    returnValue += to_string(*std::get<0>(wl));
 //    returnValue += " " + logicalOperatorMap[std::get<1>(wl)] + " ";
 //    returnValue += to_string(*std::get<2>(wl)) + ")";
 
-//    return returnValue;
+    return returnValue;
   }
 
   /// @brief      to_string function for a columnRef.
@@ -2762,7 +2762,7 @@ namespace GCL
 
   sqlWriter::whereVariant_t where_v(std::string col, operator_t op, sqlWriter::parameter_t param)
   {
-    return {std::make_tuple(col, op, param)};
+    return sqlWriter::whereTest_t(col, op, param);
   }
 
   sqlWriter::whereVariant_t where_v(std::string col, operator_t op, sqlWriter::parameterVector_t param)
@@ -2786,7 +2786,7 @@ namespace GCL
 
   sqlWriter::whereVariant_t where_v(std::string col, operator_t op, sqlWriter::pointer_t param)
   {
-    return {std::make_tuple(col, op, std::move(param))};
+    return sqlWriter::whereTest_t(std::make_tuple(col, op, std::move(param)));
   }
 
   sqlWriter::whereVariant_t where_v(sqlWriter::whereVariant_t lhs, logicalOperator_t op, sqlWriter::whereVariant_t rhs)
@@ -2796,12 +2796,12 @@ namespace GCL
                                                    std::make_unique<sqlWriter::whereVariant_t>(std::move(rhs)));
 
 
-    return {std::move(wl)};
+    return wl;
   }
 
   sqlWriter::whereVariant_t where_v(std::string col, operator_t op, sqlWriter &&rhs)
   {
-    return {std::make_tuple(col, op, std::make_unique<sqlWriter>(std::move(rhs)))};
+    return sqlWriter::whereVariant_t(col, op, std::make_unique<sqlWriter>(std::move(rhs)));
   }
 
 

@@ -251,7 +251,8 @@ namespace GCL
                                      time_t,
                                      /*std::vector<std::uint8_t> *, */
                                      bindValue_t,
-                                     decimal_t>;
+                                     decimal_t
+                                     >;
 
 #include "sqlWriter_typedef.inc"
 #include "sqlWriter_variables.inc"

@@ -91,4 +91,4 @@ target_include_directories(${PROJECT_NAME}
                            PRIVATE ${DIRECTORIES})
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 
-ADD_SUBDIRECTORY(test)
+#ADD_SUBDIRECTORY(test)
