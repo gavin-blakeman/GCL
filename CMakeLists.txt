@@ -23,6 +23,7 @@ set(SOURCES
   source/alarm/alarmDaily.cpp
   source/alarm/alarmWeekly.cpp
   source/dataParser/dataDelimited.cpp
+  source/dataParser/dataLexerXLSX
   source/dataParser/dataParserCore.cpp
   source/dataParser/dataParser_SAPBKG.cpp  
   source/logger/loggerManager.cpp
@@ -45,6 +46,7 @@ set(HEADERS
   include/common.h
   include/SQLWriter.h
   include/dataParser/dataDelimited.h
+  include/dataParser/dataLexerXLSX.h
   include/dataParser/dataParserCore.h
   include/dataParser/dataParser_SAPBKG.h
   include/dateTime.h

@@ -1,4 +1,4 @@
-﻿//**********************************************************************************************************************************
+//**********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
 // FILE:                dataParser/dataParserCore.h
@@ -27,7 +27,8 @@
 //
 // CLASSES INCLUDED:
 //
-// HISTORY:             2020-10-13 GGB - File Created
+// HISTORY:             2024-02-19 GGB - Added section names to the dataTable_t member.
+//                      2020-10-13 GGB - File Created
 //
 //**********************************************************************************************************************************
 
@@ -56,6 +57,7 @@ namespace GCL
     using dataFile_t = std::vector<dataLine_t>;
     struct dataTable_t
     {
+      std::optional<std::string> tableName;
       dataLine_t headings;
       dataFile_t data;
     };
@@ -67,6 +69,7 @@ namespace GCL
     dataFile_t &data(std::size_t indx = 0)  { return dataFile(indx); }
     dataLine_t &header(std::size_t indx = 0)  { return dataHeader(indx); }
     dataTable_t &dataTable(std::size_t indx = 0) { return dataTables_[indx]; }
+    dataTable_t &dataTable(std::string const &);
     std::size_t tableCount() const { return dataTables_.size(); }
 
     void parseData() { processParseData(); }
@@ -75,6 +78,13 @@ namespace GCL
     void parseHeader() { processParseHeader(); }
 
   protected:
+    struct pData_t
+    {
+      std::size_t posnStart;
+      std::size_t posnEnd;
+      std::size_t posnNext;
+    };
+
     std::istream &inputStream;
     dataTables_t &dataTables_;
     std::optional<std::size_t> lineLimit;     ///< Only parse the file up to the line limit.

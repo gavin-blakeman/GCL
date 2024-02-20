@@ -25,3 +25,7 @@ Makefile
 libGCL.a
 
 CMakeFiles/GCL.dir/
+
+test/.cproject
+
+test/.project
