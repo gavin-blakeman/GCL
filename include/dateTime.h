@@ -1,4 +1,4 @@
-﻿//*********************************************************************************************************************************
+//*********************************************************************************************************************************
 //
 // PROJECT:							General Class Library
 // FILE:								dateTime
@@ -34,7 +34,7 @@
 #ifndef GCL_DATETIME
 #define GCL_DATETIME
 
-  // Standard C++ library header files
+// Standard C++ library header files
 
 #include <chrono>
 #include <ctime>
@@ -42,6 +42,9 @@
 
 namespace GCL
 {
+  using year_t = std::chrono::year;
+  using month_t = std::chrono::month;
+  using day_t = std::chrono::day;
 
   ///@brief Type used for storing dates.
 
@@ -51,6 +54,7 @@ namespace GCL
     using valueType = std::chrono::time_point<std::chrono::system_clock>;
 
     date_t() { value_ = std::chrono::system_clock::now(); }
+    date_t(std::string const &);
     date_t(date_t const &) = default;
     date_t(date_t &&) = default;
     date_t(std::chrono::time_point<std::chrono::system_clock> d) { value_ = d; }
@@ -72,8 +76,9 @@ namespace GCL
       return std::chrono::duration_cast<std::chrono::days>(value_- rhs.value_);
     }
 
-    std::chrono::month month() const;
-    std::chrono::year year() const;
+    month_t month() const;
+    year_t year() const;
+    day_t day() const;
 
     date_t monthStart() const;
     date_t monthEnd() const;
@@ -86,7 +91,7 @@ namespace GCL
     static date_t min() { return valueType::min(); }
 
   private:
-     valueType value_;
+    valueType value_;
   };
 
   ///@brief Type used for storing times.

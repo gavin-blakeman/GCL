@@ -47,12 +47,22 @@
 
 namespace GCL
 {
+  /// @brief      Constructor accepting a date string.
+  /// @param[in]  s: The input string.
+  /// @throws     On bad conversion.
+  /// @version    2024-02-21/GGB - Function created.
+
+  date_t::date_t(std::string const &s)
+  {
+    value_ = parseDate(s);
+  }
+
   /// @brief      Returns the month of the date.
   /// @returns    The month value.
   /// @throws
   /// @version    2024-02-13/GGB - Function created.
 
-  std::chrono::month date_t::month() const
+  month_t date_t::month() const
   {
     std::chrono::year_month_day ymd(std::chrono::floor<std::chrono::days>(value_));
     return ymd.month();
@@ -63,7 +73,7 @@ namespace GCL
   /// @throws
   /// @version    2024-02-13/GGB - Function created.
 
-  std::chrono::year date_t::year() const
+  year_t date_t::year() const
   {
     std::chrono::year_month_day ymd(std::chrono::floor<std::chrono::days>(value_));
     return ymd.year();
