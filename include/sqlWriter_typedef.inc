@@ -22,7 +22,7 @@
                                           dateTime_t,
                                           time_t,
                                           decimal_t>;
-  using selectExpressionStorage_t = std::vector<selectExpression_t>;
+  using selectExpressionStorage_t = std::list<selectExpression_t>;
 
   using pointer_t = std::unique_ptr<sqlWriter>;
   using groupBy_t = std::variant<std::size_t, std::string>;
@@ -31,15 +31,15 @@
   using parameterVector_t = std::vector<parameter_t>;
   using parameterSet_t = std::set<parameter_t>;
   using parameterPair = std::pair<std::string, parameter_t>;
-  typedef std::pair<std::string, std::string> stringPair;
+  using stringPair = std::pair<std::string, std::string>;
   using parameterTriple = std::tuple<std::string, std::string, parameter_t>;
-  typedef std::pair<std::string, EOrderBy> orderBy_t;
+  using orderBy_t = std::pair<std::string, EOrderBy>;
 
   using parameterStorage = std::vector<parameter_t>;
   using pairStorage = std::vector<parameterPair>;
   using tripleStorage = std::vector<parameterTriple>;
-  typedef std::vector<stringPair> stringPairStorage;
-  typedef std::vector<orderBy_t> orderByStorage_t;
+  using stringPairStorage = std::vector<stringPair>;
+  using orderByStorage_t = std::vector<orderBy_t>;
 
   using valueStorage_t = std::vector<parameterVector_t>;     // This is to allow multiple insertions in one statement.
   using valueType_t = std::variant<std::monostate, valueStorage_t, pointer_t>;

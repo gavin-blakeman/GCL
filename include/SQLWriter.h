@@ -1,7 +1,7 @@
 ﻿//*********************************************************************************************************************************
 //
 // PROJECT:							General Class Library
-// FILE:								SQLWriter
+// FILE:								SQLWriter.h
 // SUBSYSTEM:						Database library
 // LANGUAGE:						C++20
 // TARGET OS:						None - Standard C++
@@ -24,10 +24,9 @@
 //                      see <http://www.gnu.org/licenses/>.
 //
 // OVERVIEW:            The file provides a class for generating/composing/writing SQL queries using a simplified approach that
-//                      does not require knowledge of SQL.
+//                      does not require detailed knowledge of SQL.
 //                      The class does not communicate with the database server directly, but does provide functions to create the
 //                      SQL command strings to perform the database access.
-//                      Typical select query would be written as follows:
 //
 // CLASSES INCLUDED:    sqlWriter
 //
@@ -57,6 +56,7 @@
 #include <functional>
 #include <initializer_list>
 #include <iterator>
+#include <list>
 #include <map>
 #include <memory>
 #include <optional>
@@ -84,7 +84,7 @@
 /// @section sec1 Overview
 /// The SQL Writer is a single class that implements an SQL query writer (or composer) (opposite of parser) to allow easy
 /// writing of SQL queries programatically. The class is constructed that a map (representation) of the database is constructed in
-/// the class. The class is then used to generate the SQL queries with minimial input, including checking of column and table names,
+/// the class. The class is then used to generate the SQL queries with minimal input, including checking of column and table names,
 /// with exceptions to indicate issues.
 /// @section sec2 class CSQLWriter
 /// There is a single class that implements the SQL Writer.
@@ -93,10 +93,9 @@
 namespace GCL
 {
 
-
   /// @brief The decimal_t type is used for numbers that must have and maintain precision to a definite number of digits. This is
-  /// liked to the DECIMAL type used in databases. The MariaDB decimal type has 65 digits maximum and this is matched to the MariaDB
-  /// 65 digits.
+  /// linked to the DECIMAL type used in databases. The MariaDB decimal type has 65 digits maximum and this is matched to the
+  /// MariaDB 65 digits.
   /// @note The underlying implementation is larger than register size. All decimal_t function parameters should be passed by
   /// reference and not by value.
 
@@ -109,11 +108,11 @@ namespace GCL
     lt,             ///< less than
     gte,            ///< greater than equal to
     lte,            ///< less than equal to
-    neq,
-    nse,
+    neq,            ///< not equals
+    nse,            ///<
     in,             ///< IN  - Parameter should be a set or vector.
-    between,
-    nin
+    between,        ///< between twp parameters
+    nin             ///< Not in a set.
   };
 
   enum logicalOperator_t
@@ -249,7 +248,7 @@ namespace GCL
                                      date_t,
                                      dateTime_t,
                                      time_t,
-                                     /*std::vector<std::uint8_t> *, */
+                                     //std::vector<std::uint8_t>,
                                      bindValue_t,
                                      decimal_t
                                      >;
@@ -261,12 +260,13 @@ namespace GCL
     sqlWriter() = default;
     sqlWriter(sqlWriter const &) = default;
     sqlWriter(sqlWriter &&) = default;
-//    sqlWriter &operator=(sqlWriter const &);
-//    sqlWriter &operator=(sqlWriter &&);
+    sqlWriter &operator=(sqlWriter const &) = default;
+    sqlWriter &operator=(sqlWriter &&) = default;
     virtual ~sqlWriter() = default;
 
     operator std::string() const { return string(); }
 
+    void bindValues(std::list<std::reference_wrapper<parameterVariant_t>> &);
     sqlWriter &call(std::string const &, std::initializer_list<parameter_t>);
     std::size_t columnCount() const;
     parameterType_t columnType(std::size_t) const;
@@ -384,7 +384,6 @@ namespace GCL
     std::string createFromClause() const;
     std::string createJoinClause() const;
     std::string createWhereClause(bool = false) const;
-    std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> createWhereParameters() const;
     std::string createSetClause(bool = false) const;
     std::string createLimitClause() const;
 
@@ -403,9 +402,10 @@ namespace GCL
     std::string to_string(valueType_t const &) const;
     std::string to_string(valueStorage_t const &) const;
 
-    std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> to_parameter(whereTest_t const &) const;
-    std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> to_parameter(whereLogical_t const &) const;
-    std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> to_parameter(whereVariant_t const &) const;
+    std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> createWhereParameters();
+    std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> to_parameter(whereTest_t const &);
+    std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> to_parameter(whereLogical_t const &);
+    std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> to_parameter(whereVariant_t const &);
 
   }; // class sqlWriter
 

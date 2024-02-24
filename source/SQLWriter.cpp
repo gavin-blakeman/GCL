@@ -1,7 +1,7 @@
 ﻿//*********************************************************************************************************************************
 //
 // PROJECT:							General Class Library
-// FILE:								SQLWriter
+// FILE:								SQLWriter.cpp
 // SUBSYSTEM:						Database library
 // LANGUAGE:						C++20
 // TARGET OS:						None - Standard C++
@@ -24,10 +24,9 @@
 //                      see <http://www.gnu.org/licenses/>.
 //
 // OVERVIEW:            The file provides a class for generating/composing/writing SQL queries using a simplified approach that
-//                      does not require knowledge of SQL.
+//                      does not require detailed knowledge of SQL.
 //                      The class does not communicate with the database server directly, but does provide functions to create the
 //                      SQL command strings to perform the database access.
-//                      Typical select query would be written as follows:
 //
 // CLASSES INCLUDED:    sqWriter
 //
@@ -81,7 +80,7 @@ namespace GCL
    *
    * The subquery type is already supported in WHERE clauses. This needs to be extended to the FROM clause.
    *
-   * subqueries are represented by using a pointer_t.
+   * subqueries are represented by using a pointer_t. Otherwise infinite recursion occurs.
    *
    * Two from's currently supported
    *    sqlWriter &from(std::string const &, std::string const & = "");
@@ -338,6 +337,65 @@ namespace GCL
   template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
   // explicit deduction guide (not needed as of C++20)
   template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
+  /// @brief      Gets all the parameters. These are returned as a queue of reference wrappers.
+  /// @details    This function needs to return all the parameters. This includes the parameters from where clauses, insert clauses
+  ///             and update clauses.
+  ///             Insert queries will generally not have where clauses.
+  ///             Select & Delete queries will generally only have where clause parameters.
+  ///             Update queries will have value and where clause parameters.
+  ///             The order of parameter return matches the order of parameters in the query, so values, folowed by where.
+  /// @param[out] params: The list to store the parameters in.
+  /// @throws
+  /// @version    2024-02-18/GGB - Function created.
+
+  void sqlWriter::bindValues(std::list<std::reference_wrapper<parameterVariant_t>> &params)
+  {
+    switch (queryType)
+    {
+      case qt_update:
+      case qt_upsert:
+      {
+          // Work through the set fields and if a string, add it to the parameter list.
+
+        for (auto const &parameter: setFields)
+        {
+          if (std::holds_alternative<std::string>(parameter.second))
+          {
+            //params.emplace_back(std::ref(std::get<std::string>(parameter.second)));
+          }
+        }
+        [[fallthrough]];
+      }
+      case qt_select:
+      case qt_delete:
+      {
+        auto temp = createWhereParameters();
+        params.insert(params.end(), temp.begin(), temp.end());
+        break;
+      }
+      case qt_insert:
+      {
+        //returnValue = shouldParameterise(insertValue);
+        break;
+      }
+      case qt_call:
+      {
+        RUNTIME_ERROR("sqlWriter:: Requesting Parameters for call query.");
+        // Does not return.
+      }
+      case qt_none:
+      {
+        RUNTIME_ERROR("sqlWriter: Parameters requested, but no query defined.");
+        // Does not return.
+      }
+      default:
+      {
+        CODE_ERROR();
+        // Does not return.
+      }
+    }
+  }
 
   std::string sqlWriter::to_string(parameter_t const &p) const
   {
@@ -2334,57 +2392,57 @@ namespace GCL
   {
     bool returnValue = false;
 
-        switch (queryType)
+    switch (queryType)
+    {
+      case qt_select:
+      case qt_delete:
+      {
+          // Only the where clause needs to be tested,
+
+        std::visit(overloaded
         {
-          case qt_select:
-          case qt_delete:
-          {
-              // Only the where clause needs to be tested,
+          [&](std::monostate const &) { CODE_ERROR(); },
+          [&](whereTest_t const &wt) { returnValue = returnValue || shouldParameterise(wt); },
+          [&](whereLogical_t const &wl) { returnValue = returnValue || shouldParameterise(wl); },
+        }, whereClause_.base);
+        break;
+      }
+      case qt_update:
+      {
+        // Need to check the where clause and the set clause.
+        // Set clause is a vector<std::pair<string, parameter_t>>
 
-            std::visit(overloaded
-            {
-              [&](std::monostate const &) { CODE_ERROR(); },
-              [&](whereTest_t const &wt) { returnValue = returnValue || shouldParameterise(wt); },
-              [&](whereLogical_t const &wl) { returnValue = returnValue || shouldParameterise(wl); },
-            }, whereClause_.base);
-            break;
-          }
-          case qt_update:
-          {
-            // Need to check the where clause and the set clause.
-            // Set clause is a vector<std::pair<string, parameter_t>>
+        std::visit(overloaded
+        {
+          [&](std::monostate const &) { CODE_ERROR(); },
+          [&](whereTest_t const &wt) { returnValue = shouldParameterise(wt); },
+          [&](whereLogical_t const &wl) { returnValue = shouldParameterise(wl); },
+        }, whereClause_.base);
 
-            std::visit(overloaded
-            {
-              [&](std::monostate const &) { CODE_ERROR(); },
-              [&](whereTest_t const &wt) { returnValue = shouldParameterise(wt); },
-              [&](whereLogical_t const &wl) { returnValue = shouldParameterise(wl); },
-            }, whereClause_.base);
+        if (!returnValue)
+        {
+          //using pairStorage = std::vector<parameterPair>;
 
-            if (!returnValue)
-            {
-              //using pairStorage = std::vector<parameterPair>;
-
-              for (auto const &parameter: setFields)
-              {
-                returnValue = returnValue || std::holds_alternative<std::string>(parameter.second);
-              }
-            }
-            break;
-          }
-          case qt_insert:
+          for (auto const &parameter: setFields)
           {
-            returnValue = shouldParameterise(insertValue);
-            break;
-          }
-          default:
-          {
-            CODE_ERROR();
-            // Does not return.
+            returnValue = returnValue || std::holds_alternative<std::string>(parameter.second);
           }
         }
+        break;
+      }
+      case qt_insert:
+      {
+        returnValue = shouldParameterise(insertValue);
+        break;
+      }
+      default:
+      {
+        CODE_ERROR();
+        // Does not return.
+      }
+    }
 
-        return returnValue;
+    return returnValue;
   }
 
   /// @brief      Tests a whereTest for whether the query should be parameterised.
@@ -2683,10 +2741,10 @@ namespace GCL
     return *this;
   }
 
-  std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> sqlWriter::createWhereParameters() const
+  std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> sqlWriter::createWhereParameters()
   {
     logger::TRACE_ENTER();
-    std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> returnValue;
+    std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> returnValue;
 
     if (!std::holds_alternative<std::monostate>(whereClause_.base))
     {
@@ -2702,30 +2760,28 @@ namespace GCL
   /// @throws
   /// @version  2024-01-19/GGB - Function created.
 
-  std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> sqlWriter::to_parameter(whereVariant_t const &wv) const
+  std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> sqlWriter::to_parameter(whereVariant_t const &wv)
   {
     /* The whereClause_ has all the parameters. What is needed is to iterate the parameters in order to
      * produce the list.
      */
 
-    std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> returnValue;
-
-    //v1.insert(v1.end(), make_move_iterator(v2.begin()), make_move_iterator(v2.end()));
+    std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> returnValue;
 
     std::visit(overloaded
-               {
-                 [&](std::monostate const &) { CODE_ERROR(); },
-                 [&](whereTest_t const &wt)
-                 {
-                   auto temp = to_parameter(wv);
-                   returnValue.insert(returnValue.end(), std::make_move_iterator(temp.begin()), std::make_move_iterator(temp.end()));
-                 },
-                 [&](whereLogical_t const &wl)
-                 {
-                   auto temp = to_parameter(wv);
-                   returnValue.insert(returnValue.end(), std::make_move_iterator(temp.begin()), std::make_move_iterator(temp.end()));
-                 },
-               }, wv.base);
+    {
+      [&](std::monostate const &) { CODE_ERROR(); },
+      [&](whereTest_t const &wt)
+      {
+         auto temp = to_parameter(wv);
+         returnValue.insert(returnValue.end(), std::make_move_iterator(temp.begin()), std::make_move_iterator(temp.end()));
+      },
+      [&](whereLogical_t const &wl)
+      {
+         auto temp = to_parameter(wv);
+         returnValue.insert(returnValue.end(), std::make_move_iterator(temp.begin()), std::make_move_iterator(temp.end()));
+      },
+    }, wv.base);
 
     return returnValue;
   }
@@ -2735,9 +2791,9 @@ namespace GCL
   /// @throws
   /// @version    2022-06-07/GGB - Function created.
 
-  std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> sqlWriter::to_parameter(whereLogical_t const &wl) const
+  std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> sqlWriter::to_parameter(whereLogical_t const &wl)
   {
-    std::vector<std::reference_wrapper<sqlWriter::parameterVariant_t>> returnValue;
+    std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> returnValue;
 
 //    returnValue += to_string(*std::get<0>(wl));
 //    returnValue += " " + logicalOperatorMap[std::get<1>(wl)] + " ";

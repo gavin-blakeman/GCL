@@ -218,4 +218,37 @@ BOOST_AUTO_TEST_CASE(shouldParameterise_insert)
   BOOST_TEST(sqlQuery3.shouldParameterise()  == true);
 }
 
+BOOST_AUTO_TEST_CASE(bindValues)
+{
+//  using namespace GCL;
+//  sqlWriter sqlQuery1, sqlQuery2, sqlQuery3;
+//  std::uint32_t ID = 1;
+//  std::string test;
+//
+//  std::list<std::reference_wrapper<sqlWriter::parameter_t>> rv;
+//
+//  sqlQuery1.insertInto("TBL", {"COL1", "COL2", "COL3", "COL4", "COL5", "COL6"})
+//          .values({ {ID++, ID++, ID++, ID++, ID++, ID}});
+//  BOOST_REQUIRE_NO_THROW(sqlQuery1.bindValues(rv));
+//  ID = 1;
+//  std::vector<uint32_t> tv = { ID++, ID++, ID++, ID++, ID++, ID };
+//  std::vector<uint32_t> rtv;
+//  for (auto &val: rv)
+//  {
+//    rtv.push_back(std::get<std::uint32_t>(val.get()));
+//  }
+//  BOOST_TEST_INFO("Testing retrieval of bindValues from insert query.");
+//  BOOST_TEST(tv == rtv);
+
+//  sqlQuery2.insertInto("TBL", {"COL1", "COL2", "COL3", "COL4", "COL5", "COL6"})
+//            .values({ {ID, ID, ID, ID, "Text", ID}});
+//  BOOST_REQUIRE_NO_THROW(sqlQuery2.shouldParameterise());
+//  BOOST_TEST(sqlQuery2.shouldParameterise()  == true);
+//
+//  sqlQuery3.insertInto("TBL", {"COL1", "COL2", "COL3", "COL4", "COL5", "COL6"})
+//              .values({ {ID, test, ID, ID, "Text", ID}});
+//  BOOST_REQUIRE_NO_THROW(sqlQuery3.shouldParameterise());
+//  BOOST_TEST(sqlQuery3.shouldParameterise()  == true);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
