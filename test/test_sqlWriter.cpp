@@ -218,37 +218,73 @@ BOOST_AUTO_TEST_CASE(shouldParameterise_insert)
   BOOST_TEST(sqlQuery3.shouldParameterise()  == true);
 }
 
-BOOST_AUTO_TEST_CASE(bindValues)
+BOOST_AUTO_TEST_CASE(bindValues_insert)
 {
 //  using namespace GCL;
 //  sqlWriter sqlQuery1, sqlQuery2, sqlQuery3;
 //  std::uint32_t ID = 1;
 //  std::string test;
 //
-//  std::list<std::reference_wrapper<sqlWriter::parameter_t>> rv;
+//  std::list<sqlWriter::bindParameter_t> rv;
+//
+//  BOOST_TEST_INFO("Testing retrieval of bindValues from insert query.");
 //
 //  sqlQuery1.insertInto("TBL", {"COL1", "COL2", "COL3", "COL4", "COL5", "COL6"})
 //          .values({ {ID++, ID++, ID++, ID++, ID++, ID}});
 //  BOOST_REQUIRE_NO_THROW(sqlQuery1.bindValues(rv));
 //  ID = 1;
 //  std::vector<uint32_t> tv = { ID++, ID++, ID++, ID++, ID++, ID };
+//  for (auto const v: tv)
+//  {
+//    std::cout << v << std::endl;
+//  }
 //  std::vector<uint32_t> rtv;
 //  for (auto &val: rv)
 //  {
-//    rtv.push_back(std::get<std::uint32_t>(val.get()));
+//    rtv.push_back(std::get<std::uint32_t>(std::get<sqlWriter::parameter_ref>(val).get()));
+//    std::cout << rtv.back() << std::endl;
 //  }
-//  BOOST_TEST_INFO("Testing retrieval of bindValues from insert query.");
 //  BOOST_TEST(tv == rtv);
+}
 
-//  sqlQuery2.insertInto("TBL", {"COL1", "COL2", "COL3", "COL4", "COL5", "COL6"})
-//            .values({ {ID, ID, ID, ID, "Text", ID}});
-//  BOOST_REQUIRE_NO_THROW(sqlQuery2.shouldParameterise());
-//  BOOST_TEST(sqlQuery2.shouldParameterise()  == true);
-//
-//  sqlQuery3.insertInto("TBL", {"COL1", "COL2", "COL3", "COL4", "COL5", "COL6"})
-//              .values({ {ID, test, ID, ID, "Text", ID}});
-//  BOOST_REQUIRE_NO_THROW(sqlQuery3.shouldParameterise());
-//  BOOST_TEST(sqlQuery3.shouldParameterise()  == true);
+BOOST_AUTO_TEST_CASE(bindValues_update)
+{
+  using namespace GCL;
+  sqlWriter sqlQuery1;
+  std::uint32_t ID = 1;
+  std::string test;
+
+  std::vector<std::string> tv = { "STR1", "STR2", "STR3", "STR4", "STR5", "STR6"};
+  auto i = tv.begin();
+
+  std::list<sqlWriter::bindParameter_t> rv;
+
+  BOOST_TEST_INFO("Testing retrieval of bindValues from update query.");
+
+  sqlQuery1.update("TBL").set({ {"COL1", *i++}, {"COL2", *i++}, {"COL3", *i++}, {"COL4", *i++}, {"COL5", *i++}, {"COL6", *i}});
+
+  BOOST_REQUIRE_NO_THROW(sqlQuery1.bindValues(rv));
+  std::vector<std::string> rtv;
+  for (auto &val: rv)
+  {
+    rtv.push_back(std::get<std::string>(std::get<sqlWriter::parameter_ref>(val).get()));
+  }
+  BOOST_TEST(tv == rtv);
+}
+
+BOOST_AUTO_TEST_CASE(bindValues_select)
+{
+  using namespace GCL;
+  sqlWriter sqlQuery1;
+  std::uint32_t ID = 1;
+  std::string test;
+  std::list<sqlWriter::bindParameter_t> rv;
+
+  BOOST_TEST_INFO("Testing retrieval of bindValues from update query.");
+
+  sqlQuery1.select({"COL"}).from("TBL1").where("COL1", eq, "STR1");
+  BOOST_REQUIRE_NO_THROW(sqlQuery1.bindValues(rv));
+  BOOST_TEST("STR1" == std::get<std::string>(std::get<sqlWriter::parameter_ref>(rv.back()).get()));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

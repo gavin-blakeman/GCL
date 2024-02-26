@@ -70,6 +70,7 @@
   // Miscellaneous Library header files
 
 #include "boost/multiprecision/mpfr.hpp"
+#include "include/bimap.hpp"
 
   // GCL Library header files
 
@@ -266,7 +267,7 @@ namespace GCL
 
     operator std::string() const { return string(); }
 
-    void bindValues(std::list<std::reference_wrapper<parameterVariant_t>> &);
+    void bindValues(std::list<bindParameter_t> &);
     sqlWriter &call(std::string const &, std::initializer_list<parameter_t>);
     std::size_t columnCount() const;
     parameterType_t columnType(std::size_t) const;
@@ -402,10 +403,8 @@ namespace GCL
     std::string to_string(valueType_t const &) const;
     std::string to_string(valueStorage_t const &) const;
 
-    std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> createWhereParameters();
-    std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> to_parameter(whereTest_t const &);
-    std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> to_parameter(whereLogical_t const &);
-    std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> to_parameter(whereVariant_t const &);
+    void to_parameter(whereTest_t &, std::list<bindParameter_t> &);
+    void to_parameter(whereLogical_t &, std::list<bindParameter_t> &);
 
   }; // class sqlWriter
 

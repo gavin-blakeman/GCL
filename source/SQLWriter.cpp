@@ -349,7 +349,7 @@ namespace GCL
   /// @throws
   /// @version    2024-02-18/GGB - Function created.
 
-  void sqlWriter::bindValues(std::list<std::reference_wrapper<parameterVariant_t>> &params)
+  void sqlWriter::bindValues(std::list<bindParameter_t> &params)
   {
     switch (queryType)
     {
@@ -358,11 +358,11 @@ namespace GCL
       {
           // Work through the set fields and if a string, add it to the parameter list.
 
-        for (auto const &parameter: setFields)
+        for (auto &parameter: setFields)
         {
           if (std::holds_alternative<std::string>(parameter.second))
           {
-            //params.emplace_back(std::ref(std::get<std::string>(parameter.second)));
+            params.push_back(std::ref(parameter.second));
           }
         }
         [[fallthrough]];
@@ -370,8 +370,17 @@ namespace GCL
       case qt_select:
       case qt_delete:
       {
-        auto temp = createWhereParameters();
-        params.insert(params.end(), temp.begin(), temp.end());
+
+        if (!std::holds_alternative<std::monostate>(whereClause_.base))
+        {
+          std::visit(overloaded
+          {
+            [&](std::monostate &) { CODE_ERROR(); },
+            [&](whereTest_t &wt) { to_parameter(wt, params); },
+            [&](whereLogical_t &wl) { to_parameter(wl, params); },
+          }, whereClause_.base);
+
+        }
         break;
       }
       case qt_insert:
@@ -395,6 +404,7 @@ namespace GCL
         // Does not return.
       }
     }
+    std::cout << "Exiting function" << std::endl;
   }
 
   std::string sqlWriter::to_string(parameter_t const &p) const
@@ -2741,49 +2751,72 @@ namespace GCL
     return *this;
   }
 
-  std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> sqlWriter::createWhereParameters()
+  void sqlWriter::to_parameter(whereTest_t &wt, std::list<bindParameter_t> &params)
   {
-    logger::TRACE_ENTER();
-    std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> returnValue;
-
-    if (!std::holds_alternative<std::monostate>(whereClause_.base))
+    switch(std::get<1>(wt))
     {
-      to_parameter(whereClause_);
+      case eq:
+      case gt:
+      case lt:
+      case gte:
+      case lte:
+      case neq:
+      case nse:
+      case in:
+      case nin:
+      {
+        std::visit(overloaded
+         {
+           [&](parameter_t &p)
+           {
+             if (std::holds_alternative<bindValue_t>(p) || std::holds_alternative<std::string>(p))
+             {
+               params.push_back(std::ref(p));
+             }
+           },
+           [&](parameterVector_t &pv)
+           {
+             for (auto &p : pv)
+             {
+               if (std::holds_alternative<bindValue_t>(p) || std::holds_alternative<std::string>(p))
+               {
+                 params.push_back(std::ref(p));
+               }
+             }
+           },
+           [&](parameterSet_t &pv)
+           {
+             for (auto &p : pv)
+             {
+               if (std::holds_alternative<bindValue_t>(p) || std::holds_alternative<std::string>(p))
+               {
+                 //params.push_back(std::ref(pv));
+                 break;
+               }
+             }
+           },
+           [&](pointer_t &pt)
+           {
+             //returnValue = returnValue || pt->hasBindValues();
+           },
+         }, std::get<2>(wt));
+        break;
+      };
+      case between:
+      {
+        if (std::holds_alternative<parameterVector_t>(std::get<2>(wt)))
+        {
+//          returnValue.insert(std::ref(std::get<parameterVector_t>(std::get<2>(wt))[0]));
+//          returnValue.insert(std::ref(std::get<parameterVector_t>(std::get<2>(wt))[1]));
+        }
+        break;
+      }
+      default:
+      {
+        CODE_ERROR();
+        break;
+      }
     }
-
-    logger::TRACE_EXIT();
-    return returnValue;
-  }
-
-  /// @brief    Returns a list containing all the whereParameters. This is needed for parameterised queries.
-  /// @returns  A list of parameters
-  /// @throws
-  /// @version  2024-01-19/GGB - Function created.
-
-  std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> sqlWriter::to_parameter(whereVariant_t const &wv)
-  {
-    /* The whereClause_ has all the parameters. What is needed is to iterate the parameters in order to
-     * produce the list.
-     */
-
-    std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> returnValue;
-
-    std::visit(overloaded
-    {
-      [&](std::monostate const &) { CODE_ERROR(); },
-      [&](whereTest_t const &wt)
-      {
-         auto temp = to_parameter(wv);
-         returnValue.insert(returnValue.end(), std::make_move_iterator(temp.begin()), std::make_move_iterator(temp.end()));
-      },
-      [&](whereLogical_t const &wl)
-      {
-         auto temp = to_parameter(wv);
-         returnValue.insert(returnValue.end(), std::make_move_iterator(temp.begin()), std::make_move_iterator(temp.end()));
-      },
-    }, wv.base);
-
-    return returnValue;
   }
 
   /// @brief      Converts a whereTest_t to a parameter.
@@ -2791,15 +2824,14 @@ namespace GCL
   /// @throws
   /// @version    2022-06-07/GGB - Function created.
 
-  std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> sqlWriter::to_parameter(whereLogical_t const &wl)
+  void sqlWriter::to_parameter(whereLogical_t &wl, std::list<bindParameter_t> &params)
   {
-    std::list<std::reference_wrapper<sqlWriter::parameterVariant_t>> returnValue;
 
 //    returnValue += to_string(*std::get<0>(wl));
 //    returnValue += " " + logicalOperatorMap[std::get<1>(wl)] + " ";
 //    returnValue += to_string(*std::get<2>(wl)) + ")";
 
-    return returnValue;
+
   }
 
   /// @brief      to_string function for a columnRef.

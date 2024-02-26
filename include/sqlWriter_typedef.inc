@@ -74,8 +74,6 @@
     whereVariant_t &operator=(whereVariant_t &&) = default;
 
     std::variant<std::monostate, whereTest_t, whereLogical_t> base;
-
-
   };
 
     // From Types
@@ -84,3 +82,9 @@
   using fromPair_t = std::pair<from_t, std::optional<std::string>>;   ///!< Field:
   using fromStorage_t = std::vector<fromPair_t>;
 
+  // Bind paramters
+
+  using parameter_ref = std::reference_wrapper<parameter_t>;
+  using bindParameter_t = std::variant<std::monostate,
+                                       parameter_ref,
+                                       std::reference_wrapper<parameterVariant_t>>;
