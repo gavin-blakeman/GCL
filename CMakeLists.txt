@@ -23,7 +23,7 @@ set(SOURCES
   source/alarm/alarmDaily.cpp
   source/alarm/alarmWeekly.cpp
   source/dataParser/dataDelimited.cpp
-  source/dataParser/dataLexerXLSX
+  source/dataParser/dataLexerXLSX.cpp
   source/dataParser/dataParserCore.cpp
   source/dataParser/dataParser_SAPBKG.cpp  
   source/logger/loggerManager.cpp

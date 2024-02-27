@@ -39,6 +39,11 @@
 
 #include "include/filesystem.h"
 
+// Standard C++ library header files
+
+#include <cstdio>
+#include <random>
+
   // Miscellaneous library header files.
 
 #include <boost/algorithm/string.hpp>
@@ -130,6 +135,52 @@ namespace GCL
                     (permissions & std::filesystem::perms::others_read)) != std::filesystem::perms::none;
     };
     return returnValue;
+  }
+
+  std::filesystem::path temporaryFilename(std::uint8_t len)
+  {
+    std::filesystem::path rv = std::filesystem::temp_directory_path();
+    std::random_device rd;
+    std::mt19937 genT(rd());
+    std::mt19937 gen1(rd());
+    std::mt19937 genA(rd());
+    std::mt19937 gena(rd());
+    std::uniform_int_distribution<> type(1, 3);
+    std::uniform_int_distribution<> UC('A', 'Z');
+    std::uniform_int_distribution<> LC('a', 'z');
+    std::uniform_int_distribution<> NUM('0', '9');
+
+    std::string tempName;
+
+    for (std::uint_fast8_t i = 0; i != len; i++)
+    {
+      switch (type(genT))
+      {
+        case 1:
+        {
+          tempName.push_back(UC(genA));
+          break;
+        }
+        case 2:
+        {
+          tempName.push_back(LC(gena));
+          break;
+        }
+        case 3:
+        {
+          tempName.push_back(NUM(gen1));
+          break;
+        }
+        default:
+        {
+          CODE_ERROR();
+          // Does not return.
+        }
+      }
+    }
+    rv /= tempName;
+
+    return rv;
   }
 
 

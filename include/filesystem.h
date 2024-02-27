@@ -52,6 +52,7 @@ namespace GCL
   bool file_readable(std::filesystem::path const &);
   void expandFileList(std::string_view &&, fileList_t &);
 
+  std::filesystem::path temporaryFilename(std::uint8_t = 10);
 }
 
 #endif // FILESYSTEM_H
