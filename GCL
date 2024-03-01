@@ -76,6 +76,7 @@
 #include "include/filesystem.h"
 #include "include/Functions.h"
 #include "include/SQLWriter.h"
+#include "include/string.hpp"
 #include "include/resource.h"
 #include "include/pluginManager/pluginManager.h"
 
