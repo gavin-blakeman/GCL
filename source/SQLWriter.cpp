@@ -101,7 +101,6 @@ namespace GCL
    *  sqlWriter &from(std::string const &, std::optional<std::string> = std::nullopt);
    *  sqlWriter &from(std::initializer_list<fromPair_t>);
    *  sqlWriter &from(pointer_t, std::optional<std::string> = std::nullopt);
-   *
    */
 
 
@@ -279,7 +278,14 @@ namespace GCL
     std::string operator()(std::string const &s)
     {
       using namespace std::string_literals;
-      return (preparingClause ? ""s : "'"s) + s + (preparingClause ? ""s : "'"s);
+      if (preparingClause)
+      {
+      return "?";
+      }
+      else
+      {
+        return "'"s + s + "'"s;
+      }
     }
     std::string operator()(sqlWriter::bindValue_t const &bvt)
     {
@@ -413,9 +419,23 @@ namespace GCL
     return std::visit(v, p);
   }
 
-  sqlWriter::parameterType_t sqlWriter::parameterType(parameter_t const &p) const
+  sqlWriter::parameterType_t sqlWriter::parameterType(parameter_t const &p)
   {
     return std::visit(parameter_to_type(), p);
+  }
+
+  sqlWriter::parameterType_t sqlWriter::parameterType(bindParameter_t const &bp)
+  {
+    sqlWriter::parameterType_t rv = PT_NONE;
+
+    std::visit(overloaded
+    {
+      [&](std::monostate const &) { CODE_ERROR(); },
+      [&](parameter_ref const &pr) { rv = parameterType(pr.get()); },
+      [&](parameterVariant_ref const &pvr) {  },
+    }, bp);
+
+    return rv;
   }
 
   std::string sqlWriter::to_string(groupBy_t const &p) const
@@ -465,49 +485,49 @@ namespace GCL
       {
         returnValue += "(";
         std::visit(overloaded
-                   {
-                     [&](parameter_t const &p) { returnValue += to_string(p) + ")"; },
-                     [&](parameterVector_t const &pv)
-                     {
-                       bool first = true;
+         {
+           [&](parameter_t const &p) { returnValue += to_string(p) + ")"; },
+           [&](parameterVector_t const &pv)
+           {
+             bool first = true;
 
-                       for (auto const &p : pv)
-                       {
-                         if (first)
-                         {
-                           first = false;
-                         }
-                         else
-                         {
-                           returnValue += ", ";
-                         }
-                         returnValue += to_string(p);
-                       }
-                       returnValue += ")";
-                     },
-                     [&](parameterSet_t const &pv)
-                     {
-                       bool first = true;
+             for (auto const &p : pv)
+             {
+               if (first)
+               {
+                 first = false;
+               }
+               else
+               {
+                 returnValue += ", ";
+               }
+               returnValue += to_string(p);
+             }
+             returnValue += ")";
+           },
+           [&](parameterSet_t const &pv)
+           {
+             bool first = true;
 
-                       for (auto const &p : pv)
-                       {
-                         if (first)
-                         {
-                           first = false;
-                         }
-                         else
-                         {
-                           returnValue += ", ";
-                         }
-                         returnValue += to_string(p);
-                       }
-                       returnValue += ")";
-                     },
-                     [&](pointer_t const &pt)
-                     {
-                       returnValue += static_cast<std::string>(*pt) + ")";
-                     },
-                   }, std::get<2>(w));
+             for (auto const &p : pv)
+             {
+               if (first)
+               {
+                 first = false;
+               }
+               else
+               {
+                 returnValue += ", ";
+               }
+               returnValue += to_string(p);
+             }
+             returnValue += ")";
+           },
+           [&](pointer_t const &pt)
+           {
+             returnValue += static_cast<std::string>(*pt) + ")";
+           },
+         }, std::get<2>(w));
         break;
       };
       case between:

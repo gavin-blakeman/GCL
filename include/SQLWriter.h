@@ -364,6 +364,8 @@ namespace GCL
     std::string getTableMappedName(std::string const &) const;
 
     static std::string sum(std::string const &);
+    static parameterType_t parameterType(parameter_t const &);
+    static parameterType_t parameterType(bindParameter_t const &);
 
   private:
     bool verifyOperator(std::string const &) const;
@@ -387,8 +389,6 @@ namespace GCL
     std::string createWhereClause(bool = false) const;
     std::string createSetClause(bool = false) const;
     std::string createLimitClause() const;
-
-    parameterType_t parameterType(parameter_t const &) const;
 
     std::string to_string(whereTest_t const &) const;
     std::string to_string(whereLogical_t const &) const;

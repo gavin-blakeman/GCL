@@ -85,6 +85,7 @@
   // Bind paramters
 
   using parameter_ref = std::reference_wrapper<parameter_t>;
+  using parameterVariant_ref = std::reference_wrapper<parameterVariant_t>;
   using bindParameter_t = std::variant<std::monostate,
                                        parameter_ref,
-                                       std::reference_wrapper<parameterVariant_t>>;
+                                       parameterVariant_ref>;
