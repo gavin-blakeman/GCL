@@ -24,6 +24,7 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 
 set(SOURCES
   main.cpp
+  test_filesystem.cpp
   test_sqlWriter.cpp
   test_string.cpp
   )

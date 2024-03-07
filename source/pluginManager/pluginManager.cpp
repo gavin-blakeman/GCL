@@ -46,7 +46,7 @@
 #include "fmt/format.h"
 #include "fmt/std.h"
 
- #include "../../include/logger/loggerManager.h"
+ #include "include/logger/loggerManager.h"
  // GCL library
 
 #include "include/common.h"
@@ -293,13 +293,13 @@ namespace GCL::plugin
     {
       if (--plugin.second.pluginRefCount == 0)
       {
-        logger::DEBUGMESSAGE(fmt::format("Closing plugin: {:s}", plugin.second.pluginName));
+        logger::DEBUGMESSAGE(fmt::format(fmt::runtime(boost::locale::gettext("Closing plugin: {:s}")), plugin.second.pluginName));
         dlerror();
         int error = dlclose(plugin.second.systemHandle);
         if (error == 0)
         {
           plugin.second.symbolMap.clear();
-          logger::DEBUGMESSAGE(fmt::format("Plugin Closed: {:s}", plugin.second.pluginName));
+          logger::DEBUGMESSAGE(fmt::format(fmt::runtime(boost::locale::gettext("Closing plugin: {:s}")), plugin.second.pluginName));
         }
         else
         {

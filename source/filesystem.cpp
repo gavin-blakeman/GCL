@@ -139,7 +139,16 @@ namespace GCL
 
   std::filesystem::path temporaryFilename(std::uint8_t len)
   {
-    std::filesystem::path rv = std::filesystem::temp_directory_path();
+    return temporaryFilename(std::filesystem::temp_directory_path(), len);
+  }
+
+  /// @brief      Returns a temporary filename. The filename is tested for uniqueness.
+  /// @param[in]  temporaryPath:
+  /// @param[in]  len:
+
+  std::filesystem::path temporaryFilename(std::filesystem::path const &temporaryPath, std::uint8_t len)
+  {
+    std::filesystem::path rv;
     std::random_device rd;
     std::mt19937 genT(rd());
     std::mt19937 gen1(rd());
@@ -149,39 +158,46 @@ namespace GCL
     std::uniform_int_distribution<> UC('A', 'Z');
     std::uniform_int_distribution<> LC('a', 'z');
     std::uniform_int_distribution<> NUM('0', '9');
+    bool uniqueFile = false;
 
-    std::string tempName;
-
-    for (std::uint_fast8_t i = 0; i != len; i++)
+    while (!uniqueFile)
     {
-      switch (type(genT))
+      std::string tempName;
+
+      for (std::uint_fast8_t i = 0; i != len; i++)
       {
-        case 1:
+        switch (type(genT))
         {
-          tempName.push_back(UC(genA));
-          break;
-        }
-        case 2:
-        {
-          tempName.push_back(LC(gena));
-          break;
-        }
-        case 3:
-        {
-          tempName.push_back(NUM(gen1));
-          break;
-        }
-        default:
-        {
-          CODE_ERROR();
-          // Does not return.
+          case 1:
+          {
+            tempName.push_back(UC(genA));
+            break;
+          }
+          case 2:
+          {
+            tempName.push_back(LC(gena));
+            break;
+          }
+          case 3:
+          {
+            tempName.push_back(NUM(gen1));
+            break;
+          }
+          default:
+          {
+            CODE_ERROR();
+            // Does not return.
+          }
         }
       }
-    }
-    rv /= tempName;
+      rv = temporaryPath / tempName;
+      if (!std::filesystem::exists(rv))
+      {
+        uniqueFile =true;
+      }
+    };
 
     return rv;
   }
-
 
 }

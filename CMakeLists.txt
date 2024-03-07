@@ -19,6 +19,7 @@ set(SOURCES
   source/resource.cpp
   source/SQLWriter.cpp
   source/string.cpp
+  source/tempFileManager.cpp
   source/alarm/alarmCore.cpp
   source/alarm/alarmDaily.cpp
   source/alarm/alarmWeekly.cpp
@@ -73,6 +74,7 @@ set(HEADERS
   include/pluginManager/pluginManager.h
   include/resource.h
   include/traits.h
+  include/tempFileManager.h
   include/sqlWriter_typedef.inc
   include/sqlWriter_variables.inc
   )
@@ -80,11 +82,12 @@ set(HEADERS
 set(DIRECTORIES	
   ../MCL
   ../SCL
-  ${fmt_DIR}
+  ${CMAKE_SOURCE_DIR}/fmt/include
   ${Boost_INCLUDE_DIRS}
   )
 set(LIBRARIES
 	Boost::locale
+	fmt
 	)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})

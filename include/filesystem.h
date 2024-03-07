@@ -41,6 +41,7 @@
 
   // Standard C++ library
 
+#include <cstdint>
 #include <filesystem>
 #include <list>
 #include <string_view>
@@ -53,6 +54,7 @@ namespace GCL
   void expandFileList(std::string_view &&, fileList_t &);
 
   std::filesystem::path temporaryFilename(std::uint8_t = 10);
+  std::filesystem::path temporaryFilename(std::filesystem::path const &, std::uint8_t = 10);
 }
 
 #endif // FILESYSTEM_H
