@@ -247,7 +247,7 @@ namespace GCL
 
         if (!ifs.is_open())
         {
-          RUNTIME_ERROR(fmt::format(fmt::runtime(boost::locale::gettext("Unable to open configuration file {:s}.")), filename_));
+          RUNTIME_ERROR(fmt::format(fmt::runtime(boost::locale::gettext("Unable to open configuration file {}.")), filename_));
         };
 
           // Read through the already read lines quickly without any translation.

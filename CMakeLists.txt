@@ -80,14 +80,16 @@ set(HEADERS
   )
 
 set(DIRECTORIES	
-  ../MCL
-  ../SCL
+  ${CMAKE_SOURCE_DIR}/MCL
+  ${CMAKE_SOURCE_DIR}/SCL
   ${CMAKE_SOURCE_DIR}/fmt/include
-  ${Boost_INCLUDE_DIRS}
+  ${CMAKE_SOURCE_DIR}/xlnt/include
+  ${Boost_INCLUDE_DIRS}  
   )
 set(LIBRARIES
 	Boost::locale
 	fmt
+	xlnt
 	)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
