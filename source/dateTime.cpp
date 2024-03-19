@@ -127,6 +127,26 @@ namespace GCL
     return date_t(sys_days(ymd));
   }
 
+
+  /// @brief      Tests if a string contains a date value.
+  /// @param[in]  str: The string to test.
+  /// @returns    true if the string can be converted to a date. It does not need to be a valid date.
+  /// @throws     None.
+  /// @version    2024-03-19/GGB - Function created.
+
+  bool isDate(std::string const &str) noexcept
+  {
+    bool rv = false;
+    try
+    {
+      parseDate(str);
+      rv = true;
+    }
+    catch(...){}
+
+    return rv;
+  }
+
   /// @brief      Outputs the passed date as a string value.
   /// @param[in]  dateTime: Structure with the date value.
   /// @returns    A string containing the date/time (YYYY-MM-DD)
@@ -164,7 +184,7 @@ namespace GCL
   /// @brief      Parses a YYYY-MM-DD into a std::chrono::system_clock instance
   /// @param[in]  str: The string to parse
   /// @returns    The system_clock
-  /// @throws
+  /// @throws     std::runtime_error
   /// @version    2023-10-06/GGB - Throws std::runtime error when unable to convert.
   /// @version    2022-11-29/GGB - Function created.
 

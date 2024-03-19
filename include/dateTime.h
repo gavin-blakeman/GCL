@@ -153,6 +153,7 @@ namespace GCL
   std::chrono::time_point<std::chrono::system_clock> parseTime(std::string const &, std::string const &);
   std::chrono::time_point<std::chrono::system_clock> parseDateTime(std::string const &);
   std::chrono::time_point<std::chrono::system_clock> parseDateTime(std::string const &, std::string const &);
+  bool isDate(std::string const &) noexcept;
 
 }
 
