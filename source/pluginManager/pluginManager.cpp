@@ -293,13 +293,13 @@ namespace GCL::plugin
     {
       if (--plugin.second.pluginRefCount == 0)
       {
-        logger::DEBUGMESSAGE(fmt::format(fmt::runtime(boost::locale::gettext("Closing plugin: {:s}")), plugin.second.pluginName));
+        logger::DEBUGMESSAGE(fmt::format(fmt::runtime(boost::locale::gettext("Closing plugin: {}")), plugin.second.pluginName));
         dlerror();
         int error = dlclose(plugin.second.systemHandle);
         if (error == 0)
         {
           plugin.second.symbolMap.clear();
-          logger::DEBUGMESSAGE(fmt::format(fmt::runtime(boost::locale::gettext("Closing plugin: {:s}")), plugin.second.pluginName));
+          logger::DEBUGMESSAGE(fmt::format(fmt::runtime(boost::locale::gettext("Closing plugin: {}")), plugin.second.pluginName));
         }
         else
         {
