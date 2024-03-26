@@ -40,6 +40,7 @@
 #include <any>
 #include <cstdint>
 #include <istream>
+#include <list>
 #include <map>
 #include <optional>
 #include <string>
@@ -54,7 +55,7 @@ namespace GCL
   public:
     using data_t = std::string;
     using dataLine_t = std::pair<std::size_t, std::vector<data_t>>;
-    using dataFile_t = std::vector<dataLine_t>;
+    using dataFile_t = std::list<dataLine_t>;
     struct dataTable_t
     {
       std::optional<std::string> tableName;
