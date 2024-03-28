@@ -101,5 +101,6 @@ using GCL::logger::TRACE_UNEXPECTED;
 
 using GCL::RUNTIME_ERROR;
 using GCL::CODE_ERROR;
+using GCL::IMPLEMENT_ME;
 
 #endif //GCL_H

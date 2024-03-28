@@ -1,4 +1,4 @@
-﻿//*********************************************************************************************************************************
+//*********************************************************************************************************************************
 //
 // PROJECT:							General Class Library (GCL)
 // FILE:								error.cpp
@@ -27,7 +27,8 @@
 //
 // CLASSES INCLUDED:    CGCLError
 //
-// HISTORY:             2015-09-22 GGB - AIRDAS 2015.09 release
+// HISTORY:             2024-03-27 GGB - Added the implment me class to use for unimplemented features that need to be implemented.
+//                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2013-09-30 GGB - AIRDAS 2013.09 release.
 //                      2013-03-22 GGB - AIRDAS 2013.03 release.
 //                      2013-01-26 GGB - Development of classes for Application AIRDAS
@@ -116,6 +117,34 @@ namespace GCL
     std::ostringstream o;
 
     o << "Code Error. (Generally unreachable code)" << std::endl;
+    o << "File: " << fileName << " at line: " << lineNo << std::endl;
+
+    return o.str();
+  }
+  
+  /// @brief      Class constructor.
+  /// @param[in]  fn: File name
+  /// @param[in]  ln: Line number.
+  /// @throws
+  /// @version      2024-03-27/GGB - Function created
+  
+  CImplementMe::CImplementMe(std::string fn, size_t ln) : std::runtime_error("Implement Me."), fileName(fn),lineNo(ln)
+  {
+    LOGEXCEPTION(errorMessage(fileName, lineNo));
+  }
+
+  /// @brief        Converts the error message to a string.
+  /// @param[in]    fileName: The name of the source file having the error.
+  /// @param[in]    lineNo: The line number that raises the error.
+  /// @returns      String containing the error message details.
+  /// @throws       std::bad_alloc  
+  /// @version      2024-03-27/GGB - Function created
+
+  std::string CImplementMe::errorMessage(std::string const &fileName, std::size_t lineNo) const
+  {
+    std::ostringstream o;
+
+    o << "Implement ME. Code must still be implemented." << std::endl;
     o << "File: " << fileName << " at line: " << lineNo << std::endl;
 
     return o.str();

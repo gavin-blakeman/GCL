@@ -1,4 +1,4 @@
-﻿//*********************************************************************************************************************************
+//*********************************************************************************************************************************
 //
 // PROJECT:							General Class Library (GCL)
 // FILE:								error.h
@@ -27,7 +27,8 @@
 //
 // CLASSES INCLUDED:    CGCLError
 //
-// HISTORY:             2015-09-22 GGB - AIRDAS 2015.09 release
+// HISTORY:             2024-03-27 GGB - Added the implment me class to use for unimplemented features that need to be implemented.
+//                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2013-09-30 GGB - AIRDAS 2013.09 release.
 //                      2013-03-22 GGB - AIRDAS 2013.03 release.
 //                      2013-01-26 GGB - Development of classes for Application AIRDAS
@@ -96,6 +97,29 @@ namespace GCL
   public:
     explicit CCodeError(std::string fn, size_t ln);
   };
+  
+  /// @brief        The CImplmentMe class is used to throw exceptions to indicate unimplmented code that needs to 
+  ///               be implemented. This has been added to differentiate from CODE_ERRORS (unexpected or impossible branches)  
+
+  class CImplementMe : public std::runtime_error
+  {
+  public:
+    explicit CImplementMe(std::string fn, size_t ln);
+    ~CImplementMe() = default;
+  
+  private:
+    CImplementMe(CImplementMe const &) = delete;
+    CImplementMe(CImplementMe &&) = delete;
+    CImplementMe &operator=(CImplementMe const &) = delete;
+    CImplementMe &operator==(CImplementMe &&) = delete;
+  
+    size_t lineNo;
+    std::string fileName;
+
+    std::string errorMessage(std::string const &, std::size_t) const;
+
+  
+  };
 
   /// @brief    The CRuntimeAssert class throws exceptions to indicate assertion failures within a library.
   /// @details  Assertion exceptions are used when parameters to functions, or calculated values within functions are checked for
@@ -143,6 +167,11 @@ namespace GCL
   [[noreturn]] inline void CODE_ERROR(std::source_location const location = std::source_location::current())
   {
     throw(CCodeError(std::string(location.file_name()), location.line()));
+  }
+  
+  [[noreturn]] inline void IMPLEMENT_ME(std::source_location const location = std::source_location::current())
+  {
+    throw(CImplementMe(std::string(location.file_name()), location.line()));
   }
 
   #define RUNTIME_ASSERT(EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert((#EXPRESSION), (MESSAGE)); }}
