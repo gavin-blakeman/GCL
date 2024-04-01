@@ -21,6 +21,7 @@ set(SOURCES
   source/error.cpp
   source/filesystem.cpp
   source/Functions.cpp
+  source/functionTrace.cpp
   source/resource.cpp
   source/SQLWriter.cpp
   source/string.cpp
@@ -50,6 +51,7 @@ set(HEADERS
   include/Functions.h
   include/any.hpp
   include/common.h
+  include/functionTrace.h
   include/SQLWriter.h
   include/dataParser/dataDelimited.h
   include/dataParser/dataLexerXLSX.h

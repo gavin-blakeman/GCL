@@ -61,6 +61,7 @@
 #include "include/dataParser/dataParserCore.h"
 #include "include/dataParser/dataParser_SAPBKG.h"
 #include "include/error.h"
+#include "include/functionTrace.h"
 #include "include/logger/loggerManager.h"
 #include "include/logger/loggerCore.h"
 #include "include/logger/filters/baseFilter.h"
@@ -102,5 +103,7 @@ using GCL::logger::TRACE_UNEXPECTED;
 using GCL::RUNTIME_ERROR;
 using GCL::CODE_ERROR;
 using GCL::IMPLEMENT_ME;
+
+using GCL::FUNCTION_TRACE;
 
 #endif //GCL_H

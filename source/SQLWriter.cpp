@@ -66,6 +66,7 @@
 
 #include "include/common.h"
 #include "include/error.h"
+#include "include/functionTrace.h"
 
 namespace GCL
 {
@@ -391,7 +392,12 @@ namespace GCL
       }
       case qt_insert:
       {
-        //returnValue = shouldParameterise(insertValue);
+        std::visit(overloaded
+        {
+          [&](std::monostate &) { CODE_ERROR(); },
+          [&](valueStorage_t &vs) { to_parameter(vs, params); },
+          [&](pointer_t &pt) { /*pt->to_parameter();*/},
+        }, insertValue);
         break;
       }
       case qt_call:
@@ -426,16 +432,17 @@ namespace GCL
 
   sqlWriter::parameterType_t sqlWriter::parameterType(bindParameter_t const &bp)
   {
-    sqlWriter::parameterType_t rv = PT_NONE;
-
-    std::visit(overloaded
-    {
-      [&](std::monostate const &) { CODE_ERROR(); },
-      [&](parameter_ref const &pr) { rv = parameterType(pr.get()); },
-      [&](parameterVariant_ref const &pvr) {  },
-    }, bp);
-
-    return rv;
+    FUNCTION_TRACE();
+//    sqlWriter::parameterType_t rv = PT_NONE;
+//
+//    std::visit(overloaded
+//    {
+//      [&](std::monostate const &) { CODE_ERROR(); },
+//      [&](parameter_ref const &pr) { rv = parameterType(pr.get()); },
+//      [&](parameterVariant_ref const &pvr) {  },
+//    }, bp);
+//
+//    return rv;
   }
 
   std::string sqlWriter::to_string(groupBy_t const &p) const
@@ -597,11 +604,11 @@ namespace GCL
     std::string returnValue;
 
     std::visit(overloaded
-               {
-                 [&](std::monostate const &) { CODE_ERROR(); },
-                 [&](valueStorage_t const &vs) { returnValue = to_string(vs); },
-                 [&](pointer_t const &pt) { returnValue = "( " + static_cast<std::string>(*pt) + ") "; },
-               }, values);
+    {
+      [&](std::monostate const &) { CODE_ERROR(); },
+      [&](valueStorage_t const &vs) { returnValue = to_string(vs); },
+      [&](pointer_t const &pt) { returnValue = "( " + static_cast<std::string>(*pt) + ") "; },
+    }, values);
 
     return returnValue;
   }
@@ -2335,6 +2342,7 @@ namespace GCL
   /// @param[in]  fields: The initialiser list of set clauses.
   /// @returns    (*this)
   /// @throws
+  /// @note       The set fields are stored in row form. One row at time.
   /// @version    2020-03-24/GGB - Function created.
 
   sqlWriter &sqlWriter::set(std::initializer_list<parameterPair> fields)
@@ -2594,11 +2602,11 @@ namespace GCL
     bool returnValue;
 
     std::visit(overloaded
-               {
-                 [&](std::monostate const &) { CODE_ERROR(); },
-                 [&](valueStorage_t const &vs) { returnValue = shouldParameterise(vs); },
-                 [&](pointer_t const &pt) { returnValue = pt->shouldParameterise();},
-               }, vt);
+    {
+      [&](std::monostate const &) { CODE_ERROR(); },
+      [&](valueStorage_t const &vs) { returnValue = shouldParameterise(vs); },
+      [&](pointer_t const &pt) { returnValue = pt->shouldParameterise();},
+    }, vt);
 
     return returnValue;
   }
@@ -2688,12 +2696,16 @@ namespace GCL
   /// @brief        Stores the value fields for the query.
   /// @param[in]    fields: The parameter values to include in the query.
   /// @returns      (*this)
+  /// @throws
+  /// @note         Data is stored in record format.
   /// @version      2022-07-23/GGB - Extended to allow INSERT INTO SELECT
   /// @version      2017-07-26/GGB - Changed code to use parameter rather than parameter pair.
   /// @version      2015-03-31/GGB - Function created.
 
   sqlWriter &sqlWriter::values(std::initializer_list<parameterStorage> fields)
   {
+    FUNCTION_TRACE();
+
     valueStorage_t valueFields;
 
     for (auto const &f : fields)
@@ -2771,8 +2783,42 @@ namespace GCL
     return *this;
   }
 
+  /// @brief        Returns the parameters for the passed valueStorage type.
+  /// @param[in]    vs: The valueStorage value.
+  /// @params[out]  The params that are created.
+  /// @throws
+  /// @note         The insert parameters are returned in column form. That is one column of values per parameter. This more
+  ///               closely aligns with expectations and matches the place holders.
+  /// @todo         Add a control variable to allow params for insert queries to be returned by column or by row.
+  /// @version      2024-03-30/GGB - Function created.
+
+  void sqlWriter::to_parameter(valueStorage_t &vs, std::list<bindParameter_t> &params)
+  {
+    FUNCTION_TRACE();
+
+    /* Inner elements are column values, outer elements are the records. Records are returned by column.
+     */
+
+    std::vector<parameterValues_t> parameterSet; // Columns of values.
+    parameterSet.resize(vs.front().size());
+
+    for (auto &outerElement : vs)
+    {
+      std::size_t indxInner = 0;
+      for (auto &innerElement : outerElement)
+      {
+        parameterSet[indxInner].push_back(std::ref(innerElement));
+        indxInner++;
+      };
+    };
+
+    params.insert(params.end(), std::move_iterator(parameterSet.begin()), std::move_iterator(parameterSet.end()));
+  }
+
   void sqlWriter::to_parameter(whereTest_t &wt, std::list<bindParameter_t> &params)
   {
+    FUNCTION_TRACE();
+
     switch(std::get<1>(wt))
     {
       case eq:
@@ -2839,14 +2885,14 @@ namespace GCL
     }
   }
 
-  /// @brief      Converts a whereTest_t to a parameter.
-  /// @param[in]  w: The whereTest_t to convert.
+  /// @brief      Converts a where_logical to a parameter.
+  /// @param[in]  w: The whereLogical to convert.
   /// @throws
   /// @version    2022-06-07/GGB - Function created.
 
   void sqlWriter::to_parameter(whereLogical_t &wl, std::list<bindParameter_t> &params)
   {
-
+    CODE_ERROR();
 //    returnValue += to_string(*std::get<0>(wl));
 //    returnValue += " " + logicalOperatorMap[std::get<1>(wl)] + " ";
 //    returnValue += to_string(*std::get<2>(wl)) + ")";
@@ -2902,7 +2948,6 @@ namespace GCL
     sqlWriter::whereLogical_t wl = std::make_tuple(std::make_unique<sqlWriter::whereVariant_t>(std::move(lhs)),
                                                    op,
                                                    std::make_unique<sqlWriter::whereVariant_t>(std::move(rhs)));
-
 
     return wl;
   }

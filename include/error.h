@@ -27,7 +27,7 @@
 //
 // CLASSES INCLUDED:    CGCLError
 //
-// HISTORY:             2024-03-27 GGB - Added the implment me class to use for unimplemented features that need to be implemented.
+// HISTORY:             2024-03-27 GGB - Added the implement me class to use for unimplemented features that need to be implemented.
 //                      2015-09-22 GGB - AIRDAS 2015.09 release
 //                      2013-09-30 GGB - AIRDAS 2013.09 release.
 //                      2013-03-22 GGB - AIRDAS 2013.03 release.
@@ -117,8 +117,6 @@ namespace GCL
     std::string fileName;
 
     std::string errorMessage(std::string const &, std::size_t) const;
-
-  
   };
 
   /// @brief    The CRuntimeAssert class throws exceptions to indicate assertion failures within a library.

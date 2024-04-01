@@ -91,6 +91,7 @@
 /// There is a single class that implements the SQL Writer.
 /// This is placed in the GCL::sqlWriter namespace.
 
+
 namespace GCL
 {
 
@@ -185,7 +186,6 @@ namespace GCL
       PT_DECIMAL,
       PT_STRING,
     };
-
 
     class bindValue_t
     {
@@ -319,12 +319,6 @@ namespace GCL
     sqlWriter &set(std::initializer_list<parameterPair>);
     void setDialect(EDialect d) {dialect = d;}
     bool shouldParameterise() const;
-    bool shouldParameterise(whereTest_t const &) const;
-    bool shouldParameterise(whereLogical_t const &) const;
-    bool shouldParameterise(whereVariant_t const &) const;
-    bool shouldParameterise(valueType_t const &) const;
-    bool shouldParameterise(parameter_t const &) const;
-    bool shouldParameterise(valueStorage_t const &) const;
     sqlWriter &update(std::string const &);
     sqlWriter &upsert(std::string const &);
 
@@ -390,6 +384,13 @@ namespace GCL
     std::string createSetClause(bool = false) const;
     std::string createLimitClause() const;
 
+    bool shouldParameterise(whereTest_t const &) const;
+    bool shouldParameterise(whereLogical_t const &) const;
+    bool shouldParameterise(whereVariant_t const &) const;
+    bool shouldParameterise(valueType_t const &) const;
+    bool shouldParameterise(parameter_t const &) const;
+    bool shouldParameterise(valueStorage_t const &) const;
+
     std::string to_string(whereTest_t const &) const;
     std::string to_string(whereLogical_t const &) const;
     std::string to_string(whereVariant_t const &) const;
@@ -405,6 +406,7 @@ namespace GCL
 
     void to_parameter(whereTest_t &, std::list<bindParameter_t> &);
     void to_parameter(whereLogical_t &, std::list<bindParameter_t> &);
+    void to_parameter(valueStorage_t &, std::list<bindParameter_t> &);
 
   }; // class sqlWriter
 

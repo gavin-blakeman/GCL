@@ -82,10 +82,12 @@
   using fromPair_t = std::pair<from_t, std::optional<std::string>>;   ///!< Field:
   using fromStorage_t = std::vector<fromPair_t>;
 
-  // Bind paramters
+  // Bind parameters
 
   using parameter_ref = std::reference_wrapper<parameter_t>;
   using parameterVariant_ref = std::reference_wrapper<parameterVariant_t>;
+  using parameterValues_t = std::vector<parameter_ref>;         ///!< Vector of record fields. (Used for insert queries).
   using bindParameter_t = std::variant<std::monostate,
                                        parameter_ref,
-                                       parameterVariant_ref>;
+                                       parameterVariant_ref,
+                                       parameterValues_t>;
