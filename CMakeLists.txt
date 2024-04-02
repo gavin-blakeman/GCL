@@ -32,7 +32,8 @@ set(SOURCES
   source/dataParser/dataDelimited.cpp
   source/dataParser/dataLexerXLSX.cpp
   source/dataParser/dataParserCore.cpp
-  source/dataParser/dataParser_SAPBKG.cpp  
+  source/dataParser/dataParser_SAPBKG.cpp
+  source/dataParser/dataTables.cpp  
   source/logger/loggerManager.cpp
   source/logger/loggerCore.cpp
   source/logger/filters/baseFilter.cpp
@@ -57,6 +58,7 @@ set(HEADERS
   include/dataParser/dataLexerXLSX.h
   include/dataParser/dataParserCore.h
   include/dataParser/dataParser_SAPBKG.h
+  include/dataParser/dataTables.h
   include/dateTime.h
   include/config.h
   include/filesystem.h

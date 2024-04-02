@@ -97,22 +97,22 @@ namespace GCL
   public:
     explicit CCodeError(std::string fn, size_t ln);
   };
-  
-  /// @brief        The CImplmentMe class is used to throw exceptions to indicate unimplmented code that needs to 
-  ///               be implemented. This has been added to differentiate from CODE_ERRORS (unexpected or impossible branches)  
+
+  /// @brief        The CImplmentMe class is used to throw exceptions to indicate unimplmented code that needs to
+  ///               be implemented. This has been added to differentiate from CODE_ERRORS (unexpected or impossible branches)
 
   class CImplementMe : public std::runtime_error
   {
   public:
     explicit CImplementMe(std::string fn, size_t ln);
     ~CImplementMe() = default;
-  
+
   private:
     CImplementMe(CImplementMe const &) = delete;
     CImplementMe(CImplementMe &&) = delete;
     CImplementMe &operator=(CImplementMe const &) = delete;
     CImplementMe &operator==(CImplementMe &&) = delete;
-  
+
     size_t lineNo;
     std::string fileName;
 
@@ -130,7 +130,7 @@ namespace GCL
     explicit CRuntimeAssert(std::string const &expression, std::string const &message,
                             std::source_location const location = std::source_location::current());
   private:
-    std::string errorMessage(std::string const &, std::string const &, std::size_t, std::string const &) const;
+    std::string errorMessage(std::string const &, std::string const &, std::source_location const &) const;
   };
 
   class search_error : public std::runtime_error
@@ -166,7 +166,7 @@ namespace GCL
   {
     throw(CCodeError(std::string(location.file_name()), location.line()));
   }
-  
+
   [[noreturn]] inline void IMPLEMENT_ME(std::source_location const location = std::source_location::current())
   {
     throw(CImplementMe(std::string(location.file_name()), location.line()));

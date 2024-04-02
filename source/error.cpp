@@ -121,13 +121,13 @@ namespace GCL
 
     return o.str();
   }
-  
+
   /// @brief      Class constructor.
   /// @param[in]  fn: File name
   /// @param[in]  ln: Line number.
   /// @throws
   /// @version      2024-03-27/GGB - Function created
-  
+
   CImplementMe::CImplementMe(std::string fn, size_t ln) : std::runtime_error("Implement Me."), fileName(fn),lineNo(ln)
   {
     LOGEXCEPTION(errorMessage(fileName, lineNo));
@@ -137,7 +137,7 @@ namespace GCL
   /// @param[in]    fileName: The name of the source file having the error.
   /// @param[in]    lineNo: The line number that raises the error.
   /// @returns      String containing the error message details.
-  /// @throws       std::bad_alloc  
+  /// @throws       std::bad_alloc
   /// @version      2024-03-27/GGB - Function created
 
   std::string CImplementMe::errorMessage(std::string const &fileName, std::size_t lineNo) const
@@ -150,40 +150,38 @@ namespace GCL
     return o.str();
   }
 
+  /// @brief      Constructor for runtime assert. Also raises an exception.
+  /// @param[in]  expression: The expression that failed.
+  /// @param[in]  message: The message associated with the expression.
+  /// @param[in]  location: The location where the error occurred.
+  /// @throws
+  /// @version      2020-04-14/GGB - Function created.
+
   CRuntimeAssert::CRuntimeAssert(std::string const &expression, std::string const &message, std::source_location const location)
         : std::runtime_error("Runtime Assert")
   {
-    LOGEXCEPTION(errorMessage(expression, std::string(location.file_name()), location.line(), message));
+    LOGEXCEPTION(errorMessage(expression, message, location));
   }
 
   /// @brief        Creates the message string for the runtime assertion.
   /// @param[in]    expression: The expression that failed.
-  /// @param[in]    fileName: The name of the source file that generated the error.
-  /// @param[in]    lineNumber: The line number that created the exception.
   /// @param[in]    message: The message to associate with the exception.
+  /// @param[in]    location: The source location where the error occurred.
   /// @returns      A string to use for creating a standardised description for the exception.
   /// @throws       std::bad_alloc
+  /// @version      2024-04-02/GGB - Changed parameters to include the source_location.
   /// @version      2023-11-30.GGB - Changed to reflect move to std::source_location
   /// @version      2020-09-06/GGB - Removed parameter library.
   /// @version      2020-04-14/GGB - Function created.
 
   std::string CRuntimeAssert::errorMessage(std::string const &expression,
-                                           std::string const &fileName,
-                                           std::size_t lineNumber,
-                                           std::string const &message) const
+                                           std::string const &message,
+                                           std::source_location const &location) const
   {
-    std::string messageString;
-
-    messageString = "Failed Assertion: '" + expression + "'  failed in file '";
-
-    messageString += fileName + "' at line '" + std::to_string(lineNumber) + "'.";
-
-    if (!message.empty())
-    {
-      messageString += " " + message;
-    }
-
-    return messageString;
+    return fmt::format("Failed Assertation: '{}', File: {}, Function: {}",
+                       expression,
+                       std::string(location.file_name()),
+                       std::string(location.function_name()));
   }
 
 }  // namespace GCL

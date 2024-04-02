@@ -46,6 +46,9 @@
 #include <string>
 #include <vector>
 
+// DataParser header files
+#include "include/dataParser/dataTables.h"
+
 namespace GCL
 {
   /// Used to parse general data streams.
@@ -53,16 +56,11 @@ namespace GCL
   class CDataTokeniser
   {
   public:
-    using data_t = std::string;
-    using dataLine_t = std::pair<std::size_t, std::vector<data_t>>;
-    using dataFile_t = std::vector<dataLine_t>;
-    struct dataTable_t
-    {
-      std::optional<std::string> tableName;
-      dataLine_t headings;
-      dataFile_t data;
-    };
-    using dataTables_t = std::vector<dataTable_t>;
+    using data_t = GCL::dataParser::field_t;
+    using dataLine_t = GCL::dataParser::dataLine_t;
+    using dataFile_t = GCL::dataParser::dataFile_t;
+    using dataTable_t = GCL::dataParser::dataTable_t;
+    using dataTables_t = GCL::dataParser::CDataTables;
 
     CDataTokeniser(dataTables_t &dt, std::istream &is) : inputStream(is), dataTables_(dt) {}
     virtual ~CDataTokeniser() = default;

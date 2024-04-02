@@ -1,4 +1,9 @@
-﻿2022-12
+﻿2024-04
+-------
+CHANGED     CRuntimeAssert: Changed the parameters to errorMessage() and the returned information.
+ADDED       CDataTables to the dataParser functionality.
+
+2022-12
 ------
 REMOVE      Deprecated error functions
 RENAME      Resource.x to resource.x
