@@ -1183,7 +1183,7 @@ namespace GCL
 
         std::visit(overloaded
         {
-          [&](std::monostate const &) { CODE_ERROR(); },
+          [&](std::monostate const &) { returnValue = false; },
           [&](whereTest_t const &wt) { returnValue = returnValue || hasBindValues(wt); },
           [&](whereLogical_t const &wl) { returnValue = returnValue || hasBindValues(wl); },
         }, whereClause_.base);
@@ -2439,7 +2439,7 @@ namespace GCL
 
         std::visit(overloaded
         {
-          [&](std::monostate const &) { CODE_ERROR(); },
+          [&](std::monostate const &) { returnValue = false; },
           [&](whereTest_t const &wt) { returnValue = returnValue || shouldParameterise(wt); },
           [&](whereLogical_t const &wl) { returnValue = returnValue || shouldParameterise(wl); },
         }, whereClause_.base);
