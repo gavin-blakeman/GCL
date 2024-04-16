@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015-2022 Gavin Blakeman.
+//                      Copyright 2015-2022, 2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -49,6 +49,8 @@
 
 #include "sys/types.h"
 #include "sys/sysinfo.h"
+#include "unistd.h"
+#include "limits.h"
 
 #elif defined(__MACH__)
 
@@ -207,5 +209,18 @@ namespace GCL
 
 #endif
 
+  }
+
+  /// @brief      Gets the host name of the system the software is running on.
+
+  std::string getHostName()
+  {
+#if defined(_WIN32)
+#elif defined (__linux__)
+    char hostname[HOST_NAME_MAX];
+    gethostname(hostname, HOST_NAME_MAX);
+    return hostname;
+#elif defined(__MACH__)
+#endif
   }
 }

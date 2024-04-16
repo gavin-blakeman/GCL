@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015-2022 Gavin Blakeman.
+//                      Copyright 2015-2022, 2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -39,6 +39,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 namespace GCL
 {
@@ -87,6 +88,8 @@ namespace GCL
     double usageCPU() { return percentCPU_; }
     double processCPU() { return 0; }
   };
+
+  std::string getHostName();
 }
 
 #endif // GCL_RESOURCE_H
