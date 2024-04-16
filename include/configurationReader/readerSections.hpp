@@ -1,4 +1,4 @@
-﻿//*********************************************************************************************************************************
+//*********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
 // FILE:                configurationReader/readerSections.hpp
@@ -194,6 +194,91 @@ namespace GCL
     }
 
   protected:
+
+    /// @brief      Reads  the entire file and caches the data. Any errors are output to the ostream.
+    /// @returns    true if no errors occurred. false if errors occurred.
+
+    virtual bool processParseFile(std::ostream &os = std::cout) noexcept override
+    {
+      std::size_t lineNumber = 0;
+      bool rv = false;
+      std::string szLine;
+      std::string szSection;
+      sectionContainer_t::iterator sectionIterator;
+
+      try
+      {
+
+        std::ifstream ifs(filename_);
+
+        if (!ifs.is_open())
+        {
+          os << fmt::format(fmt::runtime(boost::locale::gettext("Unable to open configuration file {}.")), filename_);
+        };
+
+        while (!ifs.eof())
+        {
+          std::getline(ifs, szLine);
+          lineNumber++;
+          boost::trim(szLine);  // Drop of all whitespace
+
+          if (!szLine.empty())
+          {
+            std::size_t indexStart, indexEnd;
+
+              // Check if a comment, section or tag line
+
+            if ((indexStart = szLine.find(commentChar_)) != std::string::npos)
+            {
+                // Comment in line, discard everything after the comment.
+
+              szLine = szLine.substr(0, indexStart);
+            };
+
+            if ((indexStart = szLine.find(sectionOpenChar_)) != std::string::npos)
+            {
+                // Section line.
+
+              indexEnd = szLine.find(sectionCloseChar_);
+
+              szSection = szLine.substr(indexStart + sectionOpenChar_.size(), indexEnd -
+                                        (indexStart + sectionOpenChar_.size()));
+              sectionIterator = std::get<0>(sectionContainer.emplace(szSection, tagValueContainer_t()));
+            }
+            else
+            {
+                // tag line
+
+              std::size_t tokenEnd;
+              std::string tag, value;
+
+              tokenEnd = szLine.find(seperatorChar_);
+              if (tokenEnd != std::string::npos)
+              {
+                tag = szLine.substr(0, tokenEnd);
+                boost::trim(tag);
+
+                value = szLine.substr(tokenEnd + seperatorChar_.size(), std::string::npos);
+                boost::trim(value);
+
+                sectionIterator->second.emplace(std::move(tag), std::move(value));
+              };
+            };
+          };
+        };  // while loop
+
+        if (ifs.eof())
+        {
+          readComplete_ = true;
+        };
+
+        ifs.close();
+        rv = true;
+      }
+      catch(...) {}
+
+      return rv;
+    }
 
     /// @brief      Reads the configuration file until the tag value is found.
     /// @param[in]  sectionTagName: The section and tag seperated by a namespace seperator.
