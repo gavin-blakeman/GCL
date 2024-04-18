@@ -281,7 +281,7 @@ namespace GCL
     }
 
     /// @brief      Reads the configuration file until the tag value is found.
-    /// @param[in]  sectionTagName: The section and tag seperated by a namespace seperator.
+    /// @param[in]  sectionTagName: The section and tag separated by a namespace separator.
     /// @returns    Standard optional with the value if found. If the tag is not found then the optional has no value.
     /// @throws
     /// @version    2020-11-30/GGB - Debugging function.
