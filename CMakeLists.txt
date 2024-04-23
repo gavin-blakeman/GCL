@@ -46,6 +46,7 @@ set(SOURCES
   source/logger/sinks/fileSink.cpp
   source/logger/sinks/streamSink.cpp
   source/pluginManager/pluginManager.cpp
+  source/utf.cpp
   )
 set(HEADERS
   GCL
@@ -86,6 +87,7 @@ set(HEADERS
   include/tempFileManager.h
   include/sqlWriter_typedef.inc
   include/sqlWriter_variables.inc
+  include/utf.h
   )
 
 set(DIRECTORIES	

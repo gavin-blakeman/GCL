@@ -27,7 +27,8 @@
 //
 // CLASSES INCLUDED:    None
 //
-// HISTORY:             2024-02-06 GGB - Added files for the updated logger module.
+// HISTORY:             2024-04-23 GGB - Added utf.hpp for UTF BOM constants.
+//                      2024-02-06 GGB - Added files for the updated logger module.
 //											2023-10-03 GGB - Added the SAP background file data parser.
 //                      2018-07-06 GGB - Added alarm module.
 //                      2015-09-22 GGB - AIRDAS 2015.09 release
@@ -81,6 +82,7 @@
 #include "include/string.hpp"
 #include "include/resource.h"
 #include "include/pluginManager/pluginManager.h"
+#include "include/utf.h"
 
   // Inject the logger functions into the global namespace.
 

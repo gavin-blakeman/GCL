@@ -28,6 +28,7 @@ set(SOURCES
   test_filesystem.cpp
   test_sqlWriter.cpp
   test_string.cpp
+  test_utf.cpp
   )
 
 set(LIBRARIES

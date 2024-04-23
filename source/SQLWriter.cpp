@@ -416,7 +416,6 @@ namespace GCL
         // Does not return.
       }
     }
-    std::cout << "Exiting function" << std::endl;
   }
 
   std::string sqlWriter::to_string(parameter_t const &p) const

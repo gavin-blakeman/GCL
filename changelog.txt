@@ -1,5 +1,6 @@
 ﻿2024-04
 -------
+ADDED       UTF BOM support.
 CHANGED     CRuntimeAssert: Changed the parameters to errorMessage() and the returned information.
 ADDED       CDataTables to the dataParser functionality.
 
