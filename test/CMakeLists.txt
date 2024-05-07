@@ -25,6 +25,7 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 set(SOURCES
   main.cpp
   #test_dateTime.cpp
+  test_error.cpp
   test_filesystem.cpp
   test_sqlWriter.cpp
   test_string.cpp

@@ -102,6 +102,7 @@ using GCL::logger::TRACE_UNEXPECTED;
 
   // Inject the error functions into the global namespace.
 
+using GCL::SIGNAL;
 using GCL::RUNTIME_ERROR;
 using GCL::CODE_ERROR;
 using GCL::IMPLEMENT_ME;

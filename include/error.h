@@ -140,6 +140,23 @@ namespace GCL
     ~search_error() {}
   };
 
+  class CSignal
+  {
+  public:
+    using signal_t = std::uint_fast8_t;
+
+    explicit CSignal(signal_t s) : signal_(s) {}
+    signal_t signal() const noexcept { return signal_; }
+
+  private:
+    signal_t signal_;
+  };
+
+  [[noreturn]] inline void SIGNAL(CSignal::signal_t s)
+  {
+    throw CSignal(s);
+  }
+
   /// @brief Function to throw a runtime error.
 
   [[noreturn]] inline void RUNTIME_ERROR(std::string const &message,
