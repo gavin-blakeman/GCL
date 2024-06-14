@@ -33,7 +33,7 @@ set(SOURCES
   source/dataParser/dataLexerXLSX.cpp
   source/dataParser/dataParserCore.cpp
   source/dataParser/dataParser_SAPBKG.cpp
-  source/dataParser/dataTables.cpp  
+  source/dataParser/dataTables.cpp
   source/logger/loggerManager.cpp
   source/logger/loggerCore.cpp
   source/logger/filters/baseFilter.cpp
@@ -45,6 +45,9 @@ set(SOURCES
   source/logger/sinks/baseSink.cpp
   source/logger/sinks/fileSink.cpp
   source/logger/sinks/streamSink.cpp
+  source/parsers/htmlLexer.cpp
+  source/parsers/lexer.cpp
+  source/parsers/token.cpp
   source/pluginManager/pluginManager.cpp
   source/utf.cpp
   )
@@ -66,7 +69,7 @@ set(HEADERS
   include/alarm/alarmCore.h
   include/alarm/alarmDaily.h
   include/alarm/alarmWeekly.h
-  include/error.h
+  include/error.h  
   include/logger/loggerManager.h
   include/logger/loggerCore.h
   include/logger/filters/baseFilter.h
@@ -81,6 +84,11 @@ set(HEADERS
   include/configurationReader/readerSections.hpp
   include/configurationReader/readerVanilla.hpp
   include/configurationReader/readerCore.hpp
+  include/parsers/htmlLexer.h
+  include/parsers/htmlTokenType.h
+  include/parsers/lexer.h
+  include/parsers/token.h
+  include/parsers/tokenType.h
   include/pluginManager/pluginManager.h
   include/resource.h
   include/traits.h
