@@ -1,8 +1,8 @@
 //**********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// SUBSYSTEM:           Parsers
-// FILE:                token.h
+// SUBSYSTEM:           Parsers::HTML Parser
+// FILE:                htmlLexer.h
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,7 +23,7 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class provides a generic token used for lexing files.
+// OVERVIEW:            Class that lexes the html stream
 //
 // CLASSES INCLUDED:
 //
@@ -32,30 +32,38 @@
 //**********************************************************************************************************************************
 
 
+#ifndef GCL_PARSERS_HTMLLEXER_H
+#define GCL_PARSERS_HTMLLEXER_H
 
-#include "include/parsers/token.h"
+#include "include/parsers/lexer.h"
 
-#include <string>
-
-namespace GCL::parsers
+namespace GCL::parsers::html
 {
-
-  SCL::bimap<token_id, std::string> CToken::tokenStrings;
-
-  CToken::CToken(token_id type, std::string const &val, std::size_t row, std::size_t col)
-   {
-    tokenType = type;
-    tokenValue = val;
-    tokenRow = row;
-    tokenCol = col;
-  }
-
-  std::string CToken::to_string() const
+  class CHTMLLexer : public CLexer
   {
-    return std::string ("(" + std::to_string(tokenRow) + ", " + std::to_string(tokenCol) + ")"
-                        + " " + (tokenStrings.contains_LHS(tokenType) ? tokenStrings.RHS(tokenType) : std::to_string(tokenType))
-                        + " " + tokenValue);
-  }
+    public:
+      CHTMLLexer(std::istream &is, std::vector<CToken> &tokens);
+      virtual ~CHTMLLexer() = default;
 
+    private:
+      CHTMLLexer() = delete;
+      CHTMLLexer(CHTMLLexer const &) = delete;
+      CHTMLLexer(CHTMLLexer &&) = delete;
+      CHTMLLexer &operator=(CHTMLLexer const &) = delete;
+      CHTMLLexer &operator=(CHTMLLexer &&) = delete;
 
-} // namespace
+      virtual void next() override;
+
+      void attribute();
+      void id();
+      void whitespace();
+      void tag();
+      void comment();
+      void value();
+      void text();
+
+  };
+
+} // namesapce
+
+#endif

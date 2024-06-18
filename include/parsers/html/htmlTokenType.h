@@ -1,8 +1,8 @@
 //**********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// SUBSYSTEM:           Parsers
-// FILE:                token.h
+// SUBSYSTEM:           Parsers::HTML Parser
+// FILE:                htmlTokenTypes.h
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,7 +23,7 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class provides a generic token used for lexing files.
+// OVERVIEW:            Class that represents the token types.
 //
 // CLASSES INCLUDED:
 //
@@ -31,31 +31,25 @@
 //
 //**********************************************************************************************************************************
 
+#include <SCL>
 
+#include "include/parsers/tokenType.h"
 
-#include "include/parsers/token.h"
-
-#include <string>
-
-namespace GCL::parsers
+namespace GCL::parsers::html
 {
-
-  SCL::bimap<token_id, std::string> CToken::tokenStrings;
-
-  CToken::CToken(token_id type, std::string const &val, std::size_t row, std::size_t col)
-   {
-    tokenType = type;
-    tokenValue = val;
-    tokenRow = row;
-    tokenCol = col;
-  }
-
-  std::string CToken::to_string() const
+  enum htmlTokenTypes : token_id
   {
-    return std::string ("(" + std::to_string(tokenRow) + ", " + std::to_string(tokenCol) + ")"
-                        + " " + (tokenStrings.contains_LHS(tokenType) ? tokenStrings.RHS(tokenType) : std::to_string(tokenType))
-                        + " " + tokenValue);
-  }
-
-
+    L_TAG_OPEN = TT_NEXT,     // <
+    L_TAG_CLOSE,              // </
+    R_TAG_OPEN,               // >
+    R_TAG_CLOSE,              // />
+    L_TAG_DOCTYPE,            // <!
+    COMMENT_OPEN,             // <!---
+    COMMENT_CLOSE,            // --->
+    ASSIGN,                   // =
+    ID,
+    VALUE,
+    TEXT,
+    ATTRIBUTE,
+  };
 } // namespace

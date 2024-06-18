@@ -1,8 +1,8 @@
 //**********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// SUBSYSTEM:           Parsers
-// FILE:                lexer.h
+// SUBSYSTEM:           Parsers::HTML Parser
+// FILE:                htmlParser.h
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,7 +23,7 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class provides a generic interface for lexing a stream.
+// OVERVIEW:            Class that parsers the tokens
 //
 // CLASSES INCLUDED:
 //
@@ -32,73 +32,40 @@
 //**********************************************************************************************************************************
 
 
-#ifndef GCL_PARSERS_LEXER_H
-#define GCL_PARSERS_LEXER_H
+#ifndef GCL_PARSERS_HTML_HTMLPARSER_H_
+#define GCL_PARSERS_HTML_HTMLPARSER_H_
 
-#include <atomic>
+// Standard C++ library header files
 #include <istream>
-#include <mutex>
-#include <semaphore>
-#include <shared_mutex>
-#include <string>
-#include <thread>
-#include <vector>
+#include <stack>
 
-#include <SCL>
-
+// GCL header files.
 #include "include/parsers/token.h"
+#include "include/parsers/html/htmlDocument.h"
+#include "include/parsers/html/htmlElement.h"
 
-namespace GCL::parsers
+namespace GCL::parsers::html
 {
-  class CLexer
+  /* The lexer breaks the input stream into tokens. The parser then builds the DOM tree from the tokens. This requires knowledge of
+   * the HTML5 standard. The output from the parser is a structured list of parsers.
+   */
+  class CHTMLParser
   {
   public:
-    /*! @brief      Constructor.
-     *  @param[in]  is: The input stream to parse.
-     */
+    CHTMLParser(std::istream &is, CHTMLDocument &d) : inputStream(is), DOM(d) {}
 
-    CLexer(std::istream &is, std::vector<CToken> &tokens);
-    virtual ~CLexer() = default;
-
-    void getTokens();
-
-  protected:
-    std::size_t lineNo = 0;
-    std::size_t linePos = 0;
-    std::size_t row = 0;
-    std::size_t col = 0;
-    std::vector<CToken> &tokens;
-    SCL::circularBuffer<char, 1024, false, false> buffer;
-
-    /*! @brief      Checks if the next character in the stream matches the parameter.
-     *  @param[in]  c: The character to test.
-     *  @returns    true if the c matches the next character in the stream.
-     */
-    bool peek(char c, std::size_t);
-
-    void consume(int n);
-    bool match(std::string const &str);
-    bool match(char const);
-
-    virtual void next();
-
-    /*! @brief    Fill the buffer when it falls below the minimum size.
-     */
-    virtual void fillBuffer();
-
-    virtual void consume();
+    void parse();
 
   private:
-    CLexer() = delete;
-    CLexer(CLexer const &) = delete;
-    CLexer(CLexer &&) = delete;
-    CLexer &operator=(CLexer const &) = delete;
-    CLexer &operator=(CLexer &&) = delete;
+    using element_ref = CHTMLDocument::value_ref;
 
     std::istream &inputStream;
-    bool eos = false;
-  };
+    std::vector<GCL::parsers::CToken> tokens;
 
+    CHTMLDocument &DOM;
+  };
 } // namespace
 
-#endif // GCL_PARSERS_LEXER_H
+
+
+#endif /* GCL_PARSERS_HTML_HTMLPARSER_H_ */

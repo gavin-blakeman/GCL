@@ -45,7 +45,11 @@ set(SOURCES
   source/logger/sinks/baseSink.cpp
   source/logger/sinks/fileSink.cpp
   source/logger/sinks/streamSink.cpp
-  source/parsers/htmlLexer.cpp
+  source/parsers/html/htmlAttributes.cpp
+  source/parsers/html/htmlDocument.cpp
+  source/parsers/html/htmlElement.cpp
+  source/parsers/html/htmlLexer.cpp
+  source/parsers/html/htmlParser.cpp
   source/parsers/lexer.cpp
   source/parsers/token.cpp
   source/pluginManager/pluginManager.cpp
@@ -84,8 +88,12 @@ set(HEADERS
   include/configurationReader/readerSections.hpp
   include/configurationReader/readerVanilla.hpp
   include/configurationReader/readerCore.hpp
-  include/parsers/htmlLexer.h
-  include/parsers/htmlTokenType.h
+  include/parsers/html/htmlAttributes.h
+  include/parsers/html/htmlDocument.h
+  include/parsers/html/htmlElement.h
+  include/parsers/html/htmlLexer.h
+  include/parsers/html/htmlParser.h
+  include/parsers/html/htmlTokenType.h
   include/parsers/lexer.h
   include/parsers/token.h
   include/parsers/tokenType.h

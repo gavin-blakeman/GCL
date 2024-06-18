@@ -1,8 +1,8 @@
 //**********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// SUBSYSTEM:           Parsers
-// FILE:                token.h
+// SUBSYSTEM:           Parsers::HTML Parser
+// FILE:                htmlDocument.cpp
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,7 +23,7 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class provides a generic token used for lexing files.
+// OVERVIEW:            Class that represents the DOM.
 //
 // CLASSES INCLUDED:
 //
@@ -32,30 +32,54 @@
 //**********************************************************************************************************************************
 
 
+#include "include/parsers/html/htmlDocument.h"
 
-#include "include/parsers/token.h"
 
-#include <string>
+// Miscellaneous library header files.
+#include <GCL>
 
-namespace GCL::parsers
+namespace GCL::parsers::html
 {
-
-  SCL::bimap<token_id, std::string> CToken::tokenStrings;
-
-  CToken::CToken(token_id type, std::string const &val, std::size_t row, std::size_t col)
-   {
-    tokenType = type;
-    tokenValue = val;
-    tokenRow = row;
-    tokenCol = col;
-  }
-
-  std::string CToken::to_string() const
+  void CHTMLDocument::addAttribute(std::string const &attr, std::string const &val)
   {
-    return std::string ("(" + std::to_string(tokenRow) + ", " + std::to_string(tokenCol) + ")"
-                        + " " + (tokenStrings.contains_LHS(tokenType) ? tokenStrings.RHS(tokenType) : std::to_string(tokenType))
-                        + " " + tokenValue);
+    currentElement.get().insert(attr, val);
+  }
+
+  CHTMLDocument::iterator CHTMLDocument::find(htmlElements_e element, iterator start) const noexcept
+  {
+    while (start->elementType() != element) start++;
+
+    return start;
+  }
+
+  void CHTMLDocument::openElement(std::string const &element)
+  {
+    createStack.push_front(currentElement);
+    currentElement = currentElement.get().insert(element);
+  }
+
+  void CHTMLDocument::setValue(std::string const &val)
+  {
+    currentElement.get().value(val);
   }
 
 
-} // namespace
+  void CHTMLDocument::closeElement()
+  {
+    currentElement = createStack.front();
+    createStack.pop_front();
+  }
+
+  void CHTMLDocument::closeElement(std::string const &element)
+  {
+    if (currentElement.get().elementType() == CHTMLElement::string2elementType(element))
+    {
+      closeElement();
+    }
+    else
+    {
+      IMPLEMENT_ME();
+    }
+  }
+
+}

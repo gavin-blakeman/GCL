@@ -1,8 +1,8 @@
 //**********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// SUBSYSTEM:           Parsers
-// FILE:                token.h
+// SUBSYSTEM:           Parsers::HTML Parser
+// FILE:                htmlAttributes.h
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,7 +23,7 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class provides a generic token used for lexing files.
+// OVERVIEW:            Class to store attributes.
 //
 // CLASSES INCLUDED:
 //
@@ -31,31 +31,62 @@
 //
 //**********************************************************************************************************************************
 
+#ifndef PARSERS_HTML_HTMLATTRIBUTES_H
+#define PARSERS_HTML_HTMLATTRIBUTES_H
 
-
-#include "include/parsers/token.h"
-
+// Standard C++ library header files.
 #include <string>
 
-namespace GCL::parsers
+namespace GCL::parsers::html
 {
-
-  SCL::bimap<token_id, std::string> CToken::tokenStrings;
-
-  CToken::CToken(token_id type, std::string const &val, std::size_t row, std::size_t col)
-   {
-    tokenType = type;
-    tokenValue = val;
-    tokenRow = row;
-    tokenCol = col;
-  }
-
-  std::string CToken::to_string() const
+  enum htmlAttributes_e
   {
-    return std::string ("(" + std::to_string(tokenRow) + ", " + std::to_string(tokenCol) + ")"
-                        + " " + (tokenStrings.contains_LHS(tokenType) ? tokenStrings.RHS(tokenType) : std::to_string(tokenType))
-                        + " " + tokenValue);
-  }
+    ATTR_ACCESSKEY,
+    ATTR_AUTOCAPITALISE,
+    ATTR_AUTOFOCUS,
+    ATTR_CONTENTEDITABLE,
+    ATTR_DIR,
+    ATTR_DRAGGABLE,
+    ATTR_ENTERKEYHINT,
+    ATTR_HIDDEN,
+    ATTR_INERT,
+    ATTR_INPUTMODE,
+    ATTR_IS,
+    ATTR_ITEMID,
+    ATTR_ITEMPROP,
+    ATTR_ITEMREF,
+    ATTR_ITEMSCOPE,
+    ATTR_ITEMTYPE,
+    ATTR_LANG,
+    ATTR_NONCE,
+    ATTR_POPOVER,
+    ATTR_SPELLCHECK,
+    ATTR_STYLE,
+    ATTR_TABINDEX,
+    ATTR_TITLE,
+    ATTR_TRANSLATE,
+    ATTR_WRITINGSUGGESTIONS,
 
+    ATTR_CLASS,
+    ATTR_ID,
+    ATTR_SLOT,
+  };
 
-} // namespace
+  class CHTMLAttribute
+  {
+    public:
+      CHTMLAttribute(htmlAttributes_e, std::string const &);
+      CHTMLAttribute(htmlAttributes_e, std::string &&);
+
+      htmlAttributes_e attribute() const noexcept { return attr; }
+      std::string const &value() const noexcept { return val; }
+
+    private:
+      CHTMLAttribute() = delete;
+
+      htmlAttributes_e attr;
+      std::string val;
+  };
+}
+
+#endif // PARSERS_HTML_HTMLATTRIBUTES_H

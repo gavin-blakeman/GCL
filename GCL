@@ -27,7 +27,8 @@
 //
 // CLASSES INCLUDED:    None
 //
-// HISTORY:             2024-04-23 GGB - Added utf.hpp for UTF BOM constants.
+// HISTORY:             2024-06-18 GGB - Added a generic base for parsing. Added HTML parser.
+//                      2024-04-23 GGB - Added utf.hpp for UTF BOM constants.
 //                      2024-02-06 GGB - Added files for the updated logger module.
 //											2023-10-03 GGB - Added the SAP background file data parser.
 //                      2018-07-06 GGB - Added alarm module.
@@ -74,6 +75,7 @@
 #include "include/logger/sinks/baseSink.h"
 #include "include/logger/sinks/fileSink.h"
 #include "include/logger/sinks/streamSink.h"
+#include "include/parsers/html/htmlDocument.h"
 #include "include/common.h"
 #include "include/dateTime.h"
 #include "include/filesystem.h"

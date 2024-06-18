@@ -1,12 +1,46 @@
-#include "include/parsers/htmlLexer.h"
+//**********************************************************************************************************************************
+//
+// PROJECT:             General Class Library
+// SUBSYSTEM:           Parsers::HTML Parser
+// FILE:                htmlLexer.cpp
+// LANGUAGE:            C++
+// TARGET OS:           None.
+// NAMESPACE:           GCL
+// AUTHOR:              Gavin Blakeman.
+// LICENSE:             GPLv2
+//
+//                      Copyright 2024 Gavin Blakeman.
+//                      This file is part of the General Class Library (GCL)
+//
+//                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
+//                      Public License as published by the Free Software Foundation, either version 2 of the License, or
+//                      (at your option) any later version.
+//
+//                      GCL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+//                      implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+//                      for more details.
+//
+//                      You should have received a copy of the GNU General Public License along with GCL.  If not,
+//                      see <http://www.gnu.org/licenses/>.
+//
+// OVERVIEW:            Class that lexes the html stream
+//
+// CLASSES INCLUDED:
+//
+// HISTORY:             2024-06-18 GGB - File Created
+//
+//**********************************************************************************************************************************
+
+
+#include "include/parsers/html/htmlLexer.h"
 
 #include <iostream>
 #include <utility>
 #include <vector>
 
-#include "include/parsers/htmlTokenType.h"
+#include "include/parsers/html/htmlTokenType.h"
 
-namespace GCL::parsers
+namespace GCL::parsers::html
 {
   static std::vector<std::pair<token_id, std::string>> tokenStrings =
   {
@@ -18,16 +52,41 @@ namespace GCL::parsers
     { COMMENT_OPEN, "<!---" },
     { COMMENT_CLOSE, "--->" },
     { ASSIGN,  "=" },
-    { ID, "ID" },
-    { VALUE, "Value" },
-    { TEXT, "Text" },
+    { ID, "ID: " },
+    { VALUE, "Value: " },
+    { TEXT, "Text: " },
+    { ATTRIBUTE, "Attribute: "},
   };
 
-  CHTMLLexer::CHTMLLexer(std::istream &is) : CLexer(is)
+  CHTMLLexer::CHTMLLexer(std::istream &is, std::vector<GCL::parsers::CToken> &t) : CLexer(is, t)
   {
     CToken::tokenStrings.insert(tokenStrings.begin(), tokenStrings.end());
   }
 
+  void CHTMLLexer::attribute()
+    {
+      int sRow = row;
+      int sCol = col;
+
+      std::string str;
+
+      whitespace();
+
+      while(true)
+      {
+        if(match(" ") || match("/>") || match('>') || match('=') || match(EOF))
+        {
+          break;
+        }
+        str.push_back(buffer.front());
+        consume();
+      }
+
+      if(!str.empty())
+      {
+        tokens.push_back(CToken (htmlTokenTypes::ATTRIBUTE, str, sRow, sCol));
+      }
+    }
 
   void CHTMLLexer::next()
   {
@@ -86,7 +145,7 @@ namespace GCL::parsers
         tokens.push_back(CToken (htmlTokenTypes::ASSIGN, "", row, col));
         consume();
       }
-      else if(match(EOF))
+      else if(match('"'))
       {
         value();
       }
@@ -114,7 +173,7 @@ namespace GCL::parsers
       }
       else
       {
-        id();
+        attribute();
       }
     }
 

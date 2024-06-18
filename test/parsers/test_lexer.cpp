@@ -9,13 +9,16 @@
 #include <tuple>
 
 #include "include/parsers/lexer.h"
+#include "include/parsers/token.h"
 
 BOOST_AUTO_TEST_SUITE(parser_lexer_test)
+
+std::vector<GCL::parsers::CToken> tokens;
 
 class CLexerTest : public GCL::parsers::CLexer
 {
 public:
-  CLexerTest(std::istream &is) : CLexer(is) {}
+  CLexerTest(std::istream &is) : CLexer(is, tokens) {}
   void nextToken() {}
 
   bool matchTest(const char c) { return match(c); }
