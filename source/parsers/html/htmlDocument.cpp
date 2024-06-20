@@ -36,31 +36,62 @@
 
 
 // Miscellaneous library header files.
-#include <GCL>
+#include "include/error.h"
+#include "include/parsers/html/htmlParser.h"
+#include "include/parsers/html/htmlNodeComment.h"
 
 namespace GCL::parsers::html
 {
-  void CHTMLDocument::addAttribute(std::string const &attr, std::string const &val)
+  CHTMLDocument::CHTMLDocument(std::istream &is)
   {
-    currentElement.get().insert(attr, val);
+    CHTMLParser parser(is, *this);
   }
 
-  CHTMLDocument::iterator CHTMLDocument::find(htmlElements_e element, iterator start) const noexcept
+  void CHTMLDocument::addAttribute(std::string const &attr, std::string const &val)
   {
-    while (start->elementType() != element) start++;
+    currentElement->insert(attr, val);
+  }
+
+  void CHTMLDocument::addComment(std::string const &comment)
+  {
+    currentElement->insert(std::make_unique<CHTMLNodeComment>(currentElement, comment));
+  }
+
+  CHTMLDocument::const_iterator CHTMLDocument::find(htmlElements_e element, const_iterator start) const noexcept
+  {
+    /* Start at the start point and search till the end. */
+
+    while (start->type() != element) start++;
+
+    return start;
+  }
+
+  CHTMLDocument::const_iterator CHTMLDocument::find(std::string element, const_iterator start) const noexcept
+  {
+    /* Start at the start point and search till the end. */
+
+    while (start->type() != element) start++;
 
     return start;
   }
 
   void CHTMLDocument::openElement(std::string const &element)
   {
-    createStack.push_front(currentElement);
-    currentElement = currentElement.get().insert(element);
+    if (root)
+    {
+      createStack.push_front(currentElement);
+      currentElement = currentElement->insert(currentElement, element);
+    }
+    else
+    {
+      root = std::make_unique<CHTMLElement>(currentElement, element);
+      currentElement = root.get();
+    }
   }
 
   void CHTMLDocument::setValue(std::string const &val)
   {
-    currentElement.get().value(val);
+    currentElement->value(val);
   }
 
 
@@ -72,7 +103,7 @@ namespace GCL::parsers::html
 
   void CHTMLDocument::closeElement(std::string const &element)
   {
-    if (currentElement.get().elementType() == CHTMLElement::string2elementType(element))
+    if (currentElement->type() == CHTMLElement::string2elementType(element))
     {
       closeElement();
     }
@@ -80,6 +111,42 @@ namespace GCL::parsers::html
     {
       IMPLEMENT_ME();
     }
+  }
+
+  CHTMLDocument CHTMLDocument::parseHTMLUnsafe(std::istream &is)
+  {
+    return CHTMLDocument(is);
+  }
+
+  CHTMLDocument CHTMLDocument::parseHTMLUnsafe(std::string const &)
+  {
+
+  }
+
+  CHTMLDocument::iterator CHTMLDocument::begin()
+  {
+
+  }
+  CHTMLDocument::const_iterator CHTMLDocument::begin() const
+  {
+
+  }
+  CHTMLDocument::const_iterator CHTMLDocument::cbegin() const
+  {
+
+  }
+
+  CHTMLDocument::iterator CHTMLDocument::end()
+  {
+
+  }
+  CHTMLDocument::const_iterator CHTMLDocument::end() const
+  {
+
+  }
+  CHTMLDocument::const_iterator CHTMLDocument::cend() const
+  {
+
   }
 
 }

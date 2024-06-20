@@ -35,13 +35,15 @@
 #define PARSERS_HTML_HTMLDOCUMENT_H
 
 // Standard C++ library header files
-#include <functional>
 #include <deque>
+#include <istream>
+#include <memory>
 #include <optional>
 #include <stack>
 
 // GCL Header files
-#include "include/parsers/html/htmlElement.h"
+#include "include/parsers/html/htmlNodeElement.h"
+#include "include/error.h"
 
 /* The HTML document class stores all the data that makes up the document.
  * There should only be one root element in the DOM and this is the html element. All other elements fall under the root element.
@@ -61,6 +63,9 @@ namespace GCL::parsers::html
   class CHTMLDocument
   {
     public:
+      enum documentReadyState_e { DRS_LOADING, DRS_INTERACTIVE, DRS_COMPLETE};
+      enum documentVisibilityState_e { DVS_VISIBLE, DVS_HIDDEN };
+
       using value_type = CHTMLElement;
       using value_ref = std::reference_wrapper<value_type>;
       using reference = value_type &;
@@ -70,15 +75,34 @@ namespace GCL::parsers::html
       using const_iterator = CHTMLDocumentIterator<true>;
       using child_iterator = CHTMLElement::child_iterator;
 
-      enum order_e : int { PREORDER, POSTORDER, PARENTORDER, INORDER, LEFT, RIGHT, NATURAL };
+      /*! @brief      Default constructs an HTML Document.
+       */
+      CHTMLDocument() = default;
+
+      /*! @brief      Constructs an HTML document from a stream.
+       *  @param[in]  inputStream: The stream to use for the HTML.
+       */
+      CHTMLDocument(std::istream &inputStream);
+      CHTMLDocument(CHTMLDocument const &) = default;
+      CHTMLDocument(CHTMLDocument &&) = default;
+      CHTMLDocument &operator=(CHTMLDocument const &) = default;
+      CHTMLDocument &operator=(CHTMLDocument &&) = default;
+      ~CHTMLDocument() = default;
+
 
       /*! @brief    Searches for the specified element from the starting position.
        *  @param[in]  element: The element to find.
        *  @param[in]  start: The starting iterator.
        *  @throws     noexcept
        */
-      iterator find(htmlElements_e element, iterator start) const noexcept;
+      const_iterator find(htmlElements_e element, const_iterator start) const noexcept;
 
+      /*! @brief    Searches for the specified element from the starting position.
+       *  @param[in]  element: The element to find.
+       *  @param[in]  start: The starting iterator.
+       *  @throws     noexcept
+       */
+      const_iterator find(std::string element, const_iterator start) const noexcept;
 
       /*! @brief      Opens a new element. The element is opened as a child of the current element.
        *  @param[in]  element: The tag name.
@@ -98,7 +122,17 @@ namespace GCL::parsers::html
        */
       void closeElement();
 
+      /*! @brief      Adds the specified attribute to the current element's atributes.
+       *  @param[in]  attr: The attribute name.
+       *  @param[in]  val: The attributes value.
+       */
       void addAttribute(std::string const &attr, std::string const &val);
+
+      /*! @brief      Adds a comment node to the current node.
+       *  @param[in]  node: The node to add.
+       *  @throws
+       */
+      void addComment(std::string const &);
 
       iterator begin();
       const_iterator begin() const;
@@ -109,16 +143,37 @@ namespace GCL::parsers::html
       const_iterator cend() const;
 
       /*! @brief      Sets the value of the last item inserted.
-       *  @param[in]  The value to set.
+       *  @param[in]  val: The value to set.
        *  @throws
        */
-      void setValue(std::string const &);
+      void setValue(std::string const &val);
 
+      static CHTMLDocument parseHTMLUnsafe(std::istream &);
+      static CHTMLDocument parseHTMLUnsafe(std::string const &);
+
+//      documentReadyState_e readyState() const;
+
+//      std::string dir() const noexcept;
+//      CHTMLNodeElement &body();
+//      CHTMLNodeElement &head();
+
+//      CHTMLCollection const &images;
+//      CHTMLCOllection const &emeds;
+//      CHTMLCollection const &plugins;
+//      CHTMLCollection const &links;
+//      CHTMLCollection const &forms;
+//      CHTMLCollection const &scripts;
+
+      //NodeList getElementsByName(std::string elementName);
+
+//      CHTMLContainer policyContainer;
+//      CHTMLPermissions permissionsPolicy;
+//      CModuleMap moduleMap;
 
     private:
-      CHTMLElement root;
-      std::deque<value_ref> createStack;
-      value_ref currentElement;
+      std::unique_ptr<CHTMLElement> root;
+      std::deque<pointer> createStack;
+      pointer currentElement = nullptr;
   };
 
   template<bool isConst>
@@ -138,36 +193,101 @@ namespace GCL::parsers::html
       using pointer = value_type *;
       using const_pointer = value_type const *;
       using self_type = CHTMLDocumentIterator;
-      using iteration_order = CHTMLDocument::order_e;
       using child_iterator = CHTMLDocument::child_iterator;
+      using iterator_category = std::forward_iterator_tag;
 
+      CHTMLDocumentIterator(CHTMLDocument &l, bool ie = false) : linked(l), isEnd(ie)
+      {
+        if (!isEnd)
+        {
+          if (linked.root)
+          {
+            if (linked.root->child_begin() != linked.root->child_end())
+            {
+              stack.push(std::make_pair(std::ref(*linked.root.get()), linked.root->child_begin()));
+            }
+            else
+            {
+              isEnd = true;
+            }
+          }
+          else
+          {
+            isEnd = true;
+          }
+        }
+      }
+
+      CHTMLDocumentIterator(self_type const &rhs) : linked(rhs.linked), isEnd(rhs.isEnd), stack(rhs.stack) {}
+      ~CHTMLDocumentIterator() = default;
 
       reference operator*()
       {
-        return stack.top().get();
+        if (!isEnd)
+        {
+          return stack.top().first.get();
+        }
+        else
+        {
+          CODE_ERROR();
+          // Does not return.
+        }
       }
 
       pointer operator->()
       {
-        return &stack.top().get();
+        if (!isEnd)
+        {
+          return &stack.top().first.get();
+        }
+        else
+        {
+          CODE_ERROR();
+          // Does not return.
+        }
       }
 
       self_type &operator++()
       {
+        if (!isEnd)
+        {
+          while (!stack.empty() && (++stack.top().second == stack.top().first.get().child_end()))
+          {
+            stack.pop();
+          }
+          if (stack.empty())
+          {
+            isEnd = true;
+          }
+        }
         return *this;
       }
 
       self_type operator++(int)
       {
-        self_type temp;
+        if (!isEnd)
+        {
+          self_type temp(*this);
+          ++*this;
 
-        return temp;
+          return temp;
+        }
+        else
+        {
+          return *this;
+        }
       }
 
     private:
-      iteration_order iterationOrder;
-      std::stack<value_ref> stack;          // Current element is TOS.
-      child_iterator currentChildIterator;
+      CHTMLDocumentIterator() = delete;
+
+      using stack_entry = std::pair<value_ref, child_iterator>;
+
+      CHTMLDocument &linked;
+      bool isEnd = false;
+      std::stack<stack_entry> stack;          // Current element is TOS.
+
+      friend bool operator==(self_type const &, self_type const &) {};
   };
 
 } // namespace

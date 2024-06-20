@@ -32,6 +32,7 @@ set(SOURCES
   source/dataParser/dataDelimited.cpp
   source/dataParser/dataLexerXLSX.cpp
   source/dataParser/dataParserCore.cpp
+  source/dataParser/dataParserHTML.cpp
   source/dataParser/dataParser_SAPBKG.cpp
   source/dataParser/dataTables.cpp
   source/logger/loggerManager.cpp
@@ -47,7 +48,7 @@ set(SOURCES
   source/logger/sinks/streamSink.cpp
   source/parsers/html/htmlAttributes.cpp
   source/parsers/html/htmlDocument.cpp
-  source/parsers/html/htmlElement.cpp
+  source/parsers/html/htmlNodeElement.cpp
   source/parsers/html/htmlLexer.cpp
   source/parsers/html/htmlParser.cpp
   source/parsers/lexer.cpp
@@ -65,6 +66,7 @@ set(HEADERS
   include/dataParser/dataDelimited.h
   include/dataParser/dataLexerXLSX.h
   include/dataParser/dataParserCore.h
+  include/dataParser/dataParserHTML.h
   include/dataParser/dataParser_SAPBKG.h
   include/dataParser/dataTables.h
   include/dateTime.h
@@ -90,7 +92,11 @@ set(HEADERS
   include/configurationReader/readerCore.hpp
   include/parsers/html/htmlAttributes.h
   include/parsers/html/htmlDocument.h
-  include/parsers/html/htmlElement.h
+  include/parsers/html/htmlNodeBase.h
+  include/parsers/html/htmlNodeComment.h
+  include/parsers/html/htmlNodeDocumentType.h
+  include/parsers/html/htmlNodeElement.h
+  include/parsers/html/htmlNodeText.h
   include/parsers/html/htmlLexer.h
   include/parsers/html/htmlParser.h
   include/parsers/html/htmlTokenType.h

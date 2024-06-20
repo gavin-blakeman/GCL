@@ -84,6 +84,7 @@ namespace GCL::parsers::html
 
       if(!str.empty())
       {
+        boost::to_lower(str);
         tokens.push_back(CToken (htmlTokenTypes::ATTRIBUTE, str, sRow, sCol));
       }
     }
@@ -237,6 +238,7 @@ namespace GCL::parsers::html
 
     if(!str.empty())
     {
+      boost::to_lower(str);
       tokens.push_back(CToken (htmlTokenTypes::ID, str, sRow, sCol));
     }
   }

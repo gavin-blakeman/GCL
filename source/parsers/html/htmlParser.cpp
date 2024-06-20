@@ -38,7 +38,6 @@
 
 // GCL library header files
 #include "include/parsers/html/htmlTokenType.h"
-#include "include/parsers/html/htmlElement.h"
 
 namespace GCL::parsers::html
 {
@@ -106,7 +105,12 @@ namespace GCL::parsers::html
         case COMMENT_OPEN:
         {
           // Simply discard all tags until the COMMENT_CLOSE is found.
-          while (iter++->type() != COMMENT_CLOSE);
+          DOM.addComment((++iter)->value());
+          if (((++iter)->type() != COMMENT_CLOSE))
+          {
+            // Malformed file.
+            IMPLEMENT_ME();
+          }
           break;
         }
         case COMMENT_CLOSE:

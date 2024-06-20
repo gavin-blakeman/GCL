@@ -36,11 +36,13 @@
 
 // Standard C++ library header files.
 #include <string>
+#include <variant>
 
 namespace GCL::parsers::html
 {
   enum htmlAttributes_e
   {
+    ATTR_UNKNOWN,
     ATTR_ACCESSKEY,
     ATTR_AUTOCAPITALISE,
     ATTR_AUTOFOCUS,
@@ -71,21 +73,33 @@ namespace GCL::parsers::html
     ATTR_ID,
     ATTR_SLOT,
   };
-
+  
   class CHTMLAttribute
   {
-    public:
+    public:      
+    
+      CHTMLAttribute(std::string const &, std::string const &);
       CHTMLAttribute(htmlAttributes_e, std::string const &);
       CHTMLAttribute(htmlAttributes_e, std::string &&);
 
-      htmlAttributes_e attribute() const noexcept { return attr; }
-      std::string const &value() const noexcept { return val; }
+      std::string attribute() const noexcept;
+      std::string const &value() const noexcept { return attributeValue; }
+      
+      static std::string attribute2string(htmlAttributes_e) noexcept;
+      static htmlAttributes_e string2attribute(std::string const &) noexcept;
 
     private:
       CHTMLAttribute() = delete;
-
-      htmlAttributes_e attr;
-      std::string val;
+      
+      using attribute_t = std::variant<std::monostate, std::string, htmlAttributes_e>;
+      
+      attribute_t attributeType;
+      std::string attributeValue;
+      
+      friend bool operator==(CHTMLAttribute const &, CHTMLAttribute const &) noexcept;
+      friend bool operator==(CHTMLAttribute const &, std::string const &) noexcept;
+      friend bool operator==(CHTMLAttribute const &, htmlAttributes_e) noexcept;
+      
   };
 }
 

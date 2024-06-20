@@ -41,7 +41,6 @@ namespace GCL
   /// @param[in]  dt: The data tables to populate with the information from the excel workbook.
   /// @param[in]  fn: The file name of the excel file.s
   /// @throws     None.
-  /// @version    2024-03-14/GGB - Function created,
 
   CDataLexerXLSX::CDataLexerXLSX(CDataTokeniser::dataTables_t &dt, std::filesystem::path const &fn)
     : dataTables(dt), fileName(fn)

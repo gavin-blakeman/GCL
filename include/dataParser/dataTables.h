@@ -89,8 +89,6 @@ namespace GCL::dataParser   // Intended to not be visible except though the data
     void push_back(value_type &);
     void push_back(value_type &&);
 
-
-
     iterator begin() { return dataTables.begin(); }
     iterator end() { return dataTables.end(); }
     const_iterator begin() const { return dataTables.cbegin(); }

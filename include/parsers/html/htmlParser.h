@@ -42,7 +42,7 @@
 // GCL header files.
 #include "include/parsers/token.h"
 #include "include/parsers/html/htmlDocument.h"
-#include "include/parsers/html/htmlElement.h"
+#include "include/parsers/html/htmlNodeElement.h"
 
 namespace GCL::parsers::html
 {
@@ -52,12 +52,12 @@ namespace GCL::parsers::html
   class CHTMLParser
   {
   public:
-    CHTMLParser(std::istream &is, CHTMLDocument &d) : inputStream(is), DOM(d) {}
-
-    void parse();
+    CHTMLParser(std::istream &is, CHTMLDocument &d) : inputStream(is), DOM(d) { parse(); }
 
   private:
     using element_ref = CHTMLDocument::value_ref;
+
+    void parse();
 
     std::istream &inputStream;
     std::vector<GCL::parsers::CToken> tokens;
