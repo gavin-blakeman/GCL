@@ -63,11 +63,12 @@ namespace GCL
     date_t &operator=(date_t const &d) = default;
     date_t &operator=(date_t &&) = default;
 
-    bool operator <(date_t const &rhs) const { return (value_ < rhs.value_); }
-    bool operator <=(date_t const &rhs) const { return (value_ <= rhs.value_); }
-    bool operator >(date_t const &rhs) const { return (value_ > rhs.value_); }
-    bool operator >=(date_t const &rhs) const { return (value_ >= rhs.value_); }
-    bool operator !=(date_t const rhs) const { return (value_ != rhs.value_); }
+    bool operator ==(date_t const &rhs) const noexcept { return (value_ == rhs.value_); }
+    bool operator <(date_t const &rhs) const noexcept { return (value_ < rhs.value_); }
+    bool operator <=(date_t const &rhs) const noexcept { return (value_ <= rhs.value_); }
+    bool operator >(date_t const &rhs) const noexcept { return (value_ > rhs.value_); }
+    bool operator >=(date_t const &rhs) const noexcept { return (value_ >= rhs.value_); }
+    bool operator !=(date_t const rhs) const noexcept { return (value_ != rhs.value_); }
 
     std::chrono::time_point<std::chrono::system_clock> date() const { return value_; }
 

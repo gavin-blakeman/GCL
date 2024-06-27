@@ -26,7 +26,7 @@ set(SOURCES
   main.cpp
   parsers/test_htmlLexer.cpp
   parsers/test_lexer.cpp  
-  #test_dateTime.cpp
+  test_dateTime.cpp
   test_error.cpp
   test_filesystem.cpp
   test_sqlWriter.cpp
