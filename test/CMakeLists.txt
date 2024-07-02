@@ -29,6 +29,7 @@ set(SOURCES
   test_dateTime.cpp
   test_error.cpp
   test_filesystem.cpp
+  test_functions.cpp
   test_sqlWriter.cpp
   test_string.cpp
   test_utf.cpp

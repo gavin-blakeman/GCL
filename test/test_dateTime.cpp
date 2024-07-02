@@ -30,8 +30,14 @@ BOOST_AUTO_TEST_CASE(comparison_test)
   date_t date2("2020-04-02");
   date_t date3("2020-04-01");
 
-  //BOOST_TEST(date1 == date2);
-
+  BOOST_TEST(date1 == date3);
+  BOOST_TEST(date1 != date2);
+  BOOST_TEST(date1 < date2);
+  BOOST_TEST(date2 > date1);
+  BOOST_TEST(date1 <= date2);
+  BOOST_TEST(date2 >= date1);
+  BOOST_TEST(date1 >= date3);
+  BOOST_TEST(date1 <= date3);
 
 }
 

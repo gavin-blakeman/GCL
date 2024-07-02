@@ -127,6 +127,12 @@ namespace GCL
     return date_t(sys_days(ymd));
   }
 
+  std::ostream &operator<<(std::ostream &strm, date_t date)
+  {
+    strm << fmt::format("{:%Y-%m-%d}", date.date());
+    return strm;
+  }
+
 
   /// @brief      Tests if a string contains a date value.
   /// @param[in]  str: The string to test.
@@ -324,3 +330,11 @@ namespace GCL
   }
 
 }   // GCL
+
+namespace std
+{
+  std::string to_string(GCL::date_t date)
+  {
+    return fmt::format("{:%Y-%m-%d}", date.date());
+  }
+}

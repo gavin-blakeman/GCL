@@ -20,7 +20,7 @@ set(SOURCES
   source/dateTime.cpp
   source/error.cpp
   source/filesystem.cpp
-  source/Functions.cpp
+  source/functions.cpp
   source/functionTrace.cpp
   source/resource.cpp
   source/SQLWriter.cpp
@@ -58,7 +58,7 @@ set(SOURCES
   )
 set(HEADERS
   GCL
-  include/Functions.h
+  include/functions.h
   include/any.hpp
   include/common.h
   include/functionTrace.h

@@ -104,7 +104,12 @@ namespace GCL::logger
   class CLogger
   {
   public:
-    CLogger();
+
+    /*! @brief      Default constructor for the class.
+     *  @param[in]  n: The name of the logger.
+     *  @throws     std::bad_alloc
+     */
+    CLogger(std::string const &n = "LOGGER");
     ~CLogger();
 
     void addQueue(std::unique_ptr<CBaseQueue> &&);
@@ -117,6 +122,8 @@ namespace GCL::logger
 
     void startup();
     void shutDown();
+
+    std::string const &name() const { return name_; }
 
   protected:
     void writer();
@@ -132,6 +139,7 @@ namespace GCL::logger
     typedef std::shared_lock<mutex_type>  SharedLock;
     using logSinks_t = std::map<std::string, std::unique_ptr<CBaseSink>>;
 
+    std::string name_;
     std::binary_semaphore messageWaiting;
     std::atomic_flag terminateThread;
 

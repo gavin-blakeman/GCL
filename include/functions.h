@@ -1,4 +1,4 @@
-﻿//*********************************************************************************************************************************
+//*********************************************************************************************************************************
 //
 // PROJECT:							General Class Library (GCL)
 // FILE:								General functions.
@@ -44,6 +44,7 @@
 #include <ctime>
 #include <iostream>
 #include <tuple>
+#include <set>
 #include <string>
 
   // GCL Libraries
@@ -65,10 +66,35 @@ namespace GCL
   std::string sprintfHMS(std::uint32_t const &);
   std::string sprintfHMS(FP_t const &, int=2);
 
+  /*! @brief      Performs an include/exclude test.
+   *  @details    The two sets provide an inlude and an exclude test.
+   *                If the val is in the include test, it is included.
+   *                If the include set is empty, the val is included unless it is in the exclude set.
+   *                RV = (T IN INCLUDE) || (INCLUDE.empty() && !(T IN EXCLUDE))
+   *  @param[in]  include: The set of items to include.
+   *  @param[in]  exclude: The set of items to exclude.
+   *  @returns    true if the item should be included.
+   *  @throws
+   */
+  template<typename T>
+  bool includeExclude(std::set<T> const &include, std::set<T> const &exclude, T const &val)
+  {
+    /* |---------------|
+     * | I | E | IE| O |
+     * |---+---+---+---|
+     * | F | F | F | F |
+     * | F | F | T | T | <-
+     * | F | T | X | F |
+     * | T | X | F | T | <-
+     * | T | X | T | NP|
+     * |---------------|
+     */
 
+    return ( include.contains(val) || (include.empty() && !exclude.contains(val)) );
+  }
 
 }   // namespace GCL
 
   std::ostream &operator<<(std::ostream &, std::tm const &);
 
-#endif // FUNCTIONS_H
+#endif // GCL_FUNCTIONS_H

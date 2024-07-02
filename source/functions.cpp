@@ -1,7 +1,7 @@
 ﻿//**********************************************************************************************************************************
 //
 // PROJECT:							General Class Library (GCL)
-// FILE:								General functions.
+// FILE:								functions.cpp
 // SUBSYSTEM:						General Class Library Exception subsystem
 // LANGUAGE:						C++
 // TARGET OS:						All (Standard C++)
@@ -35,10 +35,9 @@
 //
 //**********************************************************************************************************************************
 
-#include "include/Functions.h"
+#include "include/functions.h"
 
-  // Standard libraries
-
+// Standard libraries
 #include <cmath>
 #include <sstream>
 #include <vector>

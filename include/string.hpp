@@ -60,6 +60,28 @@ namespace GCL
       }
     }
   }
+  
+  template<typename C>
+  std::string expandTokens(C const &tokens, std::string const &seperator = ";")
+  {
+    std::string rv;
+    bool first = true;
+    
+    for (auto const &t: tokens)
+    {
+      if (!first)
+      {
+        rv += seperator + " ";
+      }
+      else
+      {
+        first = false;
+      }
+      rv += t;
+    }
+    
+    return rv;
+  }
 }
 
 

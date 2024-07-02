@@ -1,4 +1,4 @@
-﻿//*********************************************************************************************************************************
+//*********************************************************************************************************************************
 //
 // PROJECT:							General Class Library
 // FILE:								filesystem
@@ -55,6 +55,19 @@ namespace GCL
 
   std::filesystem::path temporaryFilename(std::uint8_t = 10);
   std::filesystem::path temporaryFilename(std::filesystem::path const &, std::uint8_t = 10);
+  
+  /*! @brief      A function to expand a file name that has formatting characters build in. Formatting characters are similar
+   *              to the use of std::format. The formatting characters are between braces {}. 
+   *  @details    The characters recognised are:
+   *              %Y - The current year (4 digits)
+   *              %m - The current month (2 digits)
+   *              %d - The current day. (2 digits)
+   *              An example would be "Report {:%Y-%m-%d}". This would create a filepath something like "Report 2024-02-01"
+   *  @param[in]  formatString: The formatString
+   *  @returns    An expanded filesystem path.
+   *  @throws     noexcept. Any errors are ignored. In the worst case, the formatString will be returned.
+   */
+  std::filesystem::path expandFileName(std::string const &formatString) noexcept;
 }
 
 #endif // FILESYSTEM_H

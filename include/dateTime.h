@@ -93,6 +93,8 @@ namespace GCL
 
   private:
     valueType value_;
+
+    friend std::ostream &operator<<(std::ostream &, date_t);
   };
 
   ///@brief Type used for storing times.
@@ -156,6 +158,11 @@ namespace GCL
   std::chrono::time_point<std::chrono::system_clock> parseDateTime(std::string const &, std::string const &);
   bool isDate(std::string const &) noexcept;
 
+}
+
+namespace std
+{
+  std::string to_string(GCL::date_t);
 }
 
 #endif // GCL_DATETIME

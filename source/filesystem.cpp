@@ -1,4 +1,4 @@
-﻿//*********************************************************************************************************************************
+//*********************************************************************************************************************************
 //
 // PROJECT:							General Class Library
 // FILE:								filesystem
@@ -48,10 +48,13 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/utility/string_view.hpp>
+#include <fmt/format.h>
+#include <fmt/chrono.h>
 
   // GCL header files
 
 #include "include/error.h"
+#include "include/dateTime.h"
 
 namespace GCL
 {
@@ -196,6 +199,76 @@ namespace GCL
         uniqueFile =true;
       }
     };
+
+    return rv;
+  }
+
+  std::filesystem::path expandFileName(std::string const &fmtStr) noexcept
+  {
+    std::string rv;
+
+    try
+    {
+      // Search for chars "{:"
+
+      std::size_t fmtStart = rv.find("{:}");
+      if (fmtStart != std::string::npos)
+      {
+        rv = fmtStr.substr(0, fmtStart);
+        std::size_t indx = fmtStart + 2;
+        while (fmtStr[indx] != '}')
+        {
+          switch (fmtStr[indx])
+          {
+            case '%':
+            {
+              switch (fmtStr[++indx])
+              {
+                case 'Y':
+                {
+                  date_t date;
+                  rv += fmt::format("{:%Y}", date.date());
+                  break;
+                }
+                case 'm':
+                {
+                  date_t date;
+                  rv += fmt::format("{:%m}", date.date());
+                  break;
+                }
+                case 'd':
+                {
+                  date_t date;
+                  rv += fmt::format("{:%d}", date.date());
+                  break;
+                }
+                default:
+                {
+                  break;
+                }
+              }
+              break;
+            }
+            default:
+            {
+              rv += fmtStr[indx++];
+              break;
+            }
+          }
+        }
+      }
+      else
+      {
+        rv = fmtStr;  // No expansion required.
+      }
+    }
+    catch(...)
+    {
+      if (rv.empty())
+      {
+        rv = fmtStr;
+      }
+    }
 
     return rv;
   }

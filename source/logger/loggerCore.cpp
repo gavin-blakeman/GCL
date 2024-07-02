@@ -52,15 +52,7 @@
 namespace GCL::logger
 {
 
-  /// @brief Default constructor for the class.
-  /// @throws std::bad_alloc
-  /// @version 2019-10-22/GGB - 1. Changed writerThread to a std::unique_ptr
-  ///                           2. Changed writerThread from a boost::thread to a std::thread
-  ///                           3. Changed to use std::chrono from boot::chrono.
-  /// @version 2018-08-13/GGB - Bug #141 - Added auto-creation of std::cerr sink.
-  /// @version 2014-12-24/GGB - Function created.
-
-  CLogger::CLogger() : terminateThread(false), writerThread(nullptr), messageWaiting(0)
+  CLogger::CLogger(std::string const &n) : name_(n), terminateThread(false), writerThread(nullptr), messageWaiting(0)
   {
   }
 
