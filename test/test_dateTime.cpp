@@ -7,20 +7,23 @@
 #include <string>
 #include <tuple>
 
+#include <fmt/format.h>
+#include <fmt/chrono.h>
+
 #include "include/dateTime.h"
 
-BOOST_AUTO_TEST_SUITE(dateTime_test)
+BOOST_TEST_DONT_PRINT_LOG_VALUE(GCL::date_t::valueType);
 
-std::vector<std::tuple<std::string, bool, std::string, std::chrono::year, std::chrono::month, std::chrono::day>> dates =
+namespace GCL
 {
-  { "2020-05-30", true, "YYYY-MM-DD", std::chrono::year(2020), std::chrono::month(5), std::chrono::day(30) },
-  //{ "This is a test", false, "", 0, 0, 0 },
-//  { "2020/05/30", true, "YYYY/MM/DD", 2020, 5, 30 },
-//  { "30/05/2020", true, "DD/MM/YYYY", 2020, 5, 30 },
-//  { "30/5/2020", true, "DD/M/YYYY", 2020, 5, 30 },
-//  { "30/5/20", true, "DD/M/YY", 2020, 5, 30 },
-  //{ "2021-02-29", false, "", 0, 0, 0 },     // Invalid date. Not 29 days in feb 2021.
-};
+  std::ostream &boost_test_print_type(std::ostream &ostr, GCL::date_t::valueType dv)
+  {
+    ostr << fmt::format("{:%Y-%m-%d}", dv);
+    return ostr;
+  }
+}
+
+BOOST_AUTO_TEST_SUITE(dateTime_test)
 
 BOOST_AUTO_TEST_CASE(comparison_test)
 {
@@ -38,67 +41,89 @@ BOOST_AUTO_TEST_CASE(comparison_test)
   BOOST_TEST(date2 >= date1);
   BOOST_TEST(date1 >= date3);
   BOOST_TEST(date1 <= date3);
-
 }
 
 BOOST_AUTO_TEST_CASE(isDate_test)
 {
   using namespace GCL;
 
-  for (auto &testDate: dates)
-  {
-    BOOST_REQUIRE_NO_THROW(isDate(std::get<0>(testDate)));
+//  for (auto &testDate: dates)
+//  {
+//    BOOST_REQUIRE_NO_THROW(isDate(std::get<0>(testDate)));
+//
+//    if (std::get<1>(testDate))
+//    {
+//      BOOST_TEST(isDate(std::get<0>(testDate)));
+//    }
+//    else
+//    {
+//      BOOST_TEST(!isDate(std::get<0>(testDate)));
+//    }
+//  }
+}
 
-    if (std::get<1>(testDate))
-    {
-      BOOST_TEST(isDate(std::get<0>(testDate)));
-    }
-    else
-    {
-      BOOST_TEST(!isDate(std::get<0>(testDate)));
-    }
+BOOST_AUTO_TEST_CASE(parseDate_test_withformat)
+{
+  using namespace GCL;
+
+  std::vector<std::pair<std::string, std::string>> testDates =
+  {
+     { "2020-05-30", "%Y-%m-%d" },
+     { "2020/05/30", "%Y/%m/%d" },
+     { "30/05/2020", "%d/%m/%Y" },
+     { "30/5/2020", "%d/%m/%Y" },
+     { "30/5/20", "%d/%m/%y" },
+     { "30.05.2020", "%d.%m.%Y" },
+  };
+  date_t dateValue(std::chrono::sys_days(std::chrono::May/30/2020));
+
+  for (auto &testDate: testDates)
+  {
+    BOOST_REQUIRE_NO_THROW(parseDate(testDate.first, testDate.second));
+    BOOST_TEST(dateValue == parseDate(testDate.first, testDate.second));
   }
 }
 
-//BOOST_AUTO_TEST_CASE(parseDate_test)
-//{
-//  using namespace GCL;
-//
-//  for (auto &testDate: dates)
-//  {
-//    if (std::get<1>(testDate))
-//    {
-//      BOOST_REQUIRE_NO_THROW(parseDate(std::get<0>(testDate)));
-//      date_t date = std::get<0>(testDate);
-//      std::chrono::year_month_day ymd{std::get<3>(testDate), std::get<4>(testDate), std::get<5>(testDate)};
-//      BOOST_TEST(date == ymd);
-//    }
-//    else
-//    {
-//      BOOST_REQUIRE_THROW(parseDate(std::get<0>(testDate)), std::runtime_error);
-//    }
-//  }
-//}
+BOOST_AUTO_TEST_CASE(parseDate_test)
+{
+  using namespace GCL;
 
-//BOOST_AUTO_TEST_CASE(parseDate_withFormat)
-//{
-//  using namespace GCL;
-//
-//  std::chrono::time_point<std::chrono::system_clock> testResult(2020/May/30);
-//
-//  for (auto &testDate: dates)
-//  {
-//    if (testDate.second)
-//    {
-//      BOOST_REQUIRE_NO_THROW(parseDate(std::get<0>(testDate)));
-//      BOOST_TEST(parseDate(std::get<0>(testDate), "YYYY-MM-DD") == testResult);
-//    }
-//    else
-//    {
-//      BOOST_REQUIRE_THROW(parse(testDate.first), std::runtime_error);
-//    }
-//  }
-//}
+  std::vector<std::string> testDates =
+  {
+     "2020-05-30",
+     "2020/05/30",
+     "30/05/2020",
+     "30/5/2020",
+     "30/5/20",
+     "30.05.2020",
+  };
+  date_t dateValue(std::chrono::sys_days(std::chrono::May/30/2020));
+
+  for (auto &testDate: testDates)
+  {
+    BOOST_REQUIRE_NO_THROW(parseDate(testDate));
+    BOOST_TEST(dateValue == parseDate(testDate));
+  }
+
+  testDates.clear();
+  testDates =
+  {
+     "2020-5-09",
+     "2020/5/9",
+     "09/5/2020",
+     "09/5/2020",
+     "9/5/20",
+     "09.05.2020",
+  };
+  dateValue = std::chrono::sys_days(std::chrono::May/9/2020);
+
+  for (auto &testDate: testDates)
+  {
+    BOOST_REQUIRE_NO_THROW(parseDate(testDate));
+    BOOST_TEST(dateValue == parseDate(testDate));
+  }
+
+}
 
 BOOST_AUTO_TEST_CASE(date_t_defaultConstructor)
 {
