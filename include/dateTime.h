@@ -1,12 +1,12 @@
 //*********************************************************************************************************************************
 //
-// PROJECT:							General Class Library
-// FILE:								dateTime
-// SUBSYSTEM:						Date & Time Functions
-// LANGUAGE:						C++
-// TARGET OS:						None.
-// NAMESPACE:						GCL
-// AUTHOR:							Gavin Blakeman.
+// PROJECT:             General Class Library
+// FILE:                dateTime
+// SUBSYSTEM:           Date & Time Functions
+// LANGUAGE:            C++
+// TARGET OS:           None.
+// NAMESPACE:           GCL
+// AUTHOR:              Gavin Blakeman.
 // LICENSE:             GPLv2
 //
 //                      Copyright 2017-2024 Gavin Blakeman.

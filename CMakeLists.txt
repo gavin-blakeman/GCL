@@ -24,7 +24,7 @@ set(SOURCES
   source/functionTrace.cpp
   source/resource.cpp
   source/SQLWriter.cpp
-  source/string.cpp
+  source/stringFunctions.cpp
   source/tempFileManager.cpp
   source/alarm/alarmCore.cpp
   source/alarm/alarmDaily.cpp

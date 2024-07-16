@@ -83,7 +83,7 @@
 #include "include/parsers/html/htmlDocument.h"
 #include "include/pluginManager/pluginManager.h"
 #include "include/SQLWriter.h"
-#include "include/string.hpp"
+#include "include/stringFunctions.h"
 #include "include/resource.h"
 #include "include/utf.h"
 

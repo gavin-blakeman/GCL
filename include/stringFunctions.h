@@ -32,7 +32,7 @@
 #define GCL_INCLUDE_STRING_HPP
 
 // Standard C++ library header files.
-
+#include <locale>
 #include <string>
 #include <string_view>
 
@@ -60,13 +60,13 @@ namespace GCL
       }
     }
   }
-  
+
   template<typename C>
   std::string expandTokens(C const &tokens, std::string const &seperator = ";")
   {
     std::string rv;
     bool first = true;
-    
+
     for (auto const &t: tokens)
     {
       if (!first)
@@ -79,10 +79,18 @@ namespace GCL
       }
       rv += t;
     }
-    
+
     return rv;
   }
-}
 
+  /*! @brief      Cleans a potential decimal number prior to conversion to a numeric value.
+   *  @param[in]  str: The string to clean.
+   *  @returns    The cleaned string. (Only contains a decimal point)
+   *  @throws     SIGNAL(1) - If the number is malformed.
+   *  @note       The string will be converted to the current locale.
+   */
+  void cleanDecimal(std::string &str);
+
+}
 
 #endif /* GCL_INCLUDE_STRING_HPP */
