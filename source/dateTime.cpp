@@ -467,4 +467,9 @@ namespace std
   {
     return fmt::format("{:%Y-%m-%d}", date.date());
   }
+
+  std::string to_string(GCL::time_t time)
+  {
+    return "";
+  }
 }

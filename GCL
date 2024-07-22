@@ -86,6 +86,7 @@
 #include "include/stringFunctions.h"
 #include "include/resource.h"
 #include "include/utf.h"
+#include "include/any.hpp"  // Leave at the end. There are std::to_string definitions above that may be required.
 
   // Inject the logger functions into the global namespace.
 
