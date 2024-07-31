@@ -26,7 +26,7 @@
 // OVERVIEW:            Functions for operating on strings.
 //
 // HISTORY:             2024-03-01 GGB - File Created
-//*********************************************************************************************************************************
+//*********************************************************************************************************************************/
 
 #ifndef GCL_INCLUDE_STRING_HPP
 #define GCL_INCLUDE_STRING_HPP
@@ -46,7 +46,7 @@ namespace GCL
 
     while (!sv.empty())
     {
-      size_type end = sv.find_first_of(",;:.", 0);
+      size_type end = sv.find_first_of(seperators, 0);
       if (end != std::string_view::npos)
       {
         std::string temp(sv, 0, end);

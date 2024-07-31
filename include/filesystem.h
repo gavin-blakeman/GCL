@@ -1,12 +1,12 @@
 //*********************************************************************************************************************************
 //
-// PROJECT:							General Class Library
-// FILE:								filesystem
+// PROJECT:             General Class Library
+// FILE:                filesystem
 // SUBSYSTEM:           filesystem extensions.
-// LANGUAGE:						C++
-// TARGET OS:						None.
-// NAMESPACE:						boost::filesystem
-// AUTHOR:							Gavin Blakeman (GGB)
+// LANGUAGE:            C++
+// TARGET OS:           None.
+// NAMESPACE:           boost::filesystem
+// AUTHOR:              Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
 //                      Copyright 2018-2024 Gavin Blakeman.
@@ -28,13 +28,13 @@
 //                      to support std::filesystem.
 //                      Note: The functions defined are set in the boost::filesystem namespace.
 //
-// CLASSES INCLUDED:		None
+// CLASSES INCLUDED:    None
 //
 // CLASS HIERARCHY:     None.
 //
 // HISTORY:             2018-05-20 GGB - File created.
 //
-//*********************************************************************************************************************************
+//*********************************************************************************************************************************/
 
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
@@ -55,7 +55,7 @@ namespace GCL
 
   std::filesystem::path temporaryFilename(std::uint8_t = 10);
   std::filesystem::path temporaryFilename(std::filesystem::path const &, std::uint8_t = 10);
-  
+
   /*! @brief      A function to expand a file name that has formatting characters build in. Formatting characters are similar
    *              to the use of std::format. The formatting characters are between braces {}. 
    *  @details    The characters recognised are:

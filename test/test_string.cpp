@@ -32,8 +32,14 @@ BOOST_AUTO_TEST_CASE(tokenise_toVector)
   std::vector<std::string> reqStr = {"Tokenize", "this", "string"};
   std::vector<std::string> opStr;
 
-  BOOST_REQUIRE_NO_THROW(tokeniseString(opStr, testStr););
+  BOOST_REQUIRE_NO_THROW(tokeniseString(opStr, testStr));
   BOOST_TEST(reqStr == opStr);
+
+  testStr = "Tokenize this string";
+  opStr.clear();
+  BOOST_REQUIRE_NO_THROW(tokeniseString(opStr, testStr, " "));
+  BOOST_TEST(reqStr == opStr);
+
 }
 
 BOOST_AUTO_TEST_CASE(test_cleanDecimal)
