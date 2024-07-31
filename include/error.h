@@ -1,12 +1,12 @@
 //*********************************************************************************************************************************
 //
-// PROJECT:							General Class Library (GCL)
-// FILE:								error.h
-// SUBSYSTEM:						Exception/Error subsystem
-// LANGUAGE:						C++
-// TARGET OS:						None.
-// NAMESPACE:						GCL
-// AUTHOR:							Gavin Blakeman.
+// PROJECT:             General Class Library (GCL)
+// FILE:                error.h
+// SUBSYSTEM:           Exception/Error subsystem
+// LANGUAGE:            C++
+// TARGET OS:           None.
+// NAMESPACE:           GCL
+// AUTHOR:              Gavin Blakeman.
 // LICENSE:             GPLv2
 //
 //                      Copyright 2013-2024 Gavin Blakeman.

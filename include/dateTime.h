@@ -163,6 +163,7 @@ namespace GCL
 namespace std
 {
   std::string to_string(GCL::date_t);
+  std::string to_string(GCL::time_t);
 }
 
 #endif // GCL_DATETIME

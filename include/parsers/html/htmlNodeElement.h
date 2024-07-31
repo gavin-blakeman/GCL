@@ -291,9 +291,9 @@ namespace GCL::parsers::html
     attribute_collection attributes;
     child_collection elementChildren;
 
-    friend bool operator==(CHTMLElement const &, CHTMLElement const &) {};
-    friend bool operator==(CHTMLElement const &, std::string const &) {};
-    friend bool operator==(CHTMLElement const &, htmlElements_e) {};
+    friend bool operator==(CHTMLElement const &, CHTMLElement const &) { return false; };
+    friend bool operator==(CHTMLElement const &, std::string const &) { return false; };
+    friend bool operator==(CHTMLElement const &, htmlElements_e) { return false; };
   };
 
   bool operator==(std::string const &, htmlElements_e);
