@@ -40,6 +40,12 @@ BOOST_AUTO_TEST_CASE(tokenise_toVector)
   BOOST_REQUIRE_NO_THROW(tokeniseString(opStr, testStr, " "));
   BOOST_TEST(reqStr == opStr);
 
+  testStr = "REL  CNF  GMCO GMPS MACM PRC  SETC";
+  opStr.clear();
+  BOOST_REQUIRE_NO_THROW(tokeniseString(opStr, testStr, " "));
+  BOOST_TEST(opStr.size() == 10);
+  BOOST_TEST(opStr[0] == "REL");
+  BOOST_TEST(opStr[2] == "CNF");
 }
 
 BOOST_AUTO_TEST_CASE(test_cleanDecimal)

@@ -38,6 +38,11 @@
 
 namespace GCL
 {
+  /*! @brief      Tokenises a string using the token seperator passed.
+   *  @param[out] op: The output collection to receive the tokenised srings.
+   *  @param[in]  str: The string to tokenise.
+   *  @param[in]  seperators: The seperators to use for tokenising the string.
+   */
   template<typename O>
   void tokeniseString(O &op, std::string const &str, std::string const &seperators = ".,;:")
   {
