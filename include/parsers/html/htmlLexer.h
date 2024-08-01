@@ -35,15 +35,35 @@
 #ifndef GCL_PARSERS_HTMLLEXER_H
 #define GCL_PARSERS_HTMLLEXER_H
 
+// Standard C++ library header files
+#include <list>
 #include "include/parsers/lexer.h"
 
 namespace GCL::parsers::html
 {
-  class CHTMLLexer : public CLexer
+  class CHTMLLexer : public CLexer<std::list>
   {
-    public:
-      CHTMLLexer(std::istream &is, std::vector<CToken> &tokens);
-      virtual ~CHTMLLexer() = default;
+  public:
+    using tokenID_t = CLexer::tokenID_t;
+
+    enum htmlTokenTypes : tokenID_t
+    {
+      L_TAG_OPEN = TT_NEXT,     // <
+      L_TAG_CLOSE,              // </
+      R_TAG_OPEN,               // >
+      R_TAG_CLOSE,              // />
+      L_TAG_DOCTYPE,            // <!
+      COMMENT_OPEN,             // <!---
+      COMMENT_CLOSE,            // --->
+      ASSIGN,                   // =
+      ID,
+      VALUE,
+      TEXT,
+      ATTRIBUTE,
+    };
+  
+  CHTMLLexer(std::istream &is, token_container &tokens);
+    virtual ~CHTMLLexer() = default;
 
     private:
       CHTMLLexer() = delete;

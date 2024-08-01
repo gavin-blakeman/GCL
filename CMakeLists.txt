@@ -51,7 +51,6 @@ set(SOURCES
   source/parsers/html/htmlNodeElement.cpp
   source/parsers/html/htmlLexer.cpp
   source/parsers/html/htmlParser.cpp
-  source/parsers/lexer.cpp
   source/parsers/token.cpp
   source/pluginManager/pluginManager.cpp
   source/utf.cpp
@@ -75,7 +74,7 @@ set(HEADERS
   include/alarm/alarmCore.h
   include/alarm/alarmDaily.h
   include/alarm/alarmWeekly.h
-  include/error.h  
+  include/error.h
   include/logger/loggerManager.h
   include/logger/loggerCore.h
   include/logger/filters/baseFilter.h
@@ -99,10 +98,8 @@ set(HEADERS
   include/parsers/html/htmlNodeText.h
   include/parsers/html/htmlLexer.h
   include/parsers/html/htmlParser.h
-  include/parsers/html/htmlTokenType.h
   include/parsers/lexer.h
   include/parsers/token.h
-  include/parsers/tokenType.h
   include/pluginManager/pluginManager.h
   include/resource.h
   include/traits.h
@@ -112,12 +109,12 @@ set(HEADERS
   include/utf.h
   )
 
-set(DIRECTORIES	
+set(DIRECTORIES
   ${CMAKE_SOURCE_DIR}/MCL
   ${CMAKE_SOURCE_DIR}/SCL
   ${CMAKE_SOURCE_DIR}/fmt/include
   ${CMAKE_SOURCE_DIR}/xlnt/include
-  ${Boost_INCLUDE_DIRS}  
+  ${Boost_INCLUDE_DIRS}
   )
 set(LIBRARIES
 	Boost::locale

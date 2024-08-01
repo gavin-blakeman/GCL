@@ -34,34 +34,31 @@
 
 #include "include/parsers/html/htmlLexer.h"
 
+// Standard C++ library header files
 #include <iostream>
 #include <utility>
 #include <vector>
 
-#include "include/parsers/html/htmlTokenType.h"
-
 namespace GCL::parsers::html
 {
-  static std::vector<std::pair<token_id, std::string>> tokenStrings =
+  static std::vector<std::pair<CHTMLLexer::tokenID_t, std::string>> const tokenStrings =
   {
-    { L_TAG_OPEN, "<" },
-    { L_TAG_CLOSE, "</" },
-    { R_TAG_OPEN, ">" },
-    { R_TAG_CLOSE, "/>" },
-    { L_TAG_DOCTYPE, "<!"},
-    { COMMENT_OPEN, "<!---" },
-    { COMMENT_CLOSE, "--->" },
-    { ASSIGN,  "=" },
-    { ID, "ID: " },
-    { VALUE, "Value: " },
-    { TEXT, "Text: " },
-    { ATTRIBUTE, "Attribute: "},
+    { CHTMLLexer::L_TAG_OPEN, "<" },
+    { CHTMLLexer::L_TAG_CLOSE, "</" },
+    { CHTMLLexer::R_TAG_OPEN, ">" },
+    { CHTMLLexer::R_TAG_CLOSE, "/>" },
+    { CHTMLLexer::L_TAG_DOCTYPE, "<!"},
+    { CHTMLLexer::COMMENT_OPEN, "<!---" },
+    { CHTMLLexer::COMMENT_CLOSE, "--->" },
+    { CHTMLLexer::ASSIGN,  "=" },
+    { CHTMLLexer::ID, "ID: " },
+    { CHTMLLexer::VALUE, "Value: " },
+    { CHTMLLexer::TEXT, "Text: " },
+    { CHTMLLexer::ATTRIBUTE, "Attribute: "},
   };
 
-  CHTMLLexer::CHTMLLexer(std::istream &is, std::vector<GCL::parsers::CToken> &t) : CLexer(is, t)
-  {
-    CToken::tokenStrings.insert(tokenStrings.begin(), tokenStrings.end());
-  }
+  CHTMLLexer::CHTMLLexer(std::istream &is, token_container &t)
+    : CLexer(is, tokenStrings.begin(), tokenStrings.end(), t) {}
 
   void CHTMLLexer::attribute()
     {
@@ -85,7 +82,7 @@ namespace GCL::parsers::html
       if(!str.empty())
       {
         boost::to_lower(str);
-        tokens.push_back(CToken (htmlTokenTypes::ATTRIBUTE, str, sRow, sCol));
+        tokenContainer.push_back(CToken(tokenStringMap, htmlTokenTypes::ATTRIBUTE, str, sRow, sCol));
       }
     }
 
@@ -117,24 +114,24 @@ namespace GCL::parsers::html
   {
     if(peek('!', 1))
     {
-      tokens.push_back(CToken (htmlTokenTypes::L_TAG_DOCTYPE, std::string(""), row, col));
+      tokenContainer.push_back(CToken(tokenStringMap, htmlTokenTypes::L_TAG_DOCTYPE, std::string(""), row, col));
       consume(2); // <!
     }
     else if(peek('/', 1))
     {
-      tokens.push_back(CToken (htmlTokenTypes::L_TAG_CLOSE, std::string(""), row, col));
+      tokenContainer.push_back(CToken(tokenStringMap, htmlTokenTypes::L_TAG_CLOSE, std::string(""), row, col));
       consume(2); // </
     }
     else
     {
-      tokens.push_back(CToken (htmlTokenTypes::L_TAG_OPEN, std::string(""), row, col));
+      tokenContainer.push_back(CToken(tokenStringMap, htmlTokenTypes::L_TAG_OPEN, std::string(""), row, col));
       consume(); // <
     }
 
     whitespace();
     id();
 
-    token_id type;
+    tokenID_t type;
 
     int sRow;
     int sCol;
@@ -143,7 +140,7 @@ namespace GCL::parsers::html
     {
       if(match("="))
       {
-        tokens.push_back(CToken (htmlTokenTypes::ASSIGN, "", row, col));
+        tokenContainer.push_back(CToken(tokenStringMap, htmlTokenTypes::ASSIGN, "", row, col));
         consume();
       }
       else if(match('"'))
@@ -152,7 +149,7 @@ namespace GCL::parsers::html
       }
       else if(match("/>"))
       {
-        type = htmlTokenTypes::R_TAG_CLOSE;
+        type = R_TAG_CLOSE;
         sRow = row;
         sCol = col;
         consume(2); // />
@@ -160,7 +157,7 @@ namespace GCL::parsers::html
       }
       else if(match(">"))
       {
-        type = htmlTokenTypes::R_TAG_OPEN;
+        type = R_TAG_OPEN;
         sRow = row;
         sCol = col;
         consume(); // >
@@ -178,12 +175,12 @@ namespace GCL::parsers::html
       }
     }
 
-    tokens.push_back(CToken (type, "", row, col));
+    tokenContainer.push_back(CToken(tokenStringMap, type, "", row, col));
   }
 
   void CHTMLLexer::comment()
   {
-    tokens.push_back(CToken (htmlTokenTypes::COMMENT_OPEN, "", row, col));
+    tokenContainer.push_back(CToken(tokenStringMap, htmlTokenTypes::COMMENT_OPEN, "", row, col));
 
     consume(4); // <!--
 
@@ -209,10 +206,10 @@ namespace GCL::parsers::html
 
     if(!str.empty())
     {
-      tokens.push_back(CToken (htmlTokenTypes::TEXT, str, sRow, sCol));
+      tokenContainer.push_back(CToken(tokenStringMap, htmlTokenTypes::TEXT, str, sRow, sCol));
     }
 
-    tokens.push_back(CToken (htmlTokenTypes::COMMENT_CLOSE, "", row, col));
+    tokenContainer.push_back(CToken(tokenStringMap, htmlTokenTypes::COMMENT_CLOSE, "", row, col));
 
     consume(3); // -->
   }
@@ -239,7 +236,7 @@ namespace GCL::parsers::html
     if(!str.empty())
     {
       boost::to_lower(str);
-      tokens.push_back(CToken (htmlTokenTypes::ID, str, sRow, sCol));
+      tokenContainer.push_back(CToken(tokenStringMap, htmlTokenTypes::ID, str, sRow, sCol));
     }
   }
 
@@ -266,7 +263,7 @@ namespace GCL::parsers::html
 
     if(!str.empty())
     {
-      tokens.push_back(CToken (htmlTokenTypes::VALUE, str, row, col));
+      tokenContainer.push_back(CToken(tokenStringMap, htmlTokenTypes::VALUE, str, row, col));
     }
   }
 
@@ -294,7 +291,7 @@ namespace GCL::parsers::html
 
     if(!str.empty())
     {
-      tokens.push_back(CToken (htmlTokenTypes::TEXT, str, sRow, sCol));
+      tokenContainer.push_back(CToken(tokenStringMap, htmlTokenTypes::TEXT, str, sRow, sCol));
     }
   }
 

@@ -34,11 +34,12 @@
 #include "include/parsers/html/htmlAttributes.h"
 
 // Miscellaneous library header files
+#include <fmt/format.h>
 #include <SCL>
 
 namespace GCL::parsers::html
 {
-  static SCL::bimap<htmlAttributes_e, std::string> attributeStrings =
+  static SCL::bimap<htmlAttributes_e, std::string> const attributeStrings =
   {
 //      ATTR_ACCESSKEY,
 //      ATTR_AUTOCAPITALISE,
@@ -83,6 +84,9 @@ namespace GCL::parsers::html
       attributeType = attr;
     }
   }
+
+  CHTMLAttribute::CHTMLAttribute(htmlAttributes_e attr, std::string const &val) : attributeType(attr), attributeValue(val) {}
+  CHTMLAttribute::CHTMLAttribute(htmlAttributes_e attr, std::string &&val) : attributeType(attr), attributeValue(std::move(val)) {}
 
   std::string CHTMLAttribute::attribute() const noexcept
   {
@@ -186,6 +190,23 @@ namespace GCL::parsers::html
 
       return szLHS == szRHS;
     }
+  }
+
+  std::ostream &operator<<(std::ostream &os, CHTMLAttribute const &attr)
+  {
+    if (std::holds_alternative<std::string>(attr.attributeType))
+    {
+      os << fmt::format("Attr: {}: Val: {}", std::get<std::string>(attr.attributeType), attr.attributeValue);
+    }
+    else if (std::holds_alternative<htmlAttributes_e>(attr.attributeType))
+    {
+      os << fmt::format("Attr: {}: Val: {}", attributeStrings.RHS(std::get<htmlAttributes_e>(attr.attributeType)), attr.attributeValue);
+    }
+    else
+    {
+      os << fmt::format("Attr: Unknown: Val: {}", attr.attributeValue);
+    }
+    return os;
   }
 
 }

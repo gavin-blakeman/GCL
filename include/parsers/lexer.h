@@ -29,13 +29,15 @@
 //
 // HISTORY:             2024-06-18 GGB - File Created
 //
-//**********************************************************************************************************************************
+//**********************************************************************************************************************************/
 
 
 #ifndef GCL_PARSERS_LEXER_H
 #define GCL_PARSERS_LEXER_H
 
+// Standard C++ library header files
 #include <atomic>
+#include <cstdint>
 #include <istream>
 #include <mutex>
 #include <semaphore>
@@ -44,49 +46,155 @@
 #include <thread>
 #include <vector>
 
+// Miscellaneous library header files
 #include <SCL>
 
+// GCL/parser header files.
 #include "include/parsers/token.h"
 
 namespace GCL::parsers
 {
+  template<template <typename...> class _Container>
   class CLexer
   {
   public:
+    using tokenID_t = CToken::tokenID_t;
+    using tokenStringMap_t = CToken::tokenStringMap_t;
+
+    using value_type = CToken;
+    using token_container = _Container<value_type>;
+
+    enum tokenType_t : tokenID_t { TT_NOP, TT_EOF, TT_NEXT };
+
     /*! @brief      Constructor.
      *  @param[in]  is: The input stream to parse.
+     *  @param[in]  begin: Iterator to the start of the token/string pairs.
+     *  @param[in]  end: Iterator to the end of the token/strng pairs.
+     *  @param[out] tokens: The container to receiver the tokens.
      */
+    template<class _Iter>
+    CLexer(std::istream &is, _Iter begin, _Iter end, token_container &tokens) : inputStream(is), tokenContainer(tokens)
+    {
+      tokenStringMap.emplace(TT_EOF, "<EOF>"); // This token is always provided by the lexer.
+      while (begin != end)
+      {
+        tokenStringMap.emplace(begin->first, begin->second);
+        begin++;
+      }
+      fillBuffer();
+    }
 
-    CLexer(std::istream &is, std::vector<CToken> &tokens);
     virtual ~CLexer() = default;
 
-    void getTokens();
+    void getTokens()
+    {
+      tokenContainer.clear();
+
+      while(buffer.front() != EOF)
+      {
+        next();
+        if (!buffer.full() && !eos)
+        {
+          fillBuffer();
+        }
+      }
+
+    tokenContainer.push_back(CToken(tokenStringMap, TT_EOF, std::string(""), row, col));
+  }
 
   protected:
+    tokenStringMap_t tokenStringMap;
     std::size_t lineNo = 0;
     std::size_t linePos = 0;
     std::size_t row = 0;
     std::size_t col = 0;
-    std::vector<CToken> &tokens;
+    token_container &tokenContainer;
     SCL::circularBuffer<char, 1024, false, false> buffer;
 
     /*! @brief      Checks if the next character in the stream matches the parameter.
      *  @param[in]  c: The character to test.
+     *  @param[in]  pos: The position in the stream to check.
      *  @returns    true if the c matches the next character in the stream.
      */
-    bool peek(char c, std::size_t);
+    bool peek(char c, std::size_t pos)
+    {
+      if (!buffer.empty())
+      {
+        return ((buffer[pos] == c));
+      }
+      else
+      {
+        return 0;
+      }
+    }
 
-    void consume(int n);
-    bool match(std::string const &str);
-    bool match(char const);
+    void consume(int n)
+    {
+      if(buffer.front() == '\n')
+      {
+        row++;
+        col = 1;
+      }
+      else
+      {
+        col++;
+      }
+      buffer.pop();
+    }
 
-    virtual void next();
+    bool match(std::string const &str)
+    {
+      bool rv = true;
+      for(std::size_t i = 0; i != str.size(); i++)
+      {
+        if (buffer[i] != str[i])
+        {
+          rv = false;
+          break;
+        }
+      }
+      return rv;
+    }
+
+    bool match(char const c)
+    {
+      return (buffer.front() == c);
+    }
+
+    virtual void next() 
+    {
+      consume();
+    }
 
     /*! @brief    Fill the buffer when it falls below the minimum size.
      */
-    virtual void fillBuffer();
+    virtual void fillBuffer()
+    {
+      while (!buffer.full() && !inputStream.eof())
+      {
+        buffer.push(inputStream.get());
+      }
+      if (inputStream.eof())
+      {
+        eos = true;
+        buffer.push(EOF);
+      }
+    }
 
-    virtual void consume();
+    virtual void consume()
+    {
+      if(buffer.front() == '\n')
+      {
+        row++;
+        col = 1;
+      }
+      else
+      {
+        col++;
+      }
+      buffer.pop();
+    }
+
 
   private:
     CLexer() = delete;
@@ -97,6 +205,8 @@ namespace GCL::parsers
 
     std::istream &inputStream;
     bool eos = false;
+
+  friend std::ostream &operator<<(std::ostream &os, CToken const &);  // This needs to be here as it needs the token map.
   };
 
 } // namespace
