@@ -7,7 +7,7 @@
 // AUTHOR:              Gavin Blakeman
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015-2023 Gavin Blakeman.
+//                      Copyright 2015-2024 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -122,17 +122,18 @@ namespace GCL
       objectStorage(const objectStorage&) = delete;
       objectStorage& operator=(const objectStorage&) = delete;
 
-      void* heapPointer;
-      std::aligned_storage<sizeof(heapPointer), alignof(void*)>::type memoryBuffer;
+      void *heapPointer;
+      std::aligned_storage<sizeof(heapPointer), alignof(void *)>::type memoryBuffer;
     };
 
 
-    template<typename T, typename _Safe = std::is_nothrow_move_constructible<T>, bool _Fits = (sizeof(T) <= sizeof(objectStorage))
-                                                                                           && (alignof(T) <= alignof(objectStorage))>
+    template<typename T,
+             typename _Safe = std::is_nothrow_move_constructible<T>,
+             bool _Fits = (sizeof(T) <= sizeof(objectStorage)) && (alignof(T) <= alignof(objectStorage))>
     using Internal = std::integral_constant<bool, _Safe::value && _Fits>;
 
     template<typename T>
-    struct Manager_internal;   // uses small-object optimization
+    struct Manager_internal;   // uses small-object optimisation
 
     template<typename T>
     struct Manager_external; // creates contained object on the heap
@@ -142,7 +143,8 @@ namespace GCL
                                         Manager_internal<T>,
                                         Manager_external<T>>;
 
-    template<typename _Tp, typename _VTp = std::decay_t<_Tp>>
+    template<typename _Tp,
+             typename _VTp = std::decay_t<_Tp>>
     using _Decay_if_not_any = std::enable_if_t<!std::is_same_v<_VTp, any>, _VTp>;
 
     template <typename _Res, typename _Tp, typename... _Args>
@@ -198,12 +200,13 @@ namespace GCL
     }
 
     /// @brief      Construct with a copy of @p __value as the contained object.
-    /// @param[in]  value: The value to intialise with.
+    /// @param[in]  value: The value to initialise with.
     /// @version    2020-09-21/GGB - Added the M_toString() member.
 
-    template <typename _Tp, typename _VTp = _Decay_if_not_any<_Tp>, typename _Mgr = Manager<_VTp>,
-            std::enable_if_t<std::is_copy_constructible_v<_VTp>
-            && !__is_in_place_type_v<_VTp>, bool> = true>
+    template <typename _Tp,
+              typename _VTp = _Decay_if_not_any<_Tp>,
+              typename _Mgr = Manager<_VTp>,
+              std::enable_if_t<std::is_copy_constructible_v<_VTp> && !__is_in_place_type_v<_VTp>, bool> = true>
     any(_Tp&& value) : M_manager(&_Mgr::S_manage), M_toString(&_Mgr::S_toString)
     {
       _Mgr::S_create(dataStorage, std::forward<_Tp>(value));
@@ -235,7 +238,7 @@ namespace GCL
 
 
 
-    /// @brief      Destructor, calls @c clear()
+    /// @brief      Destructor, calls clear()
     ///
     ~any()
     {
@@ -597,11 +600,12 @@ namespace GCL
   template<typename T>
   std::string any::Manager_internal<T>::S_toString(any const *any_type)
   {
+    using std::to_string;
       // The object is stored in _M_storage.memoryBuffer.
 
-    auto ptr = reinterpret_cast<const T *>(&any_type->dataStorage.memoryBuffer);
+    T const *ptr = reinterpret_cast<T const *>(&any_type->dataStorage.memoryBuffer);
 
-    return std::move(std::to_string(*ptr));
+    return std::move(to_string(*ptr));
   }
 
   /// @brief        Template instance for a stored 'char const *'
@@ -622,7 +626,7 @@ namespace GCL
   void any::Manager_internal<T>::S_manage(Op which, const any* variant, Arg* arg)
   {
     // The contained object is in _M_storage.memoryBuffer
-    auto ptr = reinterpret_cast<const T*>(&variant->dataStorage.memoryBuffer);
+    T const *ptr = reinterpret_cast<T const *>(&variant->dataStorage.memoryBuffer);
     switch (which)
     {
       case Op_access:
@@ -668,9 +672,10 @@ namespace GCL
   template<typename T>
   std::string any::Manager_external<T>::S_toString(any const *variant_tp)
   {
+    using std::to_string;
     auto ptr = static_cast<T const *>(variant_tp->dataStorage.heapPointer);
 
-    return std::move(std::to_string(*ptr));
+    return std::move(to_string(*ptr));
   }
 
   /// @brief        String conversion function for a 'char const *'. This operates on a heap stored object.

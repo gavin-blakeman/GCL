@@ -178,8 +178,9 @@ namespace GCL
                                            std::string const &message,
                                            std::source_location const &location) const
   {
-    return fmt::format("Failed Assertation: '{}', File: {}, Function: {}",
+    return fmt::format("Failed Assertation: '{}:{}', File: {}, Function: {}",
                        expression,
+                       message,
                        std::string(location.file_name()),
                        std::string(location.function_name()));
   }

@@ -459,12 +459,14 @@ namespace GCL
     return std::chrono::system_clock::from_time_t(t);
   }
 
-}   // GCL
-
-namespace std
-{
-  std::string to_string(GCL::date_t date)
+  std::string to_string(GCL::date_t const &date)
   {
     return fmt::format("{:%Y-%m-%d}", date.date());
   }
-}
+
+  std::string to_string(GCL::time_t const &time)
+  {
+    return std::string();
+  }
+
+}   // GCL

@@ -206,17 +206,13 @@ namespace GCL::logger
   inline void TRACE_ENTER(std::source_location const location = std::source_location::current())
   {
     CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(s_trace,
-                               "Entering Function: " + std::string(location.function_name()) +
-                               ". File: " + std::string(location.file_name()) +
-                               ". Line: " + std::to_string(location.line())));
+                               "Entering Function: " + std::string(location.function_name())));
   }
 
   inline void TRACE_EXIT(std::source_location const location = std::source_location::current())
   {
     CLoggerManager::defaultLogger().logMessage(std::make_unique<CDebugRecord>(s_trace,
-                               "Exiting Function: " + std::string(location.function_name()) +
-                               ". File: " + std::string(location.file_name()) +
-                               ". Line: " + std::to_string(location.line())));
+                               "Exiting Function: " + std::string(location.function_name())));
   }
 
 

@@ -31,7 +31,7 @@ set(SOURCES
   test_filesystem.cpp
   test_functions.cpp
   test_sqlWriter.cpp
-  test_string.cpp
+  test_stringFunctions.cpp
   test_utf.cpp
   )
 

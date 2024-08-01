@@ -112,7 +112,10 @@ BOOST_AUTO_TEST_CASE(test_cleanDecimal)
   BOOST_TEST(szTest == szResult);
 
   double dTest = 123456.789;
-  szResult = "123456.789";
+  std::ostringstream strmResult;
+  strmResult.precision(10);
+  strmResult << "123456.789";
+  szResult = strmResult.str();
 
   strm.imbue(std::locale(strm.getloc(), new cspd));
   strm << dTest;
