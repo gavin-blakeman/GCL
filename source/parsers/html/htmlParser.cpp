@@ -29,7 +29,7 @@
 //
 // HISTORY:             2024-06-18 GGB - File Created
 //
-//**********************************************************************************************************************************
+//**********************************************************************************************************************************/
 
 
 #include "include/parsers/html/htmlParser.h"
@@ -37,28 +37,27 @@
 // Standard C++ library header files
 
 // GCL library header files
-#include "include/parsers/html/htmlTokenType.h"
+#include "include/parsers/html/htmlLexer.h"
 
 namespace GCL::parsers::html
 {
   void CHTMLParser::parse()
   {
-
     auto iter = tokens.begin();
     while (iter != tokens.end())
     {
       switch(iter++->type())
       {
-        case L_TAG_OPEN:  // "<"
+        case CHTMLLexer::L_TAG_OPEN:  // "<"
         {
           // Starting a new tag.
           std::string tagName = iter++->value();
           DOM.openElement(tagName);
-          while (iter->type ()== ATTRIBUTE)
+          while (iter->type ()== CHTMLLexer::ATTRIBUTE)
           {
             // Capture all the attributes.
             std::string temp = iter++->value();
-            if (iter->type() != ASSIGN)
+            if (iter->type() != CHTMLLexer::ASSIGN)
             {
               DOM.addAttribute(temp, "");
             }
@@ -69,7 +68,7 @@ namespace GCL::parsers::html
             iter++;
 
           }
-          if (iter->type() == R_TAG_OPEN )
+          if (iter->type() == CHTMLLexer::R_TAG_OPEN )
           {
             if (CHTMLElement::isVoid(tagName))
             {
@@ -77,7 +76,7 @@ namespace GCL::parsers::html
               DOM.closeElement();
             }
           }
-          else if (iter->type() == R_TAG_CLOSE)
+          else if (iter->type() == CHTMLLexer::R_TAG_CLOSE)
           {
             // Tag is complete and can be added to the DOM
             DOM.closeElement();
@@ -89,9 +88,9 @@ namespace GCL::parsers::html
           }
           break;
         }
-        case L_TAG_CLOSE:   // "</"
+        case CHTMLLexer::L_TAG_CLOSE:   // "</"
         {
-          if ((++iter)->type() == ID)
+          if ((++iter)->type() == CHTMLLexer::ID)
           {
             DOM.closeElement();
           }
@@ -102,32 +101,32 @@ namespace GCL::parsers::html
           }
           break;
         }
-        case COMMENT_OPEN:
+        case CHTMLLexer::COMMENT_OPEN:
         {
           // Simply discard all tags until the COMMENT_CLOSE is found.
           DOM.addComment((++iter)->value());
-          if (((++iter)->type() != COMMENT_CLOSE))
+          if (((++iter)->type() != CHTMLLexer::COMMENT_CLOSE))
           {
             // Malformed file.
             IMPLEMENT_ME();
           }
           break;
         }
-        case COMMENT_CLOSE:
-        case ASSIGN:
-        case VALUE:
-        case ID:
+        case CHTMLLexer::COMMENT_CLOSE:
+        case CHTMLLexer::ASSIGN:
+        case CHTMLLexer::VALUE:
+        case CHTMLLexer::ID:
         {
           // Malformed HTML file. Simply discard.
           CODE_ERROR();
           break;
         }
-        case L_TAG_DOCTYPE:
+        case CHTMLLexer::L_TAG_DOCTYPE:
         {
           // This is used to indicate an HTML5 file if it is just html
           break;
         }
-        case TEXT:
+        case CHTMLLexer::TEXT:
         {
           DOM.setValue(iter->value());
           break;

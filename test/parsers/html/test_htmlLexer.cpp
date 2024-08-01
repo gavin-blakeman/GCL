@@ -5,6 +5,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <list>
 #include <sstream>
 #include <vector>
 #include <string>
@@ -15,16 +16,15 @@
 class CLexerTest : public GCL::parsers::html::CHTMLLexer
 {
 public:
-  CLexerTest(std::istream &is, std::vector<GCL::parsers::CToken> &t) : CHTMLLexer(is, t) {}
+  CLexerTest(std::istream &is, std::list<GCL::parsers::CToken> &t) : CHTMLLexer(is, t) {}
 };
 
 BOOST_AUTO_TEST_SUITE(parser_htmlLexer_test)
 
-
 BOOST_AUTO_TEST_CASE(constructor_and_destructor)
 {
   std::stringstream stream;
-  std::vector<GCL::parsers::CToken> tokens;
+  std::list<GCL::parsers::CToken> tokens;
 
   stream << "<html dir=""ltr"">";
 
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(constructor_and_destructor)
 BOOST_AUTO_TEST_CASE(test_getTokens)
 {
   std::stringstream stream;
-  std::vector<GCL::parsers::CToken> tokens;
+  std::list<GCL::parsers::CToken> tokens;
 
   stream << "<html dir=\"ltr\">value</html>";
 
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(test_getTokens)
 BOOST_AUTO_TEST_CASE(test_match)
 {
   std::stringstream stream;
-  std::vector<GCL::parsers::CToken> tokens;
+  std::list<GCL::parsers::CToken> tokens;
 
   stream << "<html dir=""ltr"">value</html>";
 

@@ -35,30 +35,30 @@
 #define PARSERS_TOKEN_H
 
 // Standard C++ library header files
+#include <cstdint>
 #include <string>
 
 // Miscellaneous library header files.
 #include <SCL>
-
-// GCL library header files.
-#include "include/parsers/tokenType.h"
 
 namespace GCL::parsers
 {
   class CToken
   {
     public:
-      static SCL::bimap<token_id, std::string> tokenStrings;
+      using tokenID_t = std::uint_fast8_t;
+      using tokenStringMap_t = SCL::bimap<tokenID_t, std::string>;
 
-      CToken(token_id type, std::size_t row, std::size_t col);
-      CToken(token_id type, std::string const &val, std::size_t row, std::size_t col);
+      CToken(tokenStringMap_t const &tsm, tokenID_t type, std::size_t row, std::size_t col);
+      CToken(tokenStringMap_t const &tsm, tokenID_t type, std::string const &val, std::size_t row, std::size_t col);
       std::string to_string() const;
 
-      token_id type() const noexcept { return tokenType; }
+      tokenID_t type() const noexcept { return tokenType; }
       std::string value() const noexcept { return tokenValue; }
 
     private:
-      token_id tokenType;
+      tokenStringMap_t const &tokenStringMap;
+      tokenID_t tokenType;
       std::string tokenValue;
       std::size_t tokenRow;
       std::size_t tokenCol;

@@ -29,7 +29,7 @@
 //
 // HISTORY:             2024-06-18 GGB - File Created
 //
-//**********************************************************************************************************************************
+//**********************************************************************************************************************************/
 
 
 #ifndef GCL_PARSERS_HTML_HTMLPARSER_H_
@@ -47,7 +47,7 @@
 namespace GCL::parsers::html
 {
   /* The lexer breaks the input stream into tokens. The parser then builds the DOM tree from the tokens. This requires knowledge of
-   * the HTML5 standard. The output from the parser is a structured list of parsers.
+   * the HTML5 standard. The output from the parser is a structured list of tokens.
    */
   class CHTMLParser
   {

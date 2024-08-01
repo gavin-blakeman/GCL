@@ -1,11 +1,14 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-#define TEST  // Used to exclude error reporting and avoid having to link GCL + others.
-
 #include <list>
 #include <string>
 #include <vector>
+
+#include <fmt/format.h>
+#include <fmt/chrono.h>
+
+#include <GCL>
 
 #include "include/filesystem.h"
 
@@ -34,6 +37,24 @@ BOOST_AUTO_TEST_CASE(get_tempFileName)
 
   BOOST_TEST(std::filesystem::exists(tfn.parent_path()));
   BOOST_TEST(!std::filesystem::exists(tfn));
+}
+
+BOOST_AUTO_TEST_CASE(expandFileName_string)
+{
+  std::string szTest = "Test-{%Y-%m}";
+  GCL::date_t date;
+  std::string szExpected = fmt::format("Test-{:%Y-%m}", date.date());
+
+  std::string szResult = GCL::expandFileName(szTest).native();
+
+  BOOST_TEST(szResult == szExpected);
+
+  szTest = "Test-{:%Y-%m}";
+  szExpected = fmt::format("Test-{:%Y-%m}", date.date());
+
+  szResult = GCL::expandFileName(szTest).native();
+
+  BOOST_TEST(szResult == szExpected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

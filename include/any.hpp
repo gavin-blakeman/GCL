@@ -55,7 +55,7 @@
 //                      2015-09-22 GGB - astroManager 2015.09 release
 //                      2015-09-07 GGB - File created.
 //
-//*********************************************************************************************************************************
+//*********************************************************************************************************************************/
 
 #ifndef GCL_ANY_H
 #define GCL_ANY_H
@@ -257,11 +257,11 @@ namespace GCL
       return *this;
     }
 
-    /// @brief      Move assignment operator
-    /// @param[in]  rhs: The value to move.
-    /// @post       @c rhs.empty()
-    /// @version    2020-09-21/GGB - Added the M_toString() member.
-
+    /*! @brief      Move assignment operator
+     *  @param[in]  rhs: The value to move.
+     *  @post       @c rhs.empty()
+     *  @version    2020-09-21/GGB - Added the M_toString() member.
+     */
     any& operator=(any&& rhs) noexcept
     {
       if (rhs.empty())
@@ -755,5 +755,16 @@ namespace GCL
 
 
 } // namespace GCL
+
+namespace std
+{
+  /*!  @brief      Stream inserter function for GCL any.
+   */
+  inline std::ostream &operator<<(std::ostream &ostrm, GCL::any const &ai)
+  {
+    ostrm << ai.to_string();
+    return ostrm;
+  }
+}
 
 #endif // GCL_ANY_H

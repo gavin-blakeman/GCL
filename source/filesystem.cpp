@@ -1,13 +1,13 @@
 //*********************************************************************************************************************************
 //
-// PROJECT:							General Class Library
-// FILE:								filesystem
-// SUBSYSTEM:						filesystem extensions.
-// LANGUAGE:						C++
-// TARGET OS:						None.
+// PROJECT:             General Class Library
+// FILE:                filesystem
+// SUBSYSTEM:           filesystem extensions.
+// LANGUAGE:            C++
+// TARGET OS:           None.
 // LIBRARY DEPENDANCE:
 // NAMESPACE:
-// AUTHOR:							Gavin Blakeman (GGB)
+// AUTHOR:              Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
 //                      Copyright 2018-2024 Gavin Blakeman.
@@ -25,11 +25,9 @@
 //                      see <http://www.gnu.org/licenses/>.
 //
 //
-// OVERVIEW:						Some extension functions to boost::filesystem. When std::filesystem is in common use, this will be changed
-//                      to support std::filesystem.
-//                      Note: The functions defined are set in the boost::filesystem namespace.
+// OVERVIEW:		Extensions to std::filesystem.
 //
-// CLASSES INCLUDED:		None
+// CLASSES INCLUDED:    None
 //
 // CLASS HIERARCHY:     None.
 //
@@ -40,19 +38,17 @@
 #include "include/filesystem.h"
 
 // Standard C++ library header files
-
 #include <cstdio>
+#include <iostream>
 #include <random>
 
-  // Miscellaneous library header files.
-
+// Miscellaneous library header files.
 #include <boost/algorithm/string.hpp>
 #include <boost/utility/string_view.hpp>
 #include <fmt/format.h>
 #include <fmt/chrono.h>
 
-  // GCL header files
-
+// GCL header files
 #include "include/error.h"
 #include "include/dateTime.h"
 
@@ -209,18 +205,41 @@ namespace GCL
 
     try
     {
-      // Search for chars "{:"
-
-      std::size_t fmtStart = rv.find("{:}");
-      if (fmtStart != std::string::npos)
+      bool fmtCurrent = false;
+      std::size_t indx = 0;
+      while (indx != fmtStr.size())
       {
-        rv = fmtStr.substr(0, fmtStart);
-        std::size_t indx = fmtStart + 2;
-        while (fmtStr[indx] != '}')
+        switch (fmtStr[indx])
         {
-          switch (fmtStr[indx])
+          case '{':
           {
-            case '%':
+            if (fmtCurrent)
+            {
+              rv += fmtStr[indx];
+            }
+            else
+            {
+              fmtCurrent = true;
+            }
+            indx++;
+            break;
+          }
+          case '}':
+          {
+            if (fmtCurrent)
+            {
+               fmtCurrent = false;
+            }
+            else
+            {
+               rv += fmtStr[indx];
+            }
+            indx++;
+            break;
+          }
+          case '%':
+          {
+            if (fmtCurrent)
             {
               switch (fmtStr[++indx])
               {
@@ -244,22 +263,29 @@ namespace GCL
                 }
                 default:
                 {
+                  rv += fmtStr[indx];
                   break;
                 }
               }
-              break;
+              indx++;
             }
-            default:
+            else
             {
               rv += fmtStr[indx++];
-              break;
             }
+            break;
+          }
+          case ':':
+          {
+            indx++;  // Ignore this character.
+            break;
+          }
+          default:
+          {
+            rv += fmtStr[indx++];
+            break;
           }
         }
-      }
-      else
-      {
-        rv = fmtStr;  // No expansion required.
       }
     }
     catch(...)
@@ -274,3 +300,4 @@ namespace GCL
   }
 
 }
+

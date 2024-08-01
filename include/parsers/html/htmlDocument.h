@@ -287,7 +287,7 @@ namespace GCL::parsers::html
       bool isEnd = false;
       std::stack<stack_entry> stack;          // Current element is TOS.
 
-      friend bool operator==(self_type const &, self_type const &) {};
+      friend bool operator==(self_type const &, self_type const &) { return false; };
   };
 
 } // namespace
