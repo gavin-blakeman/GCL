@@ -42,6 +42,11 @@ namespace GCL::parsers
   {
   }
 
+  CToken::CToken(tokenStringMap_t const &tsm, tokenID_t type, std::size_t row, std::size_t col)
+   : tokenStringMap(tsm), tokenType(type), tokenRow(row), tokenCol(col)
+  {
+  }
+
   std::string CToken::to_string() const
   {
     return std::string ("(" + std::to_string(tokenRow) + ", " + std::to_string(tokenCol) + ")"
