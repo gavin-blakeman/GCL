@@ -30,24 +30,21 @@ BOOST_AUTO_TEST_CASE(lTag)
   BOOST_TEST(testDocument.root->type() == "html");
 }
 
-BOOST_AUTO_TEST_CASE(test_rTag)
+BOOST_AUTO_TEST_CASE(test_parser)
 {
   using namespace GCL::parsers;
   using namespace GCL::parsers::html;
 
+  CHTMLDocument testDocument;
   std::stringstream stream;
-  std::vector<CToken> tokens;
 
-  stream << "<html dir=\"ltr\">value</html>";
+  stream <<
+#include "../../generated/testPage.cpp"
+;
 
-//  CHTMLLexer<std::vector> lexer(stream, tokens);
-
-//  lexer.getTokens();
-
-//  BOOST_TEST(tokens.size() == 11);
-  //BOOST_TEST(tokens[0].type() == L_TAG_OPEN);
-//  BOOST_TEST(tokens[1].type() == ID);
-  //BOOST_TEST(tokens[11].type() = TT_EOF);
+  CHTMLParser testParser(stream, testDocument);
+  BOOST_REQUIRE_NO_THROW(testParser.parseDocument());
+  BOOST_TEST(testDocument.root->type() == "html");
 }
 
 

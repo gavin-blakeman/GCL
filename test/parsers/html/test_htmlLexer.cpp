@@ -61,14 +61,16 @@ BOOST_AUTO_TEST_CASE(test_file)
   std::stringstream stream;
   std::vector<CToken> tokens;
 
-  stream << R"(<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"><html>)";
+//  stream << R"(<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"><html>)";
+  stream <<
+#include "../../generated/testPage.cpp"
+;
 
   CHTMLLexer<std::vector> lexer(stream, tokens);
 
   lexer.getTokens();
 
-  for (auto t: tokens)
-  std::cout << t;
+  BOOST_TEST(tokens.size() == 4470);
 }
 
 

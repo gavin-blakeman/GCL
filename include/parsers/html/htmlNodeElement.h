@@ -180,6 +180,7 @@ namespace GCL::parsers::html
   class CHTMLElement : public CHTMLNodeBase
   {
   public:
+    using nodeType_t = CHTLNodeBase::nodeType_t;
     enum categories_e
     {
       CAT_NONE,
@@ -198,14 +199,11 @@ namespace GCL::parsers::html
     using attribute_reference = attribute_type &;
     using attribute_const_reference = attribute_type const &;
     using attribute_pointer = attribute_type *;
-    using child_type = CHTMLElement;
-    using child_collection = std::list<std::unique_ptr<CHTMLNodeBase>>;
-    using child_pointer = child_type *;
+    using child_type = CHTMLNodeBase::child_type;
+    using child_pointer = CHTMLNodeBase::child_pointer;
     using child_vector = std::vector<child_pointer>;
     using child_reference = child_type &;
     using child_const_reference = child_type const &;
-    using child_iterator = child_collection::iterator;
-    using child_const_iterator = child_collection::const_iterator;
     using child_ref = std::reference_wrapper<child_type>;
     using child_byType = std::map<htmlElements_e, child_ref>;
 
@@ -221,6 +219,8 @@ namespace GCL::parsers::html
     std::string type() const noexcept;
     std::string value() const noexcept { return elementValue; }
     void value(std::string const &) noexcept;
+
+    virtual nodeType_t nodeType() const noexcept { return 2; }
 
     void insert(CHTMLAttribute &&);
     void insert(std::string const &attr, std::string const &val);
@@ -244,14 +244,6 @@ namespace GCL::parsers::html
     std::string dir();
 
     bool hidden();
-
-    child_iterator child_begin() { return elementChildren.begin(); }
-    child_const_iterator child_begin() const { return elementChildren.cbegin(); }
-    child_const_iterator child_cbegin() const { return elementChildren.cbegin(); }
-
-    child_iterator child_end() { return elementChildren.end(); }
-    child_const_iterator child_end() const { return elementChildren.cend(); }
-    child_const_iterator child_cend() const { return elementChildren.cend(); }
 
 
     /*! @brief      Determines if the specified element is a void element. (open/close at the same time.)
@@ -289,7 +281,6 @@ namespace GCL::parsers::html
     elementType_t elementType;
     std::string elementValue;
     attribute_collection attributes;
-    child_collection elementChildren;
 
     friend bool operator==(CHTMLElement const &, CHTMLElement const &) { return false; };
     friend bool operator==(CHTMLElement const &, std::string const &) { return false; };

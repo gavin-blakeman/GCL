@@ -1,13 +1,36 @@
 #ifndef PARSERS_HTML_HTMLNODEBASE_H
 #define PARSERS_HTML_HTMLNODEBASE_H
 
+// Standard C++ library header files
+#include <list>
+
 namespace GCL::parsers::html
 {
   class CHTMLNodeBase
   {
-    public:
-      CHTMLNodeBase(CHTMLNodeBase *parent) : parentNode(parent) {}
-      virtual ~CHTMLNodeBase() = default;
+  public:
+    using nodeType_t = unsigned int;
+    using child_type = CHTMLNodeBase;
+    using child_collection = std::list<std::unique_ptr<child_type>>;
+    using child_pointer = child_type *;
+    using child_iterator = child_collection::iterator;
+    using child_const_iterator = child_collection::const_iterator;
+
+    CHTMLNodeBase(CHTMLNodeBase *parent) : parentNode(parent) {}
+    virtual ~CHTMLNodeBase() = default;
+
+    child_iterator child_begin() { return childCollection.begin(); }
+    child_const_iterator child_begin() const { return childCollection.cbegin(); }
+    child_const_iterator child_cbegin() const { return childCollection.cbegin(); }
+
+    child_iterator child_end() { return childCollection.end(); }
+    child_const_iterator child_end() const { return childCollection.cend(); }
+    child_const_iterator child_cend() const { return childCollection.cend(); }
+
+    /*! @brief       Returns the type of the node.
+     *  @returns     The type of the node.
+     */
+    virtual nodeType_t nodeType() const = 0;
 
     private:
       CHTMLNodeBase() = delete;
@@ -17,6 +40,9 @@ namespace GCL::parsers::html
       CHTMLNodeBase &operator=(CHTMLNodeBase &&) = delete;
 
       CHTMLNodeBase *parentNode = nullptr;
+      child_collection childCollection;
+
+
   };
 }
 

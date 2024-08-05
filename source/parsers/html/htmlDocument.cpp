@@ -48,7 +48,10 @@ namespace GCL::parsers::html
 
   void CHTMLDocument::addAttribute(std::string const &attr, std::string const &val)
   {
-    currentElement->insert(attr, val);
+    if (currentElement->type() == NT_ELEMENT)
+    {
+      currentElement->insert(attr, val);
+    }
   }
 
   void CHTMLDocument::addComment(std::string const &comment)
@@ -56,14 +59,14 @@ namespace GCL::parsers::html
     currentElement->insert(std::make_unique<CHTMLNodeComment>(currentElement, comment));
   }
 
-  CHTMLDocument::const_iterator CHTMLDocument::find(htmlElements_e element, const_iterator start) const noexcept
-  {
+//  CHTMLDocument::const_iterator CHTMLDocument::find(htmlElements_e element, const_iterator start) const noexcept
+//  {
     /* Start at the start point and search till the end. */
 
-    while (start->type() != element) start++;
+//    while (start->type() != element) start++;
 
-    return start;
-  }
+//    return start;
+//  }
 
   CHTMLDocument::const_iterator CHTMLDocument::find(std::string element, const_iterator start) const noexcept
   {

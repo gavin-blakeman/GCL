@@ -42,7 +42,8 @@
 #include <stack>
 
 // GCL Header files
-#include "include/parsers/html/htmlNodeElement.h"
+#include "include/parsers/html/htmlNodeBase.h"
+//#include "include/parsers/html/htmlNodeElement.h"
 #include "include/error.h"
 
 /* The HTML document class stores all the data that makes up the document.
@@ -65,14 +66,14 @@ namespace GCL::parsers::html
       enum documentReadyState_e { DRS_LOADING, DRS_INTERACTIVE, DRS_COMPLETE};
       enum documentVisibilityState_e { DVS_VISIBLE, DVS_HIDDEN };
 
-      using value_type = CHTMLElement;
+      using value_type = CHTMLNodeBase;
       using value_ref = std::reference_wrapper<value_type>;
       using reference = value_type &;
       using pointer = value_type *;
       using const_reference = value_type const &;
       using iterator = CHTMLDocumentIterator<false>;
       using const_iterator = CHTMLDocumentIterator<true>;
-      using child_iterator = CHTMLElement::child_iterator;
+      using child_iterator = value_type::child_iterator;
 
       /*! @brief      Default constructs an HTML Document.
        */
@@ -93,7 +94,7 @@ namespace GCL::parsers::html
        *  @param[in]  start: The starting iterator.
        *  @throws     noexcept
        */
-      const_iterator find(htmlElements_e element, const_iterator start) const noexcept;
+//      const_iterator find(htmlElements_e element, const_iterator start) const noexcept;
 
       /*! @brief    Searches for the specified element from the starting position.
        *  @param[in]  element: The element to find.
@@ -173,7 +174,7 @@ namespace GCL::parsers::html
 #else
     private:
 #endif
-      std::unique_ptr<CHTMLElement> root;
+      std::unique_ptr<CHTMLNodeBase> root;
       std::deque<pointer> createStack;
       pointer currentElement = nullptr;
 

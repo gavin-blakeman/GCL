@@ -15,6 +15,15 @@ SET(Boost_USE_MULTITHREADED ON)
 find_package(Boost CONFIG)
 find_package(Boost REQUIRED COMPONENTS locale thread unit_test_framework)
 
+function(make_includable input_file output_file)
+    file(READ ${input_file} content)
+    set(delim "for_c++_include")
+    set(content "R\"${delim}(\n${content})${delim}\"")
+    file(WRITE ${output_file} "${content}")
+endfunction(make_includable)
+
+MAKE_INCLUDABLE(${PROJECT_SOURCE_DIR}/testFiles/testPage.html ${PROJECT_SOURCE_DIR}/generated/testPage.cpp)
+
 set(DIRECTORIES
   ${CMAKE_SOURCE_DIR}/SCL
   ${Boost_INCLUDE_DIRS}
@@ -49,7 +58,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBRARIES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ${DIRECTORIES})
 
-execute_process(COMMAND ${CMAKE_COMMAND} -E 
+execute_process(COMMAND ${CMAKE_COMMAND} -E
   copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/testFiles/testPage.html ${CMAKE_BINARY_DIR}/testFiles)
 
 ENABLE_TESTING()
