@@ -31,11 +31,9 @@
 //
 //**********************************************************************************************************************************
 
-
-
 #include "include/parsers/token.h"
 
-#include <string>
+// Standard C++ header files
 
 namespace GCL::parsers
 {
@@ -51,5 +49,10 @@ namespace GCL::parsers
                         + " " + tokenValue);
   }
 
+  std::ostream &operator<<(std::ostream &os, CToken const &t)
+  {
+    os << t.to_string() << std::endl;
+    return os;
+  }
 
 } // namespace

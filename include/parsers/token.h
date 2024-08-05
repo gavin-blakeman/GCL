@@ -36,6 +36,7 @@
 
 // Standard C++ library header files
 #include <cstdint>
+#include <iostream>
 #include <string>
 
 // Miscellaneous library header files.
@@ -62,6 +63,8 @@ namespace GCL::parsers
       std::string tokenValue;
       std::size_t tokenRow;
       std::size_t tokenCol;
+
+  friend std::ostream &operator<<(std::ostream &os, CToken const &);
   };
 
 } // namespace

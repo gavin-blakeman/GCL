@@ -13,7 +13,9 @@
 
 #include "include/parsers/html/htmlLexer.h"
 
-class CLexerTest : public GCL::parsers::html::CHTMLLexer
+// Use a derived class to allow access to the virtual and protected
+// functions.
+class CLexerTest : public GCL::parsers::html::CHTMLLexer<std::list>
 {
 public:
   CLexerTest(std::istream &is, std::list<GCL::parsers::CToken> &t) : CHTMLLexer(is, t) {}
@@ -31,17 +33,21 @@ BOOST_AUTO_TEST_CASE(constructor_and_destructor)
   CLexerTest lexer(stream, tokens);
 }
 
-
 BOOST_AUTO_TEST_CASE(test_getTokens)
 {
+  using namespace GCL::parsers;
+  using namespace GCL::parsers::html;
+
   std::stringstream stream;
-  std::list<GCL::parsers::CToken> tokens;
+  std::vector<CToken> tokens;
 
   stream << "<html dir=\"ltr\">value</html>";
 
-  CLexerTest lexer(stream, tokens);
+  CHTMLLexer<std::vector> lexer(stream, tokens);
 
   lexer.getTokens();
+
+  BOOST_TEST(tokens[0].type() == L_TAG_OPEN);
 }
 
 BOOST_AUTO_TEST_CASE(test_match)

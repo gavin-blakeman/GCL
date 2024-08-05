@@ -29,7 +29,7 @@
 //
 // HISTORY:             2024-06-18 GGB - File Created
 //
-//**********************************************************************************************************************************
+//**********************************************************************************************************************************/
 
 #ifndef PARSERS_HTML_HTMLDOCUMENT_H
 #define PARSERS_HTML_HTMLDOCUMENT_H
@@ -56,7 +56,6 @@
 
 namespace GCL::parsers::html
 {
-
   template<bool isConst>
   class CHTMLDocumentIterator;
 

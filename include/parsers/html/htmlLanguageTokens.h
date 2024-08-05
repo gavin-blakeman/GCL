@@ -2,7 +2,7 @@
 //
 // PROJECT:             General Class Library
 // SUBSYSTEM:           Parsers::HTML Parser
-// FILE:                htmlTokenTypes.h
+// FILE:                htmlTokens.h
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,34 +23,39 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class that represents the token types.
+// OVERVIEW:            Class that parsers the tokens
 //
 // CLASSES INCLUDED:
 //
-// HISTORY:             2024-06-18 GGB - File Created
+// HISTORY:             2024-08-05 GGB - File Created
 //
-//**********************************************************************************************************************************
+//**********************************************************************************************************************************/
 
+#ifndef PARSERS_HTML_TOKENS_H
+#define PARSERS_HTML_TOKENS_H
 
-#include "include/parsers/htmlTokenType.h"
+// parsers library
+#include "include/parsers/token.h"
+#include "include/parsers/languageTokens.h"
 
 namespace GCL::parsers::html
 {
-  SCL::bimap<htmlTokenTypes, std::string> tokenStrings =
+  enum htmlTokenTypes : CToken::tokenID_t
   {
-    { TT_EOF, "EOF" },
-    { L_TAG_OPEN, "<" },
-    { L_TAG_CLOSE, "</" },
-    { R_TAG_OPEN, ">" },
-    { R_TAG_CLOSE, "/>" },
-    { L_TAG_DOCTYPE, "<!"},
-    { COMMENT_OPEN, "<!---" },
-    { COMMENT_CLOSE, "--->" },
-    { ASSIGN,  "=" },
-    { ID, "ID"},
-    { VALUE, "Value"},
-    { TEXT, "Text"},
-    { ATTRIBUTE, "Attr"},
+    L_TAG_OPEN = TT_NEXT,     // <
+    L_TAG_CLOSE,              // </
+    R_TAG_OPEN,               // >
+    R_TAG_CLOSE,              // />
+    L_TAG_DOCTYPE,            // <!
+    COMMENT_OPEN,             // <!---
+    COMMENT_CLOSE,            // --->
+    ASSIGN,                   // =
+    ID,
+    VALUE,
+    TEXT,
+    ATTRIBUTE,
   };
 
-} // namespace
+}
+
+#endif // PARSERS_HTML_TOKENS_H

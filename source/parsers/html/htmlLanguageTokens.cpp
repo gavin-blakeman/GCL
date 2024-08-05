@@ -2,7 +2,7 @@
 //
 // PROJECT:             General Class Library
 // SUBSYSTEM:           Parsers::HTML Parser
-// FILE:                htmlParser.h
+// FILE:                htmlTokenTypes.h
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,57 +23,32 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class that parsers the tokens
+// OVERVIEW:            Class that represents the token types.
 //
 // CLASSES INCLUDED:
 //
 // HISTORY:             2024-06-18 GGB - File Created
 //
-//**********************************************************************************************************************************/
+//**********************************************************************************************************************************
 
-
-#ifndef GCL_PARSERS_HTML_HTMLPARSER_H_
-#define GCL_PARSERS_HTML_HTMLPARSER_H_
-
-// Standard C++ library header files
-#include <istream>
-#include <stack>
-
-// GCL header files.
-#include "include/parsers/token.h"
-#include "include/parsers/html/htmlDocument.h"
-#include "include/parsers/html/htmlNodeElement.h"
+#include "include/parsers/html/htmlLanguageTokens.h"
 
 namespace GCL::parsers::html
 {
-  /* The lexer breaks the input stream into tokens. The parser then builds the DOM tree from the tokens. This requires knowledge of
-   * the HTML5 standard. The output from the parser is the DOM.
-   */
-  class CHTMLParser
+  SCL::bimap<htmlTokenTypes, std::string> tokenStrings =
   {
-  public:
-    CHTMLParser(std::istream &is, CHTMLDocument &d) : inputStream(is), DOM(d) {}
-    ~CHTMLParser() = default;
-
-    void parseDocument();
-
-  private:
-    CHTMLParser() = delete;
-    CHTMLParser(CHTMLParser const &) = delete;
-    CHTMLParser(CHTMLParser &&) = delete;
-    CHTMLParser &operator=(CHTMLParser const &) = delete;
-    CHTMLParser &operator=(CHTMLParser &&) = delete;
-
-    using element_ref = CHTMLDocument::value_ref;
-
-    std::istream &inputStream;
-    std::vector<GCL::parsers::CToken> tokens;
-    CHTMLDocument &DOM;
-
-    void parseTokens();
+    { L_TAG_OPEN, "<" },
+    { L_TAG_CLOSE, "</" },
+    { R_TAG_OPEN, ">" },
+    { R_TAG_CLOSE, "/>" },
+    { L_TAG_DOCTYPE, "<!"},
+    { COMMENT_OPEN, "<!---" },
+    { COMMENT_CLOSE, "--->" },
+    { ASSIGN,  "=" },
+    { ID, "ID"},
+    { VALUE, "Value"},
+    { TEXT, "Text"},
+    { ATTRIBUTE, "Attr"},
   };
+
 } // namespace
-
-
-
-#endif /* GCL_PARSERS_HTML_HTMLPARSER_H_ */

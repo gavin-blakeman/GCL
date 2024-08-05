@@ -51,6 +51,7 @@
 
 // GCL/parser header files.
 #include "include/parsers/token.h"
+#include "include/parsers/languageTokens.h"
 
 namespace GCL::parsers
 {
@@ -63,8 +64,6 @@ namespace GCL::parsers
 
     using value_type = CToken;
     using token_container = _Container<value_type>;
-
-    enum tokenType_t : tokenID_t { TT_NOP, TT_EOF, TT_NEXT };
 
     /*! @brief      Constructor.
      *  @param[in]  is: The input stream to parse.
@@ -102,7 +101,7 @@ namespace GCL::parsers
     tokenContainer.push_back(CToken(tokenStringMap, TT_EOF, std::string(""), row, col));
   }
 
-  protected:
+//  protected:
     tokenStringMap_t tokenStringMap;
     std::size_t lineNo = 0;
     std::size_t linePos = 0;
