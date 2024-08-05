@@ -93,7 +93,6 @@ namespace GCL::parsers::html
     currentElement->value(val);
   }
 
-
   void CHTMLDocument::closeElement()
   {
     currentElement = createStack.front();

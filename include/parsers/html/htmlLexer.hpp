@@ -39,7 +39,7 @@
 #include <utility>
 
 // Parsers library header files.
-#include "include/parsers/lexer.h"
+#include "include/parsers/lexer.hpp"
 #include "include/parsers/html/htmlLanguageTokens.h"
 
 namespace GCL::parsers::html
@@ -79,7 +79,7 @@ namespace GCL::parsers::html
 
     virtual void next() override
     {
-      if(this->match("/*"))
+      if(this->match("<!--"))
       {
         comment();
       }
@@ -181,7 +181,15 @@ namespace GCL::parsers::html
 
       while(true)
       {
-        if(this->match("="))
+        whitespace();
+
+        if(this->match(EOF))
+        {
+          sRow = this->row;
+          sCol = this->col;
+          break;
+        }
+        else if(this->match("="))
         {
           this->tokenContainer.push_back(CToken(this->tokenStringMap, htmlTokenTypes::ASSIGN, this->row, this->col));
           this->consume();
@@ -204,12 +212,6 @@ namespace GCL::parsers::html
           sRow = this->row;
           sCol = this->col;
           this->consume(); // >
-          break;
-        }
-        else if(this->match(EOF))
-        {
-          sRow = this->row;
-          sCol = this->col;
           break;
         }
         else

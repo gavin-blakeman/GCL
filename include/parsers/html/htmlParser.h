@@ -31,7 +31,6 @@
 //
 //**********************************************************************************************************************************/
 
-
 #ifndef GCL_PARSERS_HTML_HTMLPARSER_H_
 #define GCL_PARSERS_HTML_HTMLPARSER_H_
 
@@ -55,6 +54,9 @@ namespace GCL::parsers::html
     CHTMLParser(std::istream &is, CHTMLDocument &d) : inputStream(is), DOM(d) {}
     ~CHTMLParser() = default;
 
+    /*! @brief      Parses the entire document and stores the result in the DOM.
+     *  @throws
+     */
     void parseDocument();
 
   private:
@@ -68,9 +70,18 @@ namespace GCL::parsers::html
 
     std::istream &inputStream;
     std::vector<GCL::parsers::CToken> tokens;
+    std::vector<GCL::parsers::CToken>::iterator tokenIterator;
     CHTMLDocument &DOM;
 
+    /*! @brief      Parses the stream of tokens after the input stream has been tokenised.
+     *  @throws
+     */
     void parseTokens();
+
+    void parseLTagOpen();
+    void parseLTagClose();
+    void parseLTagDocType();
+    void parseCommentOpen();
   };
 } // namespace
 

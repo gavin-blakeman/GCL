@@ -88,7 +88,6 @@ namespace GCL::parsers::html
       CHTMLDocument &operator=(CHTMLDocument &&) = default;
       ~CHTMLDocument() = default;
 
-
       /*! @brief    Searches for the specified element from the starting position.
        *  @param[in]  element: The element to find.
        *  @param[in]  start: The starting iterator.
@@ -169,10 +168,15 @@ namespace GCL::parsers::html
 //      CHTMLPermissions permissionsPolicy;
 //      CModuleMap moduleMap;
 
+#ifdef TEST
+    public:
+#else
     private:
+#endif
       std::unique_ptr<CHTMLElement> root;
       std::deque<pointer> createStack;
       pointer currentElement = nullptr;
+
   };
 
   template<bool isConst>

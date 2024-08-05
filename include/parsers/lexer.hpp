@@ -101,7 +101,7 @@ namespace GCL::parsers
     tokenContainer.push_back(CToken(tokenStringMap, TT_EOF, std::string(""), row, col));
   }
 
-//  protected:
+  protected:
     tokenStringMap_t tokenStringMap;
     std::size_t lineNo = 0;
     std::size_t linePos = 0;
@@ -129,16 +129,20 @@ namespace GCL::parsers
 
     void consume(int n)
     {
-      if(buffer.front() == '\n')
+      while (n)
       {
-        row++;
-        col = 1;
+        if(buffer.front() == '\n')
+        {
+          row++;
+          col = 1;
+        }
+        else
+        {
+          col++;
+        }
+        buffer.pop();
+        n--;
       }
-      else
-      {
-        col++;
-      }
-      buffer.pop();
     }
 
     bool match(std::string const &str)

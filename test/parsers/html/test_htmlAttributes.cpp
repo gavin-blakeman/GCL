@@ -48,4 +48,13 @@ BOOST_AUTO_TEST_CASE(test_equality)
   BOOST_TEST(test2 == ATTR_CLASS);
 }
 
+BOOST_AUTO_TEST_CASE(test_attributes)
+{
+  using namespace GCL::parsers::html;
+
+  CHTMLAttribute test(ATTR_CLASS, "Value");
+  BOOST_TEST(test == ATTR_CLASS);
+  BOOST_TEST(test.attribute() == "class");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

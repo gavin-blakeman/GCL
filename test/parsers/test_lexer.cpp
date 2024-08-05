@@ -8,7 +8,7 @@
 #include <string>
 #include <tuple>
 
-#include "include/parsers/lexer.h"
+#include "include/parsers/lexer.hpp"
 #include "include/parsers/token.h"
 
 BOOST_AUTO_TEST_SUITE(parser_lexer_test)

@@ -15,17 +15,17 @@ SET(Boost_USE_MULTITHREADED ON)
 find_package(Boost CONFIG)
 find_package(Boost REQUIRED COMPONENTS locale thread unit_test_framework)
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_LIST_DIR}
-	../
-	${CMAKE_SOURCE_DIR}/SCL
-	)
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
-
+set(DIRECTORIES
+  ${CMAKE_SOURCE_DIR}/SCL
+  ${Boost_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
+)
 
 set(SOURCES
   main.cpp
   parsers/html/test_htmlAttributes.cpp
   parsers/html/test_htmlLexer.cpp
+  parsers/html/test_htmlParser.cpp
   parsers/test_lexer.cpp
   test_dateTime.cpp
   test_error.cpp
@@ -47,11 +47,12 @@ LINK_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBRARIES})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ${DIRECTORIES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
+execute_process(COMMAND ${CMAKE_COMMAND} -E 
+  copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/testFiles/testPage.html ${CMAKE_BINARY_DIR}/testFiles)
 
 ENABLE_TESTING()
-ADD_TEST(${PROJECT_NAME} ${PROJECT_NAME})
+add_test(${PROJECT_NAME} ${PROJECT_NAME})
 
-ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} COMMENT "Run tests" POST_BUILD  COMMAND ${PROJECT_NAME})
+add_custom_command(TARGET ${PROJECT_NAME} COMMENT "Run tests" POST_BUILD  COMMAND ${PROJECT_NAME})
