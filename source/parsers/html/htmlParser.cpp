@@ -31,112 +31,152 @@
 //
 //**********************************************************************************************************************************/
 
-
 #include "include/parsers/html/htmlParser.h"
 
 // Standard C++ library header files
 
 // GCL library header files
-#include "include/parsers/html/htmlLexer.h"
+#include "include/parsers/html/htmlLexer.hpp"
+#include "include/parsers/html/htmlLanguageTokens.h"
 
 namespace GCL::parsers::html
 {
-  void CHTMLParser::parse()
+  void CHTMLParser::parseDocument()
   {
-    auto iter = tokens.begin();
-    while (iter != tokens.end())
-    {
-      switch(iter++->type())
-      {
-        case CHTMLLexer::L_TAG_OPEN:  // "<"
-        {
-          // Starting a new tag.
-          std::string tagName = iter++->value();
-          DOM.openElement(tagName);
-          while (iter->type ()== CHTMLLexer::ATTRIBUTE)
-          {
-            // Capture all the attributes.
-            std::string temp = iter++->value();
-            if (iter->type() != CHTMLLexer::ASSIGN)
-            {
-              DOM.addAttribute(temp, "");
-            }
-            else
-            {
-              DOM.addAttribute(temp, (++iter)->value());
-            };
-            iter++;
+    CHTMLLexer<std::vector> lexer(inputStream, tokens);
+    lexer.getTokens();
+    parseTokens();
+  }
 
-          }
-          if (iter->type() == CHTMLLexer::R_TAG_OPEN )
-          {
-            if (CHTMLElement::isVoid(tagName))
-            {
-              // Tag is complete and can be added to the DOM
-              DOM.closeElement();
-            }
-          }
-          else if (iter->type() == CHTMLLexer::R_TAG_CLOSE)
-          {
-            // Tag is complete and can be added to the DOM
-            DOM.closeElement();
-          }
-          else
-          {
-            // Error in file format.
-            IMPLEMENT_ME();
-          }
-          break;
-        }
-        case CHTMLLexer::L_TAG_CLOSE:   // "</"
+  void CHTMLParser::parseLTagOpen()
+  {
+    // Starting a new tag.
+    std::string tagName = tokenIterator++->value();
+    DOM.openElement(tagName);
+    while (tokenIterator->type ()== ATTRIBUTE)
+    {
+      // Capture all the attributes.
+      std::string temp = tokenIterator++->value();
+      if (tokenIterator->type() != ASSIGN)
+      {
+        DOM.addAttribute(temp, "");
+      }
+      else
+      {
+        DOM.addAttribute(temp, (++tokenIterator)->value());
+      };
+      tokenIterator++;
+    }
+    if (tokenIterator->type() == R_TAG_OPEN )
+    {
+      if (CHTMLElement::isVoid(tagName))
+      {
+        // Tag is complete and can be added to the DOM
+        DOM.closeElement();
+      }
+    }
+    else if (tokenIterator->type() == R_TAG_CLOSE)
+    {
+      // Tag is complete and can be added to the DOM
+      DOM.closeElement();
+    }
+    else
+    {
+      // Error in file format.
+      IMPLEMENT_ME();
+    }
+  }
+
+  void CHTMLParser::parseLTagClose()
+  {
+    if ((++tokenIterator)->type() == ID)
+    {
+      DOM.closeElement();
+    }
+    else
+    {
+      // Malformed file.
+      IMPLEMENT_ME();
+    }
+  }
+
+  void CHTMLParser::parseLTagDocType()
+  {
+    /* Parse to the closing tag. (R_TAG_OPEN)
+     * Values that need to be supported are
+     * html -> HTML5
+     * <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> -> HTML 4.01
+     * <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"> -> XHTML 1.1
+    */
+
+    
+
+  }
+
+  void CHTMLParser::parseCommentOpen()
+  {
+    // Simply discard all tags until the COMMENT_CLOSE is found.
+    DOM.addComment((++tokenIterator)->value());
+    if (((++tokenIterator)->type() != COMMENT_CLOSE))
+    {
+      // Malformed file.
+      IMPLEMENT_ME();
+    }
+  }
+
+  void CHTMLParser::parseTokens()
+  {
+    tokenIterator = tokens.begin();
+
+    while (tokenIterator != tokens.end())
+    {
+      switch(tokenIterator++->type())
+      {
+        case L_TAG_OPEN:  // "<"
         {
-          if ((++iter)->type() == CHTMLLexer::ID)
-          {
-            DOM.closeElement();
-          }
-          else
-          {
-            // Malformed file.
-            IMPLEMENT_ME();
-          }
+          parseLTagOpen();
           break;
         }
-        case CHTMLLexer::COMMENT_OPEN:
+        case L_TAG_CLOSE:   // "</"
         {
-          // Simply discard all tags until the COMMENT_CLOSE is found.
-          DOM.addComment((++iter)->value());
-          if (((++iter)->type() != CHTMLLexer::COMMENT_CLOSE))
-          {
-            // Malformed file.
-            IMPLEMENT_ME();
-          }
+          parseLTagClose();
           break;
         }
-        case CHTMLLexer::COMMENT_CLOSE:
-        case CHTMLLexer::ASSIGN:
-        case CHTMLLexer::VALUE:
-        case CHTMLLexer::ID:
+        case COMMENT_OPEN:
+        {
+          parseCommentOpen();
+          break;
+        }
+        case ASSIGN:
+        case VALUE:
+        case ID:
         {
           // Malformed HTML file. Simply discard.
           CODE_ERROR();
           break;
         }
-        case CHTMLLexer::L_TAG_DOCTYPE:
+        case L_TAG_DOCTYPE:
         {
-          // This is used to indicate an HTML5 file if it is just html
+          parseLTagDocType();
           break;
         }
-        case CHTMLLexer::TEXT:
+        case TEXT:
         {
-          DOM.setValue(iter->value());
+          DOM.setValue(tokenIterator->value());
           break;
+        }
+        case TT_EOF:
+        {
+           break;
         }
         default:
         {
+          /* These will generally be tags that are out of order. IE closing tags. Closing tags should be picked
+           * up by the open functions. So these would be out-of-order or repeated closings. */
           break;
         }
       }
-      ++iter; // Move to the next token.
     }
   }
-}
+
+} // namespace

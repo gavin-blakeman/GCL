@@ -31,7 +31,6 @@
 //
 //**********************************************************************************************************************************/
 
-
 #ifndef GCL_PARSERS_HTML_HTMLPARSER_H_
 #define GCL_PARSERS_HTML_HTMLPARSER_H_
 
@@ -47,22 +46,42 @@
 namespace GCL::parsers::html
 {
   /* The lexer breaks the input stream into tokens. The parser then builds the DOM tree from the tokens. This requires knowledge of
-   * the HTML5 standard. The output from the parser is a structured list of tokens.
+   * the HTML5 standard. The output from the parser is the DOM.
    */
   class CHTMLParser
   {
   public:
-    CHTMLParser(std::istream &is, CHTMLDocument &d) : inputStream(is), DOM(d) { parse(); }
+    CHTMLParser(std::istream &is, CHTMLDocument &d) : inputStream(is), DOM(d) {}
+    ~CHTMLParser() = default;
+
+    /*! @brief      Parses the entire document and stores the result in the DOM.
+     *  @throws
+     */
+    void parseDocument();
 
   private:
-    using element_ref = CHTMLDocument::value_ref;
+    CHTMLParser() = delete;
+    CHTMLParser(CHTMLParser const &) = delete;
+    CHTMLParser(CHTMLParser &&) = delete;
+    CHTMLParser &operator=(CHTMLParser const &) = delete;
+    CHTMLParser &operator=(CHTMLParser &&) = delete;
 
-    void parse();
+    using element_ref = CHTMLDocument::value_ref;
 
     std::istream &inputStream;
     std::vector<GCL::parsers::CToken> tokens;
-
+    std::vector<GCL::parsers::CToken>::iterator tokenIterator;
     CHTMLDocument &DOM;
+
+    /*! @brief      Parses the stream of tokens after the input stream has been tokenised.
+     *  @throws
+     */
+    void parseTokens();
+
+    void parseLTagOpen();
+    void parseLTagClose();
+    void parseLTagDocType();
+    void parseCommentOpen();
   };
 } // namespace
 

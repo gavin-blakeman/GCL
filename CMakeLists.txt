@@ -6,12 +6,10 @@ PROJECT(GCL DESCRIPTION "General Class Library")
 
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED True)
-#set(CMAKE_CXX_FLAGS "-fPIC")
 
 if(NOT DEFINED SHARED_LIBRARY_DIR)
 set(SHARED_LIBRARY_DIR  ${CMAKE_BINARY_DIR})
 endif()
-
 
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
 
@@ -49,12 +47,13 @@ set(SOURCES
   source/parsers/html/htmlAttributes.cpp
   source/parsers/html/htmlDocument.cpp
   source/parsers/html/htmlNodeElement.cpp
-  source/parsers/html/htmlLexer.cpp
   source/parsers/html/htmlParser.cpp
+  source/parsers/html/htmlLanguageTokens.cpp
   source/parsers/token.cpp
   source/pluginManager/pluginManager.cpp
   source/utf.cpp
   )
+
 set(HEADERS
   GCL
   include/functions.h
@@ -96,10 +95,12 @@ set(HEADERS
   include/parsers/html/htmlNodeDocumentType.h
   include/parsers/html/htmlNodeElement.h
   include/parsers/html/htmlNodeText.h
-  include/parsers/html/htmlLexer.h
+  include/parsers/html/htmlLexer.hpp
   include/parsers/html/htmlParser.h
-  include/parsers/lexer.h
+  include/parsers/html/htmlLanguageTokens.h
+  include/parsers/lexer.hpp
   include/parsers/token.h
+  include/parsers/languageTokens.h
   include/pluginManager/pluginManager.h
   include/resource.h
   include/traits.h
@@ -115,16 +116,16 @@ set(DIRECTORIES
   ${CMAKE_SOURCE_DIR}/fmt/include
   ${CMAKE_SOURCE_DIR}/xlnt/include
   ${Boost_INCLUDE_DIRS}
-  )
+)
+
 set(LIBRARIES
-	Boost::locale
-	fmt
-	xlnt
-	)
+  Boost::locale
+  fmt
+  xlnt
+)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ${DIRECTORIES})
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
-set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${SHARED_LIBRARY_DIR})
 
-ADD_SUBDIRECTORY(test)
+add_subdirectory(test)

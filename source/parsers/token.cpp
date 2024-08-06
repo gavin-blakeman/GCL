@@ -31,16 +31,19 @@
 //
 //**********************************************************************************************************************************
 
-
-
 #include "include/parsers/token.h"
 
-#include <string>
+// Standard C++ header files
 
 namespace GCL::parsers
 {
   CToken::CToken(tokenStringMap_t const &tsm, tokenID_t type, std::string const &val, std::size_t row, std::size_t col)
    : tokenStringMap(tsm), tokenType(type), tokenValue(val), tokenRow(row), tokenCol(col)
+  {
+  }
+
+  CToken::CToken(tokenStringMap_t const &tsm, tokenID_t type, std::size_t row, std::size_t col)
+   : tokenStringMap(tsm), tokenType(type), tokenRow(row), tokenCol(col)
   {
   }
 
@@ -51,5 +54,10 @@ namespace GCL::parsers
                         + " " + tokenValue);
   }
 
+  std::ostream &operator<<(std::ostream &os, CToken const &t)
+  {
+    os << t.to_string() << std::endl;
+    return os;
+  }
 
 } // namespace

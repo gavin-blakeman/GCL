@@ -29,7 +29,7 @@
 //
 // HISTORY:             2024-06-18 GGB - File Created
 //
-//**********************************************************************************************************************************
+//**********************************************************************************************************************************/
 
 #include "include/parsers/html/htmlNodeElement.h"
 
@@ -139,6 +139,7 @@ namespace GCL::parsers::html
 
   CHTMLElement::CHTMLElement(CHTMLNodeBase *parent, std::string const &typeText) : CHTMLNodeBase(parent)
   {
+std::cout << "Create Node: " << typeText << std::endl;
     if (elementText.contains_RHS(typeText))
     {
       elementType = elementText.LHS(typeText);
