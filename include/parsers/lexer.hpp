@@ -55,60 +55,31 @@
 
 namespace GCL::parsers
 {
-  template<template <typename...> class _Container>
   class CLexer
   {
   public:
-    using tokenID_t = CToken::tokenID_t;
-    using tokenStringMap_t = CToken::tokenStringMap_t;
-
-    using value_type = CToken;
-    using token_container = _Container<value_type>;
-
     /*! @brief      Constructor.
      *  @param[in]  is: The input stream to parse.
      *  @param[in]  begin: Iterator to the start of the token/string pairs.
      *  @param[in]  end: Iterator to the end of the token/strng pairs.
      *  @param[out] tokens: The container to receiver the tokens.
      */
-    template<class _Iter>
-    CLexer(std::istream &is, _Iter begin, _Iter end, token_container &tokens) : inputStream(is), tokenContainer(tokens)
+    CLexer(std::istream &is) : inputStream(is)
     {
-      tokenStringMap.emplace(TT_EOF, "<EOF>"); // This token is always provided by the lexer.
-      while (begin != end)
-      {
-        tokenStringMap.emplace(begin->first, begin->second);
-        begin++;
-      }
       fillBuffer();
     }
 
     virtual ~CLexer() = default;
 
-    void getTokens()
-    {
-      tokenContainer.clear();
-
-      while(buffer.front() != EOF)
-      {
-        next();
-        if (!buffer.full() && !eos)
-        {
-          fillBuffer();
-        }
-      }
-
-    tokenContainer.push_back(CToken(tokenStringMap, TT_EOF, std::string(""), row, col));
-  }
-
   protected:
-    tokenStringMap_t tokenStringMap;
     std::size_t lineNo = 0;
     std::size_t linePos = 0;
-    std::size_t row = 0;
-    std::size_t col = 0;
-    token_container &tokenContainer;
-    SCL::circularBuffer<char, 1024, false, false> buffer;
+    SCL::circularBuffer<int, 1024, false, false> buffer;
+
+    int front()
+    {
+      return buffer.front();
+    }
 
     /*! @brief      Checks if the next character in the stream matches the parameter.
      *  @param[in]  c: The character to test.
@@ -133,12 +104,12 @@ namespace GCL::parsers
       {
         if(buffer.front() == '\n')
         {
-          row++;
-          col = 1;
+          lineNo++;
+          linePos = 0;
         }
         else
         {
-          col++;
+          linePos++;
         }
         buffer.pop();
         n--;
@@ -164,11 +135,6 @@ namespace GCL::parsers
       return (buffer.front() == c);
     }
 
-    virtual void next() 
-    {
-      consume();
-    }
-
     /*! @brief    Fill the buffer when it falls below the minimum size.
      */
     virtual void fillBuffer()
@@ -184,20 +150,26 @@ namespace GCL::parsers
       }
     }
 
-    virtual void consume()
+    void consume()
     {
       if(buffer.front() == '\n')
       {
-        row++;
-        col = 1;
+        lineNo++;
+        linePos = 0;
       }
       else
       {
-        col++;
+        linePos++;
       }
       buffer.pop();
     }
 
+    int pop()
+    {
+      int rv = front();
+      consume();
+      return rv;
+    }
 
   private:
     CLexer() = delete;

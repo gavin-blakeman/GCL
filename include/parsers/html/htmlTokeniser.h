@@ -2,7 +2,7 @@
 //
 // PROJECT:             General Class Library
 // SUBSYSTEM:           Parsers::HTML Parser
-// FILE:                htmlTokenTypes.h
+// FILE:                htmlLexer.h
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,7 +23,7 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class that represents the token types.
+// OVERVIEW:            Class that lexes the html stream
 //
 // CLASSES INCLUDED:
 //
@@ -31,22 +31,64 @@
 //
 //**********************************************************************************************************************************
 
+
+#ifndef PARSERS_HTML_HTMLTOKENISER_H
+#define PARSERS_HTML_HTMLTOKENISER_H
+
+// Standard C++ library header files
+#include <utility>
+
+// Parsers library header files.
+#include "include/parsers/lexer.hpp"
 #include "include/parsers/html/htmlLanguageTokens.h"
 
 namespace GCL::parsers::html
 {
-  SCL::bimap<CToken::tokenID_t, std::string> const tokenStrings =
+  class CHTMLTokeniser : public CLexer
   {
-    { R_TAG_OPEN, ">" },
-    { R_TAG_CLOSE, "/>" },
-    { L_TAG_DOCTYPE, "<!"},
-    { COMMENT_OPEN, "<!---" },
-    { COMMENT_CLOSE, "--->" },
-    { ASSIGN,  "=" },
-    { ID, "ID"},
-    { VALUE, "Value"},
-    { TEXT, "Text"},
-    { ATTRIBUTE, "Attr"},
+  public:
+    using tokenID_t = CToken::tokenID_t;
+
+    CHTMLTokeniser(std::istream &is) : CLexer(is) {}
+    virtual ~CHTMLTokeniser() = default;
+
+    CToken getToken();
+
+  private:
+    CHTMLTokeniser() = delete;
+    CHTMLTokeniser(CHTMLTokeniser const &) = delete;
+    CHTMLTokeniser(CHTMLTokeniser &&) = delete;
+    CHTMLTokeniser &operator=(CHTMLTokeniser const &) = delete;
+    CHTMLTokeniser &operator=(CHTMLTokeniser &&) = delete;
+
+    enum smState_e
+    {
+      SM_DATA,
+      SM_RCDATA, SM_RCDATA_LESSTHAN,
+      SM_CHARACTER_REFERENCE,
+      SM_TAG_OPEN, SM_TAG_NAME, SM_END_TAG_OPEN, SM_TAG_SELF_CLOSING_START,
+      SM_MARKUP_DECLARATION_OPEN,
+      SM_BOGUS_COMMENT,
+      SM_BEFORE_ATTR_NAME,
+      SM_RAWTEXT, SM_RAWTEXT_LESSTHAN,
+      SM_SCRIPT, SM_SCRIPT_LESSTHAN,
+      SM_PLAINTEXT,
+    };
+
+    smState_e smState = SM_DATA;
+    smState_e retState;
+
+    bool processData(CToken &);
+    bool processTagOpen(CToken &);
+    bool processEndTagOpen(CToken &);
+    bool processTagName(CToken &);
+    bool processPlainText(CToken &);
+    bool processRawText(CToken &);
+    bool processRCData(CToken &);
+    bool processRCDataLessThan(CToken &);
+    bool processScript(CToken &);
   };
 
-} // namespace
+} // namesapce
+
+#endif // PARSERS_HTML_HTMLTOKENISER_H

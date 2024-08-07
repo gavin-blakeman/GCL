@@ -50,12 +50,27 @@ namespace GCL::parsers
       using tokenID_t = std::uint_fast8_t;
       using tokenStringMap_t = SCL::bimap<tokenID_t, std::string>;
 
+      CToken(tokenStringMap_t const &tsm) : tokenStringMap(tsm) {}
       CToken(tokenStringMap_t const &tsm, tokenID_t type, std::size_t row, std::size_t col);
       CToken(tokenStringMap_t const &tsm, tokenID_t type, std::string const &val, std::size_t row, std::size_t col);
+
+      CToken(CToken const &t) : tokenStringMap(t.tokenStringMap), tokenType(t.tokenType), tokenValue(t.tokenValue) {}
+
+      CToken &operator=(CToken const &other);
+
+      CToken &operator+=(std::string const &s) { tokenValue += s; return *this; }
+      CToken &operator+=(char c) { tokenValue.push_back(c); return *this; }
+      CToken &operator+=(int i) { tokenValue.push_back(static_cast<char>(i)); tokenValue.push_back(static_cast<char>(i >> 8)); return *this; }
+
       std::string to_string() const;
 
       tokenID_t type() const noexcept { return tokenType; }
+      void type(tokenID_t tt) noexcept { tokenType = tt; }
+
       std::string value() const noexcept { return tokenValue; }
+      void value(std::string const &v) { tokenValue = v; }
+      void value(char c) { tokenValue.push_back(c); }
+      void value(int i) { }
 
     private:
       tokenStringMap_t const &tokenStringMap;
@@ -64,6 +79,8 @@ namespace GCL::parsers
       std::size_t tokenRow;
       std::size_t tokenCol;
 
+  friend bool operator==(CToken const &lhs, CToken const &rhs) { return ((lhs.tokenType == rhs.tokenType) && (lhs.tokenValue == rhs.tokenValue)); }
+  friend bool operator==(CToken const &lhs, tokenID_t rhs) { return (lhs.tokenType == rhs); }
   friend std::ostream &operator<<(std::ostream &os, CToken const &);
   };
 

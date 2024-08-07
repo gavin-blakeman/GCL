@@ -51,9 +51,9 @@ namespace GCL::parsers::html
 
   void CHTMLDocument::addAttribute(std::string const &attr, std::string const &val)
   {
-    if (currentElement->nodeType() == NT_ELEMENT)
+    if (currentNode()->nodeType() == NT_ELEMENT)
     {
-      dynamic_cast<CHTMLNodeElement *>(currentElement)->insert(attr, val);
+      dynamic_cast<CHTMLNodeElement *>(currentNode())->insert(attr, val);
     }
     else
     {
@@ -63,7 +63,7 @@ namespace GCL::parsers::html
 
   void CHTMLDocument::addComment(std::string const &comment)
   {
-    currentElement->insert(std::make_unique<CHTMLNodeComment>(currentElement, comment));
+    //currentNode()->insert(std::make_unique<CHTMLNodeComment>(currentElement, comment));
   }
 
 //  CHTMLDocument::const_iterator CHTMLDocument::find(htmlElements_e element, const_iterator start) const noexcept
@@ -84,17 +84,21 @@ namespace GCL::parsers::html
     return start;
   }
 
+  void CHTMLDocument::insertComment(std::string const &c)
+  {
+    push(currentNode()->insert(std::make_unique<CHTMLNodeComment>(currentNode(), c)));
+  }
+
   void CHTMLDocument::openElement(std::string const &element)
   {
     if (root)
     {
-      createStack.push_front(currentElement);
-      currentElement = currentElement->insert(std::make_unique<CHTMLNodeElement>(currentElement, element));
+//      createStack.push_front(currentElement);
+  //    currentNode()->insert(std::make_unique<CHTMLNodeElement>(currentElement, element));
     }
     else
     {
-      root = std::make_unique<CHTMLNodeElement>(currentElement, element);
-      currentElement = root.get();
+//      root = std::make_unique<CHTMLNodeElement>(currentElement, element);
     }
   }
 
@@ -105,8 +109,8 @@ namespace GCL::parsers::html
 
   void CHTMLDocument::closeElement()
   {
-    currentElement = createStack.front();
-    createStack.pop_front();
+//    currentElement = createStack.front();
+//    createStack.pop_front();
   }
 
   void CHTMLDocument::closeElement(std::string const &element)

@@ -31,8 +31,8 @@
 //
 //**********************************************************************************************************************************/
 
-#ifndef GCL_PARSERS_HTML_HTMLPARSER_H_
-#define GCL_PARSERS_HTML_HTMLPARSER_H_
+#ifndef GCL_PARSERS_HTML_HTMLPARSER_H
+#define GCL_PARSERS_HTML_HTMLPARSER_H
 
 // Standard C++ library header files
 #include <istream>
@@ -59,6 +59,13 @@ namespace GCL::parsers::html
      */
     void parseDocument();
 
+  protected:
+    enum insertionMode_e
+    { IM_INITIAL,
+    };
+
+    insertionMode_e insertionMode = IM_INITIAL;
+
   private:
     CHTMLParser() = delete;
     CHTMLParser(CHTMLParser const &) = delete;
@@ -70,21 +77,18 @@ namespace GCL::parsers::html
 
     std::istream &inputStream;
     std::vector<GCL::parsers::CToken> tokens;
-    std::vector<GCL::parsers::CToken>::iterator tokenIterator;
     CHTMLDocument &DOM;
 
-    /*! @brief      Parses the stream of tokens after the input stream has been tokenised.
+    /*! @brief      Parses a single token.
+     *  @param[in]  token: The token to parse.
      *  @throws
      */
-    void parseTokens();
+    void parseToken(CToken const &token);
 
-    void parseLTagOpen();
-    void parseLTagClose();
-    void parseLTagDocType();
-    void parseCommentOpen();
+    void parseTokenModeInitial(CToken const &token);
   };
 } // namespace
 
 
 
-#endif /* GCL_PARSERS_HTML_HTMLPARSER_H_ */
+#endif /* GCL_PARSERS_HTML_HTMLPARSER_H */

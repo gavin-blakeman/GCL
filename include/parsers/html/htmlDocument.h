@@ -43,7 +43,6 @@
 
 // GCL Header files
 #include "include/parsers/html/htmlNodeBase.h"
-//#include "include/parsers/html/htmlNodeElement.h"
 #include "include/error.h"
 
 /* The HTML document class stores all the data that makes up the document.
@@ -57,6 +56,8 @@
 
 namespace GCL::parsers::html
 {
+  class CHTMLParser;
+
   template<bool isConst>
   class CHTMLDocumentIterator;
 
@@ -169,16 +170,21 @@ namespace GCL::parsers::html
 //      CHTMLPermissions permissionsPolicy;
 //      CModuleMap moduleMap;
 
+    void insertComment(std::string const &);
+
 #ifdef TEST
     public:
 #else
     private:
 #endif
       std::unique_ptr<CHTMLNodeBase> root;
-      std::deque<pointer> createStack;
-      pointer currentElement = nullptr;
-      bool force_quirks = false;
+      std::deque<pointer> openElementsStack;  // Cannot be a stack as we need to acces random elements as well.
+                                              // front = first element in, back = last element in. Push/Pop to back.
 
+      inline pointer currentNode() noexcept { return ( (openElementsStack.empty()) ? nullptr : openElementsStack.back() ); }
+      inline void push(pointer p) noexcept { openElementsStack.push_back(p); }
+      inline void pop() noexcept { openElementsStack.pop_back(); }
+  friend CHTMLParser;
   };
 
   template<bool isConst>

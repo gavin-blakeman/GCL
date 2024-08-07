@@ -34,6 +34,12 @@
 #ifndef PARSERS_HTML_TOKENS_H
 #define PARSERS_HTML_TOKENS_H
 
+// Standard C++ library header files
+#include <string>
+
+// Miscellaneous libraries
+#include <SCL>
+
 // parsers library
 #include "include/parsers/token.h"
 #include "include/parsers/languageTokens.h"
@@ -42,20 +48,25 @@ namespace GCL::parsers::html
 {
   enum htmlTokenTypes : CToken::tokenID_t
   {
-    L_TAG_OPEN = TT_NEXT,     // <
-    L_TAG_CLOSE,              // </
+    TT_START_TAG = TT_NEXT,
+    TT_END_TAG,
     R_TAG_OPEN,               // >
     R_TAG_CLOSE,              // />
     L_TAG_DOCTYPE,            // <!
-    COMMENT_OPEN,             // <!---
-    COMMENT_CLOSE,            // --->
+    COMMENT_OPEN,
+    COMMENT_CLOSE,
+    TT_COMMENT,               // <!---
     ASSIGN,                   // =
     ID,
     VALUE,
     TEXT,
     ATTRIBUTE,
+    TT_CHARACTER,
+    TT_DOCTYPE,
+    TT_EOF,
   };
 
+ extern SCL::bimap<CToken::tokenID_t, std::string> const tokenStrings;
 }
 
 #endif // PARSERS_HTML_TOKENS_H
