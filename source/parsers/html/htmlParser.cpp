@@ -69,7 +69,7 @@ namespace GCL::parsers::html
     }
     if (tokenIterator->type() == R_TAG_OPEN )
     {
-      if (CHTMLElement::isVoid(tagName))
+      if (CHTMLNodeElement::isVoid(tagName))
       {
         // Tag is complete and can be added to the DOM
         DOM.closeElement();

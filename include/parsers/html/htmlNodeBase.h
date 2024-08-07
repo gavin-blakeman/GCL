@@ -3,13 +3,16 @@
 
 // Standard C++ library header files
 #include <list>
+#include <memory>
+
+// Parsers header files
+#include "include/parsers/html/htmlNodeTypes.h"
 
 namespace GCL::parsers::html
 {
   class CHTMLNodeBase
   {
   public:
-    using nodeType_t = unsigned int;
     using child_type = CHTMLNodeBase;
     using child_collection = std::list<std::unique_ptr<child_type>>;
     using child_pointer = child_type *;
@@ -18,6 +21,8 @@ namespace GCL::parsers::html
 
     CHTMLNodeBase(CHTMLNodeBase *parent) : parentNode(parent) {}
     virtual ~CHTMLNodeBase() = default;
+
+    child_pointer insert(std::unique_ptr<CHTMLNodeBase> &&);
 
     child_iterator child_begin() { return childCollection.begin(); }
     child_const_iterator child_begin() const { return childCollection.cbegin(); }

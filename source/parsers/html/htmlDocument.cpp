@@ -36,8 +36,11 @@
 
 // Miscellaneous library header files.
 #include "include/error.h"
+
+// Parsers header files
 #include "include/parsers/html/htmlParser.h"
 #include "include/parsers/html/htmlNodeComment.h"
+#include "include/parsers/html/htmlNodeElement.h"
 
 namespace GCL::parsers::html
 {
@@ -48,9 +51,13 @@ namespace GCL::parsers::html
 
   void CHTMLDocument::addAttribute(std::string const &attr, std::string const &val)
   {
-    if (currentElement->type() == NT_ELEMENT)
+    if (currentElement->nodeType() == NT_ELEMENT)
     {
-      currentElement->insert(attr, val);
+      dynamic_cast<CHTMLNodeElement *>(currentElement)->insert(attr, val);
+    }
+    else
+    {
+      CODE_ERROR();
     }
   }
 
@@ -72,7 +79,7 @@ namespace GCL::parsers::html
   {
     /* Start at the start point and search till the end. */
 
-    while (start->type() != element) start++;
+//    while (start->type() != element) start++;
 
     return start;
   }
@@ -82,18 +89,18 @@ namespace GCL::parsers::html
     if (root)
     {
       createStack.push_front(currentElement);
-      currentElement = currentElement->insert(currentElement, element);
+      currentElement = currentElement->insert(std::make_unique<CHTMLNodeElement>(currentElement, element));
     }
     else
     {
-      root = std::make_unique<CHTMLElement>(currentElement, element);
+      root = std::make_unique<CHTMLNodeElement>(currentElement, element);
       currentElement = root.get();
     }
   }
 
   void CHTMLDocument::setValue(std::string const &val)
   {
-    currentElement->value(val);
+  //  currentElement->value(val);
   }
 
   void CHTMLDocument::closeElement()
@@ -104,14 +111,14 @@ namespace GCL::parsers::html
 
   void CHTMLDocument::closeElement(std::string const &element)
   {
-    if (currentElement->type() == CHTMLElement::string2elementType(element))
-    {
-      closeElement();
-    }
-    else
-    {
-      IMPLEMENT_ME();
-    }
+//    if (currentElement->nodeType() == CHTMLElement::string2elementType(element))
+//    {
+//      closeElement();
+//    }
+//    else
+//    {
+//      IMPLEMENT_ME();
+//    }
   }
 
   CHTMLDocument CHTMLDocument::parseHTMLUnsafe(std::istream &is)

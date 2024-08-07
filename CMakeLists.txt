@@ -46,6 +46,7 @@ set(SOURCES
   source/logger/sinks/streamSink.cpp
   source/parsers/html/htmlAttributes.cpp
   source/parsers/html/htmlDocument.cpp
+  source/parsers/html/htmlNodeBase.cpp
   source/parsers/html/htmlNodeElement.cpp
   source/parsers/html/htmlParser.cpp
   source/parsers/html/htmlLanguageTokens.cpp

@@ -47,11 +47,11 @@
 #include "include/error.h"
 
 /* The HTML document class stores all the data that makes up the document.
- * There should only be one root element in the DOM and this is the html element. All other elements fall under the root element.
- * Elements are stored as children of a higher level element. Any attributes are stored within the element. The element value
- * is stored in the element.
- * All attribute values and elements values are stored as text.
- * The stack contains the elements in order of creation. This stores the current element, and all elements above the current element
+ * There should only be one root node in the DOM and this is the docType node. All other nodes fall under the root node.
+ * Nodes are stored as children of a higher level node. Any attributes are stored within the node. The node values
+ * is stored in the node.
+ * All attribute values and node values are stored as text.
+ * The stack contains the nodes in order of creation. This stores the current node, and all elements above the current node
  * in the tree. This should allow easy DOM creation. Note: The stack is used during tree creation.
  */
 
@@ -177,6 +177,7 @@ namespace GCL::parsers::html
       std::unique_ptr<CHTMLNodeBase> root;
       std::deque<pointer> createStack;
       pointer currentElement = nullptr;
+      bool force_quirks = false;
 
   };
 

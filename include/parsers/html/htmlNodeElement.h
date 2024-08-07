@@ -29,7 +29,7 @@
 //
 // HISTORY:             2024-06-18 GGB - File Created
 //
-//**********************************************************************************************************************************
+//**********************************************************************************************************************************/
 
 #ifndef PARSERS_HTML_HTMLELEMENT_H
 #define PARSERS_HTML_HTMLELEMENT_H
@@ -177,10 +177,9 @@ namespace GCL::parsers::html
     HTML_WBR,           // 4.5.28
   };
 
-  class CHTMLElement : public CHTMLNodeBase
+  class CHTMLNodeElement : public CHTMLNodeBase
   {
   public:
-    using nodeType_t = CHTLNodeBase::nodeType_t;
     enum categories_e
     {
       CAT_NONE,
@@ -207,8 +206,8 @@ namespace GCL::parsers::html
     using child_ref = std::reference_wrapper<child_type>;
     using child_byType = std::map<htmlElements_e, child_ref>;
 
-    CHTMLElement(CHTMLNodeBase *parent, std::string const &);
-    ~CHTMLElement() = default;
+    CHTMLNodeElement(CHTMLNodeBase *parent, std::string const &);
+    ~CHTMLNodeElement() = default;
 
     /*! @brief      Returns true if the node as attributes.
      *  @returns    true if the node has attributes.
@@ -220,13 +219,10 @@ namespace GCL::parsers::html
     std::string value() const noexcept { return elementValue; }
     void value(std::string const &) noexcept;
 
-    virtual nodeType_t nodeType() const noexcept { return 2; }
+    virtual nodeType_t nodeType() const noexcept { return NT_ELEMENT; }
 
     void insert(CHTMLAttribute &&);
     void insert(std::string const &attr, std::string const &val);
-
-    child_pointer insert(std::unique_ptr<CHTMLNodeBase> &&);
-    child_pointer insert(CHTMLNodeBase *, std::string const &);
 
     attribute_iterator attributes_begin() { return attributes.begin(); }
     attribute_const_iterator attributes_begin() const { return attributes.cbegin(); }
@@ -273,7 +269,7 @@ namespace GCL::parsers::html
     static std::string elementType2string(htmlElements_e type) noexcept;
 
   private:
-    CHTMLElement() = delete;
+    CHTMLNodeElement() = delete;
 
     using elementType_t = std::variant<std::monostate, htmlElements_e, std::string>;
 
@@ -282,9 +278,9 @@ namespace GCL::parsers::html
     std::string elementValue;
     attribute_collection attributes;
 
-    friend bool operator==(CHTMLElement const &, CHTMLElement const &) { return false; };
-    friend bool operator==(CHTMLElement const &, std::string const &) { return false; };
-    friend bool operator==(CHTMLElement const &, htmlElements_e) { return false; };
+    friend bool operator==(CHTMLNodeElement const &, CHTMLNodeElement const &) { return false; };
+    friend bool operator==(CHTMLNodeElement const &, std::string const &) { return false; };
+    friend bool operator==(CHTMLNodeElement const &, htmlElements_e) { return false; };
   };
 
   bool operator==(std::string const &, htmlElements_e);

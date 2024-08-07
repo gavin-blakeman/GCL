@@ -17,6 +17,8 @@ namespace GCL::parsers::html
 
       std::string comment() const noexcept { return value; }
 
+      virtual nodeType_t nodeType() const noexcept { return NT_COMMENT; }
+
     private:
       CHTMLNodeComment() = delete;
 
