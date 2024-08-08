@@ -77,7 +77,7 @@ namespace GCL::parsers
   protected:
     std::size_t lineNo = 0;
     std::size_t linePos = 0;
-    SCL::circularBuffer<int, 1024, false, false> buffer;
+    SCL::circular_biBuffer<int, 1024, false, 8, false> buffer;
 
     int front()
     {
@@ -144,17 +144,18 @@ namespace GCL::parsers
     {
       while (!buffer.full() && !inputStream.eof())
       {
-        buffer.push(inputStream.get());
+        buffer.push_back(inputStream.get());
       }
       if (inputStream.eof())
       {
         eos = true;
-        buffer.push(EOF);
+        buffer.push_back(EOF);
       }
     }
 
-    void consume()
+    int consume()
     {
+      lastChar = front();
       if(buffer.front() == '\n')
       {
         lineNo++;
@@ -165,14 +166,15 @@ namespace GCL::parsers
         linePos++;
       }
       buffer.pop();
+
+      return lastChar;
     }
 
-    int pop()
+    void reconsume()
     {
-      int rv = front();
-      consume();
-      return rv;
+      buffer.push_front(lastChar);
     }
+
 
   private:
     CLexer() = delete;
@@ -183,6 +185,7 @@ namespace GCL::parsers
 
     std::istream &inputStream;
     bool eos = false;
+    int lastChar;
 
   friend std::ostream &operator<<(std::ostream &os, CToken const &);  // This needs to be here as it needs the token map.
   };

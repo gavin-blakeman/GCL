@@ -63,22 +63,27 @@ namespace GCL::parsers::html
 
     enum smState_e
     {
+      SM_NONE,
       SM_DATA,
-      SM_RCDATA, SM_RCDATA_LESSTHAN, SM_RCDATA_END_TAG_OPEN,
+      SM_RCDATA, SM_RCDATA_LESSTHAN, SM_RCDATA_END_TAG_OPEN, SM_RCDATA_END_TAG_NAME,
       SM_CHARACTER_REFERENCE,
       SM_TAG_OPEN, SM_TAG_NAME, SM_END_TAG_OPEN, SM_TAG_SELF_CLOSING_START,
       SM_MARKUP_DECLARATION_OPEN,
       SM_BOGUS_COMMENT,
       SM_BEFORE_ATTR_NAME,
-      SM_RAWTEXT, SM_RAWTEXT_LESSTHAN,
-      SM_SCRIPT, SM_SCRIPT_LESSTHAN,
+      SM_RAWTEXT, SM_RAWTEXT_LESSTHAN, SM_RAWTEXT_END_TAG_OPEN, SM_RAWTEXT_END_TAG_NAME,
+      SM_SCRIPT, SM_SCRIPT_LESSTHAN, SM_SCRIPT_END_TAG_OPEN, SM_SCRIPT_END_TAG_NAME,
+      SM_SCRIPT_ESCAPE_START, SM_SCRIPT_ESCAPE_START_DASH, SM_SCRIPT_ESCAPED,
+      SM_SCRIPT_ESCAPED_DASH, SM_SCRIPT_ESCAPED_START_DASH_DASH, SM_SCRIPT_ESCAPED_LESSTHAN, SM_SCRIPT_ESCAPED_END_TAG_OPEN,
+      SM_SCRIPT_DOUBLE_ESCAPE_START, SM_SCRIPT_ESCAPED_END_TAG_NAME,
       SM_PLAINTEXT,
     };
 
     smState_e smState = SM_DATA;
-    smState_e retState;
+    smState_e retState = SM_NONE;
 
     std::string temporaryBuffer;
+    std::string lastStartTag;
 
     bool processData(CToken &);
     bool processTagOpen(CToken &);
@@ -86,9 +91,25 @@ namespace GCL::parsers::html
     bool processTagName(CToken &);
     bool processPlainText(CToken &);
     bool processRawText(CToken &);
+    bool processRawTextLessThan(CToken &);
+    bool processRawTextEndTagOpen(CToken &);
+    bool processRawTextEndTagName(CToken &);
     bool processRCData(CToken &);
     bool processRCDataLessThan(CToken &);
+    bool processRCDataEndTagOpen(CToken &);
+    bool processRCDataEndTagName(CToken &);
     bool processScript(CToken &);
+    bool processScriptLessThan(CToken &);
+    bool processScriptEndTagOpen(CToken &);
+    bool processScriptEndTagName(CToken &);
+    bool processScriptEscapeStart(CToken &);
+    bool processScriptEscapeStartDash(CToken &);
+    bool processScriptEscaped(CToken &);
+    bool processScriptEscapedDash(CToken &);
+    bool processScriptEscapedDashDash(CToken &);
+    bool processScriptEscapedLessThan(CToken &);
+    bool processScriptEscapedEndTagOpen(CToken &);
+    bool processScriptEscapedEndTagName(CToken &);
   };
 
 } // namesapce
