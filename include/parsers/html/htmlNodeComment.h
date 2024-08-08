@@ -4,6 +4,7 @@
 // Standard C++ header files
 #include <string>
 
+#include "htmlNodeTypes.h"
 // GCL header files
 #include "include/parsers/html/htmlNodeBase.h"
 

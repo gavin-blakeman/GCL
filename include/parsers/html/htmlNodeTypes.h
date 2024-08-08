@@ -1,7 +1,7 @@
 #ifndef GCL_PARSERS_HTML_NODETYPES_H
 #define GCL_PARSERS_HTML_NODETYPES_H
 
-// Standard C++ library
+// Standard C++ library header files.
 #include <cstdint>
 
 namespace GCL::parsers::html
