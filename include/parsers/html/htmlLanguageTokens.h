@@ -3,6 +3,8 @@
 // PROJECT:             General Class Library
 // SUBSYSTEM:           Parsers::HTML Parser
 // FILE:                htmlTokens.h
+// FILE:                htmlLexer.h
+// FILE:                htmlTokens.h
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,6 +25,7 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
+
 // OVERVIEW:            Class that parsers the tokens
 //
 // CLASSES INCLUDED:
@@ -70,3 +73,4 @@ namespace GCL::parsers::html
 }
 
 #endif // PARSERS_HTML_TOKENS_H
+

@@ -58,6 +58,12 @@ namespace GCL::parsers
   class CLexer
   {
   public:
+    using tokenID_t = CToken::tokenID_t;
+    using tokenStringMap_t = CToken::tokenStringMap_t;
+
+    using value_type = CToken;
+    using token_container = _Container<value_type>;
+
     /*! @brief      Constructor.
      *  @param[in]  is: The input stream to parse.
      *  @param[in]  begin: Iterator to the start of the token/string pairs.
@@ -104,12 +110,21 @@ namespace GCL::parsers
       {
         if(buffer.front() == '\n')
         {
+<<<<<<< HEAD
           lineNo++;
           linePos = 0;
         }
         else
         {
           linePos++;
+=======
+          row++;
+          col = 1;
+        }
+        else
+        {
+          col++;
+>>>>>>> 3e5bc50 (Html parsers dev (#3))
         }
         buffer.pop();
         n--;

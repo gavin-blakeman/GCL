@@ -2,7 +2,11 @@
 //
 // PROJECT:             General Class Library
 // SUBSYSTEM:           Parsers::HTML Parser
+<<<<<<<< HEAD:include/parsers/html/htmlTokeniser.h
 // FILE:                htmlLexer.h
+========
+// FILE:                htmlTokens.h
+>>>>>>>> 3e5bc50 (Html parsers dev (#3)):include/parsers/html/htmlLanguageTokens.h
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,6 +27,7 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
+<<<<<<<< HEAD:include/parsers/html/htmlTokeniser.h
 // OVERVIEW:            Class that lexes the html stream
 //
 // CLASSES INCLUDED:
@@ -92,3 +97,41 @@ namespace GCL::parsers::html
 } // namesapce
 
 #endif // PARSERS_HTML_HTMLTOKENISER_H
+========
+// OVERVIEW:            Class that parsers the tokens
+//
+// CLASSES INCLUDED:
+//
+// HISTORY:             2024-08-05 GGB - File Created
+//
+//**********************************************************************************************************************************/
+
+#ifndef PARSERS_HTML_TOKENS_H
+#define PARSERS_HTML_TOKENS_H
+
+// parsers library
+#include "include/parsers/token.h"
+#include "include/parsers/languageTokens.h"
+
+namespace GCL::parsers::html
+{
+  enum htmlTokenTypes : CToken::tokenID_t
+  {
+    L_TAG_OPEN = TT_NEXT,     // <
+    L_TAG_CLOSE,              // </
+    R_TAG_OPEN,               // >
+    R_TAG_CLOSE,              // />
+    L_TAG_DOCTYPE,            // <!
+    COMMENT_OPEN,             // <!---
+    COMMENT_CLOSE,            // --->
+    ASSIGN,                   // =
+    ID,
+    VALUE,
+    TEXT,
+    ATTRIBUTE,
+  };
+
+}
+
+#endif // PARSERS_HTML_TOKENS_H
+>>>>>>>> 3e5bc50 (Html parsers dev (#3)):include/parsers/html/htmlLanguageTokens.h

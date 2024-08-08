@@ -139,6 +139,7 @@ namespace GCL::parsers::html
 
   CHTMLNodeElement::CHTMLNodeElement(CHTMLNodeBase *parent, std::string const &typeText) : CHTMLNodeBase(parent)
   {
+std::cout << "Create Node: " << typeText << std::endl;
     if (elementText.contains_RHS(typeText))
     {
       elementType = elementText.LHS(typeText);

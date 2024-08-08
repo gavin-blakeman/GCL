@@ -86,6 +86,7 @@ namespace GCL::parsers::html
     void parseToken(CToken const &token);
 
     void parseTokenModeInitial(CToken const &token);
+
   };
 } // namespace
 

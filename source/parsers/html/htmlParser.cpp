@@ -72,7 +72,7 @@ namespace GCL::parsers::html
     {
       case TT_CHARACTER:
       {
-        
+
         break;
       }
         case TT_COMMENT:
