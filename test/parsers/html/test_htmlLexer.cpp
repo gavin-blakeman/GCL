@@ -70,7 +70,11 @@ BOOST_AUTO_TEST_CASE(test_file)
 
   lexer.getTokens();
 
+<<<<<<< HEAD
   BOOST_TEST(tokens.size() == 4470);
+=======
+  BOOST_TEST(tokens.size() == 4472);
+>>>>>>> KararaMining-htmlParsers-dev
 }
 
 

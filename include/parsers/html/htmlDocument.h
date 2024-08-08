@@ -43,20 +43,21 @@
 
 // GCL Header files
 #include "include/parsers/html/htmlNodeBase.h"
-//#include "include/parsers/html/htmlNodeElement.h"
 #include "include/error.h"
 
 /* The HTML document class stores all the data that makes up the document.
- * There should only be one root element in the DOM and this is the html element. All other elements fall under the root element.
- * Elements are stored as children of a higher level element. Any attributes are stored within the element. The element value
- * is stored in the element.
- * All attribute values and elements values are stored as text.
- * The stack contains the elements in order of creation. This stores the current element, and all elements above the current element
+ * There should only be one root node in the DOM and this is the docType node. All other nodes fall under the root node.
+ * Nodes are stored as children of a higher level node. Any attributes are stored within the node. The node values
+ * is stored in the node.
+ * All attribute values and node values are stored as text.
+ * The stack contains the nodes in order of creation. This stores the current node, and all elements above the current node
  * in the tree. This should allow easy DOM creation. Note: The stack is used during tree creation.
  */
 
 namespace GCL::parsers::html
 {
+  class CHTMLParser;
+
   template<bool isConst>
   class CHTMLDocumentIterator;
 
@@ -169,15 +170,22 @@ namespace GCL::parsers::html
 //      CHTMLPermissions permissionsPolicy;
 //      CModuleMap moduleMap;
 
+
+    void insertComment(std::string const &);
+
 #ifdef TEST
     public:
 #else
     private:
 #endif
       std::unique_ptr<CHTMLNodeBase> root;
-      std::deque<pointer> createStack;
-      pointer currentElement = nullptr;
+      std::deque<pointer> openElementsStack;  // Cannot be a stack as we need to acces random elements as well.
+                                              // front = first element in, back = last element in. Push/Pop to back.
 
+      inline pointer currentNode() noexcept { return ( (openElementsStack.empty()) ? nullptr : openElementsStack.back() ); }
+      inline void push(pointer p) noexcept { openElementsStack.push_back(p); }
+      inline void pop() noexcept { openElementsStack.pop_back(); }
+  friend CHTMLParser;
   };
 
   template<bool isConst>

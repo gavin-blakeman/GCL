@@ -36,8 +36,11 @@
 
 // Miscellaneous library header files.
 #include "include/error.h"
+
+// Parsers header files
 #include "include/parsers/html/htmlParser.h"
 #include "include/parsers/html/htmlNodeComment.h"
+#include "include/parsers/html/htmlNodeElement.h"
 
 namespace GCL::parsers::html
 {
@@ -48,15 +51,25 @@ namespace GCL::parsers::html
 
   void CHTMLDocument::addAttribute(std::string const &attr, std::string const &val)
   {
+<<<<<<< HEAD
     if (currentElement->type() == NT_ELEMENT)
     {
       currentElement->insert(attr, val);
+=======
+    if (currentNode()->nodeType() == NT_ELEMENT)
+    {
+      dynamic_cast<CHTMLNodeElement *>(currentNode())->insert(attr, val);
+    }
+    else
+    {
+      CODE_ERROR();
+>>>>>>> KararaMining-htmlParsers-dev
     }
   }
 
   void CHTMLDocument::addComment(std::string const &comment)
   {
-    currentElement->insert(std::make_unique<CHTMLNodeComment>(currentElement, comment));
+    //currentNode()->insert(std::make_unique<CHTMLNodeComment>(currentElement, comment));
   }
 
 //  CHTMLDocument::const_iterator CHTMLDocument::find(htmlElements_e element, const_iterator start) const noexcept
@@ -72,46 +85,50 @@ namespace GCL::parsers::html
   {
     /* Start at the start point and search till the end. */
 
-    while (start->type() != element) start++;
+//    while (start->type() != element) start++;
 
     return start;
+  }
+
+  void CHTMLDocument::insertComment(std::string const &c)
+  {
+    push(currentNode()->insert(std::make_unique<CHTMLNodeComment>(currentNode(), c)));
   }
 
   void CHTMLDocument::openElement(std::string const &element)
   {
     if (root)
     {
-      createStack.push_front(currentElement);
-      currentElement = currentElement->insert(currentElement, element);
+//      createStack.push_front(currentElement);
+  //    currentNode()->insert(std::make_unique<CHTMLNodeElement>(currentElement, element));
     }
     else
     {
-      root = std::make_unique<CHTMLElement>(currentElement, element);
-      currentElement = root.get();
+//      root = std::make_unique<CHTMLNodeElement>(currentElement, element);
     }
   }
 
   void CHTMLDocument::setValue(std::string const &val)
   {
-    currentElement->value(val);
+  //  currentElement->value(val);
   }
 
   void CHTMLDocument::closeElement()
   {
-    currentElement = createStack.front();
-    createStack.pop_front();
+//    currentElement = createStack.front();
+//    createStack.pop_front();
   }
 
   void CHTMLDocument::closeElement(std::string const &element)
   {
-    if (currentElement->type() == CHTMLElement::string2elementType(element))
-    {
-      closeElement();
-    }
-    else
-    {
-      IMPLEMENT_ME();
-    }
+//    if (currentElement->nodeType() == CHTMLElement::string2elementType(element))
+//    {
+//      closeElement();
+//    }
+//    else
+//    {
+//      IMPLEMENT_ME();
+//    }
   }
 
   CHTMLDocument CHTMLDocument::parseHTMLUnsafe(std::istream &is)

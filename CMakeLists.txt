@@ -46,8 +46,10 @@ set(SOURCES
   source/logger/sinks/streamSink.cpp
   source/parsers/html/htmlAttributes.cpp
   source/parsers/html/htmlDocument.cpp
+  source/parsers/html/htmlNodeBase.cpp
   source/parsers/html/htmlNodeElement.cpp
   source/parsers/html/htmlParser.cpp
+  source/parsers/html/htmlTokeniser.cpp
   source/parsers/html/htmlLanguageTokens.cpp
   source/parsers/token.cpp
   source/pluginManager/pluginManager.cpp
@@ -95,7 +97,7 @@ set(HEADERS
   include/parsers/html/htmlNodeDocumentType.h
   include/parsers/html/htmlNodeElement.h
   include/parsers/html/htmlNodeText.h
-  include/parsers/html/htmlLexer.hpp
+  include/parsers/html/htmlTokeniser.h
   include/parsers/html/htmlParser.h
   include/parsers/html/htmlLanguageTokens.h
   include/parsers/lexer.hpp

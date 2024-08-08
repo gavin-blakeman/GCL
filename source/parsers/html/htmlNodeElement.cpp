@@ -48,7 +48,7 @@ namespace GCL::parsers::html
     bool isForeign = false;
     bool isNormal = false;
     bool canOmitEnd = false;
-    std::set<CHTMLElement::categories_e> elementCategories;
+    std::set<CHTMLNodeElement::categories_e> elementCategories;
   };
 
   static std::map<htmlElements_e, elementAttributes_t> const elementDetails;
@@ -129,7 +129,7 @@ namespace GCL::parsers::html
 
   bool operator==(std::string const &lhs, htmlElements_e rhs)
   {
-    return (lhs == CHTMLElement::elementType2string(rhs));
+    return (lhs == CHTMLNodeElement::elementType2string(rhs));
   }
 
   bool operator!=(std::string const &lhs, htmlElements_e rhs)
@@ -137,7 +137,7 @@ namespace GCL::parsers::html
     return !(lhs == rhs);
   }
 
-  CHTMLElement::CHTMLElement(CHTMLNodeBase *parent, std::string const &typeText) : CHTMLNodeBase(parent)
+  CHTMLNodeElement::CHTMLNodeElement(CHTMLNodeBase *parent, std::string const &typeText) : CHTMLNodeBase(parent)
   {
 std::cout << "Create Node: " << typeText << std::endl;
     if (elementText.contains_RHS(typeText))
@@ -150,18 +150,12 @@ std::cout << "Create Node: " << typeText << std::endl;
     }
   }
 
-  void CHTMLElement::insert(CHTMLAttribute &&attr)
+  void CHTMLNodeElement::insert(CHTMLAttribute &&attr)
   {
     attributes.emplace(attr.attribute(), std::move(attr));
   }
 
-  CHTMLElement::child_pointer CHTMLElement::insert(std::unique_ptr<CHTMLNodeBase> &&ins)
-  {
-    elementChildren.push_back(std::move(ins));
-  }
-
-
-  void CHTMLElement::insert(std::string const &attr, std::string const &val)
+  void CHTMLNodeElement::insert(std::string const &attr, std::string const &val)
   {
     /* Adding an attribute. */
     attributes.emplace(std::piecewise_construct,
@@ -170,12 +164,7 @@ std::cout << "Create Node: " << typeText << std::endl;
 
   }
 
-  CHTMLElement::child_pointer CHTMLElement::insert(CHTMLNodeBase *p, std::string const &etype)
-  {
-    elementChildren.push_back(std::make_unique<CHTMLElement>(p, etype));
-  }
-
-  bool CHTMLElement::isVoid(std::string const &element) noexcept
+  bool CHTMLNodeElement::isVoid(std::string const &element) noexcept
   {
     if (elementText.contains_RHS(element))
     {
@@ -187,12 +176,12 @@ std::cout << "Create Node: " << typeText << std::endl;
     }
   }
 
-  bool CHTMLElement::isVoid(htmlElements_e element) noexcept
+  bool CHTMLNodeElement::isVoid(htmlElements_e element) noexcept
   {
     return elementDetails.at(element).isVoid;
   }
 
-  std::string CHTMLElement::elementType2string(htmlElements_e type) noexcept
+  std::string CHTMLNodeElement::elementType2string(htmlElements_e type) noexcept
   {
     if (elementText.contains_LHS(type))
     {
@@ -204,7 +193,7 @@ std::cout << "Create Node: " << typeText << std::endl;
     }
   }
 
-  htmlElements_e CHTMLElement::string2elementType(std::string const &str) noexcept
+  htmlElements_e CHTMLNodeElement::string2elementType(std::string const &str) noexcept
   {
     if (elementText.contains_RHS(str))
     {
@@ -216,12 +205,12 @@ std::cout << "Create Node: " << typeText << std::endl;
     }
   }
 
-  void CHTMLElement::value(std::string const &v) noexcept
+  void CHTMLNodeElement::value(std::string const &v) noexcept
   {
     elementValue = v;
   }
 
-  std::string CHTMLElement::type() const noexcept
+  std::string CHTMLNodeElement::type() const noexcept
   {
     if (std::holds_alternative<htmlElements_e>(elementType))
     {

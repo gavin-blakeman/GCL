@@ -47,6 +47,17 @@ namespace GCL::parsers
   {
   }
 
+  CToken &CToken::operator=(CToken const &other)
+  {
+    if (this != &other)
+    {
+      tokenType = other.tokenType;
+      tokenValue = other.tokenValue;
+    }
+
+    return *this;
+  }
+
   std::string CToken::to_string() const
   {
     return std::string ("(" + std::to_string(tokenRow) + ", " + std::to_string(tokenCol) + ")"

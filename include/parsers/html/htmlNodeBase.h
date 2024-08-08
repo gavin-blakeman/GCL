@@ -1,15 +1,55 @@
+//**********************************************************************************************************************************
+//
+// PROJECT:             General Class Library
+// SUBSYSTEM:           Parsers::HTML Parser
+// FILE:                htmlNodeBase.h
+// LANGUAGE:            C++
+// TARGET OS:           None.
+// NAMESPACE:           GCL
+// AUTHOR:              Gavin Blakeman.
+// LICENSE:             GPLv2
+//
+//                      Copyright 2024 Gavin Blakeman.
+//                      This file is part of the General Class Library (GCL)
+//
+//                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
+//                      Public License as published by the Free Software Foundation, either version 2 of the License, or
+//                      (at your option) any later version.
+//
+//                      GCL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+//                      implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+//                      for more details.
+//
+//                      You should have received a copy of the GNU General Public License along with GCL.  If not,
+//                      see <http://www.gnu.org/licenses/>.
+//
+// OVERVIEW:            Class that represents the HTML elements.
+//
+// CLASSES INCLUDED:
+//
+// HISTORY:             2024-08-05 GGB - File Created
+//
+//**********************************************************************************************************************************/
+
+
 #ifndef PARSERS_HTML_HTMLNODEBASE_H
 #define PARSERS_HTML_HTMLNODEBASE_H
 
 // Standard C++ library header files
 #include <list>
+#include <memory>
+
+// Parsers header files
+#include "include/parsers/html/htmlNodeTypes.h"
+
+// GCL header files
+#include "include/parsers/html/htmlNodeTypes.h"
 
 namespace GCL::parsers::html
 {
   class CHTMLNodeBase
   {
   public:
-    using nodeType_t = unsigned int;
     using child_type = CHTMLNodeBase;
     using child_collection = std::list<std::unique_ptr<child_type>>;
     using child_pointer = child_type *;
@@ -18,6 +58,7 @@ namespace GCL::parsers::html
 
     CHTMLNodeBase(CHTMLNodeBase *parent) : parentNode(parent) {}
     virtual ~CHTMLNodeBase() = default;
+
 
     child_iterator child_begin() { return childCollection.begin(); }
     child_const_iterator child_begin() const { return childCollection.cbegin(); }

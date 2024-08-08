@@ -36,13 +36,19 @@
 // Standard C++ library header files
 
 // GCL library header files
+<<<<<<< HEAD
 #include "include/parsers/html/htmlLexer.hpp"
+=======
+#include "include/parsers/token.h"
+#include "include/parsers/html/htmlTokeniser.h"
+>>>>>>> KararaMining-htmlParsers-dev
 #include "include/parsers/html/htmlLanguageTokens.h"
 
 namespace GCL::parsers::html
 {
   void CHTMLParser::parseDocument()
   {
+<<<<<<< HEAD
     CHTMLLexer<std::vector> lexer(inputStream, tokens);
     lexer.getTokens();
     parseTokens();
@@ -147,6 +153,44 @@ namespace GCL::parsers::html
           parseCommentOpen();
           break;
         }
+=======
+    using namespace GCL::parsers;
+
+    CHTMLTokeniser lexer(inputStream);
+
+    for(CToken token = lexer.getToken(); token != TT_EOF; token = lexer.getToken())
+    {
+      parseToken(token);
+    }
+  }
+
+  void CHTMLParser::parseToken(CToken const &token)
+  {
+    switch (insertionMode)
+    {
+      case IM_INITIAL:
+      {
+        parseTokenModeInitial(token);
+        break;
+      }
+    }
+  }
+
+  void CHTMLParser::parseTokenModeInitial(CToken const &token)
+  {
+    switch(token.type())
+    {
+      case TT_CHARACTER:
+      {
+
+        break;
+      }
+        case TT_COMMENT:
+        {
+          DOM.insertComment(token.value());
+          break;
+        }
+>>>>>>> KararaMining-htmlParsers-dev
         case ASSIGN:
         case VALUE:
         case ID:
@@ -157,12 +201,19 @@ namespace GCL::parsers::html
         }
         case L_TAG_DOCTYPE:
         {
+<<<<<<< HEAD
           parseLTagDocType();
+=======
+>>>>>>> KararaMining-htmlParsers-dev
           break;
         }
         case TEXT:
         {
+<<<<<<< HEAD
           DOM.setValue(tokenIterator->value());
+=======
+   //       DOM.setValue(tokenIterator->value());
+>>>>>>> KararaMining-htmlParsers-dev
           break;
         }
         case TT_EOF:
@@ -176,7 +227,10 @@ namespace GCL::parsers::html
           break;
         }
       }
+<<<<<<< HEAD
     }
+=======
+>>>>>>> KararaMining-htmlParsers-dev
   }
 
 } // namespace

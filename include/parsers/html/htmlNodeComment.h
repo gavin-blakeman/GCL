@@ -4,6 +4,7 @@
 // Standard C++ header files
 #include <string>
 
+#include "htmlNodeTypes.h"
 // GCL header files
 #include "include/parsers/html/htmlNodeBase.h"
 
@@ -16,6 +17,8 @@ namespace GCL::parsers::html
       virtual ~CHTMLNodeComment() = default;
 
       std::string comment() const noexcept { return value; }
+
+      virtual nodeType_t nodeType() const noexcept { return NT_COMMENT; }
 
     private:
       CHTMLNodeComment() = delete;

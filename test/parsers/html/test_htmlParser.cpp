@@ -26,8 +26,18 @@ BOOST_AUTO_TEST_CASE(lTag)
   stream << "<html>";
 
   CHTMLParser testParser(stream, testDocument);
+<<<<<<< HEAD
   BOOST_REQUIRE_NO_THROW(testParser.parseDocument());
   BOOST_TEST(testDocument.root->type() == "html");
+=======
+<<<<<<< HEAD
+  BOOST_REQUIRE_NO_THROW(testParser.parseDocument());
+//  BOOST_TEST(testDocument.root->nodeType() == NT_ELEMENT);
+=======
+  //BOOST_REQUIRE_NO_THROW(testParser.parseDocument());
+  //BOOST_TEST(testDocument.root->nodtype() == "html");
+>>>>>>> 32b1331 (progressing changes)
+>>>>>>> KararaMining-htmlParsers-dev
 }
 
 BOOST_AUTO_TEST_CASE(test_parser)
@@ -43,8 +53,18 @@ BOOST_AUTO_TEST_CASE(test_parser)
 ;
 
   CHTMLParser testParser(stream, testDocument);
+<<<<<<< HEAD
   BOOST_REQUIRE_NO_THROW(testParser.parseDocument());
   BOOST_TEST(testDocument.root->type() == "html");
+=======
+<<<<<<< HEAD
+//  BOOST_REQUIRE_NO_THROW(testParser.parseDocument());
+//  BOOST_TEST(testDocument.root->nodeType() == NT_ELEMENT);
+=======
+  //BOOST_REQUIRE_NO_THROW(testParser.parseDocument());
+  //BOOST_TEST(testDocument.root->nodeType() == NT_DOCTYPE);
+>>>>>>> 32b1331 (progressing changes)
+>>>>>>> KararaMining-htmlParsers-dev
 }
 
 

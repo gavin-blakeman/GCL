@@ -2,7 +2,7 @@
 //
 // PROJECT:             General Class Library
 // SUBSYSTEM:           Parsers::HTML Parser
-// FILE:                htmlTokenTypes.h
+// FILE:                htmlNodeBase.h
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,35 +23,25 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class that represents the token types.
+// OVERVIEW:            Class that represents the HTML elements.
 //
 // CLASSES INCLUDED:
 //
-// HISTORY:             2024-06-18 GGB - File Created
+// HISTORY:             2024-08-05 GGB - File Created
 //
-//**********************************************************************************************************************************
+//**********************************************************************************************************************************/
 
-#include "include/parsers/html/htmlLanguageTokens.h"
+#include "include/parsers/html/htmlNodeBase.h"
 
 namespace GCL::parsers::html
 {
-  SCL::bimap<CToken::tokenID_t, std::string> const tokenStrings =
+  CHTMLNodeBase::child_pointer CHTMLNodeBase::insert(std::unique_ptr<CHTMLNodeBase> &&ins)
   {
-<<<<<<< HEAD
-    { L_TAG_OPEN, "<" },
-    { L_TAG_CLOSE, "</" },
-=======
->>>>>>> KararaMining-htmlParsers-dev
-    { R_TAG_OPEN, ">" },
-    { R_TAG_CLOSE, "/>" },
-    { L_TAG_DOCTYPE, "<!"},
-    { COMMENT_OPEN, "<!---" },
-    { COMMENT_CLOSE, "--->" },
-    { ASSIGN,  "=" },
-    { ID, "ID"},
-    { VALUE, "Value"},
-    { TEXT, "Text"},
-    { ATTRIBUTE, "Attr"},
-  };
+    //elementChildren.push_back(std::move(ins));
+  }
 
-} // namespace
+  CHTMLNodeBase::child_pointer CHTMLNodeBase::insert(CHTMLNodeBase *p, std::string const &etype)
+  {
+    //elementChildren.push_back(std::make_unique<CHTMLElement>(p, etype));
+  }
+}
