@@ -2,11 +2,7 @@
 //
 // PROJECT:             General Class Library
 // SUBSYSTEM:           Parsers::HTML Parser
-<<<<<<<< HEAD:include/parsers/html/htmlTokeniser.h
-// FILE:                htmlLexer.h
-========
-// FILE:                htmlTokens.h
->>>>>>>> 3e5bc50 (Html parsers dev (#3)):include/parsers/html/htmlLanguageTokens.h
+// FILE:                htmlTokeniser.h
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -27,7 +23,6 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-<<<<<<<< HEAD:include/parsers/html/htmlTokeniser.h
 // OVERVIEW:            Class that lexes the html stream
 //
 // CLASSES INCLUDED:
@@ -69,7 +64,7 @@ namespace GCL::parsers::html
     enum smState_e
     {
       SM_DATA,
-      SM_RCDATA, SM_RCDATA_LESSTHAN,
+      SM_RCDATA, SM_RCDATA_LESSTHAN, SM_RCDATA_END_TAG_OPEN,
       SM_CHARACTER_REFERENCE,
       SM_TAG_OPEN, SM_TAG_NAME, SM_END_TAG_OPEN, SM_TAG_SELF_CLOSING_START,
       SM_MARKUP_DECLARATION_OPEN,
@@ -82,6 +77,8 @@ namespace GCL::parsers::html
 
     smState_e smState = SM_DATA;
     smState_e retState;
+
+    std::string temporaryBuffer;
 
     bool processData(CToken &);
     bool processTagOpen(CToken &);
@@ -97,41 +94,3 @@ namespace GCL::parsers::html
 } // namesapce
 
 #endif // PARSERS_HTML_HTMLTOKENISER_H
-========
-// OVERVIEW:            Class that parsers the tokens
-//
-// CLASSES INCLUDED:
-//
-// HISTORY:             2024-08-05 GGB - File Created
-//
-//**********************************************************************************************************************************/
-
-#ifndef PARSERS_HTML_TOKENS_H
-#define PARSERS_HTML_TOKENS_H
-
-// parsers library
-#include "include/parsers/token.h"
-#include "include/parsers/languageTokens.h"
-
-namespace GCL::parsers::html
-{
-  enum htmlTokenTypes : CToken::tokenID_t
-  {
-    L_TAG_OPEN = TT_NEXT,     // <
-    L_TAG_CLOSE,              // </
-    R_TAG_OPEN,               // >
-    R_TAG_CLOSE,              // />
-    L_TAG_DOCTYPE,            // <!
-    COMMENT_OPEN,             // <!---
-    COMMENT_CLOSE,            // --->
-    ASSIGN,                   // =
-    ID,
-    VALUE,
-    TEXT,
-    ATTRIBUTE,
-  };
-
-}
-
-#endif // PARSERS_HTML_TOKENS_H
->>>>>>>> 3e5bc50 (Html parsers dev (#3)):include/parsers/html/htmlLanguageTokens.h

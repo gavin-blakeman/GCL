@@ -180,7 +180,6 @@ namespace GCL::parsers::html
   class CHTMLNodeElement : public CHTMLNodeBase
   {
   public:
-    using nodeType_t = CHTLNodeBase::nodeType_t;
     enum categories_e
     {
       CAT_NONE,

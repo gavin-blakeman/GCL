@@ -59,6 +59,9 @@ namespace GCL::parsers::html
     CHTMLNodeBase(CHTMLNodeBase *parent) : parentNode(parent) {}
     virtual ~CHTMLNodeBase() = default;
 
+    child_pointer insert(std::unique_ptr<CHTMLNodeBase> &&ins);
+    child_pointer insert(CHTMLNodeBase *p, std::string const &etype);
+
 
     child_iterator child_begin() { return childCollection.begin(); }
     child_const_iterator child_begin() const { return childCollection.cbegin(); }

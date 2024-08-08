@@ -37,11 +37,6 @@ namespace GCL::parsers::html
 {
   SCL::bimap<CToken::tokenID_t, std::string> const tokenStrings =
   {
-<<<<<<< HEAD
-    { L_TAG_OPEN, "<" },
-    { L_TAG_CLOSE, "</" },
-=======
->>>>>>> KararaMining-htmlParsers-dev
     { R_TAG_OPEN, ">" },
     { R_TAG_CLOSE, "/>" },
     { L_TAG_DOCTYPE, "<!"},

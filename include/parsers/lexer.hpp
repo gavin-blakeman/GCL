@@ -61,9 +61,6 @@ namespace GCL::parsers
     using tokenID_t = CToken::tokenID_t;
     using tokenStringMap_t = CToken::tokenStringMap_t;
 
-    using value_type = CToken;
-    using token_container = _Container<value_type>;
-
     /*! @brief      Constructor.
      *  @param[in]  is: The input stream to parse.
      *  @param[in]  begin: Iterator to the start of the token/string pairs.

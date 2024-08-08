@@ -36,124 +36,14 @@
 // Standard C++ library header files
 
 // GCL library header files
-<<<<<<< HEAD
-#include "include/parsers/html/htmlLexer.hpp"
-=======
 #include "include/parsers/token.h"
 #include "include/parsers/html/htmlTokeniser.h"
->>>>>>> KararaMining-htmlParsers-dev
 #include "include/parsers/html/htmlLanguageTokens.h"
 
 namespace GCL::parsers::html
 {
   void CHTMLParser::parseDocument()
   {
-<<<<<<< HEAD
-    CHTMLLexer<std::vector> lexer(inputStream, tokens);
-    lexer.getTokens();
-    parseTokens();
-  }
-
-  void CHTMLParser::parseLTagOpen()
-  {
-    // Starting a new tag.
-    std::string tagName = tokenIterator++->value();
-    DOM.openElement(tagName);
-    while (tokenIterator->type ()== ATTRIBUTE)
-    {
-      // Capture all the attributes.
-      std::string temp = tokenIterator++->value();
-      if (tokenIterator->type() != ASSIGN)
-      {
-        DOM.addAttribute(temp, "");
-      }
-      else
-      {
-        DOM.addAttribute(temp, (++tokenIterator)->value());
-      };
-      tokenIterator++;
-    }
-    if (tokenIterator->type() == R_TAG_OPEN )
-    {
-      if (CHTMLElement::isVoid(tagName))
-      {
-        // Tag is complete and can be added to the DOM
-        DOM.closeElement();
-      }
-    }
-    else if (tokenIterator->type() == R_TAG_CLOSE)
-    {
-      // Tag is complete and can be added to the DOM
-      DOM.closeElement();
-    }
-    else
-    {
-      // Error in file format.
-      IMPLEMENT_ME();
-    }
-  }
-
-  void CHTMLParser::parseLTagClose()
-  {
-    if ((++tokenIterator)->type() == ID)
-    {
-      DOM.closeElement();
-    }
-    else
-    {
-      // Malformed file.
-      IMPLEMENT_ME();
-    }
-  }
-
-  void CHTMLParser::parseLTagDocType()
-  {
-    /* Parse to the closing tag. (R_TAG_OPEN)
-     * Values that need to be supported are
-     * html -> HTML5
-     * <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> -> HTML 4.01
-     * <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"> -> XHTML 1.1
-    */
-
-    
-
-  }
-
-  void CHTMLParser::parseCommentOpen()
-  {
-    // Simply discard all tags until the COMMENT_CLOSE is found.
-    DOM.addComment((++tokenIterator)->value());
-    if (((++tokenIterator)->type() != COMMENT_CLOSE))
-    {
-      // Malformed file.
-      IMPLEMENT_ME();
-    }
-  }
-
-  void CHTMLParser::parseTokens()
-  {
-    tokenIterator = tokens.begin();
-
-    while (tokenIterator != tokens.end())
-    {
-      switch(tokenIterator++->type())
-      {
-        case L_TAG_OPEN:  // "<"
-        {
-          parseLTagOpen();
-          break;
-        }
-        case L_TAG_CLOSE:   // "</"
-        {
-          parseLTagClose();
-          break;
-        }
-        case COMMENT_OPEN:
-        {
-          parseCommentOpen();
-          break;
-        }
-=======
     using namespace GCL::parsers;
 
     CHTMLTokeniser lexer(inputStream);
@@ -190,7 +80,6 @@ namespace GCL::parsers::html
           DOM.insertComment(token.value());
           break;
         }
->>>>>>> KararaMining-htmlParsers-dev
         case ASSIGN:
         case VALUE:
         case ID:
@@ -201,19 +90,11 @@ namespace GCL::parsers::html
         }
         case L_TAG_DOCTYPE:
         {
-<<<<<<< HEAD
-          parseLTagDocType();
-=======
->>>>>>> KararaMining-htmlParsers-dev
           break;
         }
         case TEXT:
         {
-<<<<<<< HEAD
-          DOM.setValue(tokenIterator->value());
-=======
    //       DOM.setValue(tokenIterator->value());
->>>>>>> KararaMining-htmlParsers-dev
           break;
         }
         case TT_EOF:
@@ -227,10 +108,6 @@ namespace GCL::parsers::html
           break;
         }
       }
-<<<<<<< HEAD
-    }
-=======
->>>>>>> KararaMining-htmlParsers-dev
   }
 
 } // namespace

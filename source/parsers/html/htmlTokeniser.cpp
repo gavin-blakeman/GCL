@@ -111,7 +111,7 @@ namespace GCL::parsers::html
     return emit;
   }
 
-  bool CHTMLTokeniser::processPlain(CToken &token)
+  bool CHTMLTokeniser::processPlainText(CToken &token)
   {
     bool emit = false;
     int v = pop();

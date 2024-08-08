@@ -51,11 +51,6 @@ namespace GCL::parsers::html
 
   void CHTMLDocument::addAttribute(std::string const &attr, std::string const &val)
   {
-<<<<<<< HEAD
-    if (currentElement->type() == NT_ELEMENT)
-    {
-      currentElement->insert(attr, val);
-=======
     if (currentNode()->nodeType() == NT_ELEMENT)
     {
       dynamic_cast<CHTMLNodeElement *>(currentNode())->insert(attr, val);
@@ -63,7 +58,6 @@ namespace GCL::parsers::html
     else
     {
       CODE_ERROR();
->>>>>>> KararaMining-htmlParsers-dev
     }
   }
 
@@ -92,7 +86,7 @@ namespace GCL::parsers::html
 
   void CHTMLDocument::insertComment(std::string const &c)
   {
-    push(currentNode()->insert(std::make_unique<CHTMLNodeComment>(currentNode(), c)));
+    //push(currentNode()->insert(std::make_unique<CHTMLNodeComment>(currentNode(), c)));
   }
 
   void CHTMLDocument::openElement(std::string const &element)
