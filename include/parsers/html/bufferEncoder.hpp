@@ -2,7 +2,7 @@
 //
 // PROJECT:             General Class Library
 // SUBSYSTEM:           Parsers
-// FILE:                lexer.h
+// FILE:                bufferEncoder.h
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -31,9 +31,8 @@
 //
 //**********************************************************************************************************************************/
 
-
-#ifndef GCL_PARSERS_LEXER_H
-#define GCL_PARSERS_LEXER_H
+#ifndef GCL_PARSERS_HTML_BUFFERENCODER_H
+#define GCL_PARSERS_HTML_BUFFERENCODER_H
 
 // Standard C++ library header files
 #include <atomic>
@@ -51,16 +50,22 @@
 
 // GCL/parser header files.
 #include "include/parsers/codePoint.h"
-#include "include/parsers/token.h"
-#include "include/parsers/languageTokens.h"
+#include "include/utf.h"
+
+/* Notes:
+ * This class and file are not visible to the HTML API. This class is designed as a setup/teardown class when processing
+ * a stream of bytes. The intent is that the buffer can be filled by a different thread to the html processing thread
+ * this can make the processing independant of read speed.
+ * When the class is created, it needs to determine the stream encoding. (See ...)
+ * The buffer stores code points.
+ */
 
 namespace GCL::parsers
 {
-  class CLexer
+  class CBufferEncoder
   {
   public:
-    using tokenID_t = CToken::tokenID_t;
-    using tokenStringMap_t = CToken::tokenStringMap_t;
+    using value_type = codePoint_t;
 
     /*! @brief      Constructor.
      *  @param[in]  is: The input stream to parse.
@@ -68,129 +73,79 @@ namespace GCL::parsers
      *  @param[in]  end: Iterator to the end of the token/strng pairs.
      *  @param[out] tokens: The container to receiver the tokens.
      */
-    CLexer(std::istream &is) : inputStream(is)
+    CBufferEncoder(std::istream &is) : inputStream(is)
     {
       fillBuffer();
     }
 
-    virtual ~CLexer() = default;
+    virtual ~CBufferEncoder() = default;
 
   protected:
-    std::size_t lineNo = 0;
-    std::size_t linePos = 0;
-    SCL::circular_biBuffer<int, 1024, false, 8, false> buffer;
-
-    int front()
-    {
-      return buffer.front();
-    }
-
-    /*! @brief      Checks if the next character in the stream matches the parameter.
-     *  @param[in]  c: The character to test.
-     *  @param[in]  pos: The position in the stream to check.
-     *  @returns    true if the c matches the next character in the stream.
-     */
-    bool peek(char c, std::size_t pos)
-    {
-      if (!buffer.empty())
-      {
-        return ((buffer[pos] == c));
-      }
-      else
-      {
-        return 0;
-      }
-    }
-
-    void consume(int n)
-    {
-      while (n)
-      {
-        if(buffer.front() == '\n')
-        {
-          lineNo++;
-          linePos = 0;
-        }
-        else
-        {
-          linePos++;
-        }
-        buffer.pop();
-        n--;
-      }
-    }
-
-    bool match(std::string const &str)
-    {
-      bool rv = true;
-      for(std::size_t i = 0; i != str.size(); i++)
-      {
-        if (buffer[i] != str[i])
-        {
-          rv = false;
-          break;
-        }
-      }
-      return rv;
-    }
-
-    bool match(char const c)
-    {
-      return (buffer.front() == c);
-    }
-
     /*! @brief    Fill the buffer when it falls below the minimum size.
+     *  @note     The function needs to take into account the inputStream type (UTF encoding) and the variable byte count nature of the 
+     *            UTF8 and UTF16 encodings.
      */
     virtual void fillBuffer()
     {
       while (!buffer.full() && !inputStream.eof())
       {
-        buffer.push_back(inputStream.get());
+        switch (streamEncoding)
+        {
+          case UTF_8:
+          {
+            buffer.push_back(inputStream.get());
+            break;
+          }
+          case UTF_16BE:
+          case UTF_16LE:
+          {
+            break;
+          }
+        }
       }
+
       if (inputStream.eof())
       {
         eos = true;
-        buffer.push_back(EOF);
+        buffer.push_back(U_EOF);
       }
     }
 
-    int consume()
+    /*! @brief      Pops and returns the value at the head of the buffer.
+     *  @returns    The value at the front of the buffer.
+     *  @throws     If  the buffer is empty.
+     */
+    value_type consume()
     {
-      lastChar = front();
-      if(buffer.front() == '\n')
-      {
-        lineNo++;
-        linePos = 0;
-      }
-      else
-      {
-        linePos++;
-      }
+      lastValue = buffer.front();
       buffer.pop();
 
-      return lastChar;
+      return lastValue;
     }
 
+    /*! @brief     Pushes the last returned value  (from consume) back into the buffer.
+     *  @note      If reconsume() is called before a call to consume() has been made, the behavior
+     *             is undefined.
+     */
     void reconsume()
     {
-      buffer.push_front(lastChar);
+      buffer.push_front(lastValue);
     }
 
-
   private:
-    CLexer() = delete;
-    CLexer(CLexer const &) = delete;
-    CLexer(CLexer &&) = delete;
-    CLexer &operator=(CLexer const &) = delete;
-    CLexer &operator=(CLexer &&) = delete;
+    CBufferEncoder() = delete;
+    CBufferEncoder(CBufferEncoder const &) = delete;
+    CBufferEncoder(CBufferEncoder &&) = delete;
+    CBufferEncoder &operator=(CBufferEncoder const &) = delete;
+    CBufferEncoder &operator=(CBufferEncoder &&) = delete;
 
     std::istream &inputStream;
+    SCL::circular_biBuffer<value_type, 1024, false, 8, false> buffer;
     bool eos = false;
-    int lastChar;
-
-  friend std::ostream &operator<<(std::ostream &os, CToken const &);  // This needs to be here as it needs the token map.
+    value_type lastValue;
+    utf_e streamEncoding = UTF_8;
   };
 
 } // namespace
 
-#endif // GCL_PARSERS_LEXER_H
+#endif // GCL_PARSERS_HTML_BUFFERENCODER_H

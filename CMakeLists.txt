@@ -48,9 +48,9 @@ set(SOURCES
   source/parsers/html/htmlDocument.cpp
   source/parsers/html/htmlNodeBase.cpp
   source/parsers/html/htmlNodeElement.cpp
-  source/parsers/html/htmlParser.cpp
+#  source/parsers/html/htmlParser.cpp
   source/parsers/html/htmlTokeniser.cpp
-  source/parsers/html/htmlLanguageTokens.cpp
+  source/parsers/html/htmlTokens.cpp
   source/parsers/token.cpp
   source/pluginManager/pluginManager.cpp
   source/utf.cpp
@@ -99,7 +99,7 @@ set(HEADERS
   include/parsers/html/htmlNodeText.h
   include/parsers/html/htmlTokeniser.h
   include/parsers/html/htmlParser.h
-  include/parsers/html/htmlLanguageTokens.h
+  include/parsers/html/htmlTokens.h
   include/parsers/lexer.hpp
   include/parsers/token.h
   include/parsers/languageTokens.h

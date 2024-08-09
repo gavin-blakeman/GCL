@@ -31,7 +31,6 @@
 //
 //**********************************************************************************************************************************
 
-
 #ifndef PARSERS_HTML_HTMLTOKENISER_H
 #define PARSERS_HTML_HTMLTOKENISER_H
 
@@ -39,20 +38,22 @@
 #include <utility>
 
 // Parsers library header files.
-#include "include/parsers/lexer.hpp"
-#include "include/parsers/html/htmlLanguageTokens.h"
+#include "include/parsers/html/bufferEncoder.hpp"
+#include "include/parsers/html/htmlTokens.h"
 
 namespace GCL::parsers::html
 {
-  class CHTMLTokeniser : public CLexer
+  class CHTMLTokeniser : public CBufferEncoder
   {
   public:
-    using tokenID_t = CToken::tokenID_t;
+    using value_type = CBufferEncoder::value_type;
+    using token_type = CHTMLToken;
+    using string_type = CHTMLToken::string_type;
 
-    CHTMLTokeniser(std::istream &is) : CLexer(is) {}
+    CHTMLTokeniser(std::istream &is) : CBufferEncoder(is) {}
     virtual ~CHTMLTokeniser() = default;
 
-    CToken getToken();
+    token_type getToken();
 
   private:
     CHTMLTokeniser() = delete;
@@ -75,41 +76,44 @@ namespace GCL::parsers::html
       SM_SCRIPT, SM_SCRIPT_LESSTHAN, SM_SCRIPT_END_TAG_OPEN, SM_SCRIPT_END_TAG_NAME,
       SM_SCRIPT_ESCAPE_START, SM_SCRIPT_ESCAPE_START_DASH, SM_SCRIPT_ESCAPED,
       SM_SCRIPT_ESCAPED_DASH, SM_SCRIPT_ESCAPED_START_DASH_DASH, SM_SCRIPT_ESCAPED_LESSTHAN, SM_SCRIPT_ESCAPED_END_TAG_OPEN,
-      SM_SCRIPT_DOUBLE_ESCAPE_START, SM_SCRIPT_ESCAPED_END_TAG_NAME,
+      SM_SCRIPT_DOUBLE_ESCAPE_START, SM_SCRIPT_DOUBLE_ESCAPED, SM_SCRIPT_DOUBLE_ESCAPED_DASH, SM_SCRIPT_DOUBLE_ESCAPED_LESSTHAN,
+      SM_SCRIPT_ESCAPED_END_TAG_NAME,
       SM_PLAINTEXT,
     };
 
     smState_e smState = SM_DATA;
     smState_e retState = SM_NONE;
 
-    std::string temporaryBuffer;
-    std::string lastStartTag;
+    string_type temporaryBuffer;
+    string_type lastStartTag;
 
-    bool processData(CToken &);
-    bool processTagOpen(CToken &);
-    bool processEndTagOpen(CToken &);
-    bool processTagName(CToken &);
-    bool processPlainText(CToken &);
-    bool processRawText(CToken &);
-    bool processRawTextLessThan(CToken &);
-    bool processRawTextEndTagOpen(CToken &);
-    bool processRawTextEndTagName(CToken &);
-    bool processRCData(CToken &);
-    bool processRCDataLessThan(CToken &);
-    bool processRCDataEndTagOpen(CToken &);
-    bool processRCDataEndTagName(CToken &);
-    bool processScript(CToken &);
-    bool processScriptLessThan(CToken &);
-    bool processScriptEndTagOpen(CToken &);
-    bool processScriptEndTagName(CToken &);
-    bool processScriptEscapeStart(CToken &);
-    bool processScriptEscapeStartDash(CToken &);
-    bool processScriptEscaped(CToken &);
-    bool processScriptEscapedDash(CToken &);
-    bool processScriptEscapedDashDash(CToken &);
-    bool processScriptEscapedLessThan(CToken &);
-    bool processScriptEscapedEndTagOpen(CToken &);
-    bool processScriptEscapedEndTagName(CToken &);
+    bool processData(token_type &);
+    bool processTagOpen(token_type &);
+    bool processEndTagOpen(token_type &);
+    bool processTagName(token_type &);
+    bool processPlainText(token_type &);
+    bool processRawText(token_type &);
+    bool processRawTextLessThan(token_type &);
+    bool processRawTextEndTagOpen(token_type &);
+    bool processRawTextEndTagName(token_type &);
+    bool processRCData(token_type &);
+    bool processRCDataLessThan(token_type &);
+    bool processRCDataEndTagOpen(token_type &);
+    bool processRCDataEndTagName(token_type &);
+    bool processScript(token_type &);
+    bool processScriptLessThan(token_type &);
+    bool processScriptEndTagOpen(token_type &);
+    bool processScriptEndTagName(token_type &);
+    bool processScriptEscapeStart(token_type &);
+    bool processScriptEscapeStartDash(token_type &);
+    bool processScriptEscaped(token_type &);
+    bool processScriptEscapedDash(token_type &);
+    bool processScriptEscapedDashDash(token_type &);
+    bool processScriptEscapedLessThan(token_type &);
+    bool processScriptEscapedEndTagOpen(token_type &);
+    bool processScriptEscapedEndTagName(token_type &);
+    bool processScriptDoubleEscapeStart(token_type &);
+    bool processScriptDoubleEscaped(token_type &);
   };
 
 } // namesapce

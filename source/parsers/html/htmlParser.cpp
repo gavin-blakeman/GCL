@@ -36,9 +36,8 @@
 // Standard C++ library header files
 
 // GCL library header files
-#include "include/parsers/token.h"
+#include "include/parsers/html/htmlTokens.h"
 #include "include/parsers/html/htmlTokeniser.h"
-#include "include/parsers/html/htmlLanguageTokens.h"
 
 namespace GCL::parsers::html
 {
