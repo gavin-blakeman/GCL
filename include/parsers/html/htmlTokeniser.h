@@ -77,7 +77,7 @@ namespace GCL::parsers::html
       SM_SCRIPT_ESCAPE_START, SM_SCRIPT_ESCAPE_START_DASH, SM_SCRIPT_ESCAPED,
       SM_SCRIPT_ESCAPED_DASH, SM_SCRIPT_ESCAPED_START_DASH_DASH, SM_SCRIPT_ESCAPED_LESSTHAN, SM_SCRIPT_ESCAPED_END_TAG_OPEN,
       SM_SCRIPT_DOUBLE_ESCAPE_START, SM_SCRIPT_DOUBLE_ESCAPED, SM_SCRIPT_DOUBLE_ESCAPED_DASH, SM_SCRIPT_DOUBLE_ESCAPED_LESSTHAN,
-      SM_SCRIPT_ESCAPED_END_TAG_NAME,
+      SM_SCRIPT_ESCAPED_END_TAG_NAME, SM_SCRIPT_DOUBLE_ESCAPED_DASH_DASH,
       SM_PLAINTEXT,
     };
 
@@ -113,7 +113,17 @@ namespace GCL::parsers::html
     bool processScriptEscapedEndTagOpen(token_type &);
     bool processScriptEscapedEndTagName(token_type &);
     bool processScriptDoubleEscapeStart(token_type &);
-    bool processScriptDoubleEscaped(token_type &);
+    bool processScriptDoubleEscaped(token_type &);          // 13.2.5.27
+    bool processScriptDoubleEscapedDash(token_type &);      // 13.2.5.28
+    bool processScriptDoubleEscapedDashDash(token_type &);  // 13.2.5.29
+
+    inline bool emitCharacter(token_type &t, codePoint_t cp)
+    {
+      t.type(token_type::TT_CHARACTER);
+      t.value(cp);
+      return true;
+    }
+    inline bool emitEOF(token_type &t) { t.type(token_type::TT_EOF); return true; }
   };
 
 } // namesapce

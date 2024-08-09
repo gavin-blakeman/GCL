@@ -93,7 +93,34 @@ namespace GCL::parsers
         {
           case UTF_8:
           {
-            buffer.push_back(inputStream.get());
+            try
+            {
+              utf_t utf;
+              char iByte;
+
+              inputStream.get(iByte);
+              utf.u8[0] = static_cast<std::uint8_t>(iByte);
+
+              if (utf.u8[0] >= 128)
+              {
+                std::uint8_t byteCount = utf.u8[0] & 0b01110000;
+
+                std::uint8_t indx = 1;
+
+                while (byteCount)
+                {
+                  inputStream.get(iByte);
+                  utf.u8[indx++] = static_cast<std::uint8_t>(iByte);
+                  byteCount = byteCount >> 1;
+                }
+              }
+
+              buffer.push_back(utf);
+            }
+            catch(...)
+            {
+              buffer.push_back(U_EOF);
+            }
             break;
           }
           case UTF_16BE:

@@ -19,11 +19,15 @@
 
 namespace GCL::parsers
 {
-  union utf_t
+  struct utf_t
   {
-    std::uint8_t u8[4];
-    std::uint16_t u16[2];
-    std::uint32_t u32;
+    union
+    {
+      std::uint8_t u8[4];
+      std::uint16_t u16[2];
+      std::uint32_t u32;
+    };
+    utf_e type;
   };
 
   class codePoint_t
@@ -35,7 +39,38 @@ namespace GCL::parsers
     constexpr codePoint_t() = default;
     constexpr codePoint_t(codePoint_t const &) = default;
     constexpr codePoint_t(codePoint_t &&) = default;
+    constexpr codePoint_t(std::uint8_t u8)
+    {
+      if (u8 <= 127)
+      {
+        value = u8;
+      }
+      else
+      {
+        throw std::runtime_error("invalid utf8 single byte");
+      }
+    }
+    constexpr codePoint_t(char c) : value(c) {}
+    constexpr codePoint_t(std::uint16_t u16) : value(u16) {}
+    constexpr codePoint_t(std::int16_t i16) : value(i16) {}
+    constexpr codePoint_t(std::int32_t i32) : value(i32) {}
     constexpr codePoint_t(utf32_t u32) : value(u32) {}
+    constexpr codePoint_t(utf_t utf)
+    {
+      switch (utf.type)
+      {
+        case UTF_8:
+        {
+          value = utf.u32;
+          break;
+        };
+        default:
+        {
+          value = 0;
+          break;
+        }
+      };
+    }
 
     constexpr ~codePoint_t() = default;
 
@@ -44,8 +79,15 @@ namespace GCL::parsers
 
     constexpr operator utf32_t() const { return value; }
 
+    constexpr bool isalpha() const { return islower() || isupper(); }
+    constexpr bool islower() const { return (value >= 0x61 && value <= 0x7A); }
+    constexpr bool isupper() const { return (value >= 0x41 && value <= 0x5A); }
+    constexpr codePoint_t tolower() { return (isupper() ? value + 0x20 : value); }
+
   private:
     value_type value;
+
+  friend constexpr bool operator==(codePoint_t const &lhs, codePoint_t const &rhs) { return lhs.value == rhs.value; }
   };
 
   constexpr codePoint_t U_0000(0x0000);  // null
@@ -54,11 +96,13 @@ namespace GCL::parsers
   constexpr codePoint_t U_000C(0x000C);  // FF
   constexpr codePoint_t U_0020(0x0020);  // Space
   constexpr codePoint_t U_0021(0x0021);  // '!'
+  constexpr codePoint_t U_0026(0x0026);  // '&'
   constexpr codePoint_t U_002D(0x002D);  // '-'
   constexpr codePoint_t U_002F(0x002F);  // '/'
   constexpr codePoint_t U_003C(0x003C);  // '<'
   constexpr codePoint_t U_003E(0x003E);  // '>'
   constexpr codePoint_t U_003F(0x003F);  // '?'
+  constexpr codePoint_t U_FFFD(0xFFFD);  // Replacement Character
   constexpr codePoint_t U_EOF(0xFEFF);   // eof
 }
 
