@@ -44,7 +44,7 @@
 #include <SCL>
 
 // Parser header files
-#include "include/parsers/codePoint.h"
+#include "include/parsers/html/htmlRawAttribute.hpp"
 
 /* Note:
  * Tokens can store multiple code points. At the time of writing, the thought is to keep the code points and pass the code
@@ -64,6 +64,8 @@ namespace GCL::parsers::html
       using string_type = std::basic_string<value_type>;
       enum token_type { TT_START_TAG, TT_END_TAG, TT_CHARACTER, TT_DOCTYPE, TT_EOF, TT_COMMENT };
       using tokenStringMap_t = SCL::bimap<token_type, std::string>;
+      using attribute_type = CHTMLRawAttribute;
+      using attribute_collection = std::list<attribute_type>;
 
       CHTMLToken();
       CHTMLToken(CHTMLToken const &t) : tokenStringMap(t.tokenStringMap), tokenType(t.tokenType), tokenValue(t.tokenValue) {}
@@ -81,11 +83,24 @@ namespace GCL::parsers::html
       string_type &value() noexcept { return tokenValue; }
       void value(string_type const &v) { tokenValue = v; }
       void value(value_type const &v) { tokenValue.clear(); tokenValue.push_back(v); }
+      void concatValue(string_type const &v) { tokenValue += v; }
+      void concatValue(value_type const &v) { tokenValue.push_back(v); }
+
+      bool attrExists(value_type const &v) const noexcept {  }
+      void attrStart() { attrCollection.emplace_back(); currentAttr = &attrCollection.back(); }
+      void attrConcatName(value_type const &);
+      void attrConcatValue(value_type const &);
+
+      void selfClosing(bool b) noexcept { selfClosingFlag = b; }
 
     private:
       tokenStringMap_t const &tokenStringMap;
       token_type tokenType;
       string_type tokenValue;
+      bool selfClosingFlag = false;
+
+      attribute_collection attrCollection;
+      attribute_type *currentAttr = nullptr;
 
   friend bool operator==(CHTMLToken const &lhs, CHTMLToken const &rhs) { return ((lhs.tokenType == rhs.tokenType) && (lhs.tokenValue == rhs.tokenValue)); }
   friend bool operator==(CHTMLToken const &lhs, token_type rhs) { return (lhs.tokenType == rhs); }

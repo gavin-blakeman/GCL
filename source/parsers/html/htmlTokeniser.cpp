@@ -27,7 +27,10 @@
 
 namespace GCL::parsers::html
 {
-  static CHTMLTokeniser::string_type STR_SCRIPT{'s', 'c', 'r', 'i', 'p', 't'};
+  static CHTMLTokeniser::string_type S32_SCRIPT{'s', 'c', 'r', 'i', 'p', 't'};
+  static CHTMLTokeniser::string_type S32_MINUSMINUS{'-', '-'};
+  static CHTMLTokeniser::string_type S32_DOCTYPE{'d', 'o', 'c', 't', 'y', 'p', 'e'};
+  static CHTMLTokeniser::string_type S32_CDATA{'[','C', 'D', 'A', 'T', 'A', '['};
 
   CHTMLTokeniser::token_type CHTMLTokeniser::getToken()
   {
@@ -183,9 +186,73 @@ namespace GCL::parsers::html
           emit = processPlainText(token);
           break;
         }
+        case SM_SCRIPT_DOUBLE_ESCAPED_LESSTHAN: // 13.2.5.30
+        {
+          emit = processScriptDoubleEscapedLessThan(token);
+          break;
+        }
+        case SM_SCRIPT_DOUBLE_ESCAPE_END: // 13.2.5.31
+        {
+          emit = processScriptDoubleEscapeEnd(token);
+          break;
+        }
+        case SM_BEFORE_ATTR_NAME: // 13.2.5.32
+        {
+          emit = processBeforeAttrName(token);
+          break;
+        }
+        case SM_ATTR_NAME:  // 13.2.5.33
+        {
+          emit = processAttrName(token);
+          break;
+        }
+        case SM_AFTER_ATTR_NAME:  // 13.2.5.34
+        {
+          emit = processAfterAttrName(token);
+          break;
+        }
+        case SM_BEFORE_ATTR_VALUE:  // 13.2.5.35
+        {
+          emit = processBeforeAttrValueStart(token);
+          break;
+        }
+        case SM_ATTR_VALUE_DOUBLE_QUOTED:  // 13.2.5.36
+        {
+          emit = processAttrValueDoubleQuoted(token);
+          break;
+        }
+        case SM_ATTR_VALUE_SINGLE_QUOTED:  // 13.2.5.37
+        {
+          emit = processAttrValueSingleQuoted(token);
+          break;
+        }
+        case SM_ATTR_VALUE_UNQUOTED:  // 13.2.5.38
+        {
+          emit = processAttrValueUnquoted(token);
+          break;
+        }
+        case SM_AFTER_ATTR_VALUE_QUOTED: // 13.2.5.39
+        {
+          emit = processAfterAttrValueQuoted(token);
+          break;
+        }
+        case SM_TAG_SELF_CLOSING_START: // 13.2.5.40
+        {
+          emit = processSelfClosingStartTag(token);
+          break;
+        }
+        case SM_BOGUS_COMMENT: // 13.2.5.41
+        {
+          emit = processBogusComment(token);
+          break;
+        }
+        case SM_MARKUPDECLARATION_OPEN: // 13.2.5.42
+        {
+          emit = processMarkupDeclarationOpen(token);
+          break;
+        }
       }
     }
-
     return token;
   }
 
@@ -212,7 +279,7 @@ namespace GCL::parsers::html
       {
         PARSE_ERROR("Unexpected null character");
         token.type(token_type::TT_CHARACTER);
-        token.value(string_type());
+        token.concatValue(string_type());
         emit = true;
         break;
       }
@@ -225,7 +292,7 @@ namespace GCL::parsers::html
       default:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(v);
+        token.concatValue(v);
         emit = true;
       }
     }
@@ -243,7 +310,7 @@ namespace GCL::parsers::html
       {
         PARSE_ERROR("unexpected null character");
         token.type(token_type::TT_CHARACTER);
-        token.value(U_FFFD);
+        token.concatValue(U_FFFD);
         emit = true;
         break;
       }
@@ -256,7 +323,7 @@ namespace GCL::parsers::html
       default:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(v);
+        token.concatValue(v);
         emit = true;
       }
     }
@@ -279,7 +346,7 @@ namespace GCL::parsers::html
       {
         PARSE_ERROR("Unexpected null character");
         token.type(token_type::TT_CHARACTER);
-        token.value(U_FFFD);
+        token.concatValue(U_FFFD);
         emit = true;
         break;
       }
@@ -292,7 +359,7 @@ namespace GCL::parsers::html
       default:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(v);
+        token.concatValue(v);
         emit = true;
       }
     }
@@ -327,8 +394,8 @@ namespace GCL::parsers::html
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value({U_003C, U_002F});
-          token.value() += temporaryBuffer;
+          token.concatValue({U_003C, U_002F});
+          token.concatValue(temporaryBuffer);
           temporaryBuffer.clear();
           emit = true;
           reconsume();
@@ -346,8 +413,8 @@ namespace GCL::parsers::html
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value({U_003C, U_002F});
-          token.value() += temporaryBuffer;
+          token.concatValue({U_003C, U_002F});
+          token.concatValue(temporaryBuffer);
           temporaryBuffer.clear();
           emit = true;
           reconsume();
@@ -359,14 +426,14 @@ namespace GCL::parsers::html
       {
         if (v.isalpha())
         {
-          token.value() += v.tolower();
+          token.concatValue(v.tolower());
           temporaryBuffer.push_back(v);
         }
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value({U_003C, U_002F});
-          token.value() += temporaryBuffer;
+          token.concatValue({U_003C, U_002F});
+          token.concatValue(temporaryBuffer);
           temporaryBuffer.clear();
           emit = true;
           reconsume();
@@ -388,14 +455,14 @@ namespace GCL::parsers::html
     if (v.isalpha())
     {
       token.type(token_type::TT_END_TAG);
-      token.value(string_type());
+      token.concatValue(string_type());
       reconsume();
       smState = SM_RAWTEXT_END_TAG_NAME;
     }
     else
     {
       token.type(token_type::TT_CHARACTER);
-      token.value({U_003C, U_002F});
+      token.concatValue({U_003C, U_002F});
       emit = true;
       reconsume();
       smState = SM_RAWTEXT;
@@ -419,7 +486,7 @@ namespace GCL::parsers::html
     else
     {
       token.type(token_type::TT_CHARACTER);
-      token.value(U_003C);
+      token.concatValue(U_003C);
       emit = true;
       reconsume();
       smState = SM_RAWTEXT;
@@ -451,7 +518,7 @@ namespace GCL::parsers::html
       {
         PARSE_ERROR("unexpexted null character");
         token.type(token_type::TT_CHARACTER);
-        token.value(U_FFFD);
+        token.concatValue(U_FFFD);
         emit = true;
         break;
       }
@@ -464,7 +531,7 @@ namespace GCL::parsers::html
       default:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(v);
+        token.concatValue(v);
         emit = true;
       }
     }
@@ -500,8 +567,8 @@ namespace GCL::parsers::html
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value({U_003C, U_002F});
-          token.value() += temporaryBuffer;
+          token.concatValue({U_003C, U_002F});
+          token.concatValue(temporaryBuffer);
           temporaryBuffer.clear();
           emit = true;
           reconsume();
@@ -519,8 +586,8 @@ namespace GCL::parsers::html
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value({U_003C, U_002F});
-          token.value() += temporaryBuffer;
+          token.concatValue({U_003C, U_002F});
+          token.concatValue(temporaryBuffer);
           temporaryBuffer.clear();
           emit = true;
           reconsume();
@@ -538,8 +605,8 @@ namespace GCL::parsers::html
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value({U_003C, U_002F});
-          token.value() += temporaryBuffer;
+          token.concatValue({U_003C, U_002F});
+          token.concatValue(temporaryBuffer);
           temporaryBuffer.clear();
           emit = true;
           reconsume();
@@ -561,14 +628,14 @@ namespace GCL::parsers::html
     if (v.isalpha())
     {
       token.type(token_type::TT_END_TAG);
-      token.value(string_type());
+      token.concatValue(string_type());
       reconsume();
       smState = SM_RCDATA_END_TAG_NAME;
     }
     else
     {
       token.type(token_type::TT_CHARACTER);
-      token.value({U_003C, U_002F});
+      token.concatValue({U_003C, U_002F});
       smState = SM_RCDATA;
       reconsume();
     }
@@ -594,7 +661,7 @@ namespace GCL::parsers::html
       default:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(U_003C);
+        token.concatValue(U_003C);
         smState = SM_RCDATA;
         reconsume();
         break;
@@ -620,7 +687,7 @@ namespace GCL::parsers::html
       {
         PARSE_ERROR("Unexpected null character");
         token.type(token_type::TT_CHARACTER);
-        token.value(U_FFFD);
+        token.concatValue(U_FFFD);
         emit = true;
         break;
       }
@@ -633,7 +700,7 @@ namespace GCL::parsers::html
       default:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(v);
+        token.concatValue(v);
         emit = true;
       }
     }
@@ -652,7 +719,7 @@ namespace GCL::parsers::html
       case U_002D:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(U_002D);
+        token.concatValue(U_002D);
         emit = true;
         smState = SM_SCRIPT_DOUBLE_ESCAPED_DASH;
         break;
@@ -660,7 +727,7 @@ namespace GCL::parsers::html
       case U_003C:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(U_003C);
+        token.concatValue(U_003C);
         emit = true;
         smState = SM_SCRIPT_DOUBLE_ESCAPED_LESSTHAN;
         break;
@@ -669,7 +736,7 @@ namespace GCL::parsers::html
       {
         PARSE_ERROR("Unexpected null character");
         token.type(token_type::TT_CHARACTER);
-        token.value(U_FFFD);
+        token.concatValue(U_FFFD);
         emit = true;
         break;
       }
@@ -683,7 +750,7 @@ namespace GCL::parsers::html
       default:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(v);
+        token.concatValue(v);
         emit = true;
       }
     }
@@ -714,7 +781,7 @@ namespace GCL::parsers::html
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value(v);
+          token.concatValue(v);
           emit = true;
           smState = SM_SCRIPT_ESCAPED;
         }
@@ -726,7 +793,7 @@ namespace GCL::parsers::html
         {
           temporaryBuffer.push_back(v.tolower());
           token.type(token_type::TT_CHARACTER);
-          token.value(v);
+          token.concatValue(v);
           emit = true;
         }
         else
@@ -768,7 +835,7 @@ namespace GCL::parsers::html
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value({U_003C, U_002F});
+          token.concatValue({U_003C, U_002F});
           token += temporaryBuffer;
           temporaryBuffer.clear();
           emit = true;
@@ -787,8 +854,8 @@ namespace GCL::parsers::html
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value({U_003C, U_002F});
-          token += temporaryBuffer;
+          token.concatValue({U_003C, U_002F});
+          token.concatValue(temporaryBuffer);
           temporaryBuffer.clear();
           emit = true;
           reconsume();
@@ -806,8 +873,8 @@ namespace GCL::parsers::html
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value({U_003C, U_002F});
-          token += temporaryBuffer;
+          token.concatValue({U_003C, U_002F});
+          token.concatValue(temporaryBuffer);
           temporaryBuffer.clear();
           emit = true;
           reconsume();
@@ -829,14 +896,14 @@ namespace GCL::parsers::html
     if (std::isalpha(v))
     {
       token.type(token_type::TT_END_TAG);
-      token.value(string_type());
+      token.concatValue(string_type());
       reconsume();
       smState = SM_SCRIPT_END_TAG_NAME;
     }
     else
     {
       token.type(token_type::TT_CHARACTER);
-      token.value({U_003C, U_002F});
+      token.concatValue({U_003C, U_002F});
       emit = true;
       reconsume();
       smState = SM_SCRIPT;
@@ -858,7 +925,7 @@ namespace GCL::parsers::html
       {
         smState = SM_SCRIPT_ESCAPED_DASH;
         token.type(token_type::TT_CHARACTER);
-        token.value(U_002D);
+        token.concatValue(U_002D);
         emit = true;
         break;
       }
@@ -871,7 +938,7 @@ namespace GCL::parsers::html
       {
         PARSE_ERROR("Unexpected null character");
         token.type(token_type::TT_CHARACTER);
-        token.value(U_FFFD);
+        token.concatValue(U_FFFD);
         emit = true;
         break;
       }
@@ -885,7 +952,7 @@ namespace GCL::parsers::html
       default:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(v);
+        token.concatValue(v);
         emit = true;
       }
     }
@@ -904,7 +971,7 @@ namespace GCL::parsers::html
       case U_002D:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(U_002D);
+        token.concatValue(U_002D);
         emit = true;
         smState = SM_SCRIPT_ESCAPED_START_DASH_DASH;
         break;
@@ -919,7 +986,7 @@ namespace GCL::parsers::html
         PARSE_ERROR("Unexpected null character");
         smState = SM_SCRIPT_ESCAPED;
         token.type(token_type::TT_CHARACTER);
-        token.value(U_FFFD);
+        token.concatValue(U_FFFD);
         emit = true;
         break;
       }
@@ -933,7 +1000,7 @@ namespace GCL::parsers::html
       default:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(v);
+        token.concatValue(v);
         emit = true;
         smState = SM_SCRIPT_ESCAPED;
         break;
@@ -955,7 +1022,7 @@ namespace GCL::parsers::html
       case U_002D:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(U_002D);
+        token.concatValue(U_002D);
         emit = true;
         break;
       }
@@ -967,7 +1034,7 @@ namespace GCL::parsers::html
       case U_003E:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(U_003E);
+        token.concatValue(U_003E);
         emit = true;
         smState = SM_SCRIPT;
         break;
@@ -977,7 +1044,7 @@ namespace GCL::parsers::html
         PARSE_ERROR("Unexpected null character");
         smState = SM_SCRIPT_ESCAPED;
         token.type(token_type::TT_CHARACTER);
-        token.value(U_FFFD);
+        token.concatValue(U_FFFD);
         emit = true;
         break;
       }
@@ -991,7 +1058,7 @@ namespace GCL::parsers::html
       default:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(v);
+        token.concatValue(v);
         emit = true;
         smState = SM_SCRIPT_ESCAPED;
         break;
@@ -1030,7 +1097,7 @@ namespace GCL::parsers::html
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value({U_003C, U_002F});
+          token.concatValue({U_003C, U_002F});
           token += temporaryBuffer;
           emit = true;
           reconsume();
@@ -1048,7 +1115,7 @@ namespace GCL::parsers::html
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value({U_003C, U_002F});
+          token.concatValue({U_003C, U_002F});
           token += temporaryBuffer;
           emit = true;
           reconsume();
@@ -1066,7 +1133,7 @@ namespace GCL::parsers::html
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value({U_003C, U_002F});
+          token.concatValue({U_003C, U_002F});
           token += temporaryBuffer;
           emit = true;
           reconsume();
@@ -1088,14 +1155,14 @@ namespace GCL::parsers::html
     if (std::isalpha(v))
     {
       token.type(token_type::TT_END_TAG);
-      token.value(string_type());
+      token.concatValue(string_type());
       reconsume();
       smState = SM_SCRIPT_ESCAPED_END_TAG_NAME;
     }
     else
     {
       token.type(token_type::TT_CHARACTER);
-      token.value({U_003C, U_002F});
+      token.concatValue({U_003C, U_002F});
       emit = true;
       reconsume();
       smState = SM_SCRIPT_ESCAPED;
@@ -1125,7 +1192,7 @@ namespace GCL::parsers::html
         {
           temporaryBuffer.clear();
           token.type(token_type::TT_CHARACTER);
-          token.value(U_003C);
+          token.concatValue(U_003C);
           emit = true;
           reconsume();
           smState = SM_SCRIPT_DOUBLE_ESCAPE_START;
@@ -1133,7 +1200,7 @@ namespace GCL::parsers::html
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value(U_003C);
+          token.concatValue(U_003C);
           emit = true;
           reconsume();
           smState = SM_SCRIPT_ESCAPED;
@@ -1156,7 +1223,7 @@ namespace GCL::parsers::html
     {
       smState = SM_SCRIPT_ESCAPE_START_DASH;
       token.type(token_type::TT_CHARACTER);
-      token.value(U_002D);
+      token.concatValue(U_002D);
       emit = true;
     }
     else
@@ -1179,7 +1246,7 @@ namespace GCL::parsers::html
     {
       smState = SM_SCRIPT_ESCAPED_START_DASH_DASH;
       token.type(token_type::TT_CHARACTER);
-      token.value(U_002D);
+      token.concatValue(U_002D);
       emit = true;
     }
     else
@@ -1210,7 +1277,7 @@ namespace GCL::parsers::html
       {
         smState = SM_SCRIPT_ESCAPE_START;
         token.type(token_type::TT_CHARACTER);
-        token.value({U_003C, U_0021});
+        token.concatValue({U_003C, U_0021});
         emit = true;
         break;
       }
@@ -1218,7 +1285,7 @@ namespace GCL::parsers::html
       {
         smState = SM_SCRIPT;
         token.type(token_type::TT_CHARACTER);
-        token.value(U_003C);
+        token.concatValue(U_003C);
         reconsume();
         emit = true;
         break;
@@ -1250,7 +1317,7 @@ namespace GCL::parsers::html
     {
       PARSE_ERROR("eof before tag name");
       token.type(token_type::TT_EOF);
-      token.value({U_003C, U_002F});
+      token.concatValue({U_003C, U_002F});
     }
     else
     {
@@ -1345,7 +1412,7 @@ namespace GCL::parsers::html
       {
         throw parse_error("eof before tag name");
         token.type(token_type::TT_EOF);
-        token.value(U_003C);
+        token.concatValue(U_003C);
         emit = true;
         break;
       }
@@ -1359,7 +1426,7 @@ namespace GCL::parsers::html
         else
         {
           token.type(token_type::TT_CHARACTER);
-          token.value(U_003C);
+          token.concatValue(U_003C);
           smState = SM_DATA;
           emit = true;
         }
@@ -1382,7 +1449,7 @@ namespace GCL::parsers::html
       case U_002D:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(U_002D);
+        token.concatValue(U_002D);
         emit = true;
         smState = SM_SCRIPT_DOUBLE_ESCAPED_DASH_DASH;
         break;
@@ -1390,7 +1457,7 @@ namespace GCL::parsers::html
       case U_003C:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(U_003C);
+        token.concatValue(U_003C);
         emit = true;
         smState = SM_SCRIPT_DOUBLE_ESCAPED_LESSTHAN;
         break;
@@ -1399,7 +1466,7 @@ namespace GCL::parsers::html
       {
         PARSE_ERROR("unexpected null character");
         token.type(token_type::TT_CHARACTER);
-        token.value(U_FFFD);
+        token.concatValue(U_FFFD);
         emit = true;
         smState = SM_SCRIPT_DOUBLE_ESCAPED;
         break;
@@ -1414,7 +1481,7 @@ namespace GCL::parsers::html
       default:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(v);
+        token.concatValue(v);
         emit = true;
         smState = SM_SCRIPT_DOUBLE_ESCAPED;
         break;
@@ -1436,7 +1503,7 @@ namespace GCL::parsers::html
       case U_002D:
       {
         token.type(token_type::TT_CHARACTER);
-        token.value(U_002D);
+        token.concatValue(U_002D);
         emit = true;
         break;
       }
@@ -1468,6 +1535,509 @@ namespace GCL::parsers::html
     }
 
     return emit;
+  }
+
+  // 13.2.5.30
+  bool CHTMLTokeniser::processScriptDoubleEscapedLessThan(token_type &token)
+  {
+    bool emit = false;
+
+    value_type v = consume();
+
+    if (v == U_002F) { emit = emitCharacter(token, U_002F); temporaryBuffer.clear(); smState = SM_SCRIPT_DOUBLE_ESCAPE_END;
+    }
+    else { smState = SM_SCRIPT_DOUBLE_ESCAPED; reconsume();
+    }
+
+    return emit;
+  }
+
+  // 13.2.5.31
+  bool CHTMLTokeniser::processScriptDoubleEscapeEnd(token_type &token)
+  {
+    bool emit = false; value_type v = consume();
+
+    switch(v)
+    {
+      case U_0009:
+      case U_000A:
+      case U_000C:
+      case U_0020:
+      case U_002F:
+      case U_003E:
+      {
+        emit = emitCharacter(token, v);
+        if (temporaryBuffer == STR_SCRIPT)
+        {
+          smState = SM_SCRIPT_ESCAPED;
+        }
+        else
+        {
+         smState = SM_SCRIPT_DOUBLE_ESCAPED;
+        }
+      }
+      default:
+      {
+        if (v.isalpha())
+        {
+          temporaryBuffer.push_back(v.tolower());
+          emit = emitCharacter(token, v);
+        }
+        else
+        {
+          smState = SM_SCRIPT_DOUBLE_ESCAPED;
+          reconsume();
+        }
+      }
+    }
+    return emit;
+  }
+
+  // 13.2.5.32
+  bool CHTMLTokeniser::processBeforeAttrName(token_type &token)
+  {
+    bool emit = false;
+    value_type v = consume();
+
+    switch (v)
+    {
+      case U_0009:
+      case U_000A:
+      case U_000C:
+      case U_0020:
+      {
+        // Ignore the character.
+        break;
+      }
+      case U_002F:
+      case U_003E:
+      case U_EOF:
+      {
+        smState = SM_AFTER_ATTR_NAME;
+        reconsume();
+        break;
+      }
+      case U_003D:
+      {
+        PARSE_ERROR("unexpected equals sign before attribute name");
+        token.attrStart();
+        token.attrConcatName(v);
+        smState = SM_ATTR_NAME;
+        break;
+      }
+      default:
+      {
+        token.attrStart();
+        smState = SM_ATTR_NAME;
+        reconsume();
+        break;
+      };
+    }
+
+    return emit;
+  }
+
+  // 13.2.5.33
+  bool CHTMLTokeniser::processAttrName(token_type &token)
+  {
+    bool emit = false;
+    value_type v = consume();
+
+    switch(v)
+    {
+      case U_0009:
+      case U_000A:
+      case U_000C:
+      case U_0020:
+      case U_002F:
+      case U_003E:
+      case U_EOF:
+      {
+        smState = SM_AFTER_ATTR_NAME;
+        reconsume();
+        break;
+      }
+      case U_003D:
+      {
+        smState = SM_BEFORE_ATTR_VALUE;
+        break;
+      }
+      case U_0000:
+      {
+        PARSE_ERROR("unexpected null character");
+        token.attrConcatName(U_FFFD);
+        break;
+      }
+      case U_0022:
+      case U_0027:
+      case U_003C:
+      {
+        PARSE_ERROR("unexpected character in attribute name");
+       [[fallthrough]];
+      }
+      default:
+      {
+        token.attrConcatName(v.tolower());
+        break;
+      }
+    }
+
+    return emit;
+  }
+
+  // 13.2.5.34
+  bool CHTMLTokeniser::processAfterAttrName(token_type &token)
+  {
+    bool emit = false;
+    value_type v = consume();
+
+    switch (v)
+    {
+      case U_0009:
+      case U_000A:
+      case U_000C:
+      case U_0020:
+      {
+        // Ignore the character
+        break;
+      }
+      case U_002F:
+      {
+        smState = SM_TAG_SELF_CLOSING_START;
+        break;
+      }
+      case U_003D:
+      {
+        smState = SM_BEFORE_ATTR_VALUE;
+        break;
+      }
+      case U_003E:
+      {
+        emit = true;
+        smState = SM_DATA;
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in tag");
+        emit = emitEOF(token);
+        break;
+      }
+      default:
+      {
+        token.attrStart();
+        smState = SM_ATTR_NAME;
+        reconsume();
+        break;
+      }
+    }
+
+    return emit;
+  }
+
+  // 13.2.5.35
+  bool CHTMLTokeniser::processBeforeAttrValueStart(token_type &token)
+  {
+    bool emit = false;
+    value_type v = consume();
+
+    switch(v)
+    {
+      case U_0009:
+      case U_000A:
+      case U_000C:
+      case U_0020:
+      {
+        // Ignore the character.
+        break;
+      }
+      case U_0022:
+      {
+        smState = SM_ATTR_VALUE_DOUBLE_QUOTED;
+        break;
+      }
+      case U_0027:
+      {
+        smState = SM_ATTR_VALUE_SINGLE_QUOTED;
+        break;
+      }
+      case U_003E:
+      {
+        PARSE_ERROR("missing attribute value");
+        emit = true;
+        smState = SM_DATA;
+        break;
+      }
+      default:
+      {
+        smState = SM_ATTR_VALUE_UNQUOTED;
+        reconsume();
+        break;
+      }
+    }
+
+    return emit;
+  }
+
+  // 13.2.5.36
+  bool CHTMLTokeniser::processAttrValueDoubleQuoted(token_type &token)
+  {
+    bool emit = false;
+    value_type v = consume();
+
+    switch(v)
+    {
+      case U_0022:
+      {
+        smState = SM_AFTER_ATTR_VALUE_QUOTED;
+        break;
+      }
+      case U_0026:
+      {
+        retState = smState;
+        smState = SM_CHARACTER_REFERENCE;
+        break;
+      }
+      case U_0000:
+      {
+        PARSE_ERROR("unexpected null character");
+        token.attrConcatValue(U_FFFD);
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in tag");
+        emit = emitEOF(token);
+        break;
+      }
+      default:
+      {
+        token.attrConcatValue(v);
+        break;
+      }
+    }
+
+    return emit;
+  }
+
+  // 13.2.5.37
+  bool CHTMLTokeniser::processAttrValueSingleQuoted(token_type &token)
+  {
+    bool emit = false;
+    value_type v = consume();
+
+    switch(v)
+    {
+      case U_0027:
+      {
+        smState = SM_AFTER_ATTR_VALUE_QUOTED;
+        break;
+      }
+      case U_0026:
+      {
+        retState = smState;
+        smState = SM_CHARACTER_REFERENCE;
+        break;
+      }
+      case U_0000:
+      {
+        PARSE_ERROR("unexpected null character");
+        token.attrConcatValue(U_FFFD);
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in tag");
+        emit = emitEOF(token);
+        break;
+      }
+      default:
+      {
+        token.attrConcatValue(v);
+        break;
+      }
+    }
+
+    return emit;
+  }
+
+  // 13.2.5.38
+  bool CHTMLTokeniser::processAttrValueUnquoted(token_type &token)
+  {
+    bool emit = false;
+    value_type v = consume();
+
+    switch(v)
+    {
+      case U_0009:
+      case U_000A:
+      case U_000C:
+      case U_0020:
+      {
+        smState = SM_BEFORE_ATTR_NAME;
+        break;
+      }
+      case U_0026:
+      {
+        retState = smState;
+        smState = SM_CHARACTER_REFERENCE;
+        break;
+      }
+      case U_003E:
+      {
+        smState = SM_DATA;
+        emit = true;
+        break;
+      }
+      case U_0000:
+      {
+        PARSE_ERROR("unexpected null character");
+        token.attrConcatValue(U_FFFD);
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in tag");
+        emit = emitEOF(token);
+        break;
+      }
+      case U_0022:
+      case U_0027:
+      case U_003C:
+      case U_003D:
+      case U_0060:
+      {
+        PARSE_ERROR("unexpected character in unquoted attribute value");
+        [[fallthrough]];
+      }
+      default:
+      {
+        token.attrConcatValue(v);
+        break;
+      }
+    }
+
+    return emit;
+  }
+
+  // 13.2.5.39
+  bool CHTMLTokeniser::processAfterAttrValueQuoted(token_type &token)
+  {
+    bool emit = false;
+    value_type v = consume();
+
+    switch(v)
+    {
+      case U_0009:
+      case U_000A:
+      case U_000C:
+      case U_0020:
+      {
+        smState = SM_BEFORE_ATTR_NAME;
+        break;
+      }
+      case U_002F:
+      {
+        smState = SM_TAG_SELF_CLOSING_START;
+        break;
+      }
+      case U_003E:
+      {
+        smState = SM_DATA;
+        emit = true;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in tag");
+        emit = emitEOF(token);
+        break;
+      }
+      default:
+      {
+        PARSE_ERROR("missing whitespace between attributes");
+        smState = SM_BEFORE_ATTR_NAME;
+        reconsume();
+        break;
+      }
+    }
+
+    return emit;
+  }
+
+  // 13.2.5.40
+  bool CHTMLTokeniser::processSelfClosingStartTag(token_type &token)
+  {
+    bool emit = false;
+    value_type v = consume();
+
+    switch(v)
+    {
+      case U_003E:
+      {
+        token.selfClosing(true);
+        smState = SM_DATA;
+        emit = true;
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in tag");
+        emit = emitEOF(token);
+        break;
+      }
+      default:
+      {
+        PARSE_ERROR("unexpected solidus in tag");
+        smState = SM_BEFORE_ATTR_NAME;
+        reconsume();
+        break;
+      }
+    }
+    return emit;
+  }
+
+  // 13.2.5.41
+  bool CHTMLTokeniser::processBogusComment(token_type &token)
+  {
+    bool emit = false;
+    value_type v = consume();
+
+    switch(v)
+    {
+      case U_003E:
+      {
+        smState = SM_DATA;
+        emit = true;
+        break;
+      }
+      case U_EOF:
+      {
+        // This appears to be the best way to handle the double emit required.
+        emit = true;
+        smState = SM_DATA;
+        reconsume();
+        break;
+      }
+      case U_0000:
+      {
+        PARSE_ERROR("unexpected null character");
+        token.concatValue(U_FFFD);
+        break;
+      }
+      default:
+      {
+        token.concatValue(v);
+        break;
+      }
+    }
+
+    return emit;
+  }
+
+  // 13.2.5.42
+  bool CHTMLTokeniser::processMarkupDeclarationOpen(token_type &token)
+  {
+
   }
 
 }

@@ -71,13 +71,14 @@ namespace GCL::parsers::html
       SM_TAG_OPEN, SM_TAG_NAME, SM_END_TAG_OPEN, SM_TAG_SELF_CLOSING_START,
       SM_MARKUP_DECLARATION_OPEN,
       SM_BOGUS_COMMENT,
-      SM_BEFORE_ATTR_NAME,
+      SM_BEFORE_ATTR_NAME, SM_ATTR_NAME, SM_AFTER_ATTR_NAME, SM_BEFORE_ATTR_VALUE, SM_ATTR_VALUE_DOUBLE_QUOTED,
+      SM_ATTR_VALUE_SINGLE_QUOTED, SM_ATTR_VALUE_UNQUOTED, SM_AFTER_ATTR_VALUE_QUOTED,
       SM_RAWTEXT, SM_RAWTEXT_LESSTHAN, SM_RAWTEXT_END_TAG_OPEN, SM_RAWTEXT_END_TAG_NAME,
       SM_SCRIPT, SM_SCRIPT_LESSTHAN, SM_SCRIPT_END_TAG_OPEN, SM_SCRIPT_END_TAG_NAME,
       SM_SCRIPT_ESCAPE_START, SM_SCRIPT_ESCAPE_START_DASH, SM_SCRIPT_ESCAPED,
       SM_SCRIPT_ESCAPED_DASH, SM_SCRIPT_ESCAPED_START_DASH_DASH, SM_SCRIPT_ESCAPED_LESSTHAN, SM_SCRIPT_ESCAPED_END_TAG_OPEN,
       SM_SCRIPT_DOUBLE_ESCAPE_START, SM_SCRIPT_DOUBLE_ESCAPED, SM_SCRIPT_DOUBLE_ESCAPED_DASH, SM_SCRIPT_DOUBLE_ESCAPED_LESSTHAN,
-      SM_SCRIPT_ESCAPED_END_TAG_NAME, SM_SCRIPT_DOUBLE_ESCAPED_DASH_DASH,
+      SM_SCRIPT_ESCAPED_END_TAG_NAME, SM_SCRIPT_DOUBLE_ESCAPED_DASH_DASH, SM_SCRIPT_DOUBLE_ESCAPE_END,
       SM_PLAINTEXT,
     };
 
@@ -116,6 +117,19 @@ namespace GCL::parsers::html
     bool processScriptDoubleEscaped(token_type &);          // 13.2.5.27
     bool processScriptDoubleEscapedDash(token_type &);      // 13.2.5.28
     bool processScriptDoubleEscapedDashDash(token_type &);  // 13.2.5.29
+    bool processScriptDoubleEscapedLessThan(token_type &);  // 13.2.5.30
+    bool processScriptDoubleEscapeEnd(token_type &);        // 13.2.5.31
+    bool processBeforeAttrName(token_type &);               // 13.2.5.32
+    bool processAttrName(token_type &);                     // 13.2.5.33
+    bool processAfterAttrName(token_type &);                // 13.2.5.34
+    bool processBeforeAttrValueStart(token_type &);         // 13.2.5.35
+    bool processAttrValueDoubleQuoted(token_type &);        // 13.2.5.36
+    bool processAttrValueSingleQuoted(token_type &);        // 13.2.5.37
+    bool processAttrValueUnquoted(token_type &);            // 13.2.5.38
+    bool processAfterAttrValueQuoted(token_type &);         // 13.2.5.39
+    bool processSelfClosingStartTag(token_type &);          // 13.2.5.40
+    bool processBogusComment(token_type &);                 // 13.2.5.41
+    bool processMarkupDeclarationOpen(token_type &);        // 13.2.5.42
 
     inline bool emitCharacter(token_type &t, codePoint_t cp)
     {

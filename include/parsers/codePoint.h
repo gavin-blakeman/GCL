@@ -96,12 +96,16 @@ namespace GCL::parsers
   constexpr codePoint_t U_000C(0x000C);  // FF
   constexpr codePoint_t U_0020(0x0020);  // Space
   constexpr codePoint_t U_0021(0x0021);  // '!'
+  constexpr codePoint_t U_0022(0x0022);  // '"'
   constexpr codePoint_t U_0026(0x0026);  // '&'
+  constexpr codePoint_t U_0027(0x0027);  // '''
   constexpr codePoint_t U_002D(0x002D);  // '-'
   constexpr codePoint_t U_002F(0x002F);  // '/'
   constexpr codePoint_t U_003C(0x003C);  // '<'
+  constexpr codePoint_t U_003D(0x003D);  // '='
   constexpr codePoint_t U_003E(0x003E);  // '>'
   constexpr codePoint_t U_003F(0x003F);  // '?'
+  constexpr codePoint_t U_0060(0x0060);  // '`'
   constexpr codePoint_t U_FFFD(0xFFFD);  // Replacement Character
   constexpr codePoint_t U_EOF(0xFEFF);   // eof
 }

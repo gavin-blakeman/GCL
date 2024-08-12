@@ -66,6 +66,7 @@ namespace GCL::parsers
   {
   public:
     using value_type = codePoint_t;
+    using string_type = std::basic_string<value_type>;
 
     /*! @brief      Constructor.
      *  @param[in]  is: The input stream to parse.
@@ -148,6 +149,10 @@ namespace GCL::parsers
       buffer.pop();
 
       return lastValue;
+    }
+
+    bool match(string_type const &s)
+    {
     }
 
     /*! @brief     Pushes the last returned value  (from consume) back into the buffer.
