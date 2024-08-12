@@ -2,7 +2,7 @@
 //
 // PROJECT:             General Class Library
 // SUBSYSTEM:           Parsers::HTML Parser
-// FILE:                htmlTokenTypes.h
+// FILE:                htmlAttributes.h
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,7 +23,7 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class that represents the token types.
+// OVERVIEW:            Class to store attributes.
 //
 // CLASSES INCLUDED:
 //
@@ -31,22 +31,47 @@
 //
 //**********************************************************************************************************************************
 
-#include "include/parsers/html/htmlLanguageTokens.h"
+#ifndef PARSERS_HTML_HTML_RAWATTRIBUTE_H
+#define PARSERS_HTML_HTML_RAWATTRIBUTE_H
+
+// Standard C++ library header files.
+#include <iostream>
+#include <string>
+#include <variant>
+
+// Parsers
+#include "include/parsers/codePoint.h"
 
 namespace GCL::parsers::html
 {
-  SCL::bimap<CToken::tokenID_t, std::string> const tokenStrings =
+  class CHTMLRawAttribute
   {
-    { R_TAG_OPEN, ">" },
-    { R_TAG_CLOSE, "/>" },
-    { L_TAG_DOCTYPE, "<!"},
-    { COMMENT_OPEN, "<!---" },
-    { COMMENT_CLOSE, "--->" },
-    { ASSIGN,  "=" },
-    { ID, "ID"},
-    { VALUE, "Value"},
-    { TEXT, "Text"},
-    { ATTRIBUTE, "Attr"},
+  public:
+    using string_type = std::u32string;
+    using char_type = string_type::value_type;
+
+    CHTMLRawAttribute() = default;
+
+    string_type const &name() const noexcept { return attributeName; }
+    string_type &name () noexcept { return attributeName; }
+    void concatName(char_type c) { attributeName.push_back(c); }
+
+    string_type const &value() const noexcept { return attributeValue; }
+    string_type &value() noexcept { return attributeValue; }
+    void concatValue(char_type c) { attributeValue.push_back(c); }
+
+  private:
+    string_type attributeName;
+    string_type attributeValue;
+
+    friend bool operator==(CHTMLRawAttribute const &lhs, CHTMLRawAttribute const &rhs) noexcept { return (lhs.attributeName == rhs.attributeName); }
+    friend bool operator<(CHTMLRawAttribute const &lhs, CHTMLRawAttribute const &rhs) noexcept { return (lhs.attributeName < rhs.attributeName); }
+    friend std::ostream &operator<<(std::ostream &os, CHTMLRawAttribute const &)
+    {
+      return os;
+    }
   };
 
-} // namespace
+}
+
+#endif // PARSERS_HTML_HTML_RAWATTRIBUTE_H

@@ -50,6 +50,7 @@
 #include <SCL>
 
 // GCL/parser header files.
+#include "include/parsers/codePoint.h"
 #include "include/parsers/token.h"
 #include "include/parsers/languageTokens.h"
 
