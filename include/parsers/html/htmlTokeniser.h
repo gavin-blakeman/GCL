@@ -35,6 +35,7 @@
 #define PARSERS_HTML_HTMLTOKENISER_H
 
 // Standard C++ library header files
+#include <queue>
 #include <utility>
 
 // Parsers library header files.
@@ -80,6 +81,11 @@ namespace GCL::parsers::html
       SM_SCRIPT_DOUBLE_ESCAPE_START, SM_SCRIPT_DOUBLE_ESCAPED, SM_SCRIPT_DOUBLE_ESCAPED_DASH, SM_SCRIPT_DOUBLE_ESCAPED_LESSTHAN,
       SM_SCRIPT_ESCAPED_END_TAG_NAME, SM_SCRIPT_DOUBLE_ESCAPED_DASH_DASH, SM_SCRIPT_DOUBLE_ESCAPE_END,
       SM_PLAINTEXT,
+      SM_COMMENT_START, SM_COMMENT_START_DASH, SM_COMMENT, SM_COMMENT_END, SM_COMMENT_END_DASH, SM_COMMENT_LESSTHAN,
+      SM_COMMENT_LESSTHAN_BANG, SM_COMMENT_LESSTHAN_BANG_DASH, SM_COMMENT_LESSTHAN_BANG_DASH_DASH, SM_COMMENT_END_BANG,
+      SM_DOCTYPE, SM_BEFORE_DOCTYPE_NAME, SM_DOCTYPE_NAME, SM_AFTER_DOCTYPE_NAME, SM_BOGUS_DOCTYPE,
+      SM_AFTER_DOCTYPE_PUBLIC_KEYWORD, SM_AFTER_DOCTYPE_SYSTEM_KEYWORD, SM_BEFORE_DOCTYPE_PUBLIC_IDENTIFIER,
+      SM_DOCTYPE_PUBLIC_IDENTIFER_SINGLE_QUOTED,
     };
 
     smState_e smState = SM_DATA;
@@ -114,27 +120,43 @@ namespace GCL::parsers::html
     bool processScriptEscapedEndTagOpen(token_type &);
     bool processScriptEscapedEndTagName(token_type &);
     bool processScriptDoubleEscapeStart(token_type &);
-    bool processScriptDoubleEscaped(token_type &);          // 13.2.5.27
-    bool processScriptDoubleEscapedDash(token_type &);      // 13.2.5.28
-    bool processScriptDoubleEscapedDashDash(token_type &);  // 13.2.5.29
-    bool processScriptDoubleEscapedLessThan(token_type &);  // 13.2.5.30
-    bool processScriptDoubleEscapeEnd(token_type &);        // 13.2.5.31
-    bool processBeforeAttrName(token_type &);               // 13.2.5.32
-    bool processAttrName(token_type &);                     // 13.2.5.33
-    bool processAfterAttrName(token_type &);                // 13.2.5.34
-    bool processBeforeAttrValueStart(token_type &);         // 13.2.5.35
-    bool processAttrValueDoubleQuoted(token_type &);        // 13.2.5.36
-    bool processAttrValueSingleQuoted(token_type &);        // 13.2.5.37
-    bool processAttrValueUnquoted(token_type &);            // 13.2.5.38
-    bool processAfterAttrValueQuoted(token_type &);         // 13.2.5.39
-    bool processSelfClosingStartTag(token_type &);          // 13.2.5.40
-    bool processBogusComment(token_type &);                 // 13.2.5.41
-    bool processMarkupDeclarationOpen(token_type &);        // 13.2.5.42
+    bool processScriptDoubleEscaped(token_type &);            // 13.2.5.27
+    bool processScriptDoubleEscapedDash(token_type &);        // 13.2.5.28
+    bool processScriptDoubleEscapedDashDash(token_type &);    // 13.2.5.29
+    bool processScriptDoubleEscapedLessThan(token_type &);    // 13.2.5.30
+    bool processScriptDoubleEscapeEnd(token_type &);          // 13.2.5.31
+    bool processBeforeAttrName(token_type &);                 // 13.2.5.32
+    bool processAttrName(token_type &);                       // 13.2.5.33
+    bool processAfterAttrName(token_type &);                  // 13.2.5.34
+    bool processBeforeAttrValueStart(token_type &);           // 13.2.5.35
+    bool processAttrValueDoubleQuoted(token_type &);          // 13.2.5.36
+    bool processAttrValueSingleQuoted(token_type &);          // 13.2.5.37
+    bool processAttrValueUnquoted(token_type &);              // 13.2.5.38
+    bool processAfterAttrValueQuoted(token_type &);           // 13.2.5.39
+    bool processSelfClosingStartTag(token_type &);            // 13.2.5.40
+    bool processBogusComment(token_type &);                   // 13.2.5.41
+    bool processMarkupDeclarationOpen(token_type &);          // 13.2.5.42
+    bool processCommentStart(token_type &);                   // 13.2.5.43
+    bool processCommentStartDash(token_type &);               // 13.2.5.44
+    bool processComment(token_type &);                        // 13.2.5.45
+    bool processCommentLessThan(token_type &);                // 13.2.5.46
+    bool processCommentLessThanBang(token_type &);            // 13.2.5.47
+    bool processCommentLessThanBangDash(token_type &);        // 13.2.5.48
+    bool processCommentLessThanBangDashDash(token_type &);    // 13.2.5.49
+    bool processCommentEndDash(token_type &);                 // 13.2.5.50
+    bool processCommentEnd(token_type &);                     // 13.2.5.51
+    bool processCommentEndBang(token_type &);                 // 13.2.5.52
+    bool processDocType(token_type &);                        // 13.2.5.53
+    bool processBeforeDocTypeName(token_type &);              // 13.2.5.54
+    bool processDocTypeName(token_type &);                    // 13.2.5.55
+    bool processAfterDocTypeName(token_type &);               // 13.2.5.56
+    bool processAfterDocTypePublicKeyword(token_type &);      // 13.2.5.57
+    bool processBeforeDocTypePublicIdentifier(token_type &);  // 13.2.5.58
 
     inline bool emitCharacter(token_type &t, codePoint_t cp)
     {
       t.type(token_type::TT_CHARACTER);
-      t.value(cp);
+      t.appendData(cp);
       return true;
     }
     inline bool emitEOF(token_type &t) { t.type(token_type::TT_EOF); return true; }

@@ -79,15 +79,16 @@ namespace GCL::parsers
 
     constexpr operator utf32_t() const { return value; }
 
-    constexpr bool isalpha() const { return islower() || isupper(); }
-    constexpr bool islower() const { return (value >= 0x61 && value <= 0x7A); }
-    constexpr bool isupper() const { return (value >= 0x41 && value <= 0x5A); }
-    constexpr codePoint_t tolower() { return (isupper() ? value + 0x20 : value); }
+    constexpr bool isalpha() const noexcept { return islower() || isupper(); }
+    constexpr bool islower() const noexcept { return (value >= 0x61 && value <= 0x7A); }
+    constexpr bool isupper() const noexcept { return (value >= 0x41 && value <= 0x5A); }
+    constexpr codePoint_t tolower() const noexcept { return (isupper() ? value + 0x20 : value); }
 
   private:
     value_type value;
 
-  friend constexpr bool operator==(codePoint_t const &lhs, codePoint_t const &rhs) { return lhs.value == rhs.value; }
+    friend constexpr bool operator==(codePoint_t const &lhs, codePoint_t const &rhs) { return lhs.value == rhs.value; }
+    friend constexpr bool operator==(codePoint_t const &lhs, char rhs) { return lhs.value == codePoint_t(rhs).value; }
   };
 
   constexpr codePoint_t U_0000(0x0000);  // null

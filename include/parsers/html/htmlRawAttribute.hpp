@@ -72,6 +72,19 @@ namespace GCL::parsers::html
     }
   };
 
+  class CHTMLRawAttributeCollection final
+  {
+  public:
+    CHTMLRawAttributeCollection() = default;
+    ~CHTMLRawAttributeCollection() = default;
+
+  private:
+    CHTMLRawAttributeCollection(CHTMLRawAttributeCollection const &) = delete;
+    CHTMLRawAttributeCollection(CHTMLRawAttributeCollection &&) = delete;
+    CHTMLRawAttributeCollection &operator=(CHTMLRawAttributeCollection const &) = delete;
+    CHTMLRawAttributeCollection &operator=(CHTMLRawAttributeCollection &&) = delete;
+  };
+
 }
 
 #endif // PARSERS_HTML_HTML_RAWATTRIBUTE_H

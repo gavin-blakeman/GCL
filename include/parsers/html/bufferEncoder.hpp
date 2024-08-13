@@ -83,7 +83,7 @@ namespace GCL::parsers
 
   protected:
     /*! @brief    Fill the buffer when it falls below the minimum size.
-     *  @note     The function needs to take into account the inputStream type (UTF encoding) and the variable byte count nature of the 
+     *  @note     The function needs to take into account the inputStream type (UTF encoding) and the variable byte count nature of the
      *            UTF8 and UTF16 encodings.
      */
     virtual void fillBuffer()
@@ -151,8 +151,34 @@ namespace GCL::parsers
       return lastValue;
     }
 
-    bool match(string_type const &s)
+    /*! @brief      Consume multiple characters.
+     *  @param[in]  n: number of characters to consume.
+     *  @throws
+     */
+    void consume(std::size_t n)
     {
+      while (n != 0)
+      {
+        consume();
+        n--;
+      }
+    }
+
+    /*! @brief      Matches a string to he current buffer.
+     *  @param[in]  s: The string to match.
+     *  @param[in]  cs: Case sensitive compare
+     *  @returns    true if the string is the next set of characters in the buffer.
+     */
+    bool match(string_type const &s, bool cs)
+    {
+      bool bMatch = true;
+      for (auto i = 0; i != s.size() && bMatch; i++)
+      {
+        bMatch = s[i].tolower() = buffer[i].tolower();
+      }
+
+
+      return bMatch;
     }
 
     /*! @brief     Pushes the last returned value  (from consume) back into the buffer.
