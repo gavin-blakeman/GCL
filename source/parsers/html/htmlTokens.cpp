@@ -37,27 +37,70 @@
 
 namespace GCL::parsers::html
 {
-  CHTMLToken::tokenStringMap_t const tokenStrings =
+  CHTMLToken::CHTMLToken(token_type tt) : tokenType(tt)
   {
-      { CHTMLToken::TT_TAG_START, "Start Tag" },
-      { CHTMLToken::TT_TAG_END, "End Tag" },
-      { CHTMLToken::TT_CHARACTER, "Character"},
-      { CHTMLToken::TT_DOCTYPE, "DocType" },
-      { CHTMLToken::TT_COMMENT, "Comment" },
-      { CHTMLToken::TT_EOF, "EOF" },
-  };
-
-  CHTMLToken::CHTMLToken() : tokenStringMap(tokenStrings) {}
-
-  CHTMLToken &CHTMLToken::operator=(CHTMLToken const &other)
-  {
-    if (this != &other)
+    switch(tokenType)
     {
-      tokenType = other.tokenType;
-      tokenValue = other.tokenValue;
+      case TT_DOCTYPE:
+      {
+        tokenValue = tokenContentDocType_t();
+        break;
+      }
+      case TT_TAG_START:
+      case TT_TAG_END:
+      {
+        tokenValue = tokenTag_t();
+        break;
+      }
+      case TT_CHARACTER:
+      {
+        tokenValue = tokenCharacter_t();
+        break;
+      }
+      case TT_COMMENT:
+      {
+        tokenValue = tokenComment_t();
+        break;
+      }
+      default:
+      {
+        // No error.
+        break;
+      }
     }
+  }
 
-    return *this;
+  CHTMLToken::CHTMLToken(token_type tt, char_type const &c) : tokenType(tt)
+  {
+    switch(tokenType)
+    {
+      case TT_DOCTYPE:
+      {
+        tokenValue = tokenContentDocType_t();
+        break;
+      }
+      case TT_TAG_START:
+      case TT_TAG_END:
+      {
+        tokenValue = tokenTag_t();
+        break;
+      }
+      case TT_CHARACTER:
+      {
+        tokenValue = tokenCharacter_t({c});
+        break;
+      }
+      case TT_COMMENT:
+      {
+        tokenValue = tokenComment_t({c});
+        break;
+      }
+      default:
+      {
+        // No error.
+        break;
+      }
+    }
   }
 
   void CHTMLToken::forceQuirks(bool b)
@@ -77,7 +120,24 @@ namespace GCL::parsers::html
     }
   }
 
-  void CHTMLToken::appendName(value_type const &v)
+  bool CHTMLToken::forceQuirks() const
+  {
+    RUNTIME_ASSERT(std::holds_alternative<tokenContentDocType_t>(tokenValue), "Incorrect type held");
+    RUNTIME_ASSERT(tokenType == TT_DOCTYPE, "Incorrect type held");
+
+    return std::get<tokenContentDocType_t>(tokenValue).forceQuirksFlag;
+  }
+
+  bool CHTMLToken::hasPublicIdentifier() const
+  {
+    RUNTIME_ASSERT(std::holds_alternative<tokenContentDocType_t>(tokenValue), "Incorrect type held");
+    RUNTIME_ASSERT(tokenType == TT_DOCTYPE, "Incorrect type held");
+
+    return std::get<tokenContentDocType_t>(tokenValue).publicIdentifier;
+
+  }
+
+  void CHTMLToken::appendName(char_type const &v)
   {
     switch (tokenType)
     {
@@ -141,7 +201,7 @@ namespace GCL::parsers::html
     }
   }
 
-  void CHTMLToken::appendPublicIdentifier(value_type const &v)
+  void CHTMLToken::appendPublicIdentifier(char_type const &v)
   {
     if (tokenType == TT_DOCTYPE)
     {
@@ -165,7 +225,7 @@ namespace GCL::parsers::html
     }
   }
 
-  void CHTMLToken::appendSystemIdentifier(value_type const &v)
+  void CHTMLToken::appendSystemIdentifier(char_type const &v)
   {
     if (tokenType == TT_DOCTYPE)
     {
@@ -176,11 +236,11 @@ namespace GCL::parsers::html
       tokenContentDocType_t &token = std::get<tokenContentDocType_t>(tokenValue);
       if (!token.publicIdentifier)
       {
-        token.systemIdentifier = string_type(v);
+        token.systemIdentifier = string_type(1, v);
       }
       else
       {
-        *(token.systemIdentifier).push_back(v);
+        (*token.systemIdentifier).push_back(v);
       }
     }
     else
@@ -199,7 +259,7 @@ namespace GCL::parsers::html
       {
         if (!std::holds_alternative<tokenContentDocType_t>(tokenValue))
         {
-          token.value = tokenContentDocType_t();
+          tokenValue = tokenContentDocType_t();
         }
         break;
       }
@@ -208,7 +268,7 @@ namespace GCL::parsers::html
       {
         if (!std::holds_alternative<tokenTag_t>(tokenValue))
         {
-          token.value = tokenTag_t();
+          tokenValue = tokenTag_t();
         }
         break;
       }
@@ -216,7 +276,7 @@ namespace GCL::parsers::html
       {
         if (!std::holds_alternative<tokenCharacter_t>(tokenValue))
         {
-          token.value = tokenCharacter_t();
+          tokenValue = tokenCharacter_t();
         }
         break;
       }
@@ -224,7 +284,7 @@ namespace GCL::parsers::html
       {
         if (!std::holds_alternative<tokenComment_t>(tokenValue))
         {
-          token.value = tokenComment_t();
+          tokenValue = tokenComment_t();
         }
         break;
       }
@@ -233,7 +293,7 @@ namespace GCL::parsers::html
       {
         if (!std::holds_alternative<std::monostate>(tokenValue))
         {
-          token.value = std::monostate{};
+          tokenValue = std::monostate{};
         }
         break;
       }
@@ -261,7 +321,7 @@ namespace GCL::parsers::html
     }
   }
 
-  void CHTMLToken::appendData(value_type const &v)
+  void CHTMLToken::appendData(char_type const &v)
   {
     switch (tokenType)
     {
@@ -269,10 +329,12 @@ namespace GCL::parsers::html
       {
         if (!std::holds_alternative<tokenCharacter_t>(tokenValue))
         {
-          tokenValue = tokenCharacter_t();
+          tokenValue = tokenCharacter_t(v);
         }
-        tokenCharacter_t &token = std::get<tokenCharacter_t>(tokenValue);
-        token.data.push_back(v);
+        else
+        {
+          std::get<tokenCharacter_t>(tokenValue).data = v;
+        }
         break;
       }
       case TT_COMMENT:
@@ -296,16 +358,6 @@ namespace GCL::parsers::html
   {
     switch (tokenType)
     {
-      case TT_CHARACTER:
-      {
-        if (!std::holds_alternative<tokenCharacter_t>(tokenValue))
-        {
-          tokenValue = tokenCharacter_t();
-        }
-        tokenCharacter_t &token = std::get<tokenCharacter_t>(tokenValue);
-        token.data.append(s);
-        break;
-      }
       case TT_COMMENT:
       {
         if (!std::holds_alternative<tokenComment_t>(tokenValue))
@@ -320,6 +372,41 @@ namespace GCL::parsers::html
       {
         CODE_ERROR();
       }
+    }
+  }
+
+  void CHTMLToken::setSystemIdentifierEmpty()
+  {
+    if (tokenType == TT_DOCTYPE)
+    {
+      if (!std::holds_alternative<tokenContentDocType_t>(tokenValue))
+      {
+        tokenValue = tokenContentDocType_t();
+      }
+      tokenContentDocType_t &token = std::get<tokenContentDocType_t>(tokenValue);
+      token.systemIdentifier = string_type({});
+
+    }
+    else
+    {
+      CODE_ERROR();
+    }
+  }
+
+  void CHTMLToken::setPublicIdentifierEmpty()
+  {
+    if (tokenType == TT_DOCTYPE)
+    {
+      if (!std::holds_alternative<tokenContentDocType_t>(tokenValue))
+      {
+        tokenValue = tokenContentDocType_t();
+      }
+      tokenContentDocType_t &token = std::get<tokenContentDocType_t>(tokenValue);
+      token.systemIdentifier = string_type({});
+    }
+    else
+    {
+      CODE_ERROR();
     }
   }
 

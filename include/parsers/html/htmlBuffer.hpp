@@ -31,8 +31,8 @@
 //
 //**********************************************************************************************************************************/
 
-#ifndef GCL_PARSERS_HTML_BUFFERENCODER_H
-#define GCL_PARSERS_HTML_BUFFERENCODER_H
+#ifndef GCL_PARSERS_HTML_BUFFER_H
+#define GCL_PARSERS_HTML_BUFFER_H
 
 // Standard C++ library header files
 #include <atomic>
@@ -60,9 +60,9 @@
  * The buffer stores code points.
  */
 
-namespace GCL::parsers
+namespace GCL::parsers::html
 {
-  class CBufferEncoder
+  class CHTMLBuffer
   {
   public:
     using char_type = codePoint_t;
@@ -74,12 +74,12 @@ namespace GCL::parsers
      *  @param[in]  end: Iterator to the end of the token/strng pairs.
      *  @param[out] tokens: The container to receiver the tokens.
      */
-    CBufferEncoder(std::istream &is) : inputStream(is)
+    CHTMLBuffer(std::istream &is) : inputStream(is)
     {
       fillBuffer();
     }
 
-    virtual ~CBufferEncoder() = default;
+    virtual ~CHTMLBuffer() = default;
 
   protected:
     char_type currentChar;
@@ -98,7 +98,7 @@ namespace GCL::parsers
           {
             try
             {
-              utf_t utf;
+              utf_t utf = {.u32 = 0, .type = UTF_8};
               char iByte;
 
               inputStream.get(iByte);
@@ -117,7 +117,6 @@ namespace GCL::parsers
                   byteCount = byteCount >> 1;
                 }
               }
-
               buffer.push_back(utf);
             }
             catch(...)
@@ -174,7 +173,14 @@ namespace GCL::parsers
       bool bMatch = true;
       for (auto i = 0; i != s.size() && bMatch; i++)
       {
-        bMatch = s[i].tolower() = buffer[i].tolower();
+        if (cs)
+        {
+          bMatch = s[i] == buffer[i];
+        }
+        else
+        {
+          bMatch = s[i].tolower() == buffer[i].tolower();
+        }
       }
 
       return bMatch;
@@ -190,11 +196,11 @@ namespace GCL::parsers
     }
 
   private:
-    CBufferEncoder() = delete;
-    CBufferEncoder(CBufferEncoder const &) = delete;
-    CBufferEncoder(CBufferEncoder &&) = delete;
-    CBufferEncoder &operator=(CBufferEncoder const &) = delete;
-    CBufferEncoder &operator=(CBufferEncoder &&) = delete;
+    CHTMLBuffer() = delete;
+    CHTMLBuffer(CHTMLBuffer const &) = delete;
+    CHTMLBuffer(CHTMLBuffer &&) = delete;
+    CHTMLBuffer &operator=(CHTMLBuffer const &) = delete;
+    CHTMLBuffer &operator=(CHTMLBuffer &&) = delete;
 
     std::istream &inputStream;
     std::deque<char_type> buffer;

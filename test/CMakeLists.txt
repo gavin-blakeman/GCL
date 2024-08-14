@@ -33,9 +33,11 @@ set(DIRECTORIES
 set(SOURCES
   main.cpp
 #  parsers/html/test_htmlAttributes.cpp
-#  parsers/html/test_htmlLexer.cpp
+  parsers/html/test_htmlBuffer.cpp
 #  parsers/html/test_htmlParser.cpp
+  parsers/html/test_htmlTokens.cpp
 #  parsers/test_lexer.cpp
+  parsers/test_codePoint.cpp
   test_dateTime.cpp
   test_error.cpp
   test_filesystem.cpp
