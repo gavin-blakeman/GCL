@@ -87,9 +87,13 @@ namespace GCL::parsers::html
 
     // DocType Access
     void forceQuirks(bool b);
+    bool forceQuirks() const;
     void appendPublicIdentifier(char_type const &v);
     void appendSystemIdentifier(char_type const &v);
-
+    void setPublicIdentifierEmpty();
+    void setSystemIdentifierEmpty();
+    bool hasPublicIdentifier() const;
+    bool hasSystemIdentifier() const;
 
     // Start and end tags
     void selfClosing(bool b);
@@ -99,8 +103,8 @@ namespace GCL::parsers::html
 
     bool attrExists(char_type const &v) const noexcept {  }
     void attrStart() { ; }
-    void attrConcatName(char_type const &);
-    void attrConcatValue(char_type const &);
+    void attrConcatName(char_type const &) {};
+    void attrConcatValue(char_type const &) {};
 
   private:
     struct tokenContentDocType_t

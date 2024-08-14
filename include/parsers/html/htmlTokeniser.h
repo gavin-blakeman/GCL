@@ -92,7 +92,9 @@ namespace GCL::parsers::html
       SM_COMMENT_LESSTHAN_BANG, SM_COMMENT_LESSTHAN_BANG_DASH, SM_COMMENT_LESSTHAN_BANG_DASH_DASH, SM_COMMENT_END_BANG,
       SM_DOCTYPE, SM_BEFORE_DOCTYPE_NAME, SM_DOCTYPE_NAME, SM_AFTER_DOCTYPE_NAME, SM_BOGUS_DOCTYPE,
       SM_AFTER_DOCTYPE_PUBLIC_KEYWORD, SM_AFTER_DOCTYPE_SYSTEM_KEYWORD, SM_BEFORE_DOCTYPE_PUBLIC_IDENTIFIER,
-      SM_DOCTYPE_PUBLIC_IDENTIFER_DOUBLE_QUOTED, SM_DOCTYPE_PUBLIC_IDENTIFER_SINGLE_QUOTED,
+      SM_DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED, SM_DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED, SM_AFTER_DOCTYPE_PUBLIC_IDENTIFIER,
+      SM_DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED, SM_DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED,
+      SM_BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIERS,
     };
 
     std::queue<token_type> tokenFIFO;
@@ -128,38 +130,41 @@ namespace GCL::parsers::html
     void processScriptEscapedEndTagOpen();
     void processScriptEscapedEndTagName();
     void processScriptDoubleEscapeStart();
-    void processScriptDoubleEscaped();            // 13.2.5.27
-    void processScriptDoubleEscapedDash();        // 13.2.5.28
-    void processScriptDoubleEscapedDashDash();    // 13.2.5.29
-    void processScriptDoubleEscapedLessThan();    // 13.2.5.30
-    void processScriptDoubleEscapeEnd();          // 13.2.5.31
-    void processBeforeAttrName();                 // 13.2.5.32
-    void processAttrName();                       // 13.2.5.33
-    void processAfterAttrName();                  // 13.2.5.34
-    void processBeforeAttrValueStart();           // 13.2.5.35
-    void processAttrValueDoubleQuoted();          // 13.2.5.36
-    void processAttrValueSingleQuoted();          // 13.2.5.37
-    void processAttrValueUnquoted();              // 13.2.5.38
-    void processAfterAttrValueQuoted();           // 13.2.5.39
-    void processSelfClosingStartTag();            // 13.2.5.40
-    void processBogusComment();                   // 13.2.5.41
-    void processMarkupDeclarationOpen();          // 13.2.5.42
-    void processCommentStart();                   // 13.2.5.43
-    void processCommentStartDash();               // 13.2.5.44
-    void processComment();                        // 13.2.5.45
-    void processCommentLessThan();                // 13.2.5.46
-    void processCommentLessThanBang();            // 13.2.5.47
-    void processCommentLessThanBangDash();        // 13.2.5.48
-    void processCommentLessThanBangDashDash();    // 13.2.5.49
-    void processCommentEndDash();                 // 13.2.5.50
-    void processCommentEnd();                     // 13.2.5.51
-    void processCommentEndBang();                 // 13.2.5.52
-    void processDocType();                        // 13.2.5.53
-    void processBeforeDocTypeName();              // 13.2.5.54
-    void processDocTypeName();                    // 13.2.5.55
-    void processAfterDocTypeName();               // 13.2.5.56
-    void processAfterDocTypePublicKeyword();      // 13.2.5.57
-    void processBeforeDocTypePublicIdentifier();  // 13.2.5.58
+    void processScriptDoubleEscaped();                    // 13.2.5.27
+    void processScriptDoubleEscapedDash();                // 13.2.5.28
+    void processScriptDoubleEscapedDashDash();            // 13.2.5.29
+    void processScriptDoubleEscapedLessThan();            // 13.2.5.30
+    void processScriptDoubleEscapeEnd();                  // 13.2.5.31
+    void processBeforeAttrName();                         // 13.2.5.32
+    void processAttrName();                               // 13.2.5.33
+    void processAfterAttrName();                          // 13.2.5.34
+    void processBeforeAttrValueStart();                   // 13.2.5.35
+    void processAttrValueDoubleQuoted();                  // 13.2.5.36
+    void processAttrValueSingleQuoted();                  // 13.2.5.37
+    void processAttrValueUnquoted();                      // 13.2.5.38
+    void processAfterAttrValueQuoted();                   // 13.2.5.39
+    void processSelfClosingStartTag();                    // 13.2.5.40
+    void processBogusComment();                           // 13.2.5.41
+    void processMarkupDeclarationOpen();                  // 13.2.5.42
+    void processCommentStart();                           // 13.2.5.43
+    void processCommentStartDash();                       // 13.2.5.44
+    void processComment();                                // 13.2.5.45
+    void processCommentLessThan();                        // 13.2.5.46
+    void processCommentLessThanBang();                    // 13.2.5.47
+    void processCommentLessThanBangDash();                // 13.2.5.48
+    void processCommentLessThanBangDashDash();            // 13.2.5.49
+    void processCommentEndDash();                         // 13.2.5.50
+    void processCommentEnd();                             // 13.2.5.51
+    void processCommentEndBang();                         // 13.2.5.52
+    void processDocType();                                // 13.2.5.53
+    void processBeforeDocTypeName();                      // 13.2.5.54
+    void processDocTypeName();                            // 13.2.5.55
+    void processAfterDocTypeName();                       // 13.2.5.56
+    void processAfterDocTypePublicKeyword();              // 13.2.5.57
+    void processBeforeDocTypePublicIdentifier();          // 13.2.5.58
+    void processDocTypePublicIdentifierDoubleQuoted();    // 13.2.5.59
+    void processDocTypePublicIdentifierSingleQuoted();    // 13.2.5.60
+    void processAfterDocTypePublicIdentifier();           // 13.2.5.61
 
     inline void emitCharacter(char_type c)
     {

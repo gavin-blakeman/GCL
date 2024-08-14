@@ -14,10 +14,22 @@
 
 // Miscellaneous libraries
 #include <GCL>
+#include <fmt/format.h>
 
-/* The challenge with representing code points, is that the utf8 and utf16 code points are variable
- * byte code points. In this case what is the best value to return for the coversion functions?
- * Should UTF8 and UTF16 then be represented as classes in their own right, or as arrays, or vectors?
+/* codePoint_t stores codePoints as UTF32. This class should have the same storage as a UTF32 char.
+ * A basic_string of type codePoint_t should have the same memory layout and values as a UTF32 string.
+ * It should be possible to reinterpret_cast between UTF32 and codePoint_t. (1)
+ * codePoint_t provides the conversions from UTF8 and UTF16 to/from UTF32.
+ * Note: 1. U_EOF is defined as a invalid character. If this is processed using a UTF32 checker, it should/will
+ *          fail. The HTML parser/tokeniser is such that the U_EOF will never appear in the output, only in the
+ *          intermediate queue that is used for buffering the stream and/or included files.
+ *       2. UTF32 was chosen as it is a fixed size representation. It is only used as the internal (intermediate)
+ *          representation in the tokeniser/tree builder. As the codePoints are fixed length there is no
+ *          requirement to pass/manage variable length encodings. The 32 bit nature also fits easily
+ *          in common register sizes.
+ *       3. There are aspects of HTML that are limited to ascii. This simplifies the tolower() function as
+ *          it only needs to operate on ascii characters.
+ *       4. If full localisation is required use std::u32string and char32_t.
  */
 
 namespace GCL::parsers
@@ -92,7 +104,14 @@ namespace GCL::parsers
 
     friend constexpr bool operator==(codePoint_t const &lhs, codePoint_t const &rhs) { return lhs.value == rhs.value; }
     friend constexpr bool operator==(codePoint_t const &lhs, char rhs) { return lhs.value == codePoint_t(rhs).value; }
+    friend std::ostream &operator<<(std::ostream &os, codePoint_t const &cp)
+    {
+      os << std::to_string(cp);
+      return os;
+    }
   };
+
+  static_assert(sizeof(codePoint_t) == 4, "Expected 4");
 
   constexpr codePoint_t U_0000(0x0000);  // null
   constexpr codePoint_t U_0009(0x0009);  // Tab

@@ -120,6 +120,23 @@ namespace GCL::parsers::html
     }
   }
 
+  bool CHTMLToken::forceQuirks() const
+  {
+    RUNTIME_ASSERT(std::holds_alternative<tokenContentDocType_t>(tokenValue), "Incorrect type held");
+    RUNTIME_ASSERT(tokenType == TT_DOCTYPE, "Incorrect type held");
+
+    return std::get<tokenContentDocType_t>(tokenValue).forceQuirksFlag;
+  }
+
+  bool CHTMLToken::hasPublicIdentifier() const
+  {
+    RUNTIME_ASSERT(std::holds_alternative<tokenContentDocType_t>(tokenValue), "Incorrect type held");
+    RUNTIME_ASSERT(tokenType == TT_DOCTYPE, "Incorrect type held");
+
+    return std::get<tokenContentDocType_t>(tokenValue).publicIdentifier;
+
+  }
+
   void CHTMLToken::appendName(char_type const &v)
   {
     switch (tokenType)
@@ -355,6 +372,41 @@ namespace GCL::parsers::html
       {
         CODE_ERROR();
       }
+    }
+  }
+
+  void CHTMLToken::setSystemIdentifierEmpty()
+  {
+    if (tokenType == TT_DOCTYPE)
+    {
+      if (!std::holds_alternative<tokenContentDocType_t>(tokenValue))
+      {
+        tokenValue = tokenContentDocType_t();
+      }
+      tokenContentDocType_t &token = std::get<tokenContentDocType_t>(tokenValue);
+      token.systemIdentifier = string_type({});
+
+    }
+    else
+    {
+      CODE_ERROR();
+    }
+  }
+
+  void CHTMLToken::setPublicIdentifierEmpty()
+  {
+    if (tokenType == TT_DOCTYPE)
+    {
+      if (!std::holds_alternative<tokenContentDocType_t>(tokenValue))
+      {
+        tokenValue = tokenContentDocType_t();
+      }
+      tokenContentDocType_t &token = std::get<tokenContentDocType_t>(tokenValue);
+      token.systemIdentifier = string_type({});
+    }
+    else
+    {
+      CODE_ERROR();
     }
   }
 

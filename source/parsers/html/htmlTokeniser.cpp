@@ -334,6 +334,21 @@ namespace GCL::parsers::html
             processBeforeDocTypePublicIdentifier();
             break;
           }
+          case SM_DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED: // 13.2.5.59
+          {
+            processDocTypePublicIdentifierDoubleQuoted();
+            break;
+          }
+          case SM_DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED: // 13.2.5.60
+          {
+            processDocTypePublicIdentifierSingleQuoted();
+            break;
+          }
+          case SM_AFTER_DOCTYPE_PUBLIC_IDENTIFIER: // 13.2.5.61
+          {
+            processAfterDocTypePublicIdentifier();
+            break;
+          }
         }
       }
     }
@@ -2277,14 +2292,14 @@ namespace GCL::parsers::html
       {
         PARSE_ERROR("missing whitespace after doctype public keyword");
         IMPLEMENT_ME();
-        smState = SM_DOCTYPE_PUBLIC_IDENTIFER_DOUBLE_QUOTED;
+        smState = SM_DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED;
         break;
       }
       case U_0027:
       {
         PARSE_ERROR("missing whitespace after doctype public keyword");
         IMPLEMENT_ME();
-        smState = SM_DOCTYPE_PUBLIC_IDENTIFER_SINGLE_QUOTED;
+        smState = SM_DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED;
         break;
       }
       case U_003E:
@@ -2328,7 +2343,167 @@ namespace GCL::parsers::html
       }
       case U_0022:
       {
+        tokenFIFO.back().setPublicIdentifierEmpty();
+        smState = SM_DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED;
+        break;
+      }
+      case U_0027:
+      {
+        tokenFIFO.back().setPublicIdentifierEmpty();
+        smState = SM_DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED;
+        break;
+      }
+      case U_003E:
+      {
+        PARSE_ERROR("missing doctype public identifier");
+        tokenFIFO.back().forceQuirks(true);
+        emit = true;
+        smState = SM_DATA;
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in doctype");
+        tokenFIFO.back().forceQuirks(true);
+        emitEOF();
+        break;
+      }
+      default:
+      {
+        PARSE_ERROR("missing quote before doctype public identifier");
+        tokenFIFO.back().forceQuirks(true);
+        smState = SM_BOGUS_DOCTYPE;
+        reconsume();
+        break;
+      }
+    }
+  }
 
+  // 13.2.5.59
+  void CHTMLTokeniser::processDocTypePublicIdentifierDoubleQuoted()
+  {
+    switch (currentChar)
+    {
+      case U_0022:
+      {
+        smState = SM_AFTER_DOCTYPE_PUBLIC_IDENTIFIER;
+        break;
+      }
+      case U_0000:
+      {
+        PARSE_ERROR("unexpected null character");
+        tokenFIFO.back().appendPublicIdentifier(U_FFFD);
+        break;
+      }
+      case U_003E:
+      {
+        PARSE_ERROR("abrupt doctype public identifier");
+        tokenFIFO.back().forceQuirks(true);
+        emit = true;
+        smState = SM_DATA;
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in doctype");
+        tokenFIFO.back().forceQuirks(true);
+        emitEOF();
+        break;
+      }
+      default:
+      {
+        tokenFIFO.back().appendPublicIdentifier(currentChar);
+        break;
+      }
+    }
+  }
+
+  // 13.2.5.60
+  void CHTMLTokeniser::processDocTypePublicIdentifierSingleQuoted()
+  {
+    switch (currentChar)
+    {
+      case U_0027:
+      {
+        smState = SM_AFTER_DOCTYPE_PUBLIC_IDENTIFIER;
+        break;
+      }
+      case U_0000:
+      {
+        PARSE_ERROR("unexpected null character");
+        tokenFIFO.back().appendPublicIdentifier(U_FFFD);
+        break;
+      }
+      case U_003E:
+      {
+        PARSE_ERROR("abrupt doctype public identifier");
+        tokenFIFO.back().forceQuirks(true);
+        emit = true;
+        smState = SM_DATA;
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in doctype");
+        tokenFIFO.back().forceQuirks(true);
+        emitEOF();
+        break;
+      }
+      default:
+      {
+        tokenFIFO.back().appendPublicIdentifier(currentChar);
+        break;
+      }
+    }
+  }
+
+  // 12.2.5.61
+  void CHTMLTokeniser::processAfterDocTypePublicIdentifier()
+  {
+    switch(currentChar)
+    {
+      case U_0009:
+      case U_000A:
+      case U_000C:
+      case U_0020:
+      {
+        smState = SM_BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIERS;
+        break;
+      }
+      case U_003E:
+      {
+        emit = true;
+        smState = SM_DATA;
+        break;
+      }
+      case U_0022:
+      {
+        PARSE_ERROR("missing whitespace between doctype public and system identifiers");
+        tokenFIFO.back().setSystemIdentifierEmpty();
+        smState = SM_DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED;
+        break;
+      }
+      case U_0027:
+      {
+        PARSE_ERROR("missing whitespace between doctype public and system identifiers");
+        tokenFIFO.back().setSystemIdentifierEmpty();
+        smState = SM_DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in doctype");
+        tokenFIFO.back().forceQuirks(true);
+        emitEOF();
+        break;
+      }
+      default:
+      {
+        PARSE_ERROR("missing quote before doctype system identifier");
+        tokenFIFO.back().forceQuirks(true);
+        smState = SM_BOGUS_DOCTYPE;
+        reconsume();
+        break;
       }
     }
   }
