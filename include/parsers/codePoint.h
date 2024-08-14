@@ -12,6 +12,9 @@
 #include <cstdint>
 #include <variant>
 
+// Miscellaneous libraries
+#include <GCL>
+
 /* The challenge with representing code points, is that the utf8 and utf16 code points are variable
  * byte code points. In this case what is the best value to return for the coversion functions?
  * Should UTF8 and UTF16 then be represented as classes in their own right, or as arrays, or vectors?

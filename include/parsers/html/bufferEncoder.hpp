@@ -37,6 +37,7 @@
 // Standard C++ library header files
 #include <atomic>
 #include <cstdint>
+#include <deque>
 #include <istream>
 #include <mutex>
 #include <semaphore>
@@ -46,7 +47,6 @@
 #include <vector>
 
 // Miscellaneous library header files
-#include <SCL>
 
 // GCL/parser header files.
 #include "include/parsers/codePoint.h"
@@ -65,8 +65,8 @@ namespace GCL::parsers
   class CBufferEncoder
   {
   public:
-    using value_type = codePoint_t;
-    using string_type = std::basic_string<value_type>;
+    using char_type = codePoint_t;
+    using string_type = std::basic_string<char_type>;
 
     /*! @brief      Constructor.
      *  @param[in]  is: The input stream to parse.
@@ -82,13 +82,15 @@ namespace GCL::parsers
     virtual ~CBufferEncoder() = default;
 
   protected:
+    char_type currentChar;
+
     /*! @brief    Fill the buffer when it falls below the minimum size.
      *  @note     The function needs to take into account the inputStream type (UTF encoding) and the variable byte count nature of the
      *            UTF8 and UTF16 encodings.
      */
     virtual void fillBuffer()
     {
-      while (!buffer.full() && !inputStream.eof())
+      while (!inputStream.eof())
       {
         switch (streamEncoding)
         {
@@ -143,12 +145,10 @@ namespace GCL::parsers
      *  @returns    The value at the front of the buffer.
      *  @throws     If  the buffer is empty.
      */
-    value_type consume()
+    void consume()
     {
-      lastValue = buffer.front();
-      buffer.pop();
-
-      return lastValue;
+      currentChar = buffer.front();
+      buffer.pop_front();
     }
 
     /*! @brief      Consume multiple characters.
@@ -177,7 +177,6 @@ namespace GCL::parsers
         bMatch = s[i].tolower() = buffer[i].tolower();
       }
 
-
       return bMatch;
     }
 
@@ -187,7 +186,7 @@ namespace GCL::parsers
      */
     void reconsume()
     {
-      buffer.push_front(lastValue);
+      buffer.push_front(currentChar);
     }
 
   private:
@@ -198,9 +197,8 @@ namespace GCL::parsers
     CBufferEncoder &operator=(CBufferEncoder &&) = delete;
 
     std::istream &inputStream;
-    SCL::circular_biBuffer<value_type, 1024, false, 8, false> buffer;
+    std::deque<char_type> buffer;
     bool eos = false;
-    value_type lastValue;
     utf_e streamEncoding = UTF_8;
   };
 

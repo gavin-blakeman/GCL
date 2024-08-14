@@ -37,13 +37,11 @@
 // Standard C++ library header files
 #include <cstdint>
 #include <iostream>
+#include <list>
 #include <optional>
 #include <string>
 #include <variant>
 #include <vector>
-
-// Miscellaneous library header files.
-#include <SCL>
 
 // Parser header files
 #include "include/parsers/html/htmlRawAttribute.hpp"
@@ -63,44 +61,46 @@ namespace GCL::parsers::html
   class CHTMLToken
   {
   public:
-    using value_type = codePoint_t;
-    using string_type = std::basic_string<value_type>;
+    using char_type = codePoint_t;
+    using string_type = std::basic_string<char_type>;
     enum token_type { TT_NONE, TT_TAG_START, TT_TAG_END, TT_CHARACTER, TT_DOCTYPE, TT_EOF, TT_COMMENT };
-    using tokenStringMap_t = SCL::bimap<token_type, std::string>;
     using attribute_type = CHTMLRawAttribute;
     using attribute_collection = std::list<attribute_type>;
 
-    CHTMLToken();
-    CHTMLToken(CHTMLToken const &t) : tokenStringMap(t.tokenStringMap), tokenType(t.tokenType), tokenValue(t.tokenValue) {}
+    CHTMLToken() = default;
+    CHTMLToken(CHTMLToken const &t) = default;
+    CHTMLToken(CHTMLToken &&) = default;
+    CHTMLToken(token_type t);
+    CHTMLToken(token_type t, char_type const &c);
 
-    CHTMLToken &operator=(CHTMLToken const &other);
+    ~CHTMLToken() = default;
+
+    CHTMLToken &operator=(CHTMLToken const &other) = default;
+    CHTMLToken &operator=(CHTMLToken &&) = default;
 
     // Shared dependent on tokenType
 
-    void appendName(value_type const &v);
+    void appendName(char_type const &v);
     string_type const &name() const;
-    void appendData(value_type const &v);
+    void appendData(char_type const &v);
     void appendData(string_type const &s);
 
     // DocType Access
     void forceQuirks(bool b);
-    void appendPublicIdentifier(value_type const &v);
-    void appendSystemIdentifier(value_type const &v);
+    void appendPublicIdentifier(char_type const &v);
+    void appendSystemIdentifier(char_type const &v);
 
 
     // Start and end tags
     void selfClosing(bool b);
 
     token_type const &type() const noexcept { return tokenType; }
-    void type(token_type tt)  { tokenType = tt; }
+    void type(token_type tt);
 
-    bool attrExists(value_type const &v) const noexcept {  }
+    bool attrExists(char_type const &v) const noexcept {  }
     void attrStart() { ; }
-    void attrConcatName(value_type const &);
-    void attrConcatValue(value_type const &);
-
-
-
+    void attrConcatName(char_type const &);
+    void attrConcatValue(char_type const &);
 
   private:
     struct tokenContentDocType_t
@@ -109,6 +109,7 @@ namespace GCL::parsers::html
       std::optional<string_type> publicIdentifier;
       std::optional<string_type> systemIdentifier;
       bool forceQuirksFlag = false;
+
     };
 
     struct tokenTag_t
@@ -125,16 +126,15 @@ namespace GCL::parsers::html
     };
     struct tokenCharacter_t
     {
-      string_type data;
+      char_type data;
     };
 
     using tokenVariant_t = std::variant<std::monostate, tokenContentDocType_t, tokenTag_t, tokenComment_t, tokenCharacter_t>;
 
-    tokenStringMap_t const &tokenStringMap;
     token_type tokenType = TT_NONE;
     mutable tokenVariant_t tokenValue;
 
-    friend bool operator==(CHTMLToken const &lhs, CHTMLToken const &rhs) { return ((lhs.tokenType == rhs.tokenType) && (lhs.tokenValue == rhs.tokenValue)); }
+    friend bool operator==(CHTMLToken const &lhs, CHTMLToken const &rhs) { return (lhs.tokenType == rhs.tokenType); }
     friend bool operator==(CHTMLToken const &lhs, token_type rhs) { return (lhs.tokenType == rhs); }
     friend std::ostream &operator<<(std::ostream &os, CHTMLToken const &);
   };
