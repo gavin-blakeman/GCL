@@ -22,7 +22,7 @@ function(make_includable input_file output_file)
     file(WRITE ${output_file} "${content}")
 endfunction(make_includable)
 
-MAKE_INCLUDABLE(${PROJECT_SOURCE_DIR}/testFiles/testPage.html ${PROJECT_SOURCE_DIR}/generated/testPage.cpp)
+#MAKE_INCLUDABLE(${PROJECT_SOURCE_DIR}/testFiles/testPage.html ${PROJECT_SOURCE_DIR}/generated/testPage.cpp)
 
 set(DIRECTORIES
   ${CMAKE_SOURCE_DIR}/SCL
