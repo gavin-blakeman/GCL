@@ -36,7 +36,7 @@ set(SOURCES
   parsers/html/test_htmlBuffer.cpp
 #  parsers/html/test_htmlParser.cpp
   parsers/html/test_htmlTokens.cpp
-#  parsers/test_lexer.cpp
+  parsers/html/test_htmlTokeniser.cpp
   parsers/test_codePoint.cpp
   test_dateTime.cpp
   test_error.cpp

@@ -95,9 +95,13 @@ namespace GCL::parsers
     constexpr operator utf32_t() const { return value; }
 
     constexpr bool isalpha() const noexcept { return islower() || isupper(); }
+    constexpr bool isnumeric() const noexcept { return (value >= 0x30 && value <= 0x39); }
+    constexpr bool isalphanumeric() const noexcept { return isalpha() || isnumeric(); }
+    constexpr bool isHexDigit() const noexcept{ return isnumeric() || ( value >= 0x41 && value <= 0x46) || (value >= 0x61 && value <= 0x66); }
     constexpr bool islower() const noexcept { return (value >= 0x61 && value <= 0x7A); }
     constexpr bool isupper() const noexcept { return (value >= 0x41 && value <= 0x5A); }
     constexpr codePoint_t tolower() const noexcept { return (isupper() ? value + 0x20 : value); }
+
 
   private:
     value_type value;
@@ -113,24 +117,29 @@ namespace GCL::parsers
 
   static_assert(sizeof(codePoint_t) == 4, "Expected 4");
 
-  constexpr codePoint_t U_0000(0x0000);  // null
-  constexpr codePoint_t U_0009(0x0009);  // Tab
-  constexpr codePoint_t U_000A(0x000A);  // LF
-  constexpr codePoint_t U_000C(0x000C);  // FF
-  constexpr codePoint_t U_0020(0x0020);  // Space
-  constexpr codePoint_t U_0021(0x0021);  // '!'
-  constexpr codePoint_t U_0022(0x0022);  // '"'
-  constexpr codePoint_t U_0026(0x0026);  // '&'
-  constexpr codePoint_t U_0027(0x0027);  // '''
-  constexpr codePoint_t U_002D(0x002D);  // '-'
-  constexpr codePoint_t U_002F(0x002F);  // '/'
-  constexpr codePoint_t U_003C(0x003C);  // '<'
-  constexpr codePoint_t U_003D(0x003D);  // '='
-  constexpr codePoint_t U_003E(0x003E);  // '>'
-  constexpr codePoint_t U_003F(0x003F);  // '?'
-  constexpr codePoint_t U_0060(0x0060);  // '`'
-  constexpr codePoint_t U_FFFD(0xFFFD);  // Replacement Character
-  constexpr codePoint_t U_EOF(0xFEFF);   // eof
+  constexpr codePoint_t U_0000(0x0000);   // null
+  constexpr codePoint_t U_0009(0x0009);   // Tab
+  constexpr codePoint_t U_000A(0x000A);   // LF
+  constexpr codePoint_t U_000C(0x000C);   // FF
+  constexpr codePoint_t U_0020(0x0020);   // Space
+  constexpr codePoint_t U_0021(0x0021);   // '!'
+  constexpr codePoint_t U_0022(0x0022);   // '"'
+  constexpr codePoint_t U_0023(0x0023);   // '#'
+  constexpr codePoint_t U_0026(0x0026);   // '&'
+  constexpr codePoint_t U_0027(0x0027);   // '''
+  constexpr codePoint_t U_002D(0x002D);   // '-'
+  constexpr codePoint_t U_002F(0x002F);   // '/'
+  constexpr codePoint_t U_003B(0x003B);   // ';'
+  constexpr codePoint_t U_003C(0x003C);   // '<'
+  constexpr codePoint_t U_003D(0x003D);   // '='
+  constexpr codePoint_t U_003E(0x003E);   // '>'
+  constexpr codePoint_t U_003F(0x003F);   // '?'
+  constexpr codePoint_t U_0058(0x0058);   // 'X'
+  constexpr codePoint_t U_005D(0x005D);   // '['
+  constexpr codePoint_t U_0060(0x0060);   // '`'
+  constexpr codePoint_t U_0078(0x0078);   // 'x'
+  constexpr codePoint_t U_FFFD(0xFFFD);   // Replacement Character
+  constexpr codePoint_t U_EOF(0xFEFF);    // eof
 }
 
 #endif /* GCL_INCLUDE_PARSERS_CODEPOINT_HPP_ */

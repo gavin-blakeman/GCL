@@ -133,9 +133,16 @@ namespace GCL::parsers::html
     RUNTIME_ASSERT(std::holds_alternative<tokenContentDocType_t>(tokenValue), "Incorrect type held");
     RUNTIME_ASSERT(tokenType == TT_DOCTYPE, "Incorrect type held");
 
-    return std::get<tokenContentDocType_t>(tokenValue).publicIdentifier;
-
+    return std::get<tokenContentDocType_t>(tokenValue).publicIdentifier.has_value();
   }
+
+  bool CHTMLToken::hasSystemIdentifier() const
+  {
+    RUNTIME_ASSERT(std::holds_alternative<tokenContentDocType_t>(tokenValue), "Incorrect type held");
+    RUNTIME_ASSERT(tokenType == TT_DOCTYPE, "Incorrect type held");
+
+    return std::get<tokenContentDocType_t>(tokenValue).systemIdentifier.has_value();
+    }
 
   void CHTMLToken::appendName(char_type const &v)
   {
@@ -249,6 +256,23 @@ namespace GCL::parsers::html
     }
   }
 
+  bool CHTMLToken::isSelfClosing() const
+  {
+    if (tokenType == TT_TAG_START)
+    {
+      if (!std::holds_alternative<tokenTag_t>(tokenValue))
+      {
+        tokenValue = tokenTag_t{};
+      }
+      tokenTag_t &token = std::get<tokenTag_t>(tokenValue);
+      return token.selfClosingFlag;
+    }
+    else
+    {
+      CODE_ERROR();
+    }
+  }
+
   void CHTMLToken::type(token_type tt)
   {
     tokenType = tt;
@@ -306,7 +330,7 @@ namespace GCL::parsers::html
 
   void CHTMLToken::selfClosing(bool b)
   {
-    if ( (tokenType == TT_TAG_START) || (tokenType == TT_TAG_END))
+    if (tokenType == TT_TAG_START)
     {
       if (!std::holds_alternative<tokenTag_t>(tokenValue))
       {
@@ -402,7 +426,7 @@ namespace GCL::parsers::html
         tokenValue = tokenContentDocType_t();
       }
       tokenContentDocType_t &token = std::get<tokenContentDocType_t>(tokenValue);
-      token.systemIdentifier = string_type({});
+      token.publicIdentifier = string_type({});
     }
     else
     {

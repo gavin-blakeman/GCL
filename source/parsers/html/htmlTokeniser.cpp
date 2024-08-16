@@ -49,7 +49,7 @@ namespace GCL::parsers::html
             processData();
             break;
           }
-          case SM_TAG_OPEN:
+          case SM_TAG_OPEN: // 13.2.5.6
           {
             processTagOpen();
             break;
@@ -349,6 +349,101 @@ namespace GCL::parsers::html
             processAfterDocTypePublicIdentifier();
             break;
           }
+          case SM_BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIERS: // 13.2.5.62
+          {
+            processBetweenDocTypePublicSystmeIdentifiers();
+            break;
+          }
+          case SM_AFTER_DOCTYPE_SYSTEM_KEYWORD: // 13.2.5.63
+          {
+            processAfterDocTypeSystemKeyword();
+            break;
+          }
+          case SM_BEFORE_DOCTYPE_SYSTEM_IDENTIFIER: // 13.2.5.64
+          {
+            processBeforeDocTypeSystemIdentifier();
+            break;
+          }
+          case SM_DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED: // 13.2.5.65
+          {
+            processDocTypeSystemIdentifierDoubleQuoted();
+            break;
+          }
+          case SM_DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED: // 13.2.5.66
+          {
+            processDocTypeSystemIdentifierSingleQuoted();
+            break;
+          }
+          case SM_AFTER_DOCTYPE_SYSTEM_IDENTIFIER: // 13.2.5.67
+          {
+            processAfterDocTypeSystemIdentifier();
+            break;
+          }
+          case SM_BOGUS_DOCTYPE: // 13.2.5.68
+          {
+            processBogusDocType();
+            break;
+          }
+          case SM_CDATA_SECTION: // 13.2.5.69
+          {
+            processCDataSection();
+            break;
+          }
+          case SM_CDATA_SECTION_BRACKET: // 13.2.5.70
+          {
+            processCDataSectionBracket();
+            break;
+          }
+          case SM_CDATA_SECTION_END: // 13.2.5.71
+          {
+            processCDataSectionEnd();
+            break;
+          }
+          case SM_CHARACTER_REFERENCE: // 13.2.5.72
+          {
+            processCharacterReference();
+            break;
+          }
+          case SM_NAMED_CHARACTER_REFERENCE:  // 13.2.5.73
+          {
+            processNamedCharacterReference();
+            break;
+          }
+          case SM_AMBIGUOUS_AMPERSAND:  // 13.2.5.74
+          {
+            processAmbiguousAmpersand();
+            break;
+          }
+          case SM_NUMERIC_CHARACTER_REFERENCE: // 13.2.5.75
+          {
+            processNumericCharacterReference();
+            break;
+          }
+          case SM_HEXADECIMAL_CHARACTER_REFERENCE_START:  // 13.2.5.76
+          {
+            processHexadecimalCharacterReferenceStart();
+            break;
+          }
+          case SM_DECIMAL_CHARACTER_REFERENCE_START:  // 13.2.5.77
+          {
+            processDecimalCharacterReferenceStart();
+            break;
+          }
+          case SM_HEXADECIMAL_CHARACTER_REFERENCE: // 13.2.5.78
+          {
+            processHexadecimalCharacterReference();
+            break;
+          }
+          case SM_DECIMAL_CHARACTER_REFERENCE:  // 13.2.5.79
+          {
+            processDecimalCharacterReference();
+            break;
+          }
+          case SM_NUMERIC_CHARACTER_REFERENCE_END: // 13.2.5.80
+          {
+            processNumericCharacterReferenceEnd();
+            break;
+          }
         }
       }
     }
@@ -368,7 +463,7 @@ namespace GCL::parsers::html
         smState = SM_CHARACTER_REFERENCE;
         break;
       }
-      case U_003C:
+      case U_003C: // '<'
       {
         smState = SM_TAG_OPEN;
         break;
@@ -1273,6 +1368,7 @@ namespace GCL::parsers::html
           emitCharacter(U_003C);
           smState = SM_DATA;
         }
+        reconsume();
         break;
       }
     }
@@ -2507,5 +2603,539 @@ namespace GCL::parsers::html
       }
     }
   }
+
+  // 13.2.5.62
+  void CHTMLTokeniser::processBetweenDocTypePublicSystmeIdentifiers()
+  {
+    switch (currentChar)
+    {
+      case U_0009:
+      case U_000A:
+      case U_000C:
+      case U_0020:
+      {
+        // Ignore the character.
+        break;
+      }
+      case U_003E:
+      {
+        emit = true;
+        smState = SM_DATA;
+        break;
+      }
+      case U_0022:
+      {
+        smState = SM_DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED;
+        break;
+      }
+      case U_0027:
+      {
+        smState = SM_DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in doctype");
+        tokenFIFO.back().forceQuirks(true);
+        emitEOF();
+        break;
+      }
+      default:
+      {
+        PARSE_ERROR("missing quote before doctype system identifier");
+        tokenFIFO.back().forceQuirks(true);
+        smState = SM_BOGUS_DOCTYPE;
+        reconsume();
+        break;
+      }
+    }
+  }
+
+  // 13.2.5.63
+  void CHTMLTokeniser::processAfterDocTypeSystemKeyword()
+  {
+    switch(currentChar)
+    {
+      case U_0009:
+      case U_000A:
+      case U_000C:
+      case U_0020:
+      {
+        smState = SM_BEFORE_DOCTYPE_SYSTEM_IDENTIFIER;
+        break;
+      }
+      case U_0022:
+      {
+        PARSE_ERROR("missing whitespace after doctype system keyyword");
+        tokenFIFO.back().setSystemIdentifierEmpty();
+        smState = SM_DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED;
+        break;
+      }
+      case U_0027:
+      {
+        PARSE_ERROR("missing whitespace after doctype system keyyword");
+        tokenFIFO.back().setSystemIdentifierEmpty();
+        smState = SM_DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
+        break;
+      }
+      case U_003E:
+      {
+        PARSE_ERROR("missing doctype system identifier");
+        tokenFIFO.back().forceQuirks(true);
+        emit = true;
+        smState = SM_DATA;
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in doctype");
+        tokenFIFO.back().forceQuirks(true);
+        emitEOF();
+        break;
+      }
+      default:
+      {
+        PARSE_ERROR("missing quote before doctype system identifier");
+        tokenFIFO.back().forceQuirks(true);
+        smState = SM_BOGUS_DOCTYPE;
+        reconsume();
+      }
+    }
+  }
+
+  void CHTMLTokeniser::processBeforeDocTypeSystemIdentifier()
+  {
+    switch (currentChar)
+    {
+      case U_0009:
+      case U_000A:
+      case U_000C:
+      case U_0020:
+      {
+        // Ignore the character.
+        break;
+      }
+      case U_0022:
+      {
+        tokenFIFO.back().setSystemIdentifierEmpty();
+        smState = SM_DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED;
+        break;
+      }
+      case U_0027:
+      {
+        tokenFIFO.back().setSystemIdentifierEmpty();
+        smState = SM_DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED;
+        break;
+      }
+      case U_003E:
+      {
+        PARSE_ERROR("missing doctype system identifier");
+        tokenFIFO.back().forceQuirks(true);
+        smState = SM_DATA;
+        emit = true;
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in doctype");
+        tokenFIFO.back().forceQuirks(true);
+        emitEOF();
+        break;
+      }
+      default:
+      {
+        PARSE_ERROR("missing quote before doctype system identifier");
+        tokenFIFO.back().forceQuirks(true);
+        smState = SM_BOGUS_DOCTYPE;
+        break;
+      }
+    }
+  }
+
+  // 13.2.5.65
+  void CHTMLTokeniser::processDocTypeSystemIdentifierDoubleQuoted()
+  {
+    switch (currentChar)
+    {
+      case U_0022:
+      {
+        smState = SM_AFTER_DOCTYPE_SYSTEM_IDENTIFIER;
+        break;
+      }
+      case U_0000:
+      {
+        PARSE_ERROR("unexpected null character");
+        tokenFIFO.back().appendSystemIdentifier(U_FFFD);
+        break;
+      }
+      case U_003E:
+      {
+        PARSE_ERROR("abrupt doctype system identifier");
+        tokenFIFO.back().forceQuirks(true);
+        smState = SM_DATA;
+        emit = true;
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in doctype");
+        tokenFIFO.back().forceQuirks(true);
+        emitEOF();
+        break;
+      }
+      default:
+      {
+        tokenFIFO.back().appendSystemIdentifier(currentChar);
+        break;
+      }
+    }
+  }
+
+  // 13.2.5.66
+  void CHTMLTokeniser::processDocTypeSystemIdentifierSingleQuoted()
+  {
+    switch (currentChar)
+    {
+      case U_0027:
+      {
+        smState = SM_AFTER_DOCTYPE_SYSTEM_IDENTIFIER;
+        break;
+      }
+      case U_0000:
+      {
+        PARSE_ERROR("unexpected null character");
+        tokenFIFO.back().appendSystemIdentifier(U_FFFD);
+        break;
+      }
+      case U_003E:
+      {
+        PARSE_ERROR("abrupt doctype system identifier");
+        tokenFIFO.back().forceQuirks(true);
+        smState = SM_DATA;
+        emit = true;
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in doctype");
+        tokenFIFO.back().forceQuirks(true);
+        emitEOF();
+        break;
+      }
+      default:
+      {
+        tokenFIFO.back().appendSystemIdentifier(currentChar);
+        break;
+      }
+    }
+  }
+
+  // 13.2.5.67
+  void CHTMLTokeniser::processAfterDocTypeSystemIdentifier()
+  {
+    switch (currentChar)
+    {
+      case U_0009:
+      case U_000A:
+      case U_000C:
+      case U_0020:
+      {
+        // Ignore the character.
+        break;
+      }
+      case U_003E:
+      {
+        smState = SM_DATA;
+        emit = true;
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in doctype");
+        tokenFIFO.back().forceQuirks(true);
+        emitEOF();
+        break;
+      }
+      default:
+      {
+        PARSE_ERROR("unexpected character after doctype system identifier");
+        smState = SM_BOGUS_DOCTYPE;
+        reconsume();
+        break;
+      }
+    }
+  }
+
+  // 13.2.5.68
+  void CHTMLTokeniser::processBogusDocType()
+  {
+    switch(currentChar)
+    {
+      case U_003E:
+      {
+        smState = SM_DATA;
+        emit = true;
+        break;
+      }
+      case U_0000:
+      {
+        PARSE_ERROR("unexpected null character");
+        break;
+      }
+      case U_EOF:
+      {
+        emitEOF();
+        break;
+      }
+      default:
+      {
+        // Ignore the character.
+        break;
+      }
+    }
+  }
+
+  // 13.2.5.69
+  void CHTMLTokeniser::processCDataSection()
+  {
+    switch (currentChar)
+    {
+      case U_005D:
+      {
+        smState = SM_CDATA_SECTION_BRACKET;
+        break;
+      }
+      case U_EOF:
+      {
+        PARSE_ERROR("eof in cdata");
+        emitEOF();
+        break;
+      }
+      default:
+      {
+        emitCharacter(currentChar);
+        break;
+      }
+    }
+  }
+
+  // 13.2.5.70
+  void CHTMLTokeniser::processCDataSectionBracket()
+  {
+    switch(currentChar)
+    {
+      case U_005D:
+      {
+        smState = SM_CDATA_SECTION_END;
+        break;
+      }
+      default:
+      {
+        emitCharacter(U_005D);
+        smState = SM_CDATA_SECTION;
+        reconsume();
+        break;
+      }
+    }
+  }
+
+  // 13.2.5.71
+  void CHTMLTokeniser::processCDataSectionEnd()
+  {
+    switch(currentChar)
+    {
+      case U_005D:
+      {
+        emitCharacter(U_005D);
+        break;
+      }
+      case U_003E:
+      {
+        smState = SM_DATA;
+        break;
+      }
+      default:
+      {
+        emitCharacter(U_005D);
+        emitCharacter(U_005D);
+        smState = SM_CDATA_SECTION;
+        reconsume();
+        break;
+      }
+    }
+  }
+
+  // 13.2.5.72
+  void CHTMLTokeniser::processCharacterReference()
+  {
+    temporaryBuffer.clear();
+    temporaryBuffer.push_back(U_0026);
+    switch (currentChar)
+    {
+      case U_0023:
+      {
+        temporaryBuffer.push_back(currentChar);
+        smState = SM_NUMERIC_CHARACTER_REFERENCE;
+        break;
+      }
+      default:
+      {
+        if (currentChar.isalphanumeric())
+        {
+          smState = SM_NAMED_CHARACTER_REFERENCE;
+          reconsume();
+        }
+        else
+        {
+          IMPLEMENT_ME();
+          smState = retState;
+          reconsume();
+        }
+      }
+    }
+  }
+
+  // 13.2.5.73
+  void CHTMLTokeniser::processNamedCharacterReference()
+  {
+    IMPLEMENT_ME();
+  }
+
+  // 13.2.5.74
+  void CHTMLTokeniser::processAmbiguousAmpersand()
+  {
+    if (currentChar.isalphanumeric())
+    {
+      IMPLEMENT_ME();
+    }
+    else if (currentChar == U_003B)
+    {
+      PARSE_ERROR("unknown named character reference");
+      smState = retState;
+      reconsume();
+    }
+    else
+    {
+      smState = retState;
+      reconsume();
+    }
+  }
+
+  // 13.2.5.75
+  void CHTMLTokeniser::processNumericCharacterReference()
+  {
+    charRefCode = 0;
+
+    switch (currentChar)
+    {
+      case U_0078:
+      case U_0058:
+      {
+        temporaryBuffer.push_back(currentChar);
+        smState = SM_HEXADECIMAL_CHARACTER_REFERENCE_START;
+        break;
+      }
+      default:
+      {
+        smState = SM_DECIMAL_CHARACTER_REFERENCE_START;
+        reconsume();
+        break;
+      }
+    }
+  }
+
+  // 13.2.5.76
+  void CHTMLTokeniser::processHexadecimalCharacterReferenceStart()
+  {
+    if (currentChar.isHexDigit())
+    {
+      smState = SM_HEXADECIMAL_CHARACTER_REFERENCE;
+      reconsume();
+    }
+    else
+    {
+      PARSE_ERROR("absence of digits in numeric character reference");
+      IMPLEMENT_ME();
+      smState = retState;
+      reconsume();
+    }
+  }
+
+  // 13.2.5.77
+  void CHTMLTokeniser::processDecimalCharacterReferenceStart()
+  {
+    if (currentChar.isnumeric())
+    {
+      smState = SM_DECIMAL_CHARACTER_REFERENCE;
+      reconsume();
+    }
+    else
+    {
+      PARSE_ERROR("absence of digits in numeric character reference");
+      IMPLEMENT_ME();
+      smState = retState;
+      reconsume();
+    }
+  }
+
+  // 13.2.5.78
+  void CHTMLTokeniser::processHexadecimalCharacterReference()
+  {
+    if (currentChar.isHexDigit())
+    {
+      charRefCode *= 16;
+      IMPLEMENT_ME();
+    }
+    else if (currentChar == U_003B)
+    {
+      smState = SM_NUMERIC_CHARACTER_REFERENCE_END;
+    }
+    else
+    {
+      PARSE_ERROR("missing semicolon after character reference.");
+      smState = SM_NUMERIC_CHARACTER_REFERENCE_END;
+      reconsume();
+    }
+  }
+
+  // 13.2.5.79
+  void CHTMLTokeniser::processDecimalCharacterReference()
+  {
+    if (currentChar.isnumeric())
+    {
+      charRefCode *= 10;
+      IMPLEMENT_ME();
+    }
+    else if (currentChar == U_003B)
+    {
+      smState = SM_NUMERIC_CHARACTER_REFERENCE_END;
+    }
+    else
+    {
+      PARSE_ERROR("missing semicolon after character reference.");
+      smState = SM_NUMERIC_CHARACTER_REFERENCE_END;
+      reconsume();
+    }
+  }
+
+  // 13.2.5.80
+  void CHTMLTokeniser::processNumericCharacterReferenceEnd()
+  {
+    if (charRefCode == 0)
+    {
+      PARSE_ERROR("null character reference");
+      charRefCode = U_FFFD;
+    }
+    else if (charRefCode > 0x10FFFF)
+    {
+      PARSE_ERROR("character reference outside unicode range");
+      charRefCode = U_FFFD;
+    }
+    else
+    {
+      IMPLEMENT_ME();
+    }
+  }
+
 
 }

@@ -68,5 +68,36 @@ BOOST_AUTO_TEST_CASE(test_tolower)
   BOOST_TEST(codePoint_t('T').tolower() == 't');
 }
 
+BOOST_AUTO_TEST_CASE(test_isalphanumeric)
+{
+  using namespace GCL::parsers;
+
+  BOOST_TEST(codePoint_t('a').isalphanumeric());
+  BOOST_TEST(codePoint_t('z').isalphanumeric());
+  BOOST_TEST(codePoint_t('A').isalphanumeric());
+  BOOST_TEST(codePoint_t('Z').isalphanumeric());
+  BOOST_TEST(codePoint_t('0').isalphanumeric());
+  BOOST_TEST(codePoint_t('9').isalphanumeric());
+  BOOST_TEST(!codePoint_t('[').isalphanumeric());
+  BOOST_TEST(!codePoint_t('!').isalphanumeric());
+}
+
+BOOST_AUTO_TEST_CASE(test_isHexDigit)
+{
+  using namespace GCL::parsers;
+
+  BOOST_TEST(codePoint_t('a').isHexDigit());
+  BOOST_TEST(codePoint_t('f').isHexDigit());
+  BOOST_TEST(codePoint_t('A').isHexDigit());
+  BOOST_TEST(codePoint_t('F').isHexDigit());
+  BOOST_TEST(!codePoint_t('g').isHexDigit());
+  BOOST_TEST(!codePoint_t('g').isHexDigit());
+  BOOST_TEST(codePoint_t('0').isHexDigit());
+  BOOST_TEST(codePoint_t('9').isHexDigit());
+  BOOST_TEST(!codePoint_t('X').isHexDigit());
+  BOOST_TEST(!codePoint_t('x').isHexDigit());
+  BOOST_TEST(!codePoint_t('o').isHexDigit());
+  BOOST_TEST(!codePoint_t('O').isHexDigit());
+}
 
 BOOST_AUTO_TEST_SUITE_END()

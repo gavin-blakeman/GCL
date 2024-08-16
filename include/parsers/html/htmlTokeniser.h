@@ -39,19 +39,19 @@
 #include <utility>
 
 // Parsers library header files.
-#include "include/parsers/html/bufferEncoder.hpp"
+#include "include/parsers/html/htmlBuffer.hpp"
 #include "include/parsers/html/htmlTokens.h"
 
 namespace GCL::parsers::html
 {
-  class CHTMLTokeniser : public CBufferEncoder
+  class CHTMLTokeniser : public CHTMLBuffer
   {
   public:
-    using char_type = CBufferEncoder::char_type;
+    using char_type = CHTMLBuffer::char_type;
     using token_type = CHTMLToken;
     using string_type = CHTMLToken::string_type;
 
-    CHTMLTokeniser(std::istream &is) : CBufferEncoder(is) {}
+    CHTMLTokeniser(std::istream &is) : CHTMLBuffer(is) {}
     virtual ~CHTMLTokeniser() = default;
 
     /*! @brief      Gets the next token from the stream.
@@ -63,7 +63,11 @@ namespace GCL::parsers::html
      */
     token_type getToken();
 
+#ifdef TEST
+  protected:
+#else
   private:
+#endif
     CHTMLTokeniser() = delete;
     CHTMLTokeniser(CHTMLTokeniser const &) = delete;
     CHTMLTokeniser(CHTMLTokeniser &&) = delete;
@@ -75,26 +79,38 @@ namespace GCL::parsers::html
       SM_NONE,
       SM_DATA,
       SM_RCDATA, SM_RCDATA_LESSTHAN, SM_RCDATA_END_TAG_OPEN, SM_RCDATA_END_TAG_NAME,
-      SM_CHARACTER_REFERENCE,
+
+      SM_CHARACTER_REFERENCE, SM_NUMERIC_CHARACTER_REFERENCE, SM_NAMED_CHARACTER_REFERENCE, SM_AMBIGUOUS_AMPERSAND,
+      SM_HEXADECIMAL_CHARACTER_REFERENCE_START, SM_DECIMAL_CHARACTER_REFERENCE_START, SM_HEXADECIMAL_CHARACTER_REFERENCE,
+      SM_DECIMAL_CHARACTER_REFERENCE, SM_NUMERIC_CHARACTER_REFERENCE_END,
+
       SM_TAG_OPEN, SM_TAG_NAME, SM_END_TAG_OPEN, SM_TAG_SELF_CLOSING_START,
       SM_MARKUP_DECLARATION_OPEN,
-      SM_BOGUS_COMMENT,
+
       SM_BEFORE_ATTR_NAME, SM_ATTR_NAME, SM_AFTER_ATTR_NAME, SM_BEFORE_ATTR_VALUE, SM_ATTR_VALUE_DOUBLE_QUOTED,
       SM_ATTR_VALUE_SINGLE_QUOTED, SM_ATTR_VALUE_UNQUOTED, SM_AFTER_ATTR_VALUE_QUOTED,
+
       SM_RAWTEXT, SM_RAWTEXT_LESSTHAN, SM_RAWTEXT_END_TAG_OPEN, SM_RAWTEXT_END_TAG_NAME,
+
       SM_SCRIPT, SM_SCRIPT_LESSTHAN, SM_SCRIPT_END_TAG_OPEN, SM_SCRIPT_END_TAG_NAME,
       SM_SCRIPT_ESCAPE_START, SM_SCRIPT_ESCAPE_START_DASH, SM_SCRIPT_ESCAPED,
       SM_SCRIPT_ESCAPED_DASH, SM_SCRIPT_ESCAPED_START_DASH_DASH, SM_SCRIPT_ESCAPED_LESSTHAN, SM_SCRIPT_ESCAPED_END_TAG_OPEN,
       SM_SCRIPT_DOUBLE_ESCAPE_START, SM_SCRIPT_DOUBLE_ESCAPED, SM_SCRIPT_DOUBLE_ESCAPED_DASH, SM_SCRIPT_DOUBLE_ESCAPED_LESSTHAN,
       SM_SCRIPT_ESCAPED_END_TAG_NAME, SM_SCRIPT_DOUBLE_ESCAPED_DASH_DASH, SM_SCRIPT_DOUBLE_ESCAPE_END,
+
       SM_PLAINTEXT,
+
       SM_COMMENT_START, SM_COMMENT_START_DASH, SM_COMMENT, SM_COMMENT_END, SM_COMMENT_END_DASH, SM_COMMENT_LESSTHAN,
       SM_COMMENT_LESSTHAN_BANG, SM_COMMENT_LESSTHAN_BANG_DASH, SM_COMMENT_LESSTHAN_BANG_DASH_DASH, SM_COMMENT_END_BANG,
+      SM_BOGUS_COMMENT,
+
       SM_DOCTYPE, SM_BEFORE_DOCTYPE_NAME, SM_DOCTYPE_NAME, SM_AFTER_DOCTYPE_NAME, SM_BOGUS_DOCTYPE,
       SM_AFTER_DOCTYPE_PUBLIC_KEYWORD, SM_AFTER_DOCTYPE_SYSTEM_KEYWORD, SM_BEFORE_DOCTYPE_PUBLIC_IDENTIFIER,
       SM_DOCTYPE_PUBLIC_IDENTIFIER_DOUBLE_QUOTED, SM_DOCTYPE_PUBLIC_IDENTIFIER_SINGLE_QUOTED, SM_AFTER_DOCTYPE_PUBLIC_IDENTIFIER,
       SM_DOCTYPE_SYSTEM_IDENTIFIER_SINGLE_QUOTED, SM_DOCTYPE_SYSTEM_IDENTIFIER_DOUBLE_QUOTED,
-      SM_BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIERS,
+      SM_BETWEEN_DOCTYPE_PUBLIC_AND_SYSTEM_IDENTIFIERS, SM_BEFORE_DOCTYPE_SYSTEM_IDENTIFIER, SM_AFTER_DOCTYPE_SYSTEM_IDENTIFIER,
+
+      SM_CDATA_SECTION, SM_CDATA_SECTION_BRACKET, SM_CDATA_SECTION_END,
     };
 
     std::queue<token_type> tokenFIFO;
@@ -102,10 +118,11 @@ namespace GCL::parsers::html
     smState_e retState = SM_NONE;
     string_type temporaryBuffer;
     string_type lastStartTag;
+    std::uint32_t charRefCode;
     bool emit = false;
 
     void processData();
-    void processTagOpen();
+    void processTagOpen();                                // 13.2.5.6
     void processEndTagOpen();
     void processTagName();
     void processPlainText();
@@ -165,6 +182,25 @@ namespace GCL::parsers::html
     void processDocTypePublicIdentifierDoubleQuoted();    // 13.2.5.59
     void processDocTypePublicIdentifierSingleQuoted();    // 13.2.5.60
     void processAfterDocTypePublicIdentifier();           // 13.2.5.61
+    void processBetweenDocTypePublicSystmeIdentifiers();  // 13.2.5.62
+    void processAfterDocTypeSystemKeyword();              // 13.2.5.63
+    void processBeforeDocTypeSystemIdentifier();          // 13.2.5.64
+    void processDocTypeSystemIdentifierDoubleQuoted();    // 13.2.5.65
+    void processDocTypeSystemIdentifierSingleQuoted();    // 13.2.5.66
+    void processAfterDocTypeSystemIdentifier();           // 13.2.5.67
+    void processBogusDocType();                           // 13.2.5.68
+    void processCDataSection();                           // 13.2.5.69
+    void processCDataSectionBracket();                    // 13.2.5.70
+    void processCDataSectionEnd();                        // 13.2.5.71
+    void processCharacterReference();                     // 13.2.5.72
+    void processNamedCharacterReference();                // 13.2.5.73
+    void processAmbiguousAmpersand();                     // 13.2.5.74
+    void processNumericCharacterReference();              // 13.2.5.75
+    void processHexadecimalCharacterReferenceStart();     // 13.2.5.76
+    void processDecimalCharacterReferenceStart();         // 13.2.6.77
+    void processHexadecimalCharacterReference();          // 13.2.6.78
+    void processDecimalCharacterReference();              // 13.2.6.79
+    void processNumericCharacterReferenceEnd();           // 13.2.6.80
 
     inline void emitCharacter(char_type c)
     {

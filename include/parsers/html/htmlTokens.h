@@ -97,6 +97,7 @@ namespace GCL::parsers::html
 
     // Start and end tags
     void selfClosing(bool b);
+    bool isSelfClosing() const;
 
     token_type const &type() const noexcept { return tokenType; }
     void type(token_type tt);

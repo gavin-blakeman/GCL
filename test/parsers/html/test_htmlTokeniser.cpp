@@ -3,71 +3,49 @@
 
 #define TEST
 
-#include <filesystem>
-#include <fstream>
-#include <list>
 #include <sstream>
-#include <vector>
-#include <string>
-#include <tuple>
 
-#include "include/parsers/html/htmlDocument.h"
-#include "include/parsers/html/htmlParser.h"
+#include "include/parsers/html/htmlTokeniser.h"
 
-BOOST_AUTO_TEST_SUITE(htmlParser_test)
-
-BOOST_AUTO_TEST_CASE(lTag)
+class CTestTokeniser final : public GCL::parsers::html::CHTMLTokeniser
 {
-  using namespace GCL::parsers;
+public:
+  CTestTokeniser(std::istream &is) : CHTMLTokeniser(is) {}
+
+  void test_processData() { consume(); processData(); }
+};
+
+BOOST_AUTO_TEST_SUITE(htmlTokeniser_test)
+
+BOOST_AUTO_TEST_CASE(test_constructor_and_destructor)
+{
   using namespace GCL::parsers::html;
 
-  CHTMLDocument testDocument;
   std::stringstream stream;
   stream << "<html>";
 
-  CHTMLParser testParser(stream, testDocument);
-<<<<<<< HEAD
-  BOOST_REQUIRE_NO_THROW(testParser.parseDocument());
-  BOOST_TEST(testDocument.root->type() == "html");
-=======
-<<<<<<< HEAD
-  BOOST_REQUIRE_NO_THROW(testParser.parseDocument());
-//  BOOST_TEST(testDocument.root->nodeType() == NT_ELEMENT);
-=======
-  //BOOST_REQUIRE_NO_THROW(testParser.parseDocument());
-  //BOOST_TEST(testDocument.root->nodtype() == "html");
->>>>>>> 32b1331 (progressing changes)
->>>>>>> KararaMining-htmlParsers-dev
+  BOOST_REQUIRE_NO_THROW(CHTMLTokeniser tokeniser(stream));
 }
 
-BOOST_AUTO_TEST_CASE(test_parser)
+/* Testing of the parsing routines can either be done by calling getToken() or by calling each relevant
+ * process... routine. The process routines only progress one character at a time, but it is easier to
+ * check the exit state and ensure all code pathways are followed.
+ */
+
+BOOST_AUTO_TEST_CASE(test_starttTag)
 {
-  using namespace GCL::parsers;
   using namespace GCL::parsers::html;
 
-  CHTMLDocument testDocument;
   std::stringstream stream;
+  stream << "<html>";
 
-  stream <<
-#include "../../generated/testPage.cpp"
-;
+  CHTMLTokeniser tokeniser(stream);
 
-  CHTMLParser testParser(stream, testDocument);
-<<<<<<< HEAD
-  BOOST_REQUIRE_NO_THROW(testParser.parseDocument());
-  BOOST_TEST(testDocument.root->type() == "html");
-=======
-<<<<<<< HEAD
-//  BOOST_REQUIRE_NO_THROW(testParser.parseDocument());
-//  BOOST_TEST(testDocument.root->nodeType() == NT_ELEMENT);
-=======
-  //BOOST_REQUIRE_NO_THROW(testParser.parseDocument());
-  //BOOST_TEST(testDocument.root->nodeType() == NT_DOCTYPE);
->>>>>>> 32b1331 (progressing changes)
->>>>>>> KararaMining-htmlParsers-dev
+  CHTMLToken token = tokeniser.getToken();
+  BOOST_TEST(token.type() == CHTMLToken::TT_TAG_START);
+  bool test = token.name() == CHTMLToken::string_type({'h', 't', 'm', 'l'});
+  BOOST_TEST(test);
 }
-
-
 
 
 BOOST_AUTO_TEST_SUITE_END()
