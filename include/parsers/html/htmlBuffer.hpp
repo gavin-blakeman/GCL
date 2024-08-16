@@ -90,6 +90,7 @@ namespace GCL::parsers::html
      */
     virtual void fillBuffer()
     {
+      inputStream.exceptions(std::ifstream::eofbit); // May throw. Throws exception when EOF bit is set.
       while (!inputStream.eof())
       {
         switch (streamEncoding)
@@ -121,7 +122,6 @@ namespace GCL::parsers::html
             }
             catch(...)
             {
-              buffer.push_back(U_EOF);
             }
             break;
           }

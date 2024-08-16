@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(test_constructor_and_destructor)
  * check the exit state and ensure all code pathways are followed.
  */
 
-BOOST_AUTO_TEST_CASE(test_starttTag)
+BOOST_AUTO_TEST_CASE(test_startTag)
 {
   using namespace GCL::parsers::html;
 
@@ -44,6 +44,58 @@ BOOST_AUTO_TEST_CASE(test_starttTag)
   CHTMLToken token = tokeniser.getToken();
   BOOST_TEST(token.type() == CHTMLToken::TT_TAG_START);
   bool test = token.name() == CHTMLToken::string_type({'h', 't', 'm', 'l'});
+  BOOST_TEST(test);
+  BOOST_TEST(!token.isSelfClosing());
+  token = tokeniser.getToken();
+  BOOST_TEST(token.type() == CHTMLToken::TT_EOF);
+
+  std::stringstream stream2;
+  stream2 << "<html/>";
+
+  CHTMLTokeniser tokeniser2(stream2);
+
+  token = tokeniser2.getToken();
+  BOOST_TEST(token.type() == CHTMLToken::TT_TAG_START);
+  test = token.name() == CHTMLToken::string_type({'h', 't', 'm', 'l'});
+  BOOST_TEST(test);
+  BOOST_TEST(token.isSelfClosing());
+
+}
+
+BOOST_AUTO_TEST_CASE(test_endTag)
+{
+  using namespace GCL::parsers::html;
+
+  std::stringstream stream;
+  stream << "</html>";
+
+  CHTMLTokeniser tokeniser(stream);
+
+  CHTMLToken token = tokeniser.getToken();
+  BOOST_TEST(token.type() == CHTMLToken::TT_TAG_END);
+  bool test = token.name() == CHTMLToken::string_type({'h', 't', 'm', 'l'});
+  BOOST_TEST(test);
+  BOOST_REQUIRE_THROW(!token.isSelfClosing(), std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(test_docType)
+{
+  using namespace GCL::parsers::html;
+
+  std::stringstream stream;
+  stream << "<!DOCTYPE html>";
+  CHTMLTokeniser tokeniser(stream);
+  CHTMLToken token = tokeniser.getToken();
+  BOOST_TEST(token.type() == CHTMLToken::TT_DOCTYPE);
+  bool test = token.name() == CHTMLToken::string_type({'h', 't', 'm', 'l'});
+  BOOST_TEST(test);
+
+  std::stringstream stream2;
+  stream2 << "<!DOCTYPE html SYSTEM \"about:legacy-compat\">";
+  CHTMLTokeniser tokeniser2(stream2);
+  token = tokeniser2.getToken();
+  BOOST_TEST(token.type() == CHTMLToken::TT_DOCTYPE);
+  test = token.name() == CHTMLToken::string_type({'h', 't', 'm', 'l'});
   BOOST_TEST(test);
 }
 

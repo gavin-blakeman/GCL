@@ -123,7 +123,7 @@ namespace GCL::parsers::html
 
     void processData();
     void processTagOpen();                                // 13.2.5.6
-    void processEndTagOpen();
+    void processEndTagOpen();                             // 13.2.5.7
     void processTagName();
     void processPlainText();
     void processRawText();

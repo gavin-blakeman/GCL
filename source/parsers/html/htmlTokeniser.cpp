@@ -29,7 +29,7 @@ namespace GCL::parsers::html
 {
   static CHTMLTokeniser::string_type S32_SCRIPT{'s', 'c', 'r', 'i', 'p', 't'};
   static CHTMLTokeniser::string_type S32_MINUSMINUS{'-', '-'};
-  static CHTMLTokeniser::string_type S32_DOCTYPE{'d', 'o', 'c', 't', 'y', 'p', 'e'};
+  static CHTMLTokeniser::string_type S32_DOCTYPE{'o', 'c', 't', 'y', 'p', 'e'};
   static CHTMLTokeniser::string_type S32_CDATA{'[','C', 'D', 'A', 'T', 'A', '['};
   static CHTMLTokeniser::string_type S32_PUBLIC{'u', 'b', 'l', 'i', 'c'};
   static CHTMLTokeniser::string_type S32_SYSTEM{'y', 's', 't', 'e', 'm'};
@@ -457,7 +457,7 @@ namespace GCL::parsers::html
   {
     switch(currentChar)
     {
-      case U_0026:
+      case U_0026:  // '&'
       {
         retState = SM_DATA;
         smState = SM_CHARACTER_REFERENCE;
@@ -468,7 +468,7 @@ namespace GCL::parsers::html
         smState = SM_TAG_OPEN;
         break;
       };
-      case EOF:
+      case U_EOF:
       {
         emitEOF();
         break;
@@ -1263,7 +1263,7 @@ namespace GCL::parsers::html
       smState = SM_TAG_NAME;
       reconsume();
     }
-    else if (currentChar == U_003E)
+    else if (currentChar == U_003E) // '>'
     {
       PARSE_ERROR("missing end tag name");
       smState = SM_DATA;
@@ -1296,7 +1296,7 @@ namespace GCL::parsers::html
         smState = SM_BEFORE_ATTR_NAME;
         break;
       }
-      case U_002F:
+      case U_002F:  // '/'
       {
         smState = SM_TAG_SELF_CLOSING_START;
         break;
@@ -1332,17 +1332,17 @@ namespace GCL::parsers::html
   {
     switch (currentChar)
     {
-      case U_0021:
+      case U_0021:  // '!'
       {
         smState = SM_MARKUP_DECLARATION_OPEN;
         break;
       }
-      case U_002F:
+      case U_002F:  // '/'
       {
         smState = SM_END_TAG_OPEN;
         break;
       }
-      case U_003F:
+      case U_003F:  // '?/
       {
         smState = SM_BOGUS_COMMENT;
         createTokenComment();
@@ -1842,7 +1842,7 @@ namespace GCL::parsers::html
   {
     switch(currentChar)
     {
-      case U_003E:
+      case U_003E:  // '>'
       {
         tokenFIFO.back().selfClosing(true);
         smState = SM_DATA;

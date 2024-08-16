@@ -141,6 +141,7 @@ namespace GCL::parsers::html
 
     friend bool operator==(CHTMLToken const &lhs, CHTMLToken const &rhs) { return (lhs.tokenType == rhs.tokenType); }
     friend bool operator==(CHTMLToken const &lhs, token_type rhs) { return (lhs.tokenType == rhs); }
+
     friend std::ostream &operator<<(std::ostream &os, CHTMLToken const &);
   };
 
