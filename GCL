@@ -81,7 +81,6 @@
 #include "include/logger/sinks/baseSink.h"
 #include "include/logger/sinks/fileSink.h"
 #include "include/logger/sinks/streamSink.h"
-#include "include/parsers/html/htmlDocument.h"
 #include "include/pluginManager/pluginManager.h"
 #include "include/SQLWriter.h"
 #include "include/stringFunctions.h"

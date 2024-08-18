@@ -31,17 +31,13 @@
 //
 //**********************************************************************************************************************************/
 
-#include "include/parsers/html/htmlNodeBase.h"
+#include "include/parsers/DOM/DOMNodeBase.h"
 
-namespace GCL::parsers::html
+namespace GCL::parsers::DOM
 {
-  CHTMLNodeBase::child_pointer CHTMLNodeBase::insert(std::unique_ptr<CHTMLNodeBase> &&ins)
+  CDOMNodeBase::child_pointer CDOMNodeBase::appendChild(std::unique_ptr<CDOMNodeBase> newChild)
   {
-    //elementChildren.push_back(std::move(ins));
-  }
-
-  CHTMLNodeBase::child_pointer CHTMLNodeBase::insert(CHTMLNodeBase *p, std::string const &etype)
-  {
-    //elementChildren.push_back(std::make_unique<CHTMLElement>(p, etype));
+    //childCollection.push_back(std::move(newChild));
+    //return childCollection.back().get();
   }
 }

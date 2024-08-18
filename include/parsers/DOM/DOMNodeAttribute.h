@@ -36,71 +36,44 @@
 
 // Standard C++ library header files.
 #include <iostream>
+#include <optional>
 #include <string>
 #include <variant>
 
-namespace GCL::parsers::html
+// DOM header files
+#include "include/parsers/DOM/DOMNodeBase.h"
+
+namespace GCL::parsers::DOM
 {
-  enum htmlAttributes_e
+
+  class CDOMElement;
+
+  class CDOMAttribute : public CDOMNodeBase
   {
-    ATTR_UNKNOWN,
-    ATTR_ACCESSKEY,
-    ATTR_AUTOCAPITALISE,
-    ATTR_AUTOFOCUS,
-    ATTR_CONTENTEDITABLE,
-    ATTR_DIR,
-    ATTR_DRAGGABLE,
-    ATTR_ENTERKEYHINT,
-    ATTR_HIDDEN,
-    ATTR_INERT,
-    ATTR_INPUTMODE,
-    ATTR_IS,
-    ATTR_ITEMID,
-    ATTR_ITEMPROP,
-    ATTR_ITEMREF,
-    ATTR_ITEMSCOPE,
-    ATTR_ITEMTYPE,
-    ATTR_LANG,
-    ATTR_NONCE,
-    ATTR_POPOVER,
-    ATTR_SPELLCHECK,
-    ATTR_STYLE,
-    ATTR_TABINDEX,
-    ATTR_TITLE,
-    ATTR_TRANSLATE,
-    ATTR_WRITINGSUGGESTIONS,
+  public:
+    CDOMAttribute(CDOMNodeBase *oe, string_type const &n, string_type const &v) : CDOMNodeBase(oe), ownerElement(oe), localName_(n), value_(v) {}
 
-    ATTR_CLASS,
-    ATTR_ID,
-    ATTR_SLOT,
-  };
+    virtual nodeType_e nodeType() const noexcept override { return ATTRIBUTE_NODE; }
 
-  class CHTMLAttribute
-  {
-    public:
-      CHTMLAttribute(std::string const &, std::string const &);
-      CHTMLAttribute(htmlAttributes_e, std::string const &);
-      CHTMLAttribute(htmlAttributes_e, std::string &&);
+    string_type prefix() const noexcept { return (prefix_ ? *prefix_: string_type()); }
+    string_type name() const noexcept { return (!prefix_ ? localName_ : *prefix_ + U_003A + localName_); }
+    string_type const &localName() const noexcept { return localName_; }
+    string_type const &value() const noexcept { return value_; }
 
-      std::string attribute() const noexcept;
-      std::string const &value() const noexcept { return attributeValue; }
+  private:
+    CDOMAttribute() = delete;
 
-      static std::string attribute2string(htmlAttributes_e) noexcept;
-      static htmlAttributes_e string2attribute(std::string const &) noexcept;
+    std::optional<string_type> namespaceURI;
+    std::optional<string_type> prefix_;
+    string_type localName_;
+    string_type value_;
+    CDOMNodeBase *ownerElement = nullptr;
 
-    private:
-      CHTMLAttribute() = delete;
-
-      using attribute_t = std::variant<std::monostate, std::string, htmlAttributes_e>;
-
-      attribute_t attributeType;
-      std::string attributeValue;
-
-      friend bool operator==(CHTMLAttribute const &, CHTMLAttribute const &) noexcept;
-      friend bool operator==(CHTMLAttribute const &, std::string const &) noexcept;
-      friend bool operator==(CHTMLAttribute const &, htmlAttributes_e) noexcept;
-
-  friend std::ostream &operator<<(std::ostream &os, CHTMLAttribute const &);
+    friend std::ostream &operator<<(std::ostream &os, CDOMAttribute const &attr)
+    {
+      //os << "(" << attr.name() << ", " << attr.value() << ")" << std::endl;
+      return os;
+    }
 
   };
 }

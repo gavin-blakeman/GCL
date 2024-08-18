@@ -4,8 +4,7 @@
 #include <fstream>
 
 // GCL header filesystem
-#include "include/parsers/html/htmlDocument.h"
-#include "include/parsers/html/htmlNodeElement.h"
+#include "include/parsers/DOM/DOMNodeDocument.h"
 #include "include/error.h"
 
 namespace GCL
@@ -27,10 +26,10 @@ namespace GCL
       // Does not return.
     }
 
-    parsers::html::CHTMLDocument DOM(ifs);
+    //parsers::html::CHTMLDocument DOM(ifs);
 
 
-    parsers::html::CHTMLDocument::const_iterator iter = DOM.find("table", DOM.cbegin());
+    //parsers::html::CHTMLDocument::const_iterator iter = DOM.find("table", DOM.cbegin());
 
 //    while (iter != DOM.cend())
 //    {

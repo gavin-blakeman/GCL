@@ -94,6 +94,8 @@ namespace GCL::parsers::html
     void setSystemIdentifierEmpty();
     bool hasPublicIdentifier() const;
     bool hasSystemIdentifier() const;
+    string_type const &publicIdentifier() const noexcept;
+    string_type const &systemIdentifier() const noexcept;
 
     // Start and end tags
     void selfClosing(bool b);

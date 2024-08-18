@@ -129,6 +129,7 @@ namespace GCL::parsers
   constexpr codePoint_t U_0027(0x0027);   // '''
   constexpr codePoint_t U_002D(0x002D);   // '-'
   constexpr codePoint_t U_002F(0x002F);   // '/'
+  constexpr codePoint_t U_003A(0x003A);   // ':'
   constexpr codePoint_t U_003B(0x003B);   // ';'
   constexpr codePoint_t U_003C(0x003C);   // '<'
   constexpr codePoint_t U_003D(0x003D);   // '='

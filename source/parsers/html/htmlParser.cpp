@@ -38,22 +38,22 @@
 // GCL library header files
 #include "include/parsers/html/htmlTokens.h"
 #include "include/parsers/html/htmlTokeniser.h"
+#include "include/parsers/html/htmlExceptions.h"
 
 namespace GCL::parsers::html
 {
+  static CHTMLParser::string_type S32_HTML{'h', 't', 'm', 'l'};
+
   void CHTMLParser::parseDocument()
   {
     using namespace GCL::parsers;
+    CHTMLTokeniser tokeniser(inputStream);
 
-    CHTMLTokeniser lexer(inputStream);
+    parseToken(tokeniser.getToken());
 
-    for(CToken token = lexer.getToken(); token != TT_EOF; token = lexer.getToken())
-    {
-      parseToken(token);
-    }
   }
 
-  void CHTMLParser::parseToken(CToken const &token)
+  void CHTMLParser::parseToken(CHTMLToken const &token)
   {
     switch (insertionMode)
     {
@@ -65,48 +65,89 @@ namespace GCL::parsers::html
     }
   }
 
-  void CHTMLParser::parseTokenModeInitial(CToken const &token)
+  // 13.2.6.4.1
+  void CHTMLParser::processInitial(CHTMLToken const &token)
   {
     switch(token.type())
     {
       case TT_CHARACTER:
       {
-
+        switch (token.data())
+        {
+          case U_0009:
+          case U_000A:
+          case U_000C:
+          case U_000D:
+          case U_0020:
+          {
+            // ignore the character.
+            break;
+          }
+        }
         break;
       }
-        case TT_COMMENT:
-        {
-          DOM.insertComment(token.value());
-          break;
-        }
-        case ASSIGN:
-        case VALUE:
-        case ID:
-        {
-          // Malformed HTML file. Simply discard.
-          CODE_ERROR();
-          break;
-        }
-        case L_TAG_DOCTYPE:
-        {
-          break;
-        }
-        case TEXT:
-        {
-   //       DOM.setValue(tokenIterator->value());
-          break;
-        }
-        case TT_EOF:
-        {
-           break;
-        }
-        default:
-        {
-          /* These will generally be tags that are out of order. IE closing tags. Closing tags should be picked
-           * up by the open functions. So these would be out-of-order or repeated closings. */
-          break;
-        }
+      case TT_COMMENT:
+      {
+        DOM.createComment(std::move(token.value()));
+        break;
       }
+      case TT_DOCTYPE:
+      {
+        if ( (token.name() == S32_HTML) || docTypeValid(token.name()) )
+        {
+         DOM.insertDocType(token.name(),token.publicIdentifier(), token.systemIdentifier());
+         insertionMode = IM_BEFORE_HTML;
+        }
+        else
+        {
+          PARSE_ERROR("");
+        }
+        break;
+      }
+      default:
+      {
+        insertionMode = IM_BEFORE_HTML;
+        break;
+      }
+      }
+  }
+
+  // 13.2.6.4.2
+  void CHTMLParser::processBeforeHTML(CHTMLToken const &)
+  {
+    switch(token.type())
+    {
+      case TT_DOCTYPE:
+      {
+        PARSE_ERROR("");
+        break;
+      }
+      case TT_COMMENT:
+      {
+        DOM.createComment(std::move(token.value()));
+        break;
+      }
+      case TT_CHARACTER:
+      {
+        switch (token.data())
+        {
+          case U_0009:
+          case U_000A:
+          case U_000C:
+          case U_000D:
+          case U_0020:
+          {
+            // ignore the character.
+            break;
+          }
+        }
+        break;
+      }
+      case TT_TAG_START:
+      {
+
+      }
+    }
   }
 
 } // namespace

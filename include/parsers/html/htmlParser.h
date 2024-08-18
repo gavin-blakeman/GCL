@@ -38,10 +38,12 @@
 #include <istream>
 #include <stack>
 
+
 // GCL header files.
-#include "include/parsers/token.h"
-#include "include/parsers/html/htmlDocument.h"
-#include "include/parsers/html/htmlNodeElement.h"
+#include "include/parsers/html/htmlTokens.h"
+#include "include/parsers/DOM/DOMNodeBase.h"
+#include "include/parsers//DOM/DOMNodeDocument.h"
+#include "include/parsers/html/htmlTokeniser.h"
 
 namespace GCL::parsers::html
 {
@@ -51,20 +53,16 @@ namespace GCL::parsers::html
   class CHTMLParser
   {
   public:
-    CHTMLParser(std::istream &is, CHTMLDocument &d) : inputStream(is), DOM(d) {}
+    using char_type = CHTMLTokeniser::char_type;
+    using string_type = CHTMLTokeniser::string_type;
+
+    CHTMLParser(std::istream &is, GCL::parsers::DOM::CDOMDocument &d) : inputStream(is), DOM(d) {}
     ~CHTMLParser() = default;
 
     /*! @brief      Parses the entire document and stores the result in the DOM.
      *  @throws
      */
     void parseDocument();
-
-  protected:
-    enum insertionMode_e
-    { IM_INITIAL,
-    };
-
-    insertionMode_e insertionMode = IM_INITIAL;
 
   private:
     CHTMLParser() = delete;
@@ -73,19 +71,29 @@ namespace GCL::parsers::html
     CHTMLParser &operator=(CHTMLParser const &) = delete;
     CHTMLParser &operator=(CHTMLParser &&) = delete;
 
+    enum insertionMode_e
+    {
+      IM_INITIAL, IM_BEFORE_HTML, IM_BEFORE_HEAD, IM_IN_HEAD, IM_IN_HEAD_NOSCRIPT, IM_AFTER_HEAD,
+    };
     using element_ref = CHTMLDocument::value_ref;
 
     std::istream &inputStream;
-    std::vector<GCL::parsers::CToken> tokens;
-    CHTMLDocument &DOM;
+    std::vector<GCL::parsers::html::CHTMLToken> tokens;
+    GCL::parsers::DOM::CDOMDocument &DOM;
+    insertionMode_e insertionMode = IM_INITIAL;
+    insertionMode_e originalInsertionMode = IM_INITIAL;
+    std::stack<string_type> openElements;
 
     /*! @brief      Parses a single token.
      *  @param[in]  token: The token to parse.
      *  @throws
      */
-    void parseToken(CToken const &token);
+    void parseToken(CHTMLToken const &token);
 
-    void parseTokenModeInitial(CToken const &token);
+    void processInitial(CHTMLToken const &token);
+    void processBeforeHTML(CHTMLToken const &token);
+
+    bool docTypeValid(string_type const &);
 
   };
 } // namespace
