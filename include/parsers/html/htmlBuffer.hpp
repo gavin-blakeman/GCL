@@ -51,6 +51,7 @@
 // GCL/parser header files.
 #include "include/parsers/codePoint.h"
 #include "include/utf.h"
+#include "include/utfString.hpp"
 
 /* Notes:
  * This class and file are not visible to the HTML API. This class is designed as a setup/teardown class when processing
@@ -67,6 +68,7 @@ namespace GCL::parsers::html
   public:
     using char_type = codePoint_t;
     using string_type = std::basic_string<char_type>;
+    using new_string_type = utf_string<char32_t>;
 
     /*! @brief      Constructor.
      *  @param[in]  is: The input stream to parse.
