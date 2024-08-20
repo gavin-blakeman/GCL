@@ -107,7 +107,7 @@ set(HEADERS
   include/tempFileManager.h
   include/sqlWriter_typedef.inc
   include/sqlWriter_variables.inc
-  include/utf.h
+  include/utf/utf.h
   )
 
 set(DIRECTORIES

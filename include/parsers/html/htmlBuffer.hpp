@@ -49,9 +49,9 @@
 // Miscellaneous library header files
 
 // GCL/parser header files.
-#include "include/parsers/codePoint.h"
-#include "include/utf.h"
-#include "include/utfString.hpp"
+#include "include/utf/codePoint.hpp"
+#include "include/utf/utf.h"
+#include "include/utf/utfString.hpp"
 
 /* Notes:
  * This class and file are not visible to the HTML API. This class is designed as a setup/teardown class when processing

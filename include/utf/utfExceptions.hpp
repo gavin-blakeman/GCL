@@ -1,7 +1,7 @@
 //*********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// FILE:                utf.h
+// FILE:                utfExceptions.hpp
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -22,31 +22,37 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            UTF constants and strings.
+// OVERVIEW:            UTF Exceptions
 //
-// HISTORY:             2024-04-23 GGB - File Created
+// HISTORY:             2024-08-20 GGB - File Created
 //
 //*********************************************************************************************************************************
 
-#ifndef GCL_INCLUDE_UTF_H_
-#define GCL_INCLUDE_UTF_H_
+#ifndef GCL_INCLUDE_UTF_UTFEXCEPTIONS_HPP_
+#define GCL_INCLUDE_UTF_UTFEXCEPTIONS_HPP_
 
-// Standard C++ library
-#include <cstdint>
-#include <istream>
+// Standard C++ library.
+#include <stdexcept>
 
 namespace GCL
 {
-  enum utf_e
+  class unexpected_eof : public std::runtime_error
   {
-    UTF_NONE,
-    UTF_8,
-    UTF_16BE,
-    UTF_16LE,
+  public:
+    unexpected_eof() : std::runtime_error("EOF") {}
   };
 
-  utf_e getBOM(std::istream &);
+  class bad_codepoint : public std::runtime_error
+  {
+  public:
+    bad_codepoint() : std::runtime_error("Bad codepoint in stream") {}
+  };
 
+  class bad_utf8 : public std::runtime_error
+  {
+  public:
+    bad_utf8() : std::runtime_error("Bad codepoint in stream") {}
+  };
 }
 
-#endif /* GCL_INCLUDE_UTF_H_ */
+#endif /* GCL_INCLUDE_UTF_UTFEXCEPTIONS_HPP_ */

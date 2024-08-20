@@ -35,32 +35,35 @@
 // Standard C++ library header files
 #include <iostream>
 #include <optional>
-#include <stdexcept>
 #include <string>
 #include <type_traits>
 
+// GCL Library
+
+
 namespace GCL
 {
+  enum encoding_type { UTF8, UTF16, UTF32 };
+
   template<typename T, typename ... U>
   concept IsAnyOf = (std::same_as<T, U> || ...);
 
   template<typename T>
   concept UTFChar = IsAnyOf<std::remove_cvref_t<std::remove_pointer_t<std::decay_t<T>>>, char8_t, char16_t, char32_t>;
 
-  /*! @details The utf_string class encapsulates a UTF string of type selected by the programmer (UTF8, UTF16, UTF32). The class stores string in
-   *           the selected format. Modifiers/Accessors/comparator functions are provided to make the storage type transparent. IE the class can
-   *           use UTF32 as the underlying storage type, be called with a UTF8 constructed and provide a UTF16 string as output. All conversions
-   *           between types are done internally.
-   *           Transcoding from/to non-utf code-sets are also supported.
+  /*! @details The utf_string class encapsulates a UTF string of type selected by the programmer (UTF8, UTF16, UTF32). The class
+   *           stores string in the selected format. Modifiers/Accessors/comparator functions are provided to make the storage type
+   *           transparent. IE the class can use UTF32 as the underlying storage type, be called with a UTF8 constructed and provide
+   *           a UTF16 string as output. All conversions between types are done internally.
    * @tparam   CharT: The character type. [char8_t, char16_t, char32_t]
-   * @tparam   EOF: If true, then an EOF character is defined as -1. This EOF character will not cause any errors or problems during string conversions
-   *           and will be correctly converted..
+   * @tparam   EOF: If true, then an EOF character is defined as -1. This EOF character will not cause any errors or problems during
+   *           string conversions and will be correctly converted..
    */
 
   template<typename CharT,
-           bool eof = true,
-           class Traits = std::char_traits<CharT>,
-           class Allocator = std::allocator<CharT>> requires UTFChar<CharT>
+  bool eof = true,
+  class Traits = std::char_traits<CharT>,
+  class Allocator = std::allocator<CharT>> requires UTFChar<CharT>
   class utf_string
   {
   public:
@@ -69,23 +72,50 @@ namespace GCL
     using iterator = string_type::iterator;
     using const_iterator = string_type::const_iterator;
     using size_type = string_type::size_type;
-    using encoding_type = std::string;
     using optional_encoding = std::optional<encoding_type>;
-
-    class unexpected_eof : public std::runtime_error { unexpected_eof() : std::runtime_error("EOF") {} };
-    class bad_codepoint : public std::runtime_error { bad_codepoint() : std::runtime_error("Bad codepoint in stream") {} };
 
     constexpr utf_string() noexcept(noexcept(Allocator())) = default;
     utf_string(utf_string const &) = default;
     utf_string(utf_string &&) = default;
 
-    /*! @brief      Construct from a string. If no encoding is given, the string will be evaluated as an ascii (8 bit) string during
+    /*! @brief      Construct from a string. If no encoding is given, the string will be evaluated as an ASCII (8 bit) string during
      *              conversion.
      *  @param[in]  other: The string to construct from.
      *  @param[in]  encoding: The encoding of the string.
      */
     utf_string(std::string const &other, optional_encoding encoding = optional_encoding())
     {
+      if (!encoding)
+      {
+
+      }
+      else
+      {
+        switch (*encoding)
+        {
+          case UTF8:
+          {
+            if constexpr (isUTF8)
+            {
+              stringStorage.assign(other.begin(), other.end());
+            }
+            else if constexpr (isUTF16)
+            {
+
+            }
+            else
+            {
+
+            }
+            break;
+          }
+          case UTF16:
+          case UTF32:
+          {
+            break;
+          }
+        }
+      }
     }
 
     /*! @brief      Construct from a UTF8 string.
@@ -95,9 +125,9 @@ namespace GCL
     utf_string(std::u8string const &other)
     {
       if constexpr(isUTF8)
-      {
+          {
         stringStorage.assign(other.begin(), other.end());
-      }
+          }
       else
       {
       }
@@ -110,9 +140,9 @@ namespace GCL
     utf_string(std::u16string const &other)
     {
       if constexpr(isUTF16)
-      {
+          {
         stringStorage.assign(other.begin(), other.end());
-      }
+          }
       else
       {
       }
@@ -139,85 +169,22 @@ namespace GCL
     explicit operator std::u16string();
     explicit operator std::u32string();
 
-    /*! @brief      Reads a single code_point (if possible) from the stream and appends it to *this.
-     *  @param[in]  is: The stream.
-     *  @param[in]  encoding: The input stream encoding.
-     *  @returns    The stream.
-     *  @throws     utf_string::eof on an eof.
-     *  @throws     utf_string::bad_codepoint if the code point cannot be converted.
-     */
-    std::istream &get(std::istream &is, optional_encoding encoding = optional_encoding())
-    {
-      std::ios::iostate isState = is.exceptions();
-      is.exceptions(isState | std::ifstream::eofbit); // May throw. Throws exception when EOF bit is set.
 
-      try
-      {
-        char_type codePoint;
-        std::string munched;
-        bool found = false;
-        char iByte;
+    void setStoreEOF() noexcept { eofFlag = true; }
+    void clrStoreEOF() noexcept { eofFlag = false; }
 
-        while( (munched.size() < 4) && !found)
-        {
-          is.get(iByte);
-          munched.push_back(iByte);
-          found = isCodePoint(munched, codePoint);
-        }
-      }
-      catch(std::ios_base::failure const &e)
-      {
-        is.exceptions(isState);
-        throw unexpected_eof();
-        }
-      }
-      is.exceptions(isState);
+    private:
 
-      if (found)
-      {
-       stringStorage.push_back(transcode);
-      }
-      else
-      {
-        throw bad_codepoint();
-      }
-
-      return is;
-    }
-
-    /*! @brief      Reads up to the number of codePoints specified by maxPoints from the stream and appends it to *this.
-     *  @param[in]  is: The stream.
-     *  @param[in]  encoding: The input stream encoding.
-     *  @returns    The stream.
-     *  @throws     utf_string::eof on an eof.
-     *  @throws     utf_string::bad_codepoint if the code point cannot be converted.
-     */
-    std::istream &get(std::istream &is, size_type maxPoints, optional_encoding encoding = optional_encoding())
-    {
-      std::ios::iostate isState = is.exceptions();
-      is.exceptions(isState | std::ifstream::eofbit); // May throw. Throws exception when EOF bit is set.
-
-      size_type indx;
-      while (!is.eof() && indx < maxPoints)
-      {
-        get(is, encoding);
-        indx++;
-      }
-      
-
-      is.exceptions(isState);
-      return is;
-    }
-
-    void setStoreEOF() noexcept final { eofFlag = true; }
-    void clrStoreEOF() noexcept final { eofFlag = false; }
-
-  private:
     static bool constexpr isUTF8 = std::is_same<CharT, char8_t>::value;
     static bool constexpr isUTF16 = std::is_same<CharT, char16_t>::value;
     static bool constexpr isUTF32 = std::is_same<CharT, char32_t>::value;
     string_type stringStorage;
     bool eofFlag = false;
+
+    template<typename Iter, typename T>
+    void UTF16toUTF8(Iter inBegin, Iter inEnd, T &out)
+    {
+    }
 
     /*! @brief    Typecast like operator to typecase the the type of UTF string required.
      */
@@ -236,7 +203,7 @@ namespace GCL
     template<typename U> requires UTFChar<typename U::value_type>
     friend bool operator==(utf_string const &lhs, U const &rhs)
     {
-     // Convert the rhs string using an explicit static_cast.
+      // Convert the rhs string using an explicit static_cast.
       return lhs.stringStorage == static_cast<string_type>(rhs);
     }
 
@@ -248,7 +215,7 @@ namespace GCL
      */
     friend std::ostream &operator<<(std::ostream &os, utf_string const &obj)
     {
-      os << static_cast<std::u8string>(obj);
+      //os << static_cast<std::u8string>(obj);
       return os;
     }
   };

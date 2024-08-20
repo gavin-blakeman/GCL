@@ -3,7 +3,7 @@
 
 #define TEST  // Used to exclude error reporting and avoid having to link GCL + others.
 
-#include "include/parsers/codePoint.h"
+#include "include/utf/codePoint.hpp"
 
 BOOST_AUTO_TEST_SUITE(parser_codePoint_test)
 

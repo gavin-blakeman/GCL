@@ -85,7 +85,9 @@
 #include "include/SQLWriter.h"
 #include "include/stringFunctions.h"
 #include "include/resource.h"
-#include "include/utf.h"
+#include "include/utf/utf.h"
+#include "include/utf/utfString.hpp"
+#include "include/utf/codePoint.hpp"
 #include "include/any.hpp"  // Leave at the end. There are std::to_string definitions above that may be required.
 
   // Inject the logger functions into the global namespace.

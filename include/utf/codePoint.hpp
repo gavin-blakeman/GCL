@@ -1,14 +1,40 @@
-/*
- * codePoint.hpp
- *
- *  Created on: 8 Aug 2024
- *      Author: gavin
- */
+//**********************************************************************************************************************************
+//
+// PROJECT:             General Class Library
+// FILE:                codePoint.hpp
+// SUBSYSTEM:           UTF code point
+// LANGUAGE:            C++
+// TARGET OS:           None.
+// NAMESPACE:           GCL
+// AUTHOR:              Gavin Blakeman.
+// LICENSE:             GPLv2
+//
+//                      Copyright 2024 Gavin Blakeman.
+//                      This file is part of the General Class Library (GCL)
+//
+//                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
+//                      Public License as published by the Free Software Foundation, either version 2 of the License, or
+//                      (at your option) any later version.
+//
+//                      GCL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+//                      implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+//                      for more details.
+//
+//                      You should have received a copy of the GNU General Public License along with GCL.  If not,
+//                      see <http://www.gnu.org/licenses/>.
+//
+// OVERVIEW:            Provides a codepoint class for storing and converting codepoints.
+//
+// CLASSES INCLUDED:
+//
+// HISTORY:             2024-08-08 GGB - File Created
+//
+//**********************************************************************************************************************************
 
 #ifndef GCL_INCLUDE_PARSERS_CODEPOINT_HPP_
 #define GCL_INCLUDE_PARSERS_CODEPOINT_HPP_
 
-// Standard C++ herader files
+// Standard C++ header files
 #include <cstdint>
 #include <variant>
 
@@ -27,8 +53,8 @@
  *          representation in the tokeniser/tree builder. As the codePoints are fixed length there is no
  *          requirement to pass/manage variable length encodings. The 32 bit nature also fits easily
  *          in common register sizes.
- *       3. There are aspects of HTML that are limited to ascii. This simplifies the tolower() function as
- *          it only needs to operate on ascii characters.
+ *       3. There are aspects of HTML that are limited to ASCII. This simplifies the tolower() function as
+ *          it only needs to operate on ASCII characters.
  *       4. If full localisation is required use std::u32string and char32_t.
  */
 
@@ -141,6 +167,8 @@ namespace GCL::parsers
   constexpr codePoint_t U_0078(0x0078);   // 'x'
   constexpr codePoint_t U_FFFD(0xFFFD);   // Replacement Character
   constexpr codePoint_t U_EOF(0xFEFF);    // eof
+
+
 }
 
 #endif /* GCL_INCLUDE_PARSERS_CODEPOINT_HPP_ */

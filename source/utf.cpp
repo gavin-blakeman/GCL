@@ -27,7 +27,7 @@
 // HISTORY:             2024-04-23 GGB - File Created
 //
 //*********************************************************************************************************************************
-#include "include/utf.h"
+#include "include/utf/utf.h"
 
 // Standard C++ library header files
 #include <map>

@@ -41,7 +41,7 @@
 #include <string>
 
 // Parsers library
-#include "include/parsers/codePoint.h"
+#include "include/utf/codePoint.hpp"
 #include "include/parsers/DOM/DOMNodeList.hpp"
 
 namespace GCL::parsers::DOM

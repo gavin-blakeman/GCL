@@ -40,7 +40,7 @@
 #include <variant>
 
 // Parsers
-#include "include/parsers/codePoint.h"
+#include "include/utf/codePoint.hpp"
 
 namespace GCL::parsers::html
 {
