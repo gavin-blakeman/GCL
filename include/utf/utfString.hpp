@@ -36,20 +36,13 @@
 #include <iostream>
 #include <optional>
 #include <string>
-#include <type_traits>
 
 // GCL Library
-
+#include "include/concepts.hpp"
 
 namespace GCL
 {
   enum encoding_type { UTF8, UTF16, UTF32 };
-
-  template<typename T, typename ... U>
-  concept IsAnyOf = (std::same_as<T, U> || ...);
-
-  template<typename T>
-  concept UTFChar = IsAnyOf<std::remove_cvref_t<std::remove_pointer_t<std::decay_t<T>>>, char8_t, char16_t, char32_t>;
 
   /*! @details The utf_string class encapsulates a UTF string of type selected by the programmer (UTF8, UTF16, UTF32). The class
    *           stores string in the selected format. Modifiers/Accessors/comparator functions are provided to make the storage type

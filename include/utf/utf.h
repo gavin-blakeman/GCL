@@ -35,7 +35,8 @@
 #include <cstdint>
 #include <istream>
 
-// Utf header files
+// GCL header files
+#include "include/concepts.hpp"
 #include "include//utf/utfExceptions.hpp"
 
 namespace GCL
@@ -58,10 +59,11 @@ namespace GCL
    *  @param[out] codePoint: The codepoint value.
    *  @returns    Iterator to the first unconsumed code unit.
    *  @throws     bad_codePoint
-   *  @throws     bad_utf8_value
+   *  @throws     bad_utf8
    */
   template<typename Iter>
-  Iter encodeUTF8(Iter begin, Iter end, std::uint32_t &codePoint)
+  requires isUTF8Char<typename std::iterator_traits<Iter>::value_type>
+  Iter decodeUTF8(Iter begin, Iter end, std::uint32_t &codePoint)
   {
     //7, 11, 16, 21
 
@@ -103,7 +105,7 @@ namespace GCL
       }
       else
       {
-        throw   bad_codepoint();
+        throw bad_codepoint();
       }
     }
     else
@@ -114,12 +116,53 @@ namespace GCL
     return begin;
   }
 
+  /*! @brief      Converts a sequence of UTF16 code units (uint16 or char16) to a code point value. The sequence
+   *              defined by the begin and end iterator may be longer than required. The function will only consume the required
+   *              number of code units and return an iterator to the first unconsumed value.
+   *  @param[in]  begin: Iterator to the start of the UTF8 code units.
+   *  @param[in]  end: Iterator to the end of the UTF8 code units.
+   *  @param[out] codePoint: The codepoint value.
+   *  @returns    Iterator to the first unconsumed code unit.
+   *  @throws     bad_codePoint
+   *  @throws     bad_utf16_value
+   */
   template<typename Iter>
-  std::uint32_t encodeUTF16(Iter begin, Iter end)
+  requires isUTF16Char<typename std::iterator_traits<Iter>::value_type>
+  Iter decodeUTF16(Iter begin, Iter end, std::uint32_t &codePoint)
   {
-    std::uint32_t codePoint;
+    codePoint = *begin++;
 
-    return codePoint;
+    if (codePoint & 0xD800)
+    {
+      if (begin != end)
+      {
+        // Surrogate area runs from 0xD800 to 0xDFFF
+        codePoint -= 0xD800;
+        codePoint *= 0x400;
+
+        std::uint32_t ls = *begin++;
+        ls -= 0xDC00;
+        codePoint += ls + 0x10000;
+      }
+      else
+      {
+        throw unexpected_eof();
+      }
+    }
+
+    return begin;
+  }
+
+  template<class T>
+  void encodeUTF8(std::uint32_t codePoint, T &str)
+  {
+
+  }
+
+  template<class T>
+  void encodeUTF16(std::uint32_t codePoint, T &str)
+  {
+
   }
 
 }
