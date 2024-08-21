@@ -26,7 +26,7 @@
 //
 // HISTORY:             2024-04-23 GGB - File Created
 //
-//*********************************************************************************************************************************
+//*********************************************************************************************************************************/
 
 #ifndef GCL_INCLUDE_UTF_H_
 #define GCL_INCLUDE_UTF_H_
@@ -37,6 +37,7 @@
 
 // GCL header files
 #include "include/concepts.hpp"
+#include "include/error.h"
 #include "include//utf/utfExceptions.hpp"
 
 namespace GCL
@@ -63,7 +64,7 @@ namespace GCL
    */
   template<typename Iter>
   requires isUTF8Char<typename std::iterator_traits<Iter>::value_type>
-  Iter decodeUTF8(Iter begin, Iter end, std::uint32_t &codePoint)
+  Iter decodeUTF(Iter begin, Iter end, std::uint32_t &codePoint)
   {
     //7, 11, 16, 21
 
@@ -128,7 +129,7 @@ namespace GCL
    */
   template<typename Iter>
   requires isUTF16Char<typename std::iterator_traits<Iter>::value_type>
-  Iter decodeUTF16(Iter begin, Iter end, std::uint32_t &codePoint)
+  Iter decodeUTF(Iter begin, Iter end, std::uint32_t &codePoint)
   {
     codePoint = *begin++;
 
@@ -153,16 +154,87 @@ namespace GCL
     return begin;
   }
 
+  /*! @brief      Convert a code point to UTF-8 code units.
+   *  @param[in]  codePoint: The code point to convert.
+   *  @param[out] str: Thr string to add the code units to. (Must have push() or push_back()
+   *  @throws
+   */
   template<class T>
+//  requires isUTF8Char<typename T::value_type> && HasPushBack<typename T, typename T::value_type>
   void encodeUTF8(std::uint32_t codePoint, T &str)
   {
+    RUNTIME_ASSERT(codePoint <= 0x10FFFF, "Codepoint outside valid range");  // Sanity check.
 
+    if (codePoint <= 0x007F)
+    {
+      str.push_back(static_cast<typename T::value_type>(codePoint));
+    }
+    else if (codePoint <= 0x07FF)
+    {
+      typename T::value_type cpByte = static_cast<std::uint8_t>(codePoint >> 6);
+      cpByte &= 0b00011111;
+      str.push_back(0b11000000 | cpByte);
+
+      cpByte = static_cast<std::uint8_t>(codePoint);
+      cpByte &= 0b00111111;
+      str.push_back(0b10000000 | cpByte);
+    }
+    else if (codePoint <= 0xFFFF)
+    {
+      std::uint8_t cpByte = static_cast<std::uint8_t>(codePoint >> 12);
+      cpByte &= 0b00001111;
+      str.push_back(0b11100000 | cpByte);
+
+      cpByte = static_cast<std::uint8_t>(codePoint >> 6);
+      cpByte &= 0b00111111;
+      str.push_back(0b10000000 | cpByte);
+
+      cpByte = static_cast<std::uint8_t>(codePoint);
+      cpByte &= 0b00111111;
+      str.push_back(0b10000000 | cpByte);
+    }
+    else
+    {
+      std::uint8_t cpByte = static_cast<std::uint8_t>(codePoint >> 18);
+      cpByte &= 0b00000111;
+      str.push_back(0b11110000 | cpByte);
+
+      cpByte = static_cast<std::uint8_t>(codePoint >> 12);
+      cpByte &= 0b00111111;
+      str.push_back(0b10000000 | cpByte);
+
+      cpByte = static_cast<std::uint8_t>(codePoint >> 6);
+      cpByte &= 0b00111111;
+      str.push_back(0b10000000 | cpByte);
+
+      cpByte = static_cast<std::uint8_t>(codePoint);
+      cpByte &= 0b00111111;
+      str.push_back(0b10000000 | cpByte);
+    }
   }
 
+  /*! @brief      Convert a code point to UTF-8 code units.
+   *  @param[in]  codePoint: The code point to convert.
+   *  @param[out] str: Thr string to add the code units to. (Must have push() or push_back()
+   *  @throws
+   */
   template<class T>
+//  requires isUTF16Char<typename T::value_type> && (HasPushBack<T> || HasPush<T>)
   void encodeUTF16(std::uint32_t codePoint, T &str)
   {
+    RUNTIME_ASSERT(codePoint <= 0x10FFFF, "Codepoint outside valid range"); // Sanity check.
 
+    if (codePoint < 0x10000)
+    {
+      str.push_back(static_cast<char16_t>(codePoint);
+    }
+    else
+    {
+      codePoint -= 0x10000;
+
+      str.push_back(0xD800 + static_cast<char16_t>(codePoint >> 10));
+      str.push_back(0xDC00 + static_cast<char16_t>(codePoint & 0b1111111111));
+    };
   }
 
 }
