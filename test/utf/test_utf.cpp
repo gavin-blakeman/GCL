@@ -4,11 +4,52 @@
 #define TEST  // Used to exclude error reporting and avoid having to link GCL + others.
 
 // Standard C++ library headers
+#include <iostream>
 #include <sstream>
 #include <vector>
 #include <tuple>
 
 #include "include/utf/utf.h"
+
+std::ostream &operator<<(std::ostream &os, std::vector<char8_t> const &vec)
+{
+  bool first = true;
+  os << "{ ";
+  for (auto v: vec)
+  {
+    if (first)
+    {
+     first = false;
+    }
+    else
+    {
+      os << ", ";
+    }
+    os << std::to_string(v);
+  }
+  os << " }";
+  return os;
+}
+
+std::ostream &operator<<(std::ostream &os, std::vector<char16_t> const &vec)
+{
+  bool first = true;
+  os << "{ ";
+  for (auto v: vec)
+  {
+    if (first)
+    {
+     first = false;
+    }
+    else
+    {
+      os << ", ";
+    }
+    os << std::to_string(v);
+  }
+  os << " }";
+  return os;
+}
 
 BOOST_AUTO_TEST_SUITE(utf_test)
 
@@ -38,10 +79,9 @@ BOOST_AUTO_TEST_CASE(getBom_test)
 
     BOOST_TEST(getBOM(strm) == std::get<0>(test));
   };
-
 }
 
-BOOST_AUTO_TEST_CASE(test_encodeUTF8)
+BOOST_AUTO_TEST_CASE(test_decodeUTF8)
 {
   using namespace GCL;
 
@@ -49,39 +89,39 @@ BOOST_AUTO_TEST_CASE(test_encodeUTF8)
   std::uint32_t codePoint;
 
   testVector = {0x24};
-  decodeUTF8(testVector.begin(), testVector.end(), codePoint);
+  decodeUTF(testVector.begin(), testVector.end(), codePoint);
   BOOST_TEST(codePoint == 0x24);
 
   testVector = { 0xC2, 0xA3 };
-  decodeUTF8(testVector.begin(), testVector.end(), codePoint);
+  decodeUTF(testVector.begin(), testVector.end(), codePoint);
   BOOST_TEST(codePoint == 0xA3);
 
   testVector = { 0xD0, 0x98 };
-  decodeUTF8(testVector.begin(), testVector.end(), codePoint);
+  decodeUTF(testVector.begin(), testVector.end(), codePoint);
   BOOST_TEST(codePoint == 0x0418);
 
   testVector = { 0xE0, 0xA4, 0xB9 };
-  decodeUTF8(testVector.begin(), testVector.end(), codePoint);
+  decodeUTF(testVector.begin(), testVector.end(), codePoint);
   BOOST_TEST(codePoint == 0x0939);
 
   testVector = { 0xE2, 0x82, 0xAC };
-  decodeUTF8(testVector.begin(), testVector.end(), codePoint);
+  decodeUTF(testVector.begin(), testVector.end(), codePoint);
   BOOST_TEST(codePoint == 0x20AC);
 
   testVector = { 0xED, 0x95, 0x9C };
-  decodeUTF8(testVector.begin(), testVector.end(), codePoint);
+  decodeUTF(testVector.begin(), testVector.end(), codePoint);
   BOOST_TEST(codePoint == 0xD55C);
 
   testVector = { 0xF0, 0x90, 0x8D, 0x88 };
-  decodeUTF8(testVector.begin(), testVector.end(), codePoint);
+  decodeUTF(testVector.begin(), testVector.end(), codePoint);
   BOOST_TEST(codePoint == 0x10348);
 
   testVector = { 0xF4, 0x89, 0x9A, 0xB3 };
-  decodeUTF8(testVector.begin(), testVector.end(), codePoint);
+  decodeUTF(testVector.begin(), testVector.end(), codePoint);
   BOOST_TEST(codePoint == 0x1096B3);
 }
 
-BOOST_AUTO_TEST_CASE(test_encodeUTF16)
+BOOST_AUTO_TEST_CASE(test_decodeUTF16)
 {
   using namespace GCL;
 
@@ -89,21 +129,96 @@ BOOST_AUTO_TEST_CASE(test_encodeUTF16)
   std::uint32_t codePoint;
 
   testVector = {0x24};
-  decodeUTF16(testVector.begin(), testVector.end(), codePoint);
+  decodeUTF(testVector.begin(), testVector.end(), codePoint);
   BOOST_TEST(codePoint == 0x0024);
 
   testVector = {0x20AC};
-  decodeUTF16(testVector.begin(), testVector.end(), codePoint);
+  decodeUTF(testVector.begin(), testVector.end(), codePoint);
   BOOST_TEST(codePoint == 0x20AC);
 
   testVector = {0xD801, 0xDC37};
-  decodeUTF16(testVector.begin(), testVector.end(), codePoint);
+  decodeUTF(testVector.begin(), testVector.end(), codePoint);
   BOOST_TEST(codePoint == 0x10437);
 
   testVector = {0xD852, 0xDF62};
-  decodeUTF16(testVector.begin(), testVector.end(), codePoint);
+  decodeUTF(testVector.begin(), testVector.end(), codePoint);
   BOOST_TEST(codePoint == 0x24B62);
+}
 
+BOOST_AUTO_TEST_CASE(test_encodeUTF8)
+{
+  using namespace GCL;
+
+  std::vector<char8_t> resultVector;
+  std::vector<char8_t> testVector;
+
+  encodeUTF8(std::uint32_t(0x0024), resultVector);
+  testVector = { 0x24};
+  BOOST_TEST(testVector == resultVector);
+
+  resultVector.clear();
+  encodeUTF8(std::uint32_t(0x00A3), resultVector);
+  testVector = { 0xC2, 0xA3 };
+  BOOST_TEST(testVector == resultVector);
+
+  resultVector.clear();
+  encodeUTF8(std::uint32_t(0x0418), resultVector);
+  testVector = { 0xD0, 0x98 };
+  BOOST_TEST(testVector == resultVector);
+
+  resultVector.clear();
+  encodeUTF8(std::uint32_t(0x0939), resultVector);
+  testVector = { 0xE0, 0xA4, 0xB9 };
+  BOOST_TEST(testVector == resultVector);
+
+  resultVector.clear();
+  encodeUTF8(std::uint32_t(0x20AC), resultVector);
+  testVector = { 0xE2, 0x82, 0xAC };
+  BOOST_TEST(testVector == resultVector);
+
+  resultVector.clear();
+  encodeUTF8(std::uint32_t(0xD55C), resultVector);
+  testVector = { 0xED, 0x95, 0x9C };
+  BOOST_TEST(testVector == resultVector);
+
+  resultVector.clear();
+  encodeUTF8(std::uint32_t(0x10348), resultVector);
+  testVector = { 0xF0, 0x90, 0x8D, 0x88 };
+  BOOST_TEST(testVector == resultVector);
+
+  resultVector.clear();
+  encodeUTF8(std::uint32_t(0x1096B3), resultVector);
+  testVector = { 0xF4, 0x89, 0x9A, 0xB3};
+  BOOST_TEST(testVector == resultVector);
+}
+
+BOOST_AUTO_TEST_CASE(test_encodeUTF16)
+{
+  using namespace GCL;
+
+  std::vector<char16_t> resultVector;
+  std::vector<char16_t> testVector;
+
+  encodeUTF16(std::uint32_t(0x0024), resultVector);
+  testVector = {0x0024};
+std::cout << testVector << std::endl;
+std::cout << resultVector << std::endl;
+  BOOST_TEST(testVector == resultVector);
+
+  resultVector.clear();
+  encodeUTF16(std::uint32_t(0x20AC), resultVector);
+  testVector = {0x20AC};
+  BOOST_TEST(testVector == resultVector);
+
+  resultVector.clear();
+  encodeUTF16(std::uint32_t(0x10437), resultVector);
+  testVector = {0xD801, 0xDC37};
+  BOOST_TEST(testVector == resultVector);
+
+  resultVector.clear();
+  encodeUTF16(std::uint32_t(0x24B62), resultVector);
+  testVector = {0xD852, 0xDF62 };
+  BOOST_TEST(testVector == resultVector);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
