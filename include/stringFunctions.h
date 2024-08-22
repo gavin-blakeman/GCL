@@ -36,14 +36,21 @@
 #include <string>
 #include <string_view>
 
+// Miscellaneous library header files.
+#include "boost/algorithm/string.hpp"
+
+// GCL library header files
+#include "include/concepts.hpp"
+
 namespace GCL
 {
-  /*! @brief      Tokenises a string using the token seperator passed.
-   *  @param[out] op: The output collection to receive the tokenised srings.
+  /*! @brief      Tokenises a string using the token separator passed.
+   *  @param[out] op: The output collection to receive the tokenised strings.
    *  @param[in]  str: The string to tokenise.
-   *  @param[in]  seperators: The seperators to use for tokenising the string.
+   *  @param[in]  separators: The separators to use for tokenising the string.
    */
   template<typename O>
+  requires HasPushBack<O, std::string>
   void tokeniseString(O &op, std::string const &str, std::string const &seperators = ".,;:")
   {
     std::string_view sv(str);
@@ -55,12 +62,15 @@ namespace GCL
       if (end != std::string_view::npos)
       {
         std::string temp(sv, 0, end);
+        boost::trim(temp);
         op.push_back(std::move(temp));
         sv.remove_prefix(end + 1);
       }
       else
       {
-        op.emplace_back(sv);
+        std::string temp(sv);
+        boost::trim(temp);
+        op.push_back(std::move(temp));
         sv.remove_prefix(sv.length());
       }
     }
