@@ -53,10 +53,13 @@ namespace GCL
   concept isUTF32Char = IsAnyOf<std::remove_cvref_t<std::remove_pointer_t<std::decay_t<T>>>, char32_t, std::uint32_t>;
 
   template<typename C, typename T>
-  concept HasPushBack = requires(C c, T t) { {c.push_back(t) } -> std::same_as<void>; };
+  concept HasPushBack = requires(C c, T t) { c.push_back(t); };
 
   template<typename C, typename T>
-  concept HasPush = requires(C c, T t) { {c.push(t) } -> std::same_as<void>; };
+  concept HasPush = requires(C c, T t) { c.push(t); };
+
+  template<typename C, typename T>
+  concept HasEmplaceBack = requires(C c, T t) { c.emplace_back(t); };
 }
 
 
