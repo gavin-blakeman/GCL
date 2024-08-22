@@ -1,11 +1,12 @@
-//*********************************************************************************************************************************
+//**********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// FILE:                utf.h
+// SUBSYSTEM:           Parsers::HTML Parser
+// FILE:                htmlNodeBase.h
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
-// AUTHOR:              Gavin Blakeman (GGB)
+// AUTHOR:              Gavin Blakeman.
 // LICENSE:             GPLv2
 //
 //                      Copyright 2024 Gavin Blakeman.
@@ -22,31 +23,21 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            UTF constants and strings.
+// OVERVIEW:            Class that represents the HTML elements.
 //
-// HISTORY:             2024-04-23 GGB - File Created
+// CLASSES INCLUDED:
 //
-//*********************************************************************************************************************************
+// HISTORY:             2024-08-05 GGB - File Created
+//
+//**********************************************************************************************************************************/
 
-#ifndef GCL_INCLUDE_UTF_H_
-#define GCL_INCLUDE_UTF_H_
+#include "include/parsers/DOM/DOMNodeBase.h"
 
-// Standard C++ library
-#include <cstdint>
-#include <istream>
-
-namespace GCL
+namespace GCL::parsers::DOM
 {
-  enum utf_e
+  CDOMNodeBase::child_pointer CDOMNodeBase::appendChild(std::unique_ptr<CDOMNodeBase> newChild)
   {
-    UTF_NONE,
-    UTF_8,
-    UTF_16BE,
-    UTF_16LE,
-  };
-
-  utf_e getBOM(std::istream &);
-
+    //childCollection.push_back(std::move(newChild));
+    //return childCollection.back().get();
+  }
 }
-
-#endif /* GCL_INCLUDE_UTF_H_ */

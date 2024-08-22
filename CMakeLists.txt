@@ -44,13 +44,13 @@ set(SOURCES
   source/logger/sinks/baseSink.cpp
   source/logger/sinks/fileSink.cpp
   source/logger/sinks/streamSink.cpp
-  source/parsers/html/htmlAttributes.cpp
-  source/parsers/html/htmlDocument.cpp
-  source/parsers/html/htmlNodeBase.cpp
-  source/parsers/html/htmlNodeElement.cpp
-  source/parsers/html/htmlParser.cpp
+  source/parsers/DOM/DOMNodeAttribute.cpp
+  source/parsers/DOM/DOMNodeDocument.cpp
+  source/parsers/DOM/DOMNodeBase.cpp
+  source/parsers/DOM/DOMNodeElement.cpp
+#  source/parsers/html/htmlParser.cpp
   source/parsers/html/htmlTokeniser.cpp
-  source/parsers/html/htmlLanguageTokens.cpp
+  source/parsers/html/htmlTokens.cpp
   source/parsers/token.cpp
   source/pluginManager/pluginManager.cpp
   source/utf.cpp
@@ -90,16 +90,14 @@ set(HEADERS
   include/configurationReader/readerSections.hpp
   include/configurationReader/readerVanilla.hpp
   include/configurationReader/readerCore.hpp
-  include/parsers/html/htmlAttributes.h
-  include/parsers/html/htmlDocument.h
-  include/parsers/html/htmlNodeBase.h
-  include/parsers/html/htmlNodeComment.h
-  include/parsers/html/htmlNodeDocumentType.h
-  include/parsers/html/htmlNodeElement.h
-  include/parsers/html/htmlNodeText.h
+  include/parsers/DOM/DOMNodeAttribute.h
+  include/parsers/DOM/DOMNodeBase.h
+  include/parsers/DOM/DOMNodeComment.h
+  include/parsers/DOM/DOMNodeElement.h
+  include/parsers/DOM/DOMNodeText.h
   include/parsers/html/htmlTokeniser.h
   include/parsers/html/htmlParser.h
-  include/parsers/html/htmlLanguageTokens.h
+  include/parsers/html/htmlTokens.h
   include/parsers/lexer.hpp
   include/parsers/token.h
   include/parsers/languageTokens.h
@@ -109,7 +107,7 @@ set(HEADERS
   include/tempFileManager.h
   include/sqlWriter_typedef.inc
   include/sqlWriter_variables.inc
-  include/utf.h
+  include/utf/utf.h
   )
 
 set(DIRECTORIES

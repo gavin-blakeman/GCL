@@ -2,7 +2,7 @@
 //
 // PROJECT:             General Class Library
 // SUBSYSTEM:           Parsers::HTML Parser
-// FILE:                htmlTokens.h
+// FILE:                htmlAttributes.cpp
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,51 +23,22 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class that parsers the tokens
+// OVERVIEW:            Class to store attributes.
 //
 // CLASSES INCLUDED:
 //
-// HISTORY:             2024-08-05 GGB - File Created
+// HISTORY:             2024-06-18 GGB - File Created
 //
-//**********************************************************************************************************************************/
+//**********************************************************************************************************************************
 
-#ifndef PARSERS_HTML_TOKENS_H
-#define PARSERS_HTML_TOKENS_H
+#include "include/parsers/DOM/DOMNodeAttribute.h"
 
-// Standard C++ library header files
-#include <string>
-
-// Miscellaneous libraries
+// Miscellaneous library header files
+#include <fmt/format.h>
 #include <SCL>
-
-// parsers library
-#include "include/parsers/token.h"
-#include "include/parsers/languageTokens.h"
 
 namespace GCL::parsers::html
 {
-  enum htmlTokenTypes : CToken::tokenID_t
-  {
-    TT_START_TAG = TT_NEXT,
-    TT_END_TAG,
-    R_TAG_OPEN,               // >
-    R_TAG_CLOSE,              // />
-    L_TAG_DOCTYPE,            // <!
-    COMMENT_OPEN,
-    COMMENT_CLOSE,
-    TT_COMMENT,               // <!---
-    ASSIGN,                   // =
-    ID,
-    VALUE,
-    TEXT,
-    ATTRIBUTE,
-    TT_CHARACTER,
-    TT_DOCTYPE,
-    TT_EOF,
-  };
 
- extern SCL::bimap<CToken::tokenID_t, std::string> const tokenStrings;
+
 }
-
-#endif // PARSERS_HTML_TOKENS_H
-

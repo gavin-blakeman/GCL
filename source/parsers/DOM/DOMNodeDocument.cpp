@@ -2,7 +2,7 @@
 //
 // PROJECT:             General Class Library
 // SUBSYSTEM:           Parsers::HTML Parser
-// FILE:                htmlNodeBase.h
+// FILE:                htmlDocument.cpp
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,25 +23,29 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class that represents the HTML elements.
+// OVERVIEW:            Class that represents the DOM.
 //
 // CLASSES INCLUDED:
 //
-// HISTORY:             2024-08-05 GGB - File Created
+// HISTORY:             2024-06-18 GGB - File Created
 //
 //**********************************************************************************************************************************/
 
-#include "include/parsers/html/htmlNodeBase.h"
+#include "include/parsers/DOM/DOMNodeDocument.h"
 
-namespace GCL::parsers::html
+// Miscellaneous library header files.
+#include "include/error.h"
+
+// Parsers header files
+#include "include/parsers/DOM/DOMNodeComment.h"
+#include "include/parsers/DOM/DOMNodeElement.h"
+
+namespace GCL::parsers::DOM
 {
-  CHTMLNodeBase::child_pointer CHTMLNodeBase::insert(std::unique_ptr<CHTMLNodeBase> &&ins)
+  CDOMComment *CDOMDocument::createComment(string_type const &comment)
   {
-    //elementChildren.push_back(std::move(ins));
+    //currentNode()->insert(std::make_unique<CHTMLNodeComment>(currentElement, comment));
   }
 
-  CHTMLNodeBase::child_pointer CHTMLNodeBase::insert(CHTMLNodeBase *p, std::string const &etype)
-  {
-    //elementChildren.push_back(std::make_unique<CHTMLElement>(p, etype));
-  }
+
 }

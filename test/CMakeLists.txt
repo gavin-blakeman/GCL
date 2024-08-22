@@ -33,16 +33,19 @@ set(DIRECTORIES
 set(SOURCES
   main.cpp
 #  parsers/html/test_htmlAttributes.cpp
-#  parsers/html/test_htmlLexer.cpp
+  parsers/html/test_htmlBuffer.cpp
 #  parsers/html/test_htmlParser.cpp
-#  parsers/test_lexer.cpp
+  parsers/html/test_htmlTokens.cpp
+  parsers/html/test_htmlTokeniser.cpp  
   test_dateTime.cpp
   test_error.cpp
   test_filesystem.cpp
   test_functions.cpp
   test_sqlWriter.cpp
   test_stringFunctions.cpp
-  test_utf.cpp
+  utf/test_codePoint.cpp
+  utf/test_utf.cpp
+  utf/test_utfString.cpp
   )
 
 set(LIBRARIES

@@ -2,7 +2,7 @@
 //
 // PROJECT:             General Class Library
 // SUBSYSTEM:           Parsers::HTML Parser
-// FILE:                htmlTokenTypes.h
+// FILE:                htmlElements.cpp
 // LANGUAGE:            C++
 // TARGET OS:           None.
 // NAMESPACE:           GCL
@@ -23,30 +23,26 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class that represents the token types.
+// OVERVIEW:            Class that represents the HTML elements.
 //
 // CLASSES INCLUDED:
 //
 // HISTORY:             2024-06-18 GGB - File Created
 //
-//**********************************************************************************************************************************
+//**********************************************************************************************************************************/
 
-#include "include/parsers/html/htmlLanguageTokens.h"
+#include "include/parsers/DOM/DOMNodeElement.h"
 
-namespace GCL::parsers::html
+// Miscellaneous library header files.
+#include <SCL>
+
+namespace GCL::parsers::DOM
 {
-  SCL::bimap<CToken::tokenID_t, std::string> const tokenStrings =
-  {
-    { R_TAG_OPEN, ">" },
-    { R_TAG_CLOSE, "/>" },
-    { L_TAG_DOCTYPE, "<!"},
-    { COMMENT_OPEN, "<!---" },
-    { COMMENT_CLOSE, "--->" },
-    { ASSIGN,  "=" },
-    { ID, "ID"},
-    { VALUE, "Value"},
-    { TEXT, "Text"},
-    { ATTRIBUTE, "Attr"},
-  };
 
-} // namespace
+  CDOMElement::CDOMElement(CDOMNodeBase *parent, string_type const &typeText) : CDOMNodeBase(parent)
+  {
+  }
+
+
+
+}
