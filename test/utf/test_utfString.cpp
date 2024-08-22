@@ -25,4 +25,13 @@ BOOST_AUTO_TEST_CASE(test_constructor_stdString)
 //  BOOST_TEST(includeExclude(include, exclude, 7));   // Include, empty include.
 }
 
+BOOST_AUTO_TEST_CASE(test_operator_typeCast)
+{
+  using namespace GCL;
+
+  utf_string<char8_t> utf8;
+
+  auto r = static_cast<std::u16string>(utf8);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

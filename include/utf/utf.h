@@ -154,14 +154,22 @@ namespace GCL
     return begin;
   }
 
+  template<typename Iter>
+  requires isUTF32Char<typename std::iterator_traits<Iter>::value_type>
+  Iter decodeUTF(Iter begin, Iter end, std::uint32_t &codePoint)
+  {
+    codePoint = *begin++;
+    return begin;
+  }
+
   /*! @brief      Convert a code point to UTF-8 code units.
    *  @param[in]  codePoint: The code point to convert.
    *  @param[out] str: Thr string to add the code units to. (Must have push() or push_back()
    *  @throws
    */
   template<class T>
-//  requires isUTF8Char<typename T::value_type> && HasPushBack<typename T, typename T::value_type>
-  void encodeUTF8(std::uint32_t codePoint, T &str)
+  requires isUTF8Char<typename T::value_type> && HasPushBack<T, typename T::value_type>
+  void encodeUTF(std::uint32_t codePoint, T &str)
   {
     RUNTIME_ASSERT(codePoint <= 0x10FFFF, "Codepoint outside valid range");  // Sanity check.
 
@@ -219,14 +227,14 @@ namespace GCL
    *  @throws
    */
   template<class T>
-//  requires isUTF16Char<typename T::value_type> && (HasPushBack<T> || HasPush<T>)
-  void encodeUTF16(std::uint32_t codePoint, T &str)
+  requires isUTF16Char<typename T::value_type> && HasPushBack<T, typename T::value_type>
+  void encodeUTF(std::uint32_t codePoint, T &str)
   {
     RUNTIME_ASSERT(codePoint <= 0x10FFFF, "Codepoint outside valid range"); // Sanity check.
 
     if (codePoint < 0x10000)
     {
-      str.push_back(static_cast<char16_t>(codePoint);
+      str.push_back(static_cast<char16_t>(codePoint));
     }
     else
     {
@@ -235,6 +243,19 @@ namespace GCL
       str.push_back(0xD800 + static_cast<char16_t>(codePoint >> 10));
       str.push_back(0xDC00 + static_cast<char16_t>(codePoint & 0b1111111111));
     };
+  }
+
+  template<class T>
+  requires isUTF32Char<typename T::value_type> && HasPushBack<T, typename T::value_type>
+  void encodeUTF(std::uint32_t codePoint, T &str)
+  {
+    str.push_back(codePoint);
+  }
+
+  template<class Iter, class C>
+  void transcode(Iter begin, Iter end, C &str)
+  {
+
   }
 
 }

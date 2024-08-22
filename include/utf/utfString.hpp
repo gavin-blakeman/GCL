@@ -39,6 +39,7 @@
 
 // GCL Library
 #include "include/concepts.hpp"
+#include "include/utf/utf.h"
 
 namespace GCL
 {
@@ -50,7 +51,7 @@ namespace GCL
    *           a UTF16 string as output. All conversions between types are done internally.
    * @tparam   CharT: The character type. [char8_t, char16_t, char32_t]
    * @tparam   EOF: If true, then an EOF character is defined as -1. This EOF character will not cause any errors or problems during
-   *           string conversions and will be correctly converted..
+   *           string conversions and will be correctly converted.
    */
 
   template<typename CharT,
@@ -92,9 +93,16 @@ namespace GCL
             {
               stringStorage.assign(other.begin(), other.end());
             }
-            else if constexpr (isUTF16)
+            else
             {
-
+            }
+            break;
+          }
+          case UTF16:
+          {
+            if constexpr (isUTF16)
+            {
+              stringStorage.assign(other.begin(), other.end());
             }
             else
             {
@@ -102,9 +110,12 @@ namespace GCL
             }
             break;
           }
-          case UTF16:
           case UTF32:
           {
+            if constexpr (isUTF32)
+            {
+              stringStorage.assign(other.begin(), other.end());
+            }
             break;
           }
         }
@@ -118,11 +129,20 @@ namespace GCL
     utf_string(std::u8string const &other)
     {
       if constexpr(isUTF8)
-          {
+      {
         stringStorage.assign(other.begin(), other.end());
-          }
+      }
       else
       {
+        std::uint32_t codePoint;
+
+        auto iter = other.begin();
+
+        while (iter != other.end())
+        {
+          iter = decodeUTF(iter, other.end(), codePoint);
+          encodeUTF(codePoint, stringStorage);
+        }
       }
     }
 
@@ -133,11 +153,20 @@ namespace GCL
     utf_string(std::u16string const &other)
     {
       if constexpr(isUTF16)
-          {
+      {
         stringStorage.assign(other.begin(), other.end());
-          }
+      }
       else
       {
+        std::uint32_t codePoint;
+
+        auto iter = other.begin();
+
+        while (iter != other.end())
+        {
+          iter = decodeUTF(iter, other.end(), codePoint);
+          encodeUTF(codePoint, stringStorage);
+        }
       }
     }
 
@@ -151,6 +180,18 @@ namespace GCL
       {
         stringStorage.assign(other.begin(), other.end());
       }
+      else
+      {
+        std::uint32_t codePoint;
+
+        auto iter = other.begin();
+
+        while (iter != other.end())
+        {
+          iter = decodeUTF(iter, other.end(), codePoint);
+          encodeUTF(codePoint, stringStorage);
+        }
+      }
     }
 
     ~utf_string() = default;
@@ -158,10 +199,21 @@ namespace GCL
     utf_string &operator=(utf_string const &) = default;
     utf_string &operator=(utf_string &&) = default;
 
-    explicit operator std::u8string();
-    explicit operator std::u16string();
-    explicit operator std::u32string();
+    template<typename U>
+    explicit operator U()
+    {
+      U resultStr;
+      std::uint32_t codePoint;
+      auto Iter = stringStorage.begin();
 
+      while (Iter != stringStorage.end())
+      {
+        Iter  = decodeUTF(Iter, stringStorage.begin(), codePoint);
+        encodeUTF(codePoint, resultStr);
+      }
+
+      return resultStr;
+    }
 
     void setStoreEOF() noexcept { eofFlag = true; }
     void clrStoreEOF() noexcept { eofFlag = false; }
