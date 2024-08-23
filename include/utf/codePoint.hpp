@@ -44,6 +44,8 @@
 
 // GCL library
 #include "include/concepts.hpp"
+#include "include/utf/utfExceptions.hpp"
+#include "include/utf/utf.h"
 
 /* codePoint_t stores codePoints as UTF32. This class should have the same storage as a UTF32 char.
  * A basic_string of type codePoint_t should have the same memory layout and values as a UTF32 string.
@@ -73,22 +75,44 @@ namespace GCL::parsers
     constexpr codePoint_t(codePoint_t const &) = default;
     constexpr codePoint_t(codePoint_t &&) = default;
 
+    /*! @brief      Converts a string object (begin and end iterator) to a unicode code point.
+     *  @param[in/out] begin: The starting iterator. The value is changed to reflect the next point to process.
+     */
     template <typename Iter>
     requires UTFChar<typename Iter::value_type>
-    constexpr codePoint_t(Iter begin, Iter end)
+    constexpr codePoint_t(Iter &begin, Iter end)
     {
-      decodeUTF(begin, end, value);
+      begin = decodeUTF(begin, end, value);
     }
 
-    constexpr codePoint_t(char c) : value(c) {}
-    constexpr codePoint_t(std::uint16_t u16) : value(u16) {}
-    constexpr codePoint_t(std::int16_t i16) : value(i16) {}
+    constexpr codePoint_t(char c) : value(c) 
+    {
+      if (c >= 127)
+      {
+        throw bad_codepoint();
+      }
+    }
+    constexpr codePoint_t(std::uint16_t u16) : value(u16)
+    {
+      if ((u16 <= 0xD7FF) && (u16 >= 0xE000))
+      {
+        throw bad_codepoint();
+      }
+    }
+
+    constexpr codePoint_t(std::int16_t i16) : value(static_cast<std::uint16_t>(i16))
+    {
+      if ((i16 <= 0xD7FF) && (i16 >= 0xE000))
+      {
+        throw bad_codepoint();
+      }
+    }
     constexpr codePoint_t(std::int32_t i32) : value(i32) {}
     constexpr codePoint_t(utf32_t u32) : value(u32) {}
 
-    constexpr codePoint_t(std::istreeam &inStr, utf_e encoding)
+    constexpr codePoint_t(std::istream &inStrm, utf_e encoding)
     {
-      decodeUTF(inStrm, value, encoding);
+//      decodeUTF(inStrm, value, encoding);
     }
 
     constexpr ~codePoint_t() = default;

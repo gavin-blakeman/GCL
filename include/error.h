@@ -38,8 +38,7 @@
 #ifndef GCL_ERROR_H
 #define GCL_ERROR_H
 
-  // Standard C++ library header files
-
+// Standard C++ library header files
 #include <cstdint>
 #include <optional>
 #include <source_location>
@@ -54,10 +53,10 @@ namespace GCL
     class CLogger;    // Forward declaration needed.
   }
 
-  /// @brief        The CRuntimeError class is used for reporting exceptions and errors. It is integrated with the logger and allows
-  ///               exceptions to be thrown and errors reported.
-  ///               Exceptions raised by CRuntimeError are not intended to be fatal and allow error management of calling functions.
-
+  /*! @brief        The CRuntimeError class is used for reporting exceptions and errors. It is integrated with the logger and allows
+   *                exceptions to be thrown and errors reported.
+   *                Exceptions raised by CRuntimeError are not intended to be fatal and allow error management of calling functions.
+   */
   class runtime_error : public std::runtime_error
   {
   public:
@@ -119,11 +118,11 @@ namespace GCL
     std::string errorMessage(std::string const &, std::size_t) const;
   };
 
-  /// @brief    The CRuntimeAssert class throws exceptions to indicate assertion failures within a library.
-  /// @details  Assertion exceptions are used when parameters to functions, or calculated values within functions are checked for
-  ///           correctness. Exceptions are thrown if the assertion fails.
-  /// @note     The CodeError class should be used for unreachable code errors.
-
+  /*! @brief    The CRuntimeAssert class throws exceptions to indicate assertion failures within a library.
+   *  @details  Assertion exceptions are used when parameters to functions, or calculated values within functions are checked for
+   *            correctness. Exceptions are thrown if the assertion fails.
+   *  @note     The CodeError class should be used for unreachable code errors.
+   */
   class CRuntimeAssert: public std::runtime_error
   {
   public:
@@ -189,8 +188,7 @@ namespace GCL
     throw(CImplementMe(std::string(location.file_name()), location.line()));
   }
 
-  #define RUNTIME_ASSERT(EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert((#EXPRESSION), (MESSAGE)); }}
-
+#define RUNTIME_ASSERT(EXPRESSION, MESSAGE) {if (!(EXPRESSION)) { throw GCL::CRuntimeAssert((#EXPRESSION), (MESSAGE)); }}
 }	// namespace GCL
 
 #endif // GCL_ERROR_H
