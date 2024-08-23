@@ -38,7 +38,7 @@
 #include <atomic>
 #include <cstdint>
 #include <deque>
-#include <istream>
+#include <iostream>
 #include <mutex>
 #include <semaphore>
 #include <shared_mutex>
@@ -92,40 +92,13 @@ namespace GCL::parsers::html
      */
     virtual void fillBuffer()
     {
-      inputStream.exceptions(std::ifstream::eofbit); // May throw. Throws exception when EOF bit is set.
+      inputStream.exceptions(std::istream::eofbit); // May throw. Throws exception when EOF bit is set.
       while (!inputStream.eof())
       {
         switch (streamEncoding)
         {
           case UTF_8:
           {
-            try
-            {
-              utf_t utf = {.u32 = 0, .type = UTF_8};
-              char iByte;
-
-              inputStream.get(iByte);
-              utf.u8[0] = static_cast<std::uint8_t>(iByte);
-
-              if (utf.u8[0] >= 128)
-              {
-                std::uint8_t byteCount = utf.u8[0] & 0b01110000;
-
-                std::uint8_t indx = 1;
-
-                while (byteCount)
-                {
-                  inputStream.get(iByte);
-                  utf.u8[indx++] = static_cast<std::uint8_t>(iByte);
-                  byteCount = byteCount >> 1;
-                }
-              }
-              buffer.push_back(utf);
-            }
-            catch(...)
-            {
-            }
-            break;
           }
           case UTF_16BE:
           case UTF_16LE:
