@@ -252,10 +252,23 @@ namespace GCL
     str.push_back(codePoint);
   }
 
+  /*! @brief      Transcaode a single code point.
+   *  @param[in]  begin: Iterator to the first input codePoint.
+   *  @param[in]  end: Iterator to the last input codePoint.
+   *  @param[out] str: The string to receive the output.
+   *  @returns    Iterator to the next unused character in the input container.
+   *  @note       The end iterator may be beyond the endpoint of the encoded character.
+   */
   template<class Iter, class C>
-  void transcode(Iter begin, Iter end, C &str)
+  requires HasPushBack<C, typename C::value_type>
+  Iter transcode(Iter begin, Iter end, C &str)
   {
+    std::uint32_t codePoint;
 
+    begin = decodeUTF(begin, end, codePoint);
+    encodeUTF(codePoint, str);
+
+    return begin;
   }
 
 }

@@ -243,4 +243,24 @@ BOOST_AUTO_TEST_CASE(test_encodeUTF32)
   BOOST_TEST(testVector == resultVector);
 }
 
+BOOST_AUTO_TEST_CASE(test_transcode)
+{
+  using namespace GCL;
+
+  std::vector<std::uint8_t> inputVector = { 0x24 };
+  std::vector<char16_t> c16Result;
+  std::vector<char32_t> c32Result;
+  std::vector<char16_t> testVector = {0x0024};
+
+  transcode(inputVector.begin(), inputVector.end(), c16Result);
+  BOOST_TEST(c16Result == testVector);
+
+  inputVector = { 0xF4, 0x89, 0x9A, 0xB3 };
+  c16Result.clear();
+
+  transcode(inputVector.begin(), inputVector.end(), c16Result);
+  testVector = { 56293, 57011 };
+  BOOST_TEST(c16Result == testVector);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
