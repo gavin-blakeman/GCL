@@ -64,10 +64,8 @@ namespace GCL
    */
   template<typename Iter>
   requires isUTF8Char<typename std::iterator_traits<Iter>::value_type>
-  Iter decodeUTF(Iter begin, Iter end, std::uint32_t &codePoint)
+  constexpr Iter decodeUTF(Iter begin, Iter end, std::uint32_t &codePoint)
   {
-    //7, 11, 16, 21
-
     if (*begin >= 0b10000000)
     {
       std::uint8_t byteCounter;
@@ -256,6 +254,125 @@ namespace GCL
   void transcode(Iter begin, Iter end, C &str)
   {
 
+  }
+
+  template<class C,
+           typename T>
+  requires isUTF8Char<T> && HasPushBack<C, typename C::value_type> && isUTF32Char<typename C::value_type>
+  std::istream &decodeUTF(std::istream &inStrm, C &str, utf_e)
+  {
+    std::uint32_t codePoint;
+    char inByte;
+
+    inStrm.get(inByte);
+
+    if (static_cast<std::uint8_t>(inByte) >= 0b10000000)
+    {
+      std::uint8_t byteCounter;
+      std::uint32_t finalMask = 0b00011111;
+      int byteCount = 1;
+
+      codePoint = byteCounter = static_cast<std::uint8_t>(inByte);
+      byteCounter = byteCounter << 1;
+
+      do
+      {
+        finalMask <<= 6;
+        finalMask |= 0b111111;
+        if (!inStrm.eof())
+        {
+          codePoint <<= 6;            // Shift up by 6
+          inStrm.get(inByte);
+          codePoint |= static_cast<uint32_t>(inByte) & 0b00111111;
+        }
+        else
+        {
+          throw unexpected_eof();
+        }
+        byteCounter <<= 1;
+        byteCount++;
+      }
+      while (((byteCounter & 0b10000000) != 0) && (byteCount <= 4));
+
+      if (byteCount <= 4)
+      {
+        byteCount--;
+        while(--byteCount)
+        {
+          finalMask >>= 1;
+        }
+        codePoint &= finalMask;
+      }
+      else
+      {
+        throw bad_codepoint();
+      }
+    }
+    else
+    {
+      codePoint = static_cast<std::uint32_t>(inByte);
+    }
+    str.push_back(codePoint);
+
+   return inStrm;
+  }
+
+  template<class C,
+           typename T>
+  requires isUTF16Char<T> && HasPushBack<C, typename C::value_type> && isUTF32Char<typename C::value_type>
+  std::istream &decodeUTF(std::istream &inStrm, C &str, utf_e format)
+  {
+    char iByte;
+    std::uint32_t codePoint;
+
+    inStrm.get(iByte);
+    codePoint = static_cast<std::uint8_t>(iByte) << 8;
+    inStrm.get(iByte);
+    codePoint += static_cast<std::uint8_t>(iByte);
+
+    if (codePoint & 0xD800)
+    {
+      if (!inStrm.eof())
+      {
+        // Surrogate area runs from 0xD800 to 0xDFFF
+        codePoint -= 0xD800;
+        codePoint *= 0x400;
+
+        inStrm.get(iByte);
+        std::uint32_t ls = static_cast<std::uint8_t>(iByte) << 8;
+        inStrm.get(iByte);
+        ls += static_cast<std::uint8_t>(iByte);
+        ls -= 0xDC00;
+        codePoint += ls + 0x10000;
+        str.push_back(codePoint);
+      }
+      else
+      {
+        throw unexpected_eof();
+      }
+    }
+
+    return inStrm;
+  }
+
+  template<class C,
+           typename T>
+  requires isUTF32Char<T> && HasPushBack<C, typename C::value_type> && isUTF32Char<typename C::value_type>
+  std::istream &decodeUTF(std::istream &inStrm, C &str, utf_e format)
+  {
+    std::uint32_t codePoint = 0;
+    char iByte;
+    int count;
+    while (count != 4)
+    {
+      inStrm.get(iByte);
+      codePoint <<= 8;
+      codePoint += static_cast<std::uint8_t>(iByte);
+    }
+
+    str.push_back(codePoint);
+
+    return inStrm;
   }
 
 }

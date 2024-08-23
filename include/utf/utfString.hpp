@@ -55,9 +55,9 @@ namespace GCL
    */
 
   template<typename CharT,
-  bool eof = true,
-  class Traits = std::char_traits<CharT>,
-  class Allocator = std::allocator<CharT>> requires UTFChar<CharT>
+           bool eof = true,
+           class Traits = std::char_traits<CharT>,
+           class Allocator = std::allocator<CharT>> requires UTFChar<CharT>
   class utf_string
   {
   public:
@@ -191,6 +191,22 @@ namespace GCL
           iter = decodeUTF(iter, other.end(), codePoint);
           encodeUTF(codePoint, stringStorage);
         }
+      }
+    }
+
+    /*! @brief      Construct from an input stream.
+     *  @param[in]  inStrm: The input stream
+     *  @param[in]  encoding: The stream encoding.
+     *  @param[in]  count: The number of code point to read.
+     *  @returns    inStrm
+     *  @throws
+     */
+    utf_string(std::istream &inStrm, utf_e encoding, size_type count)
+    {
+      while (count)
+      {
+        decodeUTF<char8_t>(inStrm, stringStorage, encoding);
+        count--;
       }
     }
 

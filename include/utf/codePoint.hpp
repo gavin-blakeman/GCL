@@ -29,18 +29,21 @@
 //
 // HISTORY:             2024-08-08 GGB - File Created
 //
-//**********************************************************************************************************************************
+//**********************************************************************************************************************************/
 
 #ifndef GCL_INCLUDE_PARSERS_CODEPOINT_HPP_
 #define GCL_INCLUDE_PARSERS_CODEPOINT_HPP_
 
 // Standard C++ header files
 #include <cstdint>
+#include <string>
 #include <variant>
 
 // Miscellaneous libraries
-#include <GCL>
 #include <fmt/format.h>
+
+// GCL library
+#include "include/concepts.hpp"
 
 /* codePoint_t stores codePoints as UTF32. This class should have the same storage as a UTF32 char.
  * A basic_string of type codePoint_t should have the same memory layout and values as a UTF32 string.
@@ -60,57 +63,32 @@
 
 namespace GCL::parsers
 {
-  struct utf_t
-  {
-    union
-    {
-      std::uint8_t u8[4];
-      std::uint16_t u16[2];
-      std::uint32_t u32;
-    };
-    utf_e type;
-  };
-
   class codePoint_t
   {
   public:
-    using value_type = std::uint32_t;
     using utf32_t = std::uint32_t;
+    using value_type = utf32_t;
 
     constexpr codePoint_t() = default;
     constexpr codePoint_t(codePoint_t const &) = default;
     constexpr codePoint_t(codePoint_t &&) = default;
-    constexpr codePoint_t(std::uint8_t u8)
+
+    template <typename Iter>
+    requires UTFChar<typename Iter::value_type>
+    constexpr codePoint_t(Iter begin, Iter end)
     {
-      if (u8 <= 127)
-      {
-        value = u8;
-      }
-      else
-      {
-        throw std::runtime_error("invalid utf8 single byte");
-      }
+      decodeUTF(begin, end, value);
     }
+
     constexpr codePoint_t(char c) : value(c) {}
     constexpr codePoint_t(std::uint16_t u16) : value(u16) {}
     constexpr codePoint_t(std::int16_t i16) : value(i16) {}
     constexpr codePoint_t(std::int32_t i32) : value(i32) {}
     constexpr codePoint_t(utf32_t u32) : value(u32) {}
-    constexpr codePoint_t(utf_t utf)
+
+    constexpr codePoint_t(std::istreeam &inStr, utf_e encoding)
     {
-      switch (utf.type)
-      {
-        case UTF_8:
-        {
-          value = utf.u32;
-          break;
-        };
-        default:
-        {
-          value = 0;
-          break;
-        }
-      };
+      decodeUTF(inStrm, value, encoding);
     }
 
     constexpr ~codePoint_t() = default;
