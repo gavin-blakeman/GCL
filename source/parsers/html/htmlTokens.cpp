@@ -35,6 +35,9 @@
 
 // Standard C++ header files
 
+// GCL Header files
+#include <GCL>
+
 namespace GCL::parsers::html
 {
   CHTMLToken::CHTMLToken(token_type tt) : tokenType(tt)
