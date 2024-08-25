@@ -5,6 +5,7 @@
 
 // parsers include files
 #include "include/parsers/html/htmlExceptions.h"
+#include "include/utf/namedCharacters.hpp"
 
 /* Note on Encoding:
  * HTML from the web may be encoded in UTF8 or UTF16. It is also possible that html may be provided as UTF32. The tokeniser needs to
