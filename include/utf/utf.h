@@ -152,8 +152,7 @@ namespace GCL
     return begin;
   }
 
-  template<typename Iter>
-  requires isUTF32Char<typename std::iterator_traits<Iter>::value_type>
+  template<typename Iter> requires isUTF32Char<typename std::iterator_traits<Iter>::value_type>
   Iter decodeUTF(Iter begin, Iter end, std::uint32_t &codePoint)
   {
     codePoint = *begin++;
@@ -165,8 +164,7 @@ namespace GCL
    *  @param[out] str: Thr string to add the code units to. (Must have push() or push_back()
    *  @throws
    */
-  template<class T>
-  requires isUTF8Char<typename T::value_type> && HasPushBack<T, typename T::value_type>
+  template<class T> requires isUTF8Char<typename T::value_type> && HasPushBack<T, typename T::value_type>
   void encodeUTF(std::uint32_t codePoint, T &str)
   {
     RUNTIME_ASSERT(codePoint <= 0x10FFFF, "Codepoint outside valid range");  // Sanity check.
@@ -224,8 +222,7 @@ namespace GCL
    *  @param[out] str: Thr string to add the code units to. (Must have push() or push_back()
    *  @throws
    */
-  template<class T>
-  requires isUTF16Char<typename T::value_type> && HasPushBack<T, typename T::value_type>
+  template<class T> requires isUTF16Char<typename T::value_type> && HasPushBack<T, typename T::value_type>
   void encodeUTF(std::uint32_t codePoint, T &str)
   {
     RUNTIME_ASSERT(codePoint <= 0x10FFFF, "Codepoint outside valid range"); // Sanity check.
@@ -243,8 +240,7 @@ namespace GCL
     };
   }
 
-  template<class T>
-  requires isUTF32Char<typename T::value_type> && HasPushBack<T, typename T::value_type>
+  template<class T> requires isUTF32Char<typename T::value_type> && HasPushBack<T, typename T::value_type>
   void encodeUTF(std::uint32_t codePoint, T &str)
   {
     str.push_back(codePoint);
@@ -388,6 +384,30 @@ namespace GCL
     return inStrm;
   }
 
-}
+  template<typename T> requires UTFChar<T>
+  constexpr bool isalpha(T c) noexcept { return islower(c) || isupper(c); }
+
+  template<typename T> requires UTFChar<T>
+  constexpr bool isnumeric(T c) noexcept { return (c >= 0x30 && c <= 0x39); }
+
+  template<typename T> requires UTFChar<T>
+  constexpr bool isalphanumeric(T c) noexcept { return isalpha(c) || isnumeric(c); }
+
+  template<typename T> requires UTFChar<T>
+  constexpr bool isHexDigit(T c) noexcept{ return isnumeric(c) || ( c >= 0x41 && c <= 0x46) || (c >= 0x61 && c <= 0x66); }
+
+  template<typename T> requires UTFChar<T>
+  constexpr bool islower(T c) noexcept { return (c >= 0x61 && c <= 0x7A); }
+
+  template<typename T> requires UTFChar<T>
+  constexpr bool isupper(T c) noexcept { return (c >= 0x41 && c <= 0x5A); }
+
+  template<typename T> requires UTFChar<T>
+  constexpr T tolower(T c) noexcept { return (isupper(c) ? c + 0x20 : c); }
+
+  template<typename T> requires UTFChar<T>
+  T toupper(T c) noexcept { return (islower(c) ? c - 0x20 : c); }
+
+} // namespace
 
 #endif /* GCL_INCLUDE_UTF_H_ */

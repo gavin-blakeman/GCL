@@ -15,7 +15,11 @@ namespace GCL::parsers::DOM
     CDOMNodeComment(CDOMNodeComment *p, string_type const &s) : CDOMNodeBase(p), value(s) {}
       virtual ~CDOMNodeComment() = default;
 
+      virtual string_type nodeName() const { return string_type("#comment"); }
+
       string_type comment() const noexcept { return value; }
+
+
 
 
     private:

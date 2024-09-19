@@ -45,6 +45,7 @@
 
 // Parser header files
 #include "include/parsers/html/htmlRawAttribute.hpp"
+#include "include/utf/utfString.hpp"
 
 /* Note:
  * 1. Tokens can store multiple code points. At the time of writing, the thought is to keep the code points and pass the code
@@ -61,8 +62,8 @@ namespace GCL::parsers::html
   class CHTMLToken
   {
   public:
-    using char_type = codePoint_t;
-    using string_type = std::basic_string<char_type>;
+    using value_type = char32_t;
+    using string_type = utf_string<value_type>;
     enum token_type { TT_NONE, TT_TAG_START, TT_TAG_END, TT_CHARACTER, TT_DOCTYPE, TT_EOF, TT_COMMENT };
     using attribute_type = CHTMLRawAttribute;
     using attribute_collection = std::list<attribute_type>;
@@ -71,7 +72,7 @@ namespace GCL::parsers::html
     CHTMLToken(CHTMLToken const &t) = default;
     CHTMLToken(CHTMLToken &&) = default;
     CHTMLToken(token_type t);
-    CHTMLToken(token_type t, char_type const &c);
+    CHTMLToken(token_type t, value_type const &c);
 
     ~CHTMLToken() = default;
 
@@ -80,16 +81,19 @@ namespace GCL::parsers::html
 
     // Shared dependent on tokenType
 
-    void appendName(char_type const &v);
+    void appendName(value_type const &v);
     string_type const &name() const;
-    void appendData(char_type const &v);
+    void appendData(value_type const &v);
     void appendData(string_type const &s);
+
+    string_type const &comment() const;
+    value_type character() const;
 
     // DocType Access
     void forceQuirks(bool b);
     bool forceQuirks() const;
-    void appendPublicIdentifier(char_type const &v);
-    void appendSystemIdentifier(char_type const &v);
+    void appendPublicIdentifier(value_type const &v);
+    void appendSystemIdentifier(value_type const &v);
     void setPublicIdentifierEmpty();
     void setSystemIdentifierEmpty();
     bool hasPublicIdentifier() const;
@@ -104,10 +108,10 @@ namespace GCL::parsers::html
     token_type const &type() const noexcept { return tokenType; }
     void type(token_type tt);
 
-    bool attrExists(char_type const &v) const noexcept {  }
+    bool attrExists(value_type const &v) const noexcept {  }
     void attrStart() { ; }
-    void attrConcatName(char_type const &) {};
-    void attrConcatValue(char_type const &) {};
+    void attrConcatName(value_type const &) {};
+    void attrConcatValue(value_type const &) {};
 
   private:
     struct tokenContentDocType_t
@@ -133,7 +137,7 @@ namespace GCL::parsers::html
     };
     struct tokenCharacter_t
     {
-      char_type data;
+      value_type data;
     };
 
     using tokenVariant_t = std::variant<std::monostate, tokenContentDocType_t, tokenTag_t, tokenComment_t, tokenCharacter_t>;

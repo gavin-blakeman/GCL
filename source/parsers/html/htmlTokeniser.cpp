@@ -28,12 +28,12 @@
 
 namespace GCL::parsers::html
 {
-  static CHTMLTokeniser::string_type S32_SCRIPT{'s', 'c', 'r', 'i', 'p', 't'};
-  static CHTMLTokeniser::string_type S32_MINUSMINUS{'-', '-'};
-  static CHTMLTokeniser::string_type S32_DOCTYPE{'o', 'c', 't', 'y', 'p', 'e'};
-  static CHTMLTokeniser::string_type S32_CDATA{'[','C', 'D', 'A', 'T', 'A', '['};
-  static CHTMLTokeniser::string_type S32_PUBLIC{'u', 'b', 'l', 'i', 'c'};
-  static CHTMLTokeniser::string_type S32_SYSTEM{'y', 's', 't', 'e', 'm'};
+  static CHTMLTokeniser::string_type S32_SCRIPT{"script"};
+  static CHTMLTokeniser::string_type S32_MINUSMINUS{"--"};
+  static CHTMLTokeniser::string_type S32_DOCTYPE{"octype"};
+  static CHTMLTokeniser::string_type S32_CDATA{"[CDATA["};
+  static CHTMLTokeniser::string_type S32_PUBLIC{"ublic"};
+  static CHTMLTokeniser::string_type S32_SYSTEM{"ystem"};
 
   CHTMLTokeniser::token_type CHTMLTokeniser::getToken()
   {
@@ -562,7 +562,8 @@ namespace GCL::parsers::html
         }
         else
         {
-          emitCharacter({U_003C, U_002F});
+          emitCharacter(U_003C);
+          emitCharacter(U_002F);
           emitCharacterTemporaryBuffer();
           smState = SM_RAWTEXT;
           reconsume();
@@ -588,9 +589,9 @@ namespace GCL::parsers::html
       }
       default:
       {
-        if (currentChar.isalpha())
+        if (isalpha(currentChar))
         {
-          tokenFIFO.back().appendName(currentChar.tolower());
+          tokenFIFO.back().appendName(tolower(currentChar));
           temporaryBuffer.push_back(currentChar);
         }
         else
@@ -608,7 +609,7 @@ namespace GCL::parsers::html
   // 13.2.5.13
   void CHTMLTokeniser::processRawTextEndTagOpen()
   {
-    if (currentChar.isalpha())
+    if (isalpha(currentChar))
     {
       createTokenTagEnd();
       reconsume();
@@ -725,9 +726,9 @@ namespace GCL::parsers::html
       }
       default:
       {
-        if (currentChar.isalpha())
+        if (isalpha(currentChar))
         {
-          tokenFIFO.back().appendName(currentChar.tolower());
+          tokenFIFO.back().appendName(tolower(currentChar));
           temporaryBuffer.push_back(currentChar);
         }
         else
@@ -745,7 +746,7 @@ namespace GCL::parsers::html
   // 13.2.5.10
   void CHTMLTokeniser::processRCDataEndTagOpen()
   {
-    if (currentChar.isalpha())
+    if (isalpha(currentChar))
     {
       createTokenTagEnd();
       reconsume();
@@ -872,10 +873,10 @@ namespace GCL::parsers::html
       }
       default:
       {
-        if (currentChar.isalpha())
+        if (isalpha(currentChar))
         {
           emitCharacter(currentChar);
-          temporaryBuffer.push_back(currentChar.tolower());
+          temporaryBuffer.push_back(tolower(currentChar));
         }
         else
         {
@@ -927,7 +928,8 @@ namespace GCL::parsers::html
         }
         else
         {
-          emitCharacter({ U_003C, U_002F });
+          emitCharacter(U_003C);
+          emitCharacter(U_002F );
           emitCharacterTemporaryBuffer();
           smState = SM_SCRIPT;
           reconsume();
@@ -936,14 +938,15 @@ namespace GCL::parsers::html
       }
       default:
       {
-        if (std::isalpha(currentChar))
+        if (isalpha(currentChar))
         {
-          tokenFIFO.back().appendName(currentChar.tolower());
+          tokenFIFO.back().appendName(tolower(currentChar));
           temporaryBuffer.push_back(currentChar);
         }
         else
         {
-          emitCharacter({U_003C, U_002F});
+          emitCharacter(U_003C);
+          emitCharacter(U_002F);
           emitCharacterTemporaryBuffer();
           smState = SM_SCRIPT;
           reconsume();
@@ -955,7 +958,7 @@ namespace GCL::parsers::html
   // 13.2.5.16
   void CHTMLTokeniser::processScriptEndTagOpen()
   {
-    if (std::isalpha(currentChar))
+    if (isalpha(currentChar))
     {
       createTokenTagEnd();
       smState = SM_SCRIPT_END_TAG_NAME;
@@ -963,7 +966,8 @@ namespace GCL::parsers::html
     }
     else
     {
-      emitCharacter({U_003C, U_002F});
+      emitCharacter(U_003C);
+      emitCharacter(U_002F);
       smState = SM_SCRIPT;
       reconsume();
     }
@@ -1109,7 +1113,8 @@ namespace GCL::parsers::html
         }
         else
         {
-          emitCharacter({U_003C, U_002F});
+          emitCharacter(U_003C);
+          emitCharacter(U_002F);
           emitCharacterTemporaryBuffer();
           smState = SM_SCRIPT_ESCAPED;
           reconsume();
@@ -1125,7 +1130,8 @@ namespace GCL::parsers::html
         }
         else
         {
-          emitCharacter({U_003C, U_002F});
+          emitCharacter(U_003C);
+          emitCharacter(U_002F);
           emitCharacterTemporaryBuffer();
           smState = SM_SCRIPT_ESCAPED;
           reconsume();
@@ -1134,14 +1140,15 @@ namespace GCL::parsers::html
       }
       default:
       {
-        if (std::isalpha(currentChar))
+        if (isalpha(currentChar))
         {
-          tokenFIFO.back().appendName(currentChar.tolower());
+          tokenFIFO.back().appendName(tolower(currentChar));
           temporaryBuffer.push_back(currentChar);
         }
         else
         {
-          emitCharacter({U_003C, U_002F});
+          emitCharacter(U_003C);
+          emitCharacter(U_002F);
           emitCharacterTemporaryBuffer();
           smState = SM_SCRIPT_ESCAPED;
           reconsume();
@@ -1153,7 +1160,7 @@ namespace GCL::parsers::html
   // 13.2.5.24
   void CHTMLTokeniser::processScriptEscapedEndTagOpen()
   {
-    if (std::isalpha(currentChar))
+    if (isalpha(currentChar))
     {
       createTokenTagEnd();
       smState = SM_SCRIPT_ESCAPED_END_TAG_NAME;
@@ -1161,7 +1168,8 @@ namespace GCL::parsers::html
     }
     else
     {
-      emitCharacter({U_003C, U_002F});
+      emitCharacter(U_003C);
+      emitCharacter(U_002F);
       smState = SM_SCRIPT_ESCAPED;
       reconsume();
     }
@@ -1180,7 +1188,7 @@ namespace GCL::parsers::html
       }
       default:
       {
-        if (std::isalpha(currentChar))
+        if (isalpha(currentChar))
         {
           temporaryBuffer.clear();
           emitCharacter(U_003C);
@@ -1241,7 +1249,8 @@ namespace GCL::parsers::html
       }
       case U_0021:
       {
-        emitCharacter({U_003C, U_0021});
+        emitCharacter(U_003C);
+        emitCharacter(U_0021);
         smState = SM_SCRIPT_ESCAPE_START;
         break;
       }
@@ -1273,7 +1282,8 @@ namespace GCL::parsers::html
     {
       PARSE_ERROR("eof before tag name");
       emitEOF();
-      emitCharacter({U_003C, U_002F});
+      emitCharacter(U_003C);
+      emitCharacter(U_002F);
     }
     else
     {
@@ -1322,7 +1332,7 @@ namespace GCL::parsers::html
       }
       default:
       {
-        tokenFIFO.back().appendName(currentChar.tolower());
+        tokenFIFO.back().appendName(tolower(currentChar));
         break;
       }
     };
@@ -1359,7 +1369,7 @@ namespace GCL::parsers::html
       }
       default:
       {
-        if (currentChar.isalpha())
+        if (isalpha(currentChar))
         {
           createTokenTagStart();
           smState = SM_TAG_NAME;
@@ -1493,9 +1503,9 @@ namespace GCL::parsers::html
       }
       default:
       {
-        if (currentChar.isalpha())
+        if (isalpha(currentChar))
         {
-          temporaryBuffer.push_back(currentChar.tolower());
+          temporaryBuffer.push_back(tolower(currentChar));
           emitCharacter(currentChar);
         }
         else
@@ -1583,7 +1593,7 @@ namespace GCL::parsers::html
       }
       default:
       {
-        tokenFIFO.back().attrConcatName(currentChar.tolower());
+        tokenFIFO.back().attrConcatName(tolower(currentChar));
         break;
       }
     }
@@ -2155,7 +2165,8 @@ namespace GCL::parsers::html
       }
       default:
       {
-        tokenFIFO.back().appendData({U_002D, U_002D});
+        tokenFIFO.back().appendData(U_002D);
+        tokenFIFO.back().appendData(U_002D);
         smState = SM_COMMENT;
         reconsume();
         break;
@@ -2170,7 +2181,9 @@ namespace GCL::parsers::html
     {
       case U_002D:
       {
-        tokenFIFO.back().appendData({U_002D, U_002D, U_0021});
+        tokenFIFO.back().appendData(U_002D);
+        tokenFIFO.back().appendData(U_002D);
+        tokenFIFO.back().appendData(U_0021);
         smState = SM_COMMENT_END_DASH;
         break;
       }
@@ -2189,7 +2202,9 @@ namespace GCL::parsers::html
       }
       default:
       {
-        tokenFIFO.back().appendData({U_002D, U_002D, U_0021});
+        tokenFIFO.back().appendData(U_002D);
+        tokenFIFO.back().appendData(U_002D);
+        tokenFIFO.back().appendData(U_0021);
         smState = SM_COMMENT;
         reconsume();
         break;
@@ -2272,7 +2287,7 @@ namespace GCL::parsers::html
       default:
       {
         createTokenDocType(false);
-        tokenFIFO.back().appendName(currentChar.tolower());
+        tokenFIFO.back().appendName(tolower(currentChar));
         smState = SM_DOCTYPE_NAME;
         break;
       }
@@ -2314,7 +2329,7 @@ namespace GCL::parsers::html
       }
       default:
       {
-        tokenFIFO.back().appendName(currentChar.tolower());
+        tokenFIFO.back().appendName(tolower(currentChar));
         break;
       }
     }
@@ -2348,13 +2363,13 @@ namespace GCL::parsers::html
       }
       default:
       {
-        if ((currentChar.tolower() == 'p') && match(S32_PUBLIC, false))
+        if ((tolower(currentChar) == 'p') && match(S32_PUBLIC, false))
         {
           consume(S32_PUBLIC.size());
           smState = SM_AFTER_DOCTYPE_PUBLIC_KEYWORD;
           break;
         }
-        else if ((currentChar.tolower() == 's') && match(S32_SYSTEM, false))
+        else if ((tolower(currentChar) == 's') && match(S32_SYSTEM, false))
         {
           consume(S32_SYSTEM.size());
           smState = SM_AFTER_DOCTYPE_SYSTEM_KEYWORD;
@@ -2970,7 +2985,7 @@ namespace GCL::parsers::html
   void CHTMLTokeniser::processCharacterReference()
   {
     temporaryBuffer.clear();
-    temporaryBuffer.push_back(U_0026);
+    temporaryBuffer.push_back(static_cast<char32_t>(U_0026));
     switch (currentChar)
     {
       case U_0023:
@@ -2981,7 +2996,7 @@ namespace GCL::parsers::html
       }
       default:
       {
-        if (currentChar.isalphanumeric())
+        if (isalphanumeric(currentChar))
         {
           smState = SM_NAMED_CHARACTER_REFERENCE;
           reconsume();
@@ -3005,7 +3020,7 @@ namespace GCL::parsers::html
   // 13.2.5.74
   void CHTMLTokeniser::processAmbiguousAmpersand()
   {
-    if (currentChar.isalphanumeric())
+    if (isalphanumeric(currentChar))
     {
       IMPLEMENT_ME();
     }
@@ -3048,7 +3063,7 @@ namespace GCL::parsers::html
   // 13.2.5.76
   void CHTMLTokeniser::processHexadecimalCharacterReferenceStart()
   {
-    if (currentChar.isHexDigit())
+    if (isHexDigit(currentChar))
     {
       smState = SM_HEXADECIMAL_CHARACTER_REFERENCE;
       reconsume();
@@ -3065,7 +3080,7 @@ namespace GCL::parsers::html
   // 13.2.5.77
   void CHTMLTokeniser::processDecimalCharacterReferenceStart()
   {
-    if (currentChar.isnumeric())
+    if (isnumeric(currentChar))
     {
       smState = SM_DECIMAL_CHARACTER_REFERENCE;
       reconsume();
@@ -3082,7 +3097,7 @@ namespace GCL::parsers::html
   // 13.2.5.78
   void CHTMLTokeniser::processHexadecimalCharacterReference()
   {
-    if (currentChar.isHexDigit())
+    if (isHexDigit(currentChar))
     {
       charRefCode *= 16;
       IMPLEMENT_ME();
@@ -3102,7 +3117,7 @@ namespace GCL::parsers::html
   // 13.2.5.79
   void CHTMLTokeniser::processDecimalCharacterReference()
   {
-    if (currentChar.isnumeric())
+    if (isnumeric(currentChar))
     {
       charRefCode *= 10;
       IMPLEMENT_ME();

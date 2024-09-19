@@ -56,7 +56,7 @@ namespace GCL::parsers::DOM
     virtual nodeType_e nodeType() const noexcept override { return ATTRIBUTE_NODE; }
 
     string_type prefix() const noexcept { return (prefix_ ? *prefix_: string_type()); }
-    string_type name() const noexcept { return (!prefix_ ? localName_ : *prefix_ + U_003A + localName_); }
+    string_type name() const noexcept { return (!prefix_ ? localName_ : *prefix_ + static_cast<char32_t>(U_003A) + localName_); }
     string_type const &localName() const noexcept { return localName_; }
     string_type const &value() const noexcept { return value_; }
 

@@ -42,6 +42,7 @@
 
 // Parsers library
 #include "include/utf/codePoint.hpp"
+#include "include/utf/utfString.hpp"
 #include "include/parsers/DOM/DOMNodeList.hpp"
 
 namespace GCL::parsers::DOM
@@ -51,8 +52,10 @@ namespace GCL::parsers::DOM
   class CDOMNodeBase
   {
   public:
-    using char_type = GCL::parsers::codePoint_t;
-    using string_type = std::basic_string<char_type>;
+    //using char_type = GCL::parsers::codePoint_t;
+    //using string_type = std::basic_string<char_type>;
+    using char_type = char32_t;
+    using string_type = utf_string<char_type>;
     using child_type = CDOMNodeBase;
     using child_collection = CNodeList;
     using child_pointer = child_type *;
@@ -70,6 +73,9 @@ namespace GCL::parsers::DOM
     CDOMNodeBase(CDOMNodeBase *parent) : parentNode_(parent) {}
     virtual ~CDOMNodeBase() = default;
 
+    CDOMNodeBase *createComment(string_type const &s);
+
+    virtual string_type nodeName() const { return nodeName_; }
 
     //CDOMNodeBase *getRootNode(GetRootNodeOptions = {});
     CDOMNodeBase const *parentNode() const { return parentNode_; }
@@ -109,7 +115,7 @@ namespace GCL::parsers::DOM
     CDOMNodeBase &operator=(CDOMNodeBase const &) = delete;
     CDOMNodeBase &operator=(CDOMNodeBase &&) = delete;
 
-    string_type nodeName;
+    string_type nodeName_;
     string_type baseURI;
     bool isConnected = false;
     CDOMDocument *ownerDocument = nullptr;

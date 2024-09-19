@@ -42,10 +42,5 @@
 
 namespace GCL::parsers::DOM
 {
-  CDOMComment *CDOMDocument::createComment(string_type const &comment)
-  {
-    //currentNode()->insert(std::make_unique<CHTMLNodeComment>(currentElement, comment));
-  }
-
 
 }

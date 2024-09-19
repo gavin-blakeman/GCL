@@ -110,6 +110,10 @@ namespace GCL::parsers
     constexpr codePoint_t(std::int32_t i32) : value(i32) {}
     constexpr codePoint_t(utf32_t u32) : value(u32) {}
 
+    constexpr codePoint_t(char8_t c8) : value(c8) {}
+    constexpr codePoint_t(char16_t c16) : value(c16) {}
+    constexpr codePoint_t(char32_t c32) : value(c32) {}
+
     constexpr codePoint_t(std::istream &inStrm, utf_e encoding)
     {
 //      decodeUTF(inStrm, value, encoding);
@@ -120,7 +124,8 @@ namespace GCL::parsers
     codePoint_t &operator=(codePoint_t const &) = default;
     codePoint_t &operator=(codePoint_t &&) = default;
 
-    constexpr operator utf32_t() const { return value; }
+    constexpr explicit operator utf32_t() const { return value; }
+    constexpr operator char32_t() const { return value; }
 
     constexpr bool isalpha() const noexcept { return islower() || isupper(); }
     constexpr bool isnumeric() const noexcept { return (value >= 0x30 && value <= 0x39); }
@@ -138,7 +143,7 @@ namespace GCL::parsers
     friend constexpr bool operator==(codePoint_t const &lhs, char rhs) { return lhs.value == codePoint_t(rhs).value; }
     friend std::ostream &operator<<(std::ostream &os, codePoint_t const &cp)
     {
-      os << std::to_string(cp);
+      os << std::to_string(static_cast<char32_t>(cp));
       return os;
     }
   };
@@ -149,6 +154,7 @@ namespace GCL::parsers
   constexpr codePoint_t U_0009(0x0009);   // Tab
   constexpr codePoint_t U_000A(0x000A);   // LF
   constexpr codePoint_t U_000C(0x000C);   // FF
+  constexpr codePoint_t U_000D(0x000D);   // CR
   constexpr codePoint_t U_0020(0x0020);   // Space
   constexpr codePoint_t U_0021(0x0021);   // '!'
   constexpr codePoint_t U_0022(0x0022);   // '"'

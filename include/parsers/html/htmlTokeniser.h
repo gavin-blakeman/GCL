@@ -251,6 +251,6 @@ namespace GCL::parsers::html
 
   };
 
-} // namesapce
+} // namespace
 
 #endif // PARSERS_HTML_HTMLTOKENISER_H

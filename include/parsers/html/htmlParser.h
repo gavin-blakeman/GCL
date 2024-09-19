@@ -75,7 +75,6 @@ namespace GCL::parsers::html
     {
       IM_INITIAL, IM_BEFORE_HTML, IM_BEFORE_HEAD, IM_IN_HEAD, IM_IN_HEAD_NOSCRIPT, IM_AFTER_HEAD,
     };
-    using element_ref = CHTMLDocument::value_ref;
 
     std::istream &inputStream;
     std::vector<GCL::parsers::html::CHTMLToken> tokens;
@@ -88,12 +87,12 @@ namespace GCL::parsers::html
      *  @param[in]  token: The token to parse.
      *  @throws
      */
-    void parseToken(CHTMLToken const &token);
+    void constructTree(CHTMLToken const &token);
 
-    void processInitial(CHTMLToken const &token);
+    void processModeInitial(CHTMLToken const &token);
     void processBeforeHTML(CHTMLToken const &token);
 
-    bool docTypeValid(string_type const &);
+    bool docTypeValid(string_type const &) {};
 
   };
 } // namespace

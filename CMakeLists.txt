@@ -48,7 +48,7 @@ set(SOURCES
   source/parsers/DOM/DOMNodeDocument.cpp
   source/parsers/DOM/DOMNodeBase.cpp
   source/parsers/DOM/DOMNodeElement.cpp
-#  source/parsers/html/htmlParser.cpp
+  source/parsers/html/htmlParser.cpp
   source/parsers/html/htmlTokeniser.cpp
   source/parsers/html/htmlTokens.cpp
   source/parsers/token.cpp

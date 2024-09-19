@@ -67,9 +67,15 @@ namespace GCL::parsers::DOM
     using attribute_const_pointer = attribute_type const *;
 
     CDOMElement(CDOMNodeBase *parent, string_type const &);
-    ~CDOMElement() = default;
+    virtual ~CDOMElement() = default;
 
     virtual nodeType_e nodeType() const noexcept override { return ELEMENT_NODE; };
+    virtual string_type nodeName() const
+    {
+      string_type rv = CDOMNodeBase::nodeName();
+      rv.to_upper();
+      return rv;
+    }
 
     void setAttribute(string_type const &, string_type const &);
     void setAttributeNS(string_type const &, string_type const &, string_type const &);

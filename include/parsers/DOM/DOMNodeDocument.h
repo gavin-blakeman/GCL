@@ -89,9 +89,11 @@ namespace GCL::parsers::DOM
     CDOMDocument(CDOMDocument &&) = default;
     CDOMDocument &operator=(CDOMDocument const &) = default;
     CDOMDocument &operator=(CDOMDocument &&) = default;
-    ~CDOMDocument() = default;
+    virtual ~CDOMDocument() = default;
 
     virtual nodeType_e nodeType() const noexcept {return DOCUMENT_NODE; }
+
+    virtual string_type nodeName() const { return string_type("#document"); }
 
     CHTMLCollection getElementsByTagName(string_type const &qualifiedName);
     CHTMLCollection getElementsByTagNameNS(string_type const &nameSpace, string_type const &localName);
@@ -100,10 +102,7 @@ namespace GCL::parsers::DOM
     CDOMNodeBase *createElement(string_type const &localName);
     CDOMNodeBase *createElementNS(string_type const &nameSpace, string_type const &qualifiedName);
 
-    CDOMComment *createComment(string_type const &);
-    CDOMComment *createComment(string_type &&);
-
-    void insertDocType(string_type const &, string_type const &, string_type const &);
+    void insertDocType(string_type const &, string_type const &, string_type const &) {};
 
 #ifdef TEST
   public:

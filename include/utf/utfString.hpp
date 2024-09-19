@@ -33,6 +33,7 @@
 #define GCL_UTFSTRING_HPP
 
 // Standard C++ library header files
+#include <algorithm>
 #include <iostream>
 #include <optional>
 #include <string>
@@ -55,14 +56,14 @@ namespace GCL
    */
 
   template<typename CharT,
-           bool eof = true,
-           class Traits = std::char_traits<CharT>,
-           class Allocator = std::allocator<CharT>> requires UTFChar<CharT>
+  bool eof = true,
+  class Traits = std::char_traits<CharT>,
+  class Allocator = std::allocator<CharT>> requires UTFChar<CharT>
   class utf_string
   {
   public:
-    using char_type = CharT;
-    using string_type = std::basic_string<char_type>;
+    using value_type = CharT;
+    using string_type = std::basic_string<value_type>;
     using iterator = string_type::iterator;
     using const_iterator = string_type::const_iterator;
     using size_type = string_type::size_type;
@@ -194,6 +195,12 @@ namespace GCL
       }
     }
 
+    template<typename T> requires UTFChar<T>
+    utf_string(size_type count, T c) : stringStorage(count, c)
+    {
+    }
+
+
     /*! @brief      Construct from an input stream.
      *  @param[in]  inStrm: The input stream
      *  @param[in]  encoding: The stream encoding.
@@ -234,7 +241,40 @@ namespace GCL
     void setStoreEOF() noexcept { eofFlag = true; }
     void clrStoreEOF() noexcept { eofFlag = false; }
 
-    private:
+    template<typename T> requires UTFChar<T>
+    void push_back(T c)
+    {
+      stringStorage.push_back(static_cast<value_type>(c));
+    }
+
+    void to_upper() noexcept
+    {
+      for (auto &c : stringStorage)
+      {
+        c = GCL::toupper(c);
+      }
+    }
+
+    iterator begin() { return stringStorage.begin(); }
+    const_iterator begin() const { return stringStorage.cbegin(); }
+    const_iterator cbegin() const { return stringStorage.cbegin(); }
+    iterator end() { return stringStorage.end(); }
+    const_iterator end() const { return stringStorage.cend(); }
+    const_iterator cend() const { return stringStorage.cend(); }
+
+    void clear() noexcept { stringStorage.clear(); }
+    size_type size() const noexcept { return stringStorage.size(); }
+
+    value_type const &operator[](size_type indx) const { return stringStorage[indx]; }
+    value_type &operator[](size_type indx) { return stringStorage[indx]; }
+
+    utf_string &append(utf_string const &str)
+    {
+      stringStorage.append(str.stringStorage);
+      return *this;
+    }
+
+  private:
 
     static bool constexpr isUTF8 = std::is_same<CharT, char8_t>::value;
     static bool constexpr isUTF16 = std::is_same<CharT, char16_t>::value;
@@ -266,6 +306,20 @@ namespace GCL
     {
       // Convert the rhs string using an explicit static_cast.
       return lhs.stringStorage == static_cast<string_type>(rhs);
+    }
+
+    template<typename U> requires UTFChar<typename U::value_type>
+    friend utf_string operator+(utf_string lhs, U const &rhs)
+    {
+      lhs.stringStorage += static_cast<decltype(lhs)>(rhs).stringStorage;
+      return lhs;
+    }
+
+    template<typename T> requires UTFChar<T>
+    friend utf_string operator+(utf_string lhs, T rhs)
+    {
+      lhs.push_back(rhs);
+      return lhs;
     }
 
     /*! @brief      String insertion operator. Always converts to UTF8 before insertion.

@@ -56,7 +56,7 @@
 /* Notes:
  * This class and file are not visible to the HTML API. This class is designed as a setup/teardown class when processing
  * a stream of bytes. The intent is that the buffer can be filled by a different thread to the html processing thread
- * this can make the processing independant of read speed.
+ * this can make the processing independent of read speed.
  * When the class is created, it needs to determine the stream encoding. (See ...)
  * The buffer stores code points.
  */
@@ -66,9 +66,10 @@ namespace GCL::parsers::html
   class CHTMLBuffer
   {
   public:
-    using char_type = codePoint_t;
-    using string_type = std::basic_string<char_type>;
-    using new_string_type = utf_string<char32_t>;
+    //using char_type = codePoint_t;
+    using char_type = char32_t;
+    //using string_type = std::basic_string<char_type>;
+    using string_type = utf_string<char32_t>;
 
     /*! @brief      Constructor.
      *  @param[in]  is: The input stream to parse.
@@ -154,7 +155,7 @@ namespace GCL::parsers::html
         }
         else
         {
-          bMatch = s[i].tolower() == buffer[i].tolower();
+          bMatch = GCL::tolower(s[i]) == GCL::tolower(buffer[i]);
         }
       }
 

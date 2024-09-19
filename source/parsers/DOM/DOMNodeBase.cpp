@@ -40,4 +40,9 @@ namespace GCL::parsers::DOM
     //childCollection.push_back(std::move(newChild));
     //return childCollection.back().get();
   }
+
+  CDOMNodeBase *CDOMNodeBase::createComment(CDOMNodeBase::string_type const &s)
+  {
+
+  }
 }

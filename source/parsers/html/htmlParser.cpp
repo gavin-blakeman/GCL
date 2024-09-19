@@ -42,37 +42,37 @@
 
 namespace GCL::parsers::html
 {
-  static CHTMLParser::string_type S32_HTML{'h', 't', 'm', 'l'};
+  static CHTMLParser::string_type S32_HTML{"html"};
 
   void CHTMLParser::parseDocument()
   {
     using namespace GCL::parsers;
     CHTMLTokeniser tokeniser(inputStream);
 
-    parseToken(tokeniser.getToken());
+    constructTree(tokeniser.getToken());
 
   }
 
-  void CHTMLParser::parseToken(CHTMLToken const &token)
+  void CHTMLParser::constructTree(CHTMLToken const &token)
   {
     switch (insertionMode)
     {
       case IM_INITIAL:
       {
-        parseTokenModeInitial(token);
+        processModeInitial(token);
         break;
       }
     }
   }
 
   // 13.2.6.4.1
-  void CHTMLParser::processInitial(CHTMLToken const &token)
+  void CHTMLParser::processModeInitial(CHTMLToken const &token)
   {
     switch(token.type())
     {
-      case TT_CHARACTER:
+      case CHTMLToken::TT_CHARACTER:
       {
-        switch (token.data())
+        switch (token.character())
         {
           case U_0009:
           case U_000A:
@@ -86,12 +86,12 @@ namespace GCL::parsers::html
         }
         break;
       }
-      case TT_COMMENT:
+      case CHTMLToken::TT_COMMENT:
       {
-        DOM.createComment(std::move(token.value()));
+        DOM.createComment(token.comment());
         break;
       }
-      case TT_DOCTYPE:
+      case CHTMLToken::TT_DOCTYPE:
       {
         if ( (token.name() == S32_HTML) || docTypeValid(token.name()) )
         {
@@ -113,23 +113,23 @@ namespace GCL::parsers::html
   }
 
   // 13.2.6.4.2
-  void CHTMLParser::processBeforeHTML(CHTMLToken const &)
+  void CHTMLParser::processBeforeHTML(CHTMLToken const &token)
   {
     switch(token.type())
     {
-      case TT_DOCTYPE:
+      case CHTMLToken::TT_DOCTYPE:
       {
         PARSE_ERROR("");
         break;
       }
-      case TT_COMMENT:
+      case CHTMLToken::TT_COMMENT:
       {
-        DOM.createComment(std::move(token.value()));
+        DOM.createComment(token.comment());
         break;
       }
-      case TT_CHARACTER:
+      case CHTMLToken::TT_CHARACTER:
       {
-        switch (token.data())
+        switch (token.character())
         {
           case U_0009:
           case U_000A:
@@ -143,7 +143,7 @@ namespace GCL::parsers::html
         }
         break;
       }
-      case TT_TAG_START:
+      case CHTMLToken::TT_TAG_START:
       {
 
       }
