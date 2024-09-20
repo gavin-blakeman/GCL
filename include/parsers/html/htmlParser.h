@@ -91,8 +91,11 @@ namespace GCL::parsers::html
 
     void processModeInitial(CHTMLToken const &token);
     void processBeforeHTML(CHTMLToken const &token);
+    void processBeforeHead(CHTMLToken const &token);
 
-    bool docTypeValid(string_type const &) {};
+    bool docTypeValid(string_type const &, string_type const &, string_type const &);
+
+    void insertElement(string_type const &ns, string_type const &tn);
 
   };
 } // namespace

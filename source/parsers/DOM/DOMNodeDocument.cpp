@@ -39,8 +39,18 @@
 // Parsers header files
 #include "include/parsers/DOM/DOMNodeComment.h"
 #include "include/parsers/DOM/DOMNodeElement.h"
+#include "include/parsers/DOM/DOMNodeDocType.h"
+#include "include/parsers/DOM/DOMNodeList.hpp"
 
 namespace GCL::parsers::DOM
 {
+  void CDOMDocument::docType(CDOMDocument::string_type const &name,
+                                CDOMDocument::string_type const &publicIdentifier,
+                                CDOMDocument::string_type const &systemIdentifier)
+  {
+    CNodeList::value_type val = std::make_unique<CDOMNodeDocType>(this, name, publicIdentifier, systemIdentifier);
+    doctype = dynamic_cast<CDOMNodeDocType *>(val.get());
+    childCollection.push_back(std::move(val));
+  }
 
 }

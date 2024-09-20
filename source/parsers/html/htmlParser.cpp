@@ -43,6 +43,44 @@
 namespace GCL::parsers::html
 {
   static CHTMLParser::string_type S32_HTML{"html"};
+  static CHTMLParser::string_type S32_ABOUT_LEGACY{"about:legacy-compat"};
+  static CHTMLParser::string_type S32_BR{"br"};
+  static CHTMLParser::string_type S32_HEAD{"head"};
+  static CHTMLParser::string_type S32_BODY{"body"};
+  static CHTMLParser::string_type S32_BASE{"base"};
+  static CHTMLParser::string_type S32_BASEFONT{"basefont"};
+  static CHTMLParser::string_type S32_BGSOUND{"bgsound"};
+  static CHTMLParser::string_type S32_LINK{"link"};
+
+  // See 13.2.6.4.1
+  bool CHTMLParser::docTypeValid(CHTMLParser::string_type const &name,
+                                 CHTMLParser::string_type const &publicID,
+                                 CHTMLParser::string_type const &systemID)
+  {
+    bool returnValue = true;
+
+    if (name != S32_HTML)
+    {
+      returnValue = false;
+    }
+    else if (!publicID.empty())
+    {
+      returnValue = false;
+    }
+    else if (!systemID.empty())
+    {
+      if (systemID != S32_ABOUT_LEGACY)
+      {
+        returnValue = false;
+      }
+    }
+    else
+    {
+      returnValue = true;
+    }
+
+    return returnValue;
+  }
 
   void CHTMLParser::parseDocument()
   {
@@ -62,7 +100,22 @@ namespace GCL::parsers::html
         processModeInitial(token);
         break;
       }
+      case IM_BEFORE_HTML:
+      {
+        processBeforeHTML(token);
+        break;
+      }
+      case IM_BEFORE_HEAD:
+      {
+        processBeforeHead(token);
+        break;
+      }
     }
+  }
+
+  void CHTMLParser::insertElement(CHTMLParser::string_type const &ns, CHTMLParser::string_type const &tn)
+  {
+
   }
 
   // 13.2.6.4.1
@@ -88,15 +141,15 @@ namespace GCL::parsers::html
       }
       case CHTMLToken::TT_COMMENT:
       {
-        DOM.createComment(token.comment());
+        DOM.insertComment(token.comment());
         break;
       }
       case CHTMLToken::TT_DOCTYPE:
       {
-        if ( (token.name() == S32_HTML) || docTypeValid(token.name()) )
+        if ( docTypeValid(token.name(), token.publicIdentifier(), token.systemIdentifier()) )
         {
-         DOM.insertDocType(token.name(),token.publicIdentifier(), token.systemIdentifier());
-         insertionMode = IM_BEFORE_HTML;
+          DOM.docType(token.name(),token.publicIdentifier(), token.systemIdentifier());
+          insertionMode = IM_BEFORE_HTML;
         }
         else
         {
@@ -106,10 +159,11 @@ namespace GCL::parsers::html
       }
       default:
       {
+        PARSE_ERROR("");
         insertionMode = IM_BEFORE_HTML;
         break;
       }
-      }
+    }
   }
 
   // 13.2.6.4.2
@@ -124,7 +178,7 @@ namespace GCL::parsers::html
       }
       case CHTMLToken::TT_COMMENT:
       {
-        DOM.createComment(token.comment());
+        DOM.insertComment(token.comment());
         break;
       }
       case CHTMLToken::TT_CHARACTER:
@@ -145,7 +199,108 @@ namespace GCL::parsers::html
       }
       case CHTMLToken::TT_TAG_START:
       {
+        if (token.name() == S32_HTML)
+        {
+          insertElement(S32_HTML, token.name());
+          openElements.push(token.name());
+          insertionMode = IM_BEFORE_HEAD;
+        }
+        break;
+      }
+      case CHTMLToken::TT_TAG_END:
+      {
+        if ( (token.name() != S32_HEAD) &&
+             (token.name() != S32_BODY) &&
+             (token.name() != S32_HTML) &&
+             (token.name() != S32_BR) )
+        {
+          PARSE_ERROR("");
+        }
+        else
+        {
+          insertElement(S32_HTML, token.name());
+          openElements.push(token.name());
+          insertionMode = IM_BEFORE_HEAD;
+          constructTree(token);
+        }
+        break;
+      }
+    }
+  }
 
+  // 13.2.6.4.3
+  void CHTMLParser::processBeforeHead(CHTMLToken const &token)
+  {
+    switch(token.type())
+    {
+      case CHTMLToken::TT_CHARACTER:
+      {
+        switch (token.character())
+        {
+          case U_0009:
+          case U_000A:
+          case U_000C:
+          case U_000D:
+          case U_0020:
+          {
+            // ignore the character.
+            break;
+          }
+        }
+        break;
+      }
+      case CHTMLToken::TT_COMMENT:
+      {
+        DOM.insertComment(token.comment());
+        break;
+      }
+      case CHTMLToken::TT_DOCTYPE:
+      {
+        PARSE_ERROR("");
+        break;
+      }
+      case CHTMLToken::TT_TAG_START:
+      {
+        if (token.name() == S32_HTML)
+        {
+
+        }
+        else if (token.name() == S32_HEAD)
+        {
+          insertElement(S32_HTML, token.name());
+          insertionMode = IM_IN_HEAD;
+        }
+        else
+        { // anything else
+          insertElement(S32_HTML, S32_HEAD);
+          insertionMode = IM_IN_HEAD;
+          constructTree(token);
+        }
+        break;
+      }
+      case CHTMLToken::TT_TAG_END:
+      {
+        if ( (token.name() == S32_HEAD) ||
+             (token.name() == S32_BODY) ||
+             (token.name() == S32_HTML) ||
+             (token.name() == S32_BR) )
+        {
+          insertElement(S32_HTML, token.name());
+          insertionMode = IM_IN_HEAD;
+          constructTree(token);
+        }
+        else
+        {
+          PARSE_ERROR("");
+        }
+        break;
+      }
+      default:
+      {
+        insertElement(S32_HTML, S32_HEAD);
+        insertionMode = IM_IN_HEAD;
+        constructTree(token);
+        break;
       }
     }
   }

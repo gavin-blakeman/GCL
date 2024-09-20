@@ -11,21 +11,26 @@ namespace GCL::parsers::DOM
 {
   class CDOMNodeComment : public CDOMNodeBase
   {
-    public:
-    CDOMNodeComment(CDOMNodeComment *p, string_type const &s) : CDOMNodeBase(p), value(s) {}
-      virtual ~CDOMNodeComment() = default;
+  public:
+    CDOMNodeComment(CDOMNodeBase *p, string_type const &s) : CDOMNodeBase(p), value(s) {}
+    virtual ~CDOMNodeComment() = default;
 
-      virtual string_type nodeName() const { return string_type("#comment"); }
+    virtual string_type nodeName() const { return string_type("#comment"); }
 
-      string_type comment() const noexcept { return value; }
+    string_type comment() const noexcept { return value; }
+
+    /*! @brief       Returns the type of the node.
+     *  @returns     The type of the node.
+     */
+    virtual nodeType_e nodeType() const noexcept { return COMMENT_NODE; }
 
 
 
 
-    private:
-      CDOMNodeComment() = delete;
+  private:
+    CDOMNodeComment() = delete;
 
-      string_type value;
+    string_type value;
   };
 }
 

@@ -52,8 +52,6 @@ namespace GCL::parsers::DOM
   class CDOMNodeBase
   {
   public:
-    //using char_type = GCL::parsers::codePoint_t;
-    //using string_type = std::basic_string<char_type>;
     using char_type = char32_t;
     using string_type = utf_string<char_type>;
     using child_type = CDOMNodeBase;
@@ -73,7 +71,7 @@ namespace GCL::parsers::DOM
     CDOMNodeBase(CDOMNodeBase *parent) : parentNode_(parent) {}
     virtual ~CDOMNodeBase() = default;
 
-    CDOMNodeBase *createComment(string_type const &s);
+    CDOMNodeBase *insertComment(string_type const &s);
 
     virtual string_type nodeName() const { return nodeName_; }
 
@@ -108,6 +106,9 @@ namespace GCL::parsers::DOM
     CDOMNodeBase *replaceChild(CDOMNodeBase const &, std::unique_ptr<CDOMNodeBase> child);
     CDOMNodeBase *removeChild(CDOMNodeBase const &);
 
+  protected:
+    child_collection childCollection;
+
   private:
     CDOMNodeBase() = delete;
     CDOMNodeBase(CDOMNodeBase const &) = delete;
@@ -120,7 +121,6 @@ namespace GCL::parsers::DOM
     bool isConnected = false;
     CDOMDocument *ownerDocument = nullptr;
     CDOMNodeBase *parentNode_ = nullptr;
-    child_collection childCollection;
     child_type *previousSibling = nullptr;
     child_type *nextSibling = nullptr;
     string_type nodeValue;

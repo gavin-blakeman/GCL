@@ -33,6 +33,8 @@
 
 #include "include/parsers/DOM/DOMNodeBase.h"
 
+#include "include/parsers/DOM/DOMNodeComment.h"
+
 namespace GCL::parsers::DOM
 {
   CDOMNodeBase::child_pointer CDOMNodeBase::appendChild(std::unique_ptr<CDOMNodeBase> newChild)
@@ -41,8 +43,11 @@ namespace GCL::parsers::DOM
     //return childCollection.back().get();
   }
 
-  CDOMNodeBase *CDOMNodeBase::createComment(CDOMNodeBase::string_type const &s)
+  CDOMNodeBase *CDOMNodeBase::insertComment(CDOMNodeBase::string_type const &s)
   {
-
+    CNodeList::value_type val = std::make_unique<CDOMNodeComment>(this, s);
+    CDOMNodeBase *rv = val.get();
+    childCollection.push_back(std::move(val));
+    return rv;
   }
 }

@@ -274,6 +274,8 @@ namespace GCL
       return *this;
     }
 
+    bool empty() const noexcept { return stringStorage.empty(); }
+
   private:
 
     static bool constexpr isUTF8 = std::is_same<CharT, char8_t>::value;

@@ -46,6 +46,7 @@ set(SOURCES
   source/logger/sinks/streamSink.cpp
   source/parsers/DOM/DOMNodeAttribute.cpp
   source/parsers/DOM/DOMNodeDocument.cpp
+  source/parsers/DOM/DOMNodeDocType.cpp
   source/parsers/DOM/DOMNodeBase.cpp
   source/parsers/DOM/DOMNodeElement.cpp
   source/parsers/html/htmlParser.cpp
@@ -93,6 +94,7 @@ set(HEADERS
   include/parsers/DOM/DOMNodeAttribute.h
   include/parsers/DOM/DOMNodeBase.h
   include/parsers/DOM/DOMNodeComment.h
+  include/parsers/DOM/DOMNodeDocType.h
   include/parsers/DOM/DOMNodeElement.h
   include/parsers/DOM/DOMNodeText.h
   include/parsers/html/htmlTokeniser.h

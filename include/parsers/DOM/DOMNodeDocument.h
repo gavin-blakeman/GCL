@@ -102,7 +102,8 @@ namespace GCL::parsers::DOM
     CDOMNodeBase *createElement(string_type const &localName);
     CDOMNodeBase *createElementNS(string_type const &nameSpace, string_type const &qualifiedName);
 
-    void insertDocType(string_type const &, string_type const &, string_type const &) {};
+    void docType(string_type const &, string_type const &, string_type const &);
+    CDOMNodeDocType const *docType() const noexcept { return doctype; }
 
 #ifdef TEST
   public:
