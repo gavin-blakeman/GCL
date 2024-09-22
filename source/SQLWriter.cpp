@@ -432,7 +432,7 @@ namespace GCL
   sqlWriter::parameterType_t sqlWriter::parameterType(bindParameter_t const &bp)
   {
     FUNCTION_TRACE();
-//    sqlWriter::parameterType_t rv = PT_NONE;
+    sqlWriter::parameterType_t rv = PT_NONE;
 //
 //    std::visit(overloaded
 //    {
@@ -441,7 +441,7 @@ namespace GCL
 //      [&](parameterVariant_ref const &pvr) {  },
 //    }, bp);
 //
-//    return rv;
+    return rv;
   }
 
   std::string sqlWriter::to_string(groupBy_t const &p) const
@@ -1189,13 +1189,14 @@ namespace GCL
         break;
       }
       case qt_update:
+      case qt_upsert:
       {
         // Need to check the where clause and the set clause.
         // Set clause is a vector<std::pair<string, parameter_t>>
 
         std::visit(overloaded
         {
-          [&](std::monostate const &) { CODE_ERROR(); },
+          [&](std::monostate const &) { /* Do nothing, this is not a code error. */; },
           [&](whereTest_t const &wt) { returnValue = hasBindValues(wt); },
           [&](whereLogical_t const &wl) { returnValue = hasBindValues(wl); },
         }, whereClause_.base);
@@ -2445,13 +2446,14 @@ namespace GCL
         break;
       }
       case qt_update:
+      case qt_upsert:
       {
         // Need to check the where clause and the set clause.
         // Set clause is a vector<std::pair<string, parameter_t>>
 
         std::visit(overloaded
         {
-          [&](std::monostate const &) { CODE_ERROR(); },
+          [&](std::monostate const &) { /* Not a code error. */ },
           [&](whereTest_t const &wt) { returnValue = shouldParameterise(wt); },
           [&](whereLogical_t const &wl) { returnValue = shouldParameterise(wl); },
         }, whereClause_.base);

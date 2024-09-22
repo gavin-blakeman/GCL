@@ -116,6 +116,50 @@ BOOST_AUTO_TEST_CASE(hasBindValues_insert)
   BOOST_TEST(sqlQuery2.hasBindValues()  == true);
 }
 
+BOOST_AUTO_TEST_CASE(hasBindValues_upsert)
+{
+  using namespace GCL;
+  sqlWriter sqlQuery1, sqlQuery2, sqlQuery3, sqlQuery4;
+  std::uint32_t ID;
+  std::string test;
+
+  sqlQuery1.upsert("TBL").set({
+    {"COL1", ID},
+    {"COL2", ID},
+    {"COL3", ID},
+    {"COL4", ID},
+  }).where("Test", eq, ID);
+  BOOST_REQUIRE_NO_THROW(sqlQuery1.hasBindValues());
+  BOOST_TEST(sqlQuery1.hasBindValues()  == false);
+
+  sqlQuery2.upsert("TBL").set({
+    {"COL1", sqlWriter::bindValue_t(test)},
+    {"COL2", test},
+    {"COL3", ID},
+    {"COL4", ID},
+  }).where("Test", eq, ID);
+  BOOST_REQUIRE_NO_THROW(sqlQuery2.hasBindValues());
+  BOOST_TEST(sqlQuery2.hasBindValues()  == true);
+
+  sqlQuery3.upsert("TBL").set({
+    {"COL1", "Test"},
+    {"COL2", test},
+    {"COL3", ID},
+    {"COL4", ID},
+  }).where("Test", eq, sqlWriter::bindValue_t(test));
+  BOOST_REQUIRE_NO_THROW(sqlQuery3.hasBindValues());
+  BOOST_TEST(sqlQuery3.hasBindValues()  == true);
+
+  sqlQuery4.upsert("TBL").set({
+      {"COL1", "Test"},
+      {"COL2", test},
+      {"COL3", ID},
+      {"COL4", ID},
+    });
+    BOOST_REQUIRE_NO_THROW(sqlQuery4.hasBindValues());
+    BOOST_TEST(sqlQuery4.hasBindValues()  == false);
+}
+
 BOOST_AUTO_TEST_CASE(shouldParameterise_select)
 {
   using namespace GCL;
@@ -193,6 +237,50 @@ BOOST_AUTO_TEST_CASE(shouldParameterise_update)
 
   BOOST_REQUIRE_NO_THROW(sqlQuery3.shouldParameterise());
   BOOST_TEST(sqlQuery3.shouldParameterise()  == true);
+}
+
+BOOST_AUTO_TEST_CASE(shouldParameterise_upsert)
+{
+  using namespace GCL;
+  sqlWriter sqlQuery1, sqlQuery2, sqlQuery3, sqlQuery4;
+  std::uint32_t ID;
+  std::string test;
+
+  sqlQuery1.upsert("TBL").set({
+    {"COL1", ID},
+    {"COL2", ID},
+    {"COL3", ID},
+    {"COL4", ID},
+  }).where("Test", eq, ID);
+  BOOST_REQUIRE_NO_THROW(sqlQuery1.shouldParameterise());
+  BOOST_TEST(sqlQuery1.shouldParameterise()  == false);
+
+  sqlQuery2.upsert("TBL").set({
+    {"COL1", "Test"},
+    {"COL2", test},
+    {"COL3", ID},
+    {"COL4", ID},
+  }).where("Test", eq, ID);
+  BOOST_REQUIRE_NO_THROW(sqlQuery2.shouldParameterise());
+  BOOST_TEST(sqlQuery2.shouldParameterise()  == true);
+
+  sqlQuery3.upsert("TBL").set({
+    {"COL1", "Test"},
+    {"COL2", test},
+    {"COL3", ID},
+    {"COL4", ID},
+  }).where("Test", eq, "Test");
+  BOOST_REQUIRE_NO_THROW(sqlQuery3.shouldParameterise());
+  BOOST_TEST(sqlQuery3.shouldParameterise()  == true);
+
+  sqlQuery4.upsert("TBL").set({
+    {"COL1", "Test"},
+    {"COL2", test},
+    {"COL3", ID},
+    {"COL4", ID},
+  });
+  BOOST_REQUIRE_NO_THROW(sqlQuery4.shouldParameterise());
+  BOOST_TEST(sqlQuery4.shouldParameterise()  == true);
 }
 
 BOOST_AUTO_TEST_CASE(shouldParameterise_insert)
