@@ -291,4 +291,26 @@ BOOST_AUTO_TEST_CASE(bindValues_select)
   BOOST_TEST("STR1" == std::get<std::string>(std::get<sqlWriter::parameter_ref>(rv.back()).get()));
 }
 
+BOOST_AUTO_TEST_CASE(tableName_test)
+{
+  using namespace GCL;
+
+  sqlWriter::tableName_t table1("t");
+  BOOST_TEST(table1.tableDefinition() == "t");
+  BOOST_TEST(table1.table() == "t");
+
+  sqlWriter::tableName_t table2("t", "a");
+  BOOST_TEST(table2.tableDefinition() == "t AS a");
+  BOOST_TEST(table2.table() == "a");
+}
+
+BOOST_AUTO_TEST_CASE(select_table_as)
+{
+  using namespace GCL;
+  sqlWriter sqlQuery;
+  sqlQuery.select({"*"}).from("table");
+
+  BOOST_TEST(sqlQuery.string() == "SELECT * FROM table");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

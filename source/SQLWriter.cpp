@@ -1523,14 +1523,8 @@ namespace GCL
 
       std::visit(overloaded
                  {
-                   [&](std::string const &p)
-                   {
-                     returnValue += p;
-                   },
-                   [&](pointer_t const &pt)
-                   {
-                     returnValue += "(" + static_cast<std::string>(*pt) + ")";
-                   },
+                   [&](std::string const &p) { returnValue += p; },
+                   [&](pointer_t const &pt) { returnValue += "(" + static_cast<std::string>(*pt) + ")"; },
                  }, std::get<0>(element));
 
       if (std::get<1>(element))
@@ -1567,9 +1561,9 @@ namespace GCL
     return returnValue;
   }
 
-  /// @brief Creates the "JOIN" clause
-  /// @returns A string containing the join clause (begins with the JOIN keyword.
-  /// @version 2017-07-29/GGB - Function created.
+  /// @brief      Creates the "JOIN" clause
+  /// @returns    A string containing the join clause (begins with the JOIN keyword.
+  /// @version    2017-07-29/GGB - Function created.
 
   std::string sqlWriter::createJoinClause() const
   {
@@ -1606,8 +1600,8 @@ namespace GCL
         }
 
       };
-      returnValue += std::get<3>(element) + " ON ";
-      returnValue += std::get<0>(element) + "." + std::get<1>(element) + "=" + std::get<3>(element) + "." + std::get<4>(element);
+      returnValue += std::get<3>(element).tableDefinition() + " ON ";
+      returnValue += std::get<0>(element) + "." + std::get<1>(element) + "=" + std::get<3>(element).table() + "." + std::get<4>(element);
     }
 
     return returnValue;

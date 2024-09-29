@@ -44,9 +44,8 @@
   using valueStorage_t = std::vector<parameterVector_t>;     // This is to allow multiple insertions in one statement.
   using valueType_t = std::variant<std::monostate, valueStorage_t, pointer_t>;
 
-  typedef std::tuple<std::string, std::string, EJoin, std::string, std::string> parameterJoin;
-
-  typedef std::vector<parameterJoin> joinStorage;
+  using parameterJoin = std::tuple<std::string, std::string, EJoin, tableName_t, std::string>;
+  using joinStorage = std::vector<parameterJoin> ;
 
     // Where clause types
 

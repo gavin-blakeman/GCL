@@ -234,7 +234,20 @@ namespace GCL
         return to_string();
       }
     };
-  public:
+
+    class tableName_t
+    {
+    public:
+      tableName_t(std::string const &t) : table_(t) {}
+      tableName_t(std::string const &t, std::string const &a) : table_(t), alias_(a) {}
+
+      std::string tableDefinition() const { return alias_.empty() ? table_ : table_ + " AS " + alias_; }
+      std::string table() const { return alias_.empty() ? table_ : alias_; }
+    private:
+      std::string table_;
+      std::string alias_;
+    };
+
     using parameter_t = std::variant<std::uint8_t,
                                      std::uint16_t,
                                      std::uint32_t,
@@ -253,6 +266,7 @@ namespace GCL
                                      bindValue_t,
                                      decimal_t
                                      >;
+
 
 #include "sqlWriter_typedef.inc"
 #include "sqlWriter_variables.inc"
