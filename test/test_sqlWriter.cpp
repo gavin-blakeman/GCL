@@ -308,9 +308,13 @@ BOOST_AUTO_TEST_CASE(select_table_as)
 {
   using namespace GCL;
   sqlWriter sqlQuery;
-  sqlQuery.select({"*"}).from("table");
 
+  sqlQuery.select({"*"}).from("table");
   BOOST_TEST(sqlQuery.string() == "SELECT * FROM table");
+
+  sqlQuery.resetQuery();
+  sqlQuery.select({"*"}).from("table", "t");
+  BOOST_TEST(sqlQuery.string() == "SELECT * FROM table AS t");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
