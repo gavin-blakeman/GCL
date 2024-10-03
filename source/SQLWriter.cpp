@@ -1189,13 +1189,14 @@ namespace GCL
         break;
       }
       case qt_update:
+      case qt_upsert:
       {
         // Need to check the where clause and the set clause.
         // Set clause is a vector<std::pair<string, parameter_t>>
 
         std::visit(overloaded
         {
-          [&](std::monostate const &) { CODE_ERROR(); },
+          [&](std::monostate const &) { },  // Do nothing, this is not a code error.
           [&](whereTest_t const &wt) { returnValue = hasBindValues(wt); },
           [&](whereLogical_t const &wl) { returnValue = hasBindValues(wl); },
         }, whereClause_.base);
@@ -2439,13 +2440,14 @@ namespace GCL
         break;
       }
       case qt_update:
+      case qt_upsert:
       {
         // Need to check the where clause and the set clause.
         // Set clause is a vector<std::pair<string, parameter_t>>
 
         std::visit(overloaded
         {
-          [&](std::monostate const &) { CODE_ERROR(); },
+          [&](std::monostate const &) { },  // This is not an error.
           [&](whereTest_t const &wt) { returnValue = shouldParameterise(wt); },
           [&](whereLogical_t const &wl) { returnValue = shouldParameterise(wl); },
         }, whereClause_.base);
