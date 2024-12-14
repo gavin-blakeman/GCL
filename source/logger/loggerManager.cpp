@@ -75,9 +75,11 @@ namespace GCL::logger
         { s_exception, "EXCEPTION"},
     };
 
+    GCL::logger::CDebugFilter::criticalityMask_t criticalityMask{s_critical, s_error, s_warning, s_notice, s_information, s_debug, s_exception, s_trace};
     std::unique_ptr<CLogger> logger = std::make_unique<CLogger>();
-    std::shared_ptr<CDebugFilter> filter = std::make_shared<CDebugFilter>(criticalityMap);
+    std::shared_ptr<CDebugFilter> filter = std::make_shared<CDebugFilter>(criticalityMap, criticalityMask);
     std::unique_ptr<CBaseSink> sink = std::make_unique<CStreamSink>(filter, std::cout);
+
     logger->addQueue(std::make_unique<CQueueQueue>());
     logger->addSink("cout", std::move(sink));
     logger->startup();

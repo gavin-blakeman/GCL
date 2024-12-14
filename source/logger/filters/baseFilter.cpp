@@ -33,6 +33,9 @@
 
 #include "include/logger/filters/baseFilter.h"
 
+// Standard C++ library header files
+#include <iostream>
+
 namespace GCL::logger
 {
   /// @brief      Basic filter string

@@ -39,6 +39,9 @@
 
 #include "include/logger/sinks/streamSink.h"
 
+// Standard C++ library header files
+#include <iostream>
+
 // GCL Header files
 
 #include "include/logger/records/baseRecord.h"

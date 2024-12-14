@@ -65,6 +65,7 @@
 #include "include/dataParser/dataParserCore.h"
 #include "include/dataParser/dataParserHTML.h"
 #include "include/dataParser/dataParser_SAPBKG.h"
+#include "include/dataParser/intelHEX.hpp"
 #include "include/dateTime.h"
 #include "include/error.h"
 #include "include/filesystem.h"

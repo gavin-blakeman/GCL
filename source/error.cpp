@@ -131,6 +131,7 @@ namespace GCL
   CImplementMe::CImplementMe(std::string fn, size_t ln) : std::runtime_error("Implement Me."), fileName(fn),lineNo(ln)
   {
     LOGEXCEPTION(errorMessage(fileName, lineNo));
+    std::cout << errorMessage(fileName, lineNo) << std::endl;
   }
 
   /// @brief        Converts the error message to a string.

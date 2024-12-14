@@ -34,11 +34,9 @@
 #include "include/logger/filters/debugFilter.h"
 
   // Standard C++ libraries
-
 #include <iostream>
 
 // Miscellaneous libraries
-
 #include <fmt/format.h>
 #include <fmt/chrono.h>
 #include <fmt/std.h>
@@ -114,7 +112,6 @@ namespace GCL::logger
     {
       CDebugRecord const &debugRecord = dynamic_cast<CDebugRecord const &>(record);
 
-
       if (criticalityMask.contains(debugRecord.severity()))
       {
         std::string rv = fmt::format("{:%Y-%m-%d %H:%M:%S} [{:s}] {:s}",
@@ -130,9 +127,9 @@ namespace GCL::logger
     }
     catch(...)
     {
-
+      std::cerr << "General Exception: " << std::endl;
     }
 
-  return returnValue;
-}
+    return returnValue;
+  }
 } // namespace
