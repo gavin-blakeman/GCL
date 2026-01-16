@@ -1,6 +1,6 @@
 # GCL Library CMAKE file
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.14 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
 
 PROJECT(GCL DESCRIPTION "General Class Library")
 
@@ -12,6 +12,8 @@ set(SHARED_LIBRARY_DIR  ${CMAKE_BINARY_DIR})
 endif()
 
 SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
+
+FIND_PACKAGE(Boost REQUIRED COMPONENTS locale)
 
 set(SOURCES
   source/common.cpp
@@ -28,7 +30,7 @@ set(SOURCES
   source/alarm/alarmDaily.cpp
   source/alarm/alarmWeekly.cpp
   source/dataParser/dataDelimited.cpp
-  source/dataParser/dataLexerXLSX.cpp
+  #source/dataParser/dataLexerXLSX.cpp
   source/dataParser/dataParserCore.cpp
   source/dataParser/dataParserHTML.cpp
   source/dataParser/dataParser_SAPBKG.cpp
@@ -121,7 +123,7 @@ set(DIRECTORIES
 set(LIBRARIES
   Boost::locale
   fmt
-  xlnt
+  #xlnt
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})

@@ -9,7 +9,7 @@
 // AUTHOR:              Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2024 Gavin Blakeman.
+//                      Copyright 2013-2026 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -27,11 +27,15 @@
 //
 // CLASSES INCLUDED:
 //
-// HISTORY:             2024-02-05 GGB - Functions split from loggerCore into seperate files
+// HISTORY:             2024-02-05 GGB - Functions split from loggerCore into separate files
 //
 //*********************************************************************************************************************************
 
 #include "include/logger/loggerManager.h"
+
+  // Standard C++ library
+
+#include <iostream>
 
 // GCL header files
 

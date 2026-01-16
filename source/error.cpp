@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2013-2024 Gavin Blakeman.
+//                      Copyright 2013-2026 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -40,6 +40,7 @@
   // Standard C++ library header files.
 
 #include <cstdlib>
+#include <iostream>
 
   // Miscellaneous library header files.
 

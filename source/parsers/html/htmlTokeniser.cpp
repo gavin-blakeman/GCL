@@ -1026,7 +1026,7 @@ namespace GCL::parsers::html
         smState = SM_SCRIPT_ESCAPED;
         break;
       }
-      case EOF:
+      case 0xFFFF:  // EOF
       {
         PARSE_ERROR("eof in script, html,comment like text");
         emitEOF();
@@ -1313,7 +1313,7 @@ namespace GCL::parsers::html
         tokenFIFO.back().appendName(U_FFFD);
         break;
       }
-      case EOF:
+      case 0xFFFF:  // EOF
       {
         PARSE_ERROR("eof in tag");
         emitEOF();
