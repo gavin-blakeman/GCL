@@ -7,7 +7,7 @@
 // AUTHOR:              Gavin Blakeman
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015-2024 Gavin Blakeman.
+//                      Copyright 2015-2026 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
@@ -49,7 +49,8 @@
 // OVERVIEW:            Implements GCL::any that is similar to std::any with some additional support for outputting the stored
 //                      values as strings.
 //
-// HISTORY:             2022-06-09 GGB - Move to GCL library
+// HISTORY:             2026-01-25 GGB - Removed std::aligned_storage
+//                      2022-06-09 GGB - Move to GCL library
 //                      2020-09-23 GGB - Rename class and file to variant. Rewrite to do small object allocation.
 //                      2020-05-05 GGB - Renamed file to any.hpp and class to any.
 //                      2015-09-22 GGB - astroManager 2015.09 release
@@ -63,13 +64,13 @@
   // Standard C++ library header files.
 
 #include <any>
+#include <array>
 #include <memory>
 #include <initializer_list>
 #include <string>
 #include <typeinfo>
 #include <type_traits>
 #include <utility>
-
 
   // Miscellaneous library header files
 
@@ -123,7 +124,8 @@ namespace GCL
       objectStorage& operator=(const objectStorage&) = delete;
 
       void *heapPointer;
-      std::aligned_storage<sizeof(heapPointer), alignof(void *)>::type memoryBuffer;
+      alignas(alignof(void *)) std::array<std::byte, sizeof(heapPointer)> memoryBuffer;
+      //std::aligned_storage<sizeof(heapPointer), alignof(void *)>::type memoryBuffer;
     };
 
 
