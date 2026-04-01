@@ -1,15 +1,15 @@
 //**********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// SUBSYSTEM:           Parsers::HTML Parser
-// FILE:                htmlAttributes.cpp
-// LANGUAGE:            C++
-// TARGET OS:           None.
-// NAMESPACE:           GCL
-// AUTHOR:              Gavin Blakeman.
+// FILE:                dataParser/elfParser.h
+// SUBSYSTEM:           Data File Parser
+// LANGUAGE:						C++
+// TARGET OS:						None.
+// NAMESPACE:						GCL
+// AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2024-2026 Gavin Blakeman.
+//                      Copyright 2026 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -23,22 +23,52 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class to store attributes.
+// OVERVIEW:            Implementation of a ELF file parser
 //
 // CLASSES INCLUDED:
 //
-// HISTORY:             2024-06-18 GGB - File Created
+// HISTORY:             2026-03-17 GGB - File Created
 //
 //**********************************************************************************************************************************
 
-#include "include/parsers/DOM/DOMNodeAttribute.h"
+#ifndef GCL_ELFPARSER_H
+#define GCL_ELFPARSER_H
 
-// Miscellaneous library header files
-#include <fmt/format.h>
-#include <SCL>
+// Standard C++ library header files.
 
-namespace GCL::parsers::html
+#include <cstdint>
+#include <fstream>
+#include <filesystem>
+#include <memory>
+#include <tuple>
+#include <vector>
+
+// GCL Header files.
+#include "include/dataParser/ELF/elfHeader.h"
+
+namespace GCL::ELF
 {
 
 
+  class CELFParser
+  {
+  public:
+    CELFParser(std::filesystem::path const &fp) : filePath(fp) { parseFile(); }
+
+  private:
+    std::filesystem::path filePath;
+    std::unique_ptr<CELFHeader> elfHeader;
+
+    void parseFile();
+
+    CELFParser() = delete;
+    CELFParser(CELFParser const &) = delete;
+    CELFParser(CELFParser &&) = delete;
+    CELFParser &operator=(CELFParser const &) = delete;
+    CELFParser &operator=(CELFParser &&) = delete;
+
+  };
+
 }
+
+#endif // GCL_ELFPARSER_H

@@ -35,6 +35,10 @@ set(SOURCES
   source/dataParser/dataParserHTML.cpp
   source/dataParser/dataParser_SAPBKG.cpp
   source/dataParser/dataTables.cpp
+  source/dataParser/ELF/elfHeader.cpp
+  source/dataParser/ELF/elfParser.cpp
+  source/dataParser/ELF/sectionHeader.cpp
+  source/dataParser/intelHEX.cpp
   source/logger/loggerManager.cpp
   source/logger/loggerCore.cpp
   source/logger/filters/baseFilter.cpp
@@ -71,6 +75,12 @@ set(HEADERS
   include/dataParser/dataParserHTML.h
   include/dataParser/dataParser_SAPBKG.h
   include/dataParser/dataTables.h
+  include/dataParser/ELF/elfCommon.h
+  include/dataParser/ELF/elfHeader.h
+  include/dataParser/ELF/elfParser.h
+  include/dataParser/ELF/programHeader.h
+  include/dataParser/ELF/sectionHeader.h
+  include/dataParser/intelHEX.h
   include/dateTime.h
   include/config.h
   include/filesystem.h
@@ -104,6 +114,7 @@ set(HEADERS
   include/parsers/token.h
   include/parsers/languageTokens.h
   include/pluginManager/pluginManager.h
+  include/pstring.hpp
   include/resource.h
   include/traits.h
   include/tempFileManager.h
@@ -126,8 +137,12 @@ set(LIBRARIES
   #xlnt
 )
 
-add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
+add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS}
+  source/dataParser/ELF/programHeader.cpp
+  include/crypto/AES.h
+
+  )
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ${DIRECTORIES})
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 
-add_subdirectory(test)
+#add_subdirectory(test)

@@ -1,15 +1,15 @@
 //**********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// SUBSYSTEM:           Parsers::HTML Parser
-// FILE:                htmlAttributes.cpp
-// LANGUAGE:            C++
-// TARGET OS:           None.
-// NAMESPACE:           GCL
-// AUTHOR:              Gavin Blakeman.
+// FILE:                dataParser/ELF/elfParser.cpp
+// SUBSYSTEM:           Data File Parser
+// LANGUAGE:						C++
+// TARGET OS:						None.
+// NAMESPACE:						GCL
+// AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2024-2026 Gavin Blakeman.
+//                      Copyright 2026 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -23,22 +23,43 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class to store attributes.
+// OVERVIEW:            Implementation of a ELF file parser
 //
 // CLASSES INCLUDED:
 //
-// HISTORY:             2024-06-18 GGB - File Created
+// HISTORY:             2026-03-17 GGB - File Created
 //
 //**********************************************************************************************************************************
 
-#include "include/parsers/DOM/DOMNodeAttribute.h"
+#include "include/dataParser/ELF/elfParser.h"
 
-// Miscellaneous library header files
-#include <fmt/format.h>
-#include <SCL>
+// Standard C++ library header files.
 
-namespace GCL::parsers::html
+
+// GCL Header files.
+#include "include/logger/loggerManager.h"
+#include "include/dataParser/ELF/elfHeader.h"
+
+namespace GCL::ELF
 {
+  using GCL::logger::ERRORMESSAGE;
+
+  void CELFParser::parseFile()
+  {
+    std::ifstream ifs{filePath, std::ios::in | std::ios::ate};
+
+    if (!ifs.is_open())
+    {
+      ERRORMESSAGE("Unable to open file: " + filePath.string());
+    }
+    else
+    {
+      elfHeader = std::make_unique<CELFHeader>(ifs);
+      if (elfHeader->hasProgramHeader())
+      {
+      }
+    }
+  }
 
 
 }

@@ -1,15 +1,15 @@
 //**********************************************************************************************************************************
 //
 // PROJECT:             General Class Library
-// SUBSYSTEM:           Parsers::HTML Parser
-// FILE:                htmlAttributes.cpp
-// LANGUAGE:            C++
-// TARGET OS:           None.
-// NAMESPACE:           GCL
-// AUTHOR:              Gavin Blakeman.
+// FILE:                dataParser/ELF/sectionHeader.h
+// SUBSYSTEM:           Data File Parser
+// LANGUAGE:						C++
+// TARGET OS:						None.
+// NAMESPACE:						GCL
+// AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2024-2026 Gavin Blakeman.
+//                      Copyright 2026 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -23,22 +23,42 @@
 //                      You should have received a copy of the GNU General Public License along with GCL.  If not,
 //                      see <http://www.gnu.org/licenses/>.
 //
-// OVERVIEW:            Class to store attributes.
+// OVERVIEW:            Implementation of a ELF file parser
 //
 // CLASSES INCLUDED:
 //
-// HISTORY:             2024-06-18 GGB - File Created
+// HISTORY:             2026-03-17 GGB - File Created
 //
 //**********************************************************************************************************************************
 
-#include "include/parsers/DOM/DOMNodeAttribute.h"
+#ifndef GCL_ELF_SECTIONHEADER_H
+#define GCL_ELF_SECTIONHEADER_H
 
-// Miscellaneous library header files
-#include <fmt/format.h>
-#include <SCL>
+// Standard C++ header files
+#include <istream>
+#include <memory>
 
-namespace GCL::parsers::html
+// GCL Library header files
+#include "include/dataParser/ELF/elfCommon.h"
+
+namespace GCL::ELF
 {
+  class CSectionHeader
+  {
+  public:
+    CSectionHeader(std::istream &ifs, ei_class elfClass);
 
+  protected:
+    std::unique_ptr<Elf32_Shdr> header32;
+    std::unique_ptr<Elf64_Shdr> header64;
 
+  private:
+    CSectionHeader() = delete;
+    CSectionHeader(CSectionHeader const &) = delete;
+    CSectionHeader(CSectionHeader &&) = delete;
+    CSectionHeader &operator=(CSectionHeader const &) = delete;
+    CSectionHeader &operator=(CSectionHeader &&) = delete;
+  };
 }
+
+#endif // GCL_ELF_SECTIONHEADER_H
