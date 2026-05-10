@@ -1,8 +1,8 @@
 //**********************************************************************************************************************************
 //
 // PROJECT:							General Class Library
-// FILE:								pstring.hpp
-// SUBSYSTEM:						Pascal style strings
+// FILE:								hash.hpp
+// SUBSYSTEM:						Hashing functions
 // LANGUAGE:						C++
 // TARGET OS:						None.
 // NAMESPACE:						SCL
@@ -25,63 +25,47 @@
 //
 // OVERVIEW:            Hashing functions.
 //
-// HISTORY:             2026-05-09 GGB - File Created
+// HISTORY:             2020-02-16 GGB - File Created
 //
 //**********************************************************************************************************************************
 
-#ifndef GCL_PSTRING_H
-#define GCL_PSTRING_H
+#ifndef GCL_HASH_HPP
+#define GCL_HASH_HPP
 
 #include <cstdint>
-#include <string>
 
 namespace GCL
 {
-  template<typename T = std::uint8_t,
-  			   typename charType = char>
-  class pstring
-  {
-  public:
-    struct pstring_t
-    {
-      T stringLength;
-      charType *string;
-    };
+	struct murmurHash3
+	{
+		static constexpr std::uint32_t operator()(std::uint32_t x) noexcept
+		{
+			x ^= x >> 16;
+			x *= 0x85ebca6b;
+			x ^= x >> 13;
+			x *= 0xc2b2ae35;
+			x ^= x >> 16;
 
-    pstring() : stringLength(0), string(nullptr) {}
-    pstring(pstring const &rhs) : pstring()
-    {
-      if (rhs.stringLength)
-      {
-        string = new charType[rhs.stringLength];
-        stringLength = rhs.stringLength;
-      }
-    }
-    ~pstring()
-    {
-      if (string)
-      {
-        delete string;
-        string = nullptr;
-      }
-    }
+			return x;
+		}
+	};
 
-    pstring &operator=(std::string const &str)
-    {
-      if (stringLength != 0)
-      {
-        delete [] string;
-        string = nullptr;
-      }
-      string = new charType[str.length()];
-      stringLength = str.length();
-      memcpy(string, str.data(), str.length);
-    }
+	struct hash32
+	{
+		static constexpr std::uint32_t operator()(std::uint32_t x) noexcept
+		{
+			x = (x + 0x7ed55d16) + (x << 12);
+			x = (x ^ 0xc761c23c) ^ (x >> 19);
+			x = (x + 0x165667b1) + (x << 5);
+			x = (x + 0xd3a2646c) ^ (x << 9);
+			x = (x + 0xfd7046c5) + (x << 3);
+			x = (x ^ 0xb55a4f09) ^ (x >> 16);
 
-  private:
+			return x;
+		}
+	};
 
-  };
+
 }
 
-
-# endif /* GCL_PSTRING_H */
+#endif /* GCL_HASH_HPP */

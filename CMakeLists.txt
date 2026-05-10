@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.16 FATAL_ERROR)
 
 PROJECT(GCL DESCRIPTION "General Class Library")
 
-SET(CMAKE_CXX_STANDARD 20)
+SET(CMAKE_CXX_STANDARD 23)
 SET(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if(NOT DEFINED SHARED_LIBRARY_DIR)
@@ -16,6 +16,7 @@ SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/${PROJECT_NAME})
 FIND_PACKAGE(Boost REQUIRED COMPONENTS locale)
 
 set(SOURCES
+	source/base32.cpp
   source/common.cpp
   source/dateTime.cpp
   source/error.cpp
@@ -37,6 +38,7 @@ set(SOURCES
   source/dataParser/dataTables.cpp
   source/dataParser/ELF/elfHeader.cpp
   source/dataParser/ELF/elfParser.cpp
+  source/dataParser/ELF/programHeader.cpp
   source/dataParser/ELF/sectionHeader.cpp
   source/dataParser/intelHEX.cpp
   source/logger/loggerManager.cpp
@@ -69,6 +71,7 @@ set(HEADERS
   include/common.h
   include/functionTrace.h
   include/SQLWriter.h
+  include/crypto/AES.h
   include/dataParser/dataDelimited.h
   include/dataParser/dataLexerXLSX.h
   include/dataParser/dataParserCore.h
@@ -134,15 +137,13 @@ set(DIRECTORIES
 set(LIBRARIES
   Boost::locale
   fmt
+  mpfr
   #xlnt
 )
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS}
-  source/dataParser/ELF/programHeader.cpp
-  include/crypto/AES.h
-
   )
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ${DIRECTORIES})
 target_link_libraries(${PROJECT_NAME} ${LIBRARIES})
 
-#add_subdirectory(test)
+add_subdirectory(test)

@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
-//                      Copyright 2016-2024 Gavin Blakeman.
+//                      Copyright 2016-2026 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -25,12 +25,6 @@
 //
 //
 // OVERVIEW:						Configuration values and typedefs for the library.
-//
-//
-// CLASSES INCLUDED:		None
-//
-// CLASS HIERARCHY:     None.
-//
 //
 // HISTORY:             2016-01-15 GGB - File created.
 //
@@ -56,6 +50,8 @@
   #undef GCL_NOSTRINGS
   #undef GCL_CONTROL
 #endif  // EMBEDDED
+
+//#undef BOOST_MP			// If defined include boost::multi-repcision.
 
 typedef double FP_t;
 typedef std::uint32_t indexID_t;

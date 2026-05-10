@@ -27,7 +27,8 @@
 //
 // CLASSES INCLUDED:    None
 //
-// HISTORY:             2024-06-18 GGB - Added a generic base for parsing. Added HTML parser.
+// HISTORY:             2026-05-09 GGB - Added hash.hpp for hashing functions.
+//											2024-06-18 GGB - Added a generic base for parsing. Added HTML parser.
 //                      2024-04-23 GGB - Added utf.hpp for UTF BOM constants.
 //                      2024-02-06 GGB - Added files for the updated logger module.
 //											2023-10-03 GGB - Added the SAP background file data parser.
@@ -57,6 +58,7 @@
 #include "include/alarm/alarmDaily.h"
 #include "include/alarm/alarmWeekly.h"
 #include "include/any.hpp"
+#include "include/base32.h"
 #include "include/common.h"
 #include "include/configurationReader/readerSections.hpp"
 #include "include/configurationReader/readerVanilla.hpp"
@@ -73,6 +75,7 @@
 #include "include/filesystem.h"
 #include "include/functions.h"
 #include "include/functionTrace.h"
+#include "include/hash.hpp"
 #include "include/logger/loggerManager.h"
 #include "include/logger/loggerCore.h"
 #include "include/logger/filters/baseFilter.h"

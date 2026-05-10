@@ -9,7 +9,7 @@
 // AUTHOR:							Gavin Blakeman.
 // LICENSE:             GPLv2
 //
-//                      Copyright 2015, 2017-2024 Gavin Blakeman.
+//                      Copyright 2015, 2017-2026 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -53,7 +53,9 @@
 
 namespace GCL
 {
-  typedef std::tuple<int, int, int, int> TIPV4;
+	using IPV4_t = std::tuple<int, int, int, int>;
+	using TIPV4 = IPV4_t; // For historic reasons.
+
 
   std::string prettyPrintBytes(size_t bytes);
 
