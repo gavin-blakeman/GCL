@@ -85,6 +85,26 @@ namespace GCL
     { a.empty() } -> std::same_as<bool>;
   };
 
+  template <typename T>
+  concept IsAtomicStorageIntegral = requires(T a, typename T::value_type v, typename T::value_type* p, std::memory_order order) 
+  {
+    // 1. Must define an integral value_type (e.g., std::uint32_t)
+    typename T::value_type;
+    requires std::is_integral_v<typename T::value_type>;
+
+    // 2. Must support standard construction/copy properties
+    requires !std::copy_constructible<T>; // Atomics are non-copyable
+
+    // 3. Mandatory method signatures matching std::atomic interface
+    { a.load(order) } -> std::same_as<typename T::value_type>;
+    { a.store(v, order) } -> std::same_as<void>;
+    { a.exchange(v, order) } -> std::same_as<typename T::value_type>;
+    { a.fetch_add(v, order) } -> std::same_as<typename T::value_type>;
+    { a.fetch_or(v, order) } -> std::same_as<typename T::value_type>;
+    { a.compare_exchange_strong(*p, v, order, order) } -> std::same_as<bool>;
+    { a.compare_exchange_weak(*p, v, order, order) } -> std::same_as<bool>;
+  };
+
 }
 
 
