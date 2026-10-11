@@ -9,7 +9,7 @@
 // AUTHOR:              Gavin Blakeman (GGB)
 // LICENSE:             GPLv2
 //
-//                      Copyright 2024 Gavin Blakeman.
+//                      Copyright 2024-2026 Gavin Blakeman.
 //                      This file is part of the General Class Library (GCL)
 //
 //                      GCL is free software: you can redistribute it and/or modify it under the terms of the GNU General
@@ -36,14 +36,17 @@
 #include <string>
 #include <string_view>
 
+#ifndef __EMBEDDED__
 // Miscellaneous library header files.
 #include "boost/algorithm/string.hpp"
+#endif
 
 // GCL library header files
 #include "include/concepts.hpp"
 
 namespace GCL
 {
+#ifndef __EMBEDDED__  
   /*! @brief      Tokenises a string using the token separator passed.
    *  @param[out] op: The output collection to receive the tokenised strings.
    *  @param[in]  str: The string to tokenise.
@@ -76,6 +79,8 @@ namespace GCL
     }
   }
 
+#endif // __EMBEDDED__
+
   template<typename C>
   std::string expandTokens(C const &tokens, std::string const &seperator = ";")
   {
@@ -106,6 +111,17 @@ namespace GCL
    */
   void cleanDecimal(std::string &str);
 
-}
+  template<class T>
+  std::string_view extract_token(std::string_view &str, T ch)
+  {
+    auto size = str.find_first_of(ch);
+    size = std::max(size, str.length());
+    
+    std::string_view rv = str.substr(0, size);
+    str.remove_prefix(size);
+    return rv;
+  }
+
+} // namespace
 
 #endif /* GCL_INCLUDE_STRING_HPP */
